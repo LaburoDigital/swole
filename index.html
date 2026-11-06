@@ -9,7 +9,8 @@
 <meta name="theme-color" content="#F3F4FA" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0D1020" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="icon" href="icons/logo.svg" type="image/svg+xml">
+<link rel="alternate icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -55,7 +56,14 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .main{min-height:100vh;padding-bottom:150px}
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:25;background:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:12px 16px;max-width:860px;margin:0 auto}
 .mark{font:800 26px/1 var(--f-d);letter-spacing:-.04em;display:flex;align-items:center;gap:8px}
-.mark i{width:12px;height:12px;border-radius:4px;background:var(--hot);transform:rotate(12deg);display:block}
+.mark svg{width:30px;height:30px;flex:none;overflow:visible}
+/* logo: la barra se dibuja y los discos saltan al abrir; al tocarlo se repite */
+.mark .lbar{stroke-dasharray:150;stroke-dashoffset:150;animation:lbar 1s cubic-bezier(.6,0,.2,1) .15s forwards}
+@keyframes lbar{to{stroke-dashoffset:0}}
+.mark .lpl{transform-box:fill-box;transform-origin:center;transform:scale(0);animation:lpl .45s cubic-bezier(.2,1.7,.4,1) forwards}
+.mark .lpl.a{animation-delay:.1s}.mark .lpl.b{animation-delay:1s}
+@keyframes lpl{to{transform:scale(1)}}
+.mark:active svg{transform:scale(.9) rotate(-6deg);transition:transform .15s}
 .tools{display:flex;gap:6px}
 .ib{width:42px;height:42px;border-radius:13px;background:var(--surf);border:1px solid var(--line);display:grid;place-items:center}
 .ib.flat{background:none;border-color:transparent}
@@ -308,7 +316,7 @@ body.sessopen .dock{bottom:calc(14px + env(safe-area-inset-bottom,0px))}
 </svg>
 <div class="main">
   <header class="top">
-    <div class="mark"><i></i>swole</div>
+    <button class="mark" data-a="tab" data-v="hoy" aria-label="Swole, ir a Hoy"><svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7A66FF"/><stop offset="1" stop-color="#FF4F93"/></linearGradient></defs><path class="lbar" d="M80 25 H50 C34 25 28 31 28 39 C28 51 72 49 72 61 C72 69 66 75 50 75 H20" fill="none" stroke="url(#lg)" stroke-width="12" stroke-linecap="round"/><g class="lpl a"><rect x="78" y="12" width="10" height="26" rx="3.5" fill="#FF4F93"/><rect x="89" y="16" width="6" height="18" rx="2.5" fill="#FF4F93"/></g><g class="lpl b"><rect x="12" y="62" width="10" height="26" rx="3.5" fill="#7A66FF"/><rect x="5" y="66" width="6" height="18" rx="2.5" fill="#7A66FF"/></g></svg>swole</button>
     <div class="tools">
       <button class="ib" data-a="theme" id="themeBtn" aria-label="Cambiar tema"></button>
       <button class="ib" data-a="profile" aria-label="Perfil"></button>
@@ -1691,6 +1699,7 @@ const ACTIONS={
 };
 
 document.addEventListener('click',e=>{
+  const mk=e.target.closest('.mark');if(mk)setTimeout(()=>{const s=mk.querySelector('svg');if(s)s.replaceWith(s.cloneNode(true));},0);
   unlockAudio();
   const el=e.target.closest('[data-a]');
   if(!el)return;
