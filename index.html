@@ -1876,7 +1876,7 @@ const Sync=(()=>{
   const redir=()=>/^https?:$/.test(location.protocol)?'?redirect_to='+encodeURIComponent(location.origin+location.pathname):'';
   function authMsg(e){
     const m=String(e.message||''),c=e.code||'';
-    if(c==='invalid_credentials'||/invalid login/i.test(m))return 'Email o contraseña incorrectos';
+    if(c==='invalid_credentials'||/invalid login/i.test(m))return 'Email o contraseña incorrectos. Si es tu primera vez, tocá Crear cuenta';
     if(c==='email_not_confirmed'||/not confirmed/i.test(m))return 'Primero confirmá tu email con el link que te mandamos';
     if(c==='user_already_exists'||/already registered/i.test(m))return 'Ese email ya tiene cuenta: entrá con tu contraseña';
     if(c==='weak_password'||/password should/i.test(m))return 'La contraseña tiene que tener al menos 6 caracteres';
