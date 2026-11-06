@@ -313,6 +313,27 @@ body.sessopen .dock{bottom:calc(14px + env(safe-area-inset-bottom,0px))}
 .btn .ic-plus{transition:transform .25s}.btn:active .ic-plus{transform:rotate(90deg)}
 .ach div.off{opacity:.38;filter:grayscale(1)}
 .ach div.new{animation:pop .6s cubic-bezier(.2,1.4,.4,1);box-shadow:0 0 0 2px var(--acc)}
+/* ===== Cargar marca ===== */
+.mark-cta{background:linear-gradient(120deg,#E8337A,#7A66FF)}
+.big-in{font:800 28px var(--f-d)!important;text-align:center;padding:14px!important}
+.big-btn{min-height:56px;font-size:17px}
+.mark-prev{background:var(--raise);border-radius:16px;padding:10px 12px;animation:rise .3s both}
+.reveal{position:relative;text-align:center;padding:10px 0 6px;overflow:hidden}
+.rv-rays{position:absolute;left:50%;top:78px;width:520px;height:520px;margin:-260px 0 0 -260px;border-radius:50%;opacity:0;
+  background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--c) 40%,transparent) 0 8deg,transparent 8deg 24deg);
+  -webkit-mask:radial-gradient(circle,#000 20%,transparent 65%);mask:radial-gradient(circle,#000 20%,transparent 65%);animation:rays 8s linear infinite,raysIn 1s ease-out .55s forwards}
+@keyframes rays{to{transform:rotate(360deg)}}@keyframes raysIn{to{opacity:1}}
+.rv-badge{position:relative;display:inline-block;perspective:600px;animation:flipIn 1.1s cubic-bezier(.2,1.25,.4,1) both}
+.rv-badge .badge{filter:drop-shadow(0 12px 24px rgba(0,0,0,.45)) drop-shadow(0 0 26px color-mix(in srgb,var(--c) 60%,transparent))}
+@keyframes flipIn{0%{transform:rotateY(720deg) scale(.2);opacity:0}60%{opacity:1}100%{transform:none}}
+.rv-name{position:relative;font:800 40px/1.1 var(--f-d);letter-spacing:-.03em;margin-top:6px}
+.rv-name span{display:inline-block;animation:letter .5s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes letter{from{opacity:0;transform:translateY(16px) scale(.6)}to{opacity:1;transform:none}}
+.rv-msg{position:relative;font:800 17px var(--f-d);margin:8px 0 2px;animation:rise .5s 1.1s both}
+.rv-bar{position:relative;margin:14px auto 6px;max-width:300px;height:10px;animation:rise .4s 1s both}
+.rv-bar i{transition:width 1.3s cubic-bezier(.2,.8,.2,1)}
+.reveal.up .rv-badge{animation:flipIn 1.1s cubic-bezier(.2,1.25,.4,1) both,pulseUp 1.6s ease-in-out 1.2s infinite}
+@keyframes pulseUp{50%{transform:scale(1.06)}}
 /* ===== Estética v2 ===== */
 html{background:var(--bg)}body{background:transparent}
 .bgfx{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
@@ -529,9 +550,9 @@ const Store=(()=>{
     wipe(){mem=null;try{localStorage.removeItem(K);}catch(e){}}
   };
 })();
-const defaults=()=>({v:1,profile:null,routines:[],customEx:[],plan:{},logs:[],weights:[],creatine:{},water:{},settings:{theme:'dark',rest:90,remind:{on:false,time:'09:00'},lastRemind:''},active:null,clock:{},del:{},ach:{}});
+const defaults=()=>({v:1,profile:null,routines:[],customEx:[],plan:{},logs:[],weights:[],creatine:{},water:{},settings:{theme:'dark',rest:90,remind:{on:false,time:'09:00'},lastRemind:''},active:null,clock:{},del:{},ach:{},tests:[]});
 function normalize(x){const d=defaults();const o=Object.assign(d,x||{});o.settings=Object.assign(d.settings,(x&&x.settings)||{});o.settings.remind=Object.assign({on:false,time:'09:00'},o.settings.remind||{});
-  ['routines','customEx','logs','weights'].forEach(k=>{if(!Array.isArray(o[k]))o[k]=[];});
+  ['routines','customEx','logs','weights','tests'].forEach(k=>{if(!Array.isArray(o[k]))o[k]=[];});
   ['plan','creatine','water','clock','del','ach'].forEach(k=>{if(!o[k]||typeof o[k]!=='object'||Array.isArray(o[k]))o[k]={};});
   /* los IDs van dentro de atributos HTML: si vienen de un archivo importado raro, los limpio
      (siempre igual, así las referencias entre rutinas, entrenos y ejercicios siguen coincidiendo) */
@@ -550,7 +571,7 @@ if(!db.settings.look2){if(db.settings.theme==='auto')db.settings.theme='dark';db
    Al guardar se compara con la foto anterior: lo que cambió recibe la hora en db.clock y
    lo que desapareció queda anotado como borrado en db.del. Al unir dos dispositivos, por
    cada clave gana lo más reciente (y un borrado más nuevo le gana a la cosa). */
-const SYNC_COLL={logs:'id',routines:'id',customEx:'id',weights:'date'};
+const SYNC_COLL={logs:'id',routines:'id',customEx:'id',weights:'date',tests:'id'};
 const SYNC_MAP=['creatine','water','ach'];
 const SYNC_ONE=['profile','plan','settings'];
 function syncKeys(d){
@@ -653,10 +674,12 @@ function equiv(ex,e){
   return kgUp(e/(1+5/30))+' kg'+(ex.ph?' por mancuerna':'')+' × 5 repeticiones';
 }
 /* las series de calentamiento (s.w) no cuentan para niveles ni récords */
+/* una marca cargada a mano cuenta como una serie suelta, pero no aparece en el calendario */
+const allSess=()=>db.logs.concat((db.tests||[]).map(t=>({id:t.id,date:t.date,test:1,entries:[{ex:t.ex,sets:[{kg:t.kg,reps:t.reps}]}]})));
 function bestE1(id){
   const ex=exById(id);if(!ex)return null;
   let best=null;
-  db.logs.forEach(l=>l.entries.forEach(en=>{
+  allSess().forEach(l=>l.entries.forEach(en=>{
     if(en.ex!==id)return;
     en.sets.forEach(s=>{if(s.w)return;const e=e1(ex,s.kg,s.reps);if(e>0&&(!best||e>best.e))best={e,kg:s.kg,reps:s.reps,date:l.date};});
   }));
@@ -699,7 +722,7 @@ function muscleLevels(){
 }
 function e1Points(id){
   const ex=exById(id),map={};
-  db.logs.forEach(l=>l.entries.forEach(en=>{
+  allSess().forEach(l=>l.entries.forEach(en=>{
     if(en.ex!==id)return;
     en.sets.forEach(s=>{if(s.w)return;const e=e1(ex,s.kg,s.reps);if(e>(map[l.date]||0))map[l.date]=e;});
   }));
@@ -1183,7 +1206,7 @@ const ACH=[
 ];
 function achStats(){
   const bw=weightNow()||70,has={},ex=new Set();let vol=0;
-  db.logs.forEach(l=>l.entries.forEach(en=>{const e=exById(en.ex);ex.add(en.ex);en.sets.forEach(s=>{if(s.w)return;if(+s.reps>0)has[en.ex]=1;if(e&&!e.time)vol+=((e.bw||0)*bw+(+s.kg||0))*(+s.reps||0);});}));
+  allSess().forEach(l=>l.entries.forEach(en=>{const e=exById(en.ex);ex.add(en.ex);if(l.test)return;en.sets.forEach(s=>{if(s.w)return;if(+s.reps>0)has[en.ex]=1;if(e&&!e.time)vol+=((e.bw||0)*bw+(+s.kg||0))*(+s.reps||0);});}));
   const r=rankedList(),wg=waterGoal();
   return{logs:db.logs.length,streak:streak(),maxL:r.reduce((m,x)=>Math.max(m,x.info.L),-1),groups:(overall()||{n:0}).n,
     sk:r.filter(x=>x.ex.sk&&x.info.L>=0).length,has,vol,distinct:ex.size,crea:Object.keys(db.creatine).length,
@@ -1213,9 +1236,10 @@ function achBadge(a,on){
 /* ============ Vista: Niveles ============ */
 function tierLegend(){return '<div class="tiers">'+TIERS.map((t,i)=>'<span><i style="background:'+TCOL[i]+'"></i>'+t+'</span>').join('')+'<span><i style="background:var(--muscle)"></i>Sin rango</span></div>';}
 function viewNiveles(){
-  let h='<h1 class="pg">Niveles</h1>';
+  let h='<h1 class="pg">Nivel</h1>';
   if(!db.profile)return h+'<div class="card empty">'+emptyArt()+'<b>Completá tu perfil</b>Necesito sexo, edad y peso para calcular tus niveles.</div>';
   const r=rankedList(),ov=overall(),ml=muscleLevels();
+  h+='<button class="gen-cta mark-cta" data-a="markOpen"><span class="gen-ic">'+ic('bolt',22)+'</span><span class="grow"><b>Cargar marca</b><span>Poné tu peso y reps, y mirá tu nivel al instante</span></span>'+ic('right',18)+'</button>';
   /* el cuerpo pintado por nivel */
   h+='<div class="card" style="padding-bottom:18px"><div class="hd"><div><h3>Tu cuerpo</h3><span class="mut sm-t">Cada músculo con el color de su mejor ejercicio. Tocá uno.</span></div>'+(ov?badge(ov.L,48):'')+'</div>'+
    '<div class="body-hero">'+bodyMap(null,{levels:ml,labels:1,cls:'live',tap:1})+'</div>'+tierLegend()+
@@ -1411,7 +1435,7 @@ function exDetail(id){
   let h='<div class="big-map" style="max-width:300px;width:100%">'+bodyMap(mapOf(ex),{labels:1,cls:'live'})+'</div><div class="chips">'+chipsMus(ex)+'</div>';
   if(ex.d)h+='<p>'+esc(ex.d)+'</p>';
   h+='<p class="mut sm-t">Equipo: '+esc(ex.eq)+'. Los músculos resaltados son los principales y los claros, los secundarios.</p>';
-  if(isBarbell(ex))h+='<button class="btn sm line" data-a="platesOpen">'+ic('disc',16)+' Calculadora de discos</button>';
+  h+='<div class="row" style="gap:8px;flex-wrap:wrap">'+(hasRank(ex)?'<button class="btn sm pri" data-a="markOpen" data-v="'+ex.id+'">'+ic('bolt',16)+' Cargar marca</button>':'')+(isBarbell(ex)?'<button class="btn sm line" data-a="platesOpen">'+ic('disc',16)+' Calculadora de discos</button>':'')+'</div>';
   const b=bestE1(id);
   if(hasRank(ex)&&db.profile){
     if(b){
@@ -1430,9 +1454,9 @@ function exDetail(id){
   const pts=e1Points(id);
   if(hasRank(ex)||ex.time)h+='<div><h4 style="margin-bottom:8px">Progreso ('+(ex.sk||ex.time?'mejor serie':'1RM estimado')+')</h4>'+chart(pts,ex.sk||ex.time?(ex.time?'segundos':'repeticiones'):'kg')+'</div>';
   /* historial: todas las veces que lo hiciste */
-  const hist=db.logs.filter(l=>l.entries.some(en=>en.ex===id)).sort((a,b)=>a.date<b.date?1:-1);
+  const hist=allSess().filter(l=>l.entries.some(en=>en.ex===id)).sort((a,b)=>a.date<b.date?1:-1);
   if(hist.length)h+='<div><h4 style="margin-bottom:6px">Historial ('+hist.length+(hist.length===1?' vez':' veces')+')</h4><div class="hist">'+hist.slice(0,30).map(l=>{const en=l.entries.find(x=>x.ex===id);
-    return '<div class="rowline"><span><b>'+shortDate(parseK(l.date).getTime())+'</b>'+(en.note?'<br><span class="mut sm-t">'+esc(en.note)+'</span>':'')+'</span><span class="mut" style="text-align:right">'+en.sets.map(s=>setTxt(ex,s)).join(', ')+'</span></div>';}).join('')+'</div></div>';
+    return '<div class="rowline"><span><b>'+shortDate(parseK(l.date).getTime())+'</b>'+(l.test?' <span class="tag" style="color:var(--acc)">Marca</span> <button class="ib flat" style="width:28px;height:28px;display:inline-grid;vertical-align:middle" data-a="delTest" data-v="'+l.id+'" aria-label="Borrar marca">'+ic('trash',14)+'</button>':'')+(en.note?'<br><span class="mut sm-t">'+esc(en.note)+'</span>':'')+'</span><span class="mut" style="text-align:right">'+en.sets.map(s=>setTxt(ex,s)).join(', ')+'</span></div>';}).join('')+'</div></div>';
   if(ex.custom&&!ex.hidden)h+='<button class="btn bad wide" data-a="delEx" data-v="'+id+'">Eliminar ejercicio</button>';
   return h;
 }
@@ -1529,6 +1553,43 @@ function welcomeHTML(m){
    '<button class="btn pri wide" data-a="welNext">'+(i<WEL.length-1?'Siguiente':'Empezar')+' '+ic('right',18)+'</button>'+
    '<button class="btn line wide" data-a="welLogin">Ya uso Swole: entrar con mi cuenta</button></div></div></div>';
 }
+/* ---- Cargar marca ---- */
+function markList(d){
+  const l=filterEx(d.q,d.g).filter(hasRank);
+  return l.length?l.slice(0,60).map(e=>{const b=bestE1(e.id),L=b?levelIdx(e,b.e):null;
+    return '<button class="ex" data-a="markPick" data-v="'+e.id+'">'+miniMap(mapOf(e))+'<span class="grow"><h4>'+esc(e.n)+'</h4><span class="mut sm-t">'+(b?lvlName(L)+' · '+bestTxt(e,b):esc(e.eq))+'</span></span>'+(b?badge(L,36):ic('right',18))+'</button>';}).join('')
+   :'<div class="empty">Ningún ejercicio coincide.</div>';
+}
+/* qué nivel daría lo que estás escribiendo */
+function markPrev(d){
+  const ex=exById(d.ex);if(!ex)return '';
+  const e=e1(ex,+d.kg||0,+d.reps||0);if(!(e>0))return '<p class="mut sm-t tc">Completá los datos para ver tu nivel.</p>';
+  const L=levelIdx(ex,e),b=bestE1(ex.id),bl=b?levelIdx(ex,b.e):null;
+  return '<div class="row mark-prev">'+badge(L,44)+'<div class="grow"><span class="mut sm-t">Esto sería</span><br>'+lvlSpan(L)+(ex.sk||ex.time?'':'<span class="mut sm-t"> · 1RM estimado '+num(e,1)+' kg</span>')+'</div>'+
+   (b?'<span class="tag" style="color:'+(e>b.e?'var(--ok)':'var(--mut)')+'">'+(e>b.e?'Récord':'Tu mejor: '+lvlName(bl))+'</span>':'')+'</div>';
+}
+function markHTML(d){
+  if(d.step==='pick')return '<div class="field"><input type="search" placeholder="Buscar ejercicio" value="'+esc(d.q)+'" data-i="mq" aria-label="Buscar ejercicio"></div>'+
+   '<div class="scroll-x">'+GROUP_TABS().filter(g=>g!=='Deporte').map(g=>'<button class="chip '+((d.g||'Todos')===g?'on':'')+'" data-a="markG" data-v="'+g+'">'+g+'</button>').join('')+'</div><div class="gap" id="markList">'+markList(d)+'</div>';
+  const ex=exById(d.ex);
+  if(d.step==='form'){
+    const noKg=ex.time&&!ex.bw;
+    return '<div class="row">'+miniMap(mapOf(ex))+'<div class="grow"><h3 style="font:800 20px var(--f-d)">'+esc(ex.n)+'</h3><span class="mut sm-t">'+esc(ex.eq)+(ex.sk?' · '+esc(SKFAM[ex.sk.f]):'')+'</span></div><button class="btn sm line" data-a="markBack">Cambiar</button></div>'+
+     '<div class="g2">'+(noKg?'':'<label class="field">'+(ex.bw||ex.sk?'Peso extra (kg)':'Peso (kg)')+'<input class="big-in" type="number" inputmode="decimal" step="0.5" min="0" value="'+esc(d.kg)+'" data-i="mk" data-f="kg" placeholder="0"></label>')+
+     '<label class="field"'+(noKg?' style="grid-column:1/-1"':'')+'>'+(ex.time?'Segundos':'Repeticiones')+'<input class="big-in" type="number" inputmode="numeric" min="1" value="'+esc(d.reps)+'" data-i="mk" data-f="reps" placeholder="'+(ex.time?'30':'5')+'"></label></div>'+
+     '<label class="field">Fecha<input type="date" max="'+today()+'" value="'+esc(d.date)+'" data-i="mk" data-f="date"></label>'+
+     '<div id="markPrev">'+markPrev(d)+'</div><button class="btn pri wide big-btn" data-a="markGo">'+ic('bolt',18)+' Ver mi nivel</button>';
+  }
+  /* reveal */
+  const r=d.res,up=r.L>r.L0,first=r.L0==null||r.L0<0&&r.e0===0;
+  const name=lvlName(r.L),col=lvlColor(r.L);
+  const msg=r.L<0?'Todavía no llegás a Bronce 1. ¡Seguí así!':up&&!first?'¡Subiste de '+lvlName(r.L0)+'!':r.rec&&!first?'¡Récord personal!':first?'Tu primer nivel en este ejercicio':'Tu mejor marca sigue siendo la anterior';
+  return '<div class="reveal'+(up?' up':'')+'" style="--c:'+col+'"><div class="rv-rays"></div><div class="rv-badge">'+badge(r.L,132)+'</div>'+
+   '<div class="rv-name" style="color:'+col+'">'+[...name].map((ch,i)=>'<span style="animation-delay:'+(700+i*45)+'ms">'+(ch===' '?'&nbsp;':esc(ch))+'</span>').join('')+'</div>'+
+   '<p class="rv-msg">'+msg+'</p><p class="mut sm-t tc">'+esc(ex.n)+' · '+(ex.time?d.reps+' s':(+d.kg?num(+d.kg,1)+' kg × ':'')+d.reps+(ex.time?'':' reps'))+'</p>'+
+   (r.L>=0&&r.L<18?'<div class="bar rv-bar"><i style="width:'+Math.round((r.L0===r.L?r.p0:0)*100)+'%;background:'+col+'" data-to="'+Math.round(r.pct*100)+'"></i></div><p class="mut sm-t tc">Para '+lvlName(r.L+1)+': '+needTxt(ex,r.L+1)+'</p>':'')+
+   '</div><div class="g2"><button class="btn" data-a="markAgain">Cargar otra</button><button class="btn pri" data-a="close" data-v="m2">Listo</button></div>';
+}
 function exCreateHTML(d){
   return '<label class="field">Nombre<input type="text" maxlength="40" value="'+esc(d.n)+'" data-i="d" data-f="n" placeholder="Ej: Remo en máquina"></label>'+
    '<label class="field">Músculo principal<select data-i="d" data-f="p">'+Object.keys(MUSC).map(k=>'<option value="'+k+'"'+(d.p===k?' selected':'')+'>'+MUSC[k]+'</option>').join('')+'</select></label>'+
@@ -1545,6 +1606,7 @@ function modalBody(m,l2){
     case 'summary':return sheet('Entrenamiento guardado',summaryHTML(m));
     case 'excreate':return sheet('Ejercicio propio',exCreateHTML(m.d),{l2:true});
     case 'confirm':return sheet(m.title,'<p>'+esc(m.msg)+'</p><div class="g2"><button class="btn" data-a="close" data-v="m2">Cancelar</button><button class="btn pri" data-a="'+m.act+'" data-v="'+esc(m.arg||'')+'">'+esc(m.ok||'Confirmar')+'</button></div>',{l2:true});
+    case 'mark':return sheet(m.d.step==='reveal'?'Tu nivel':m.d.step==='form'?'Tu marca':'Elegí el ejercicio',markHTML(m.d),{l2:true});
     case 'plates':return sheet('Calculadora de discos',platesHTML(m.d),{l2:true});
     case 'gen':return sheet('Armame una rutina',genHTML(m.d),{l2:true});
     case 'logedit':return sheet('Editar entrenamiento',logEditHTML(m.d));
@@ -1759,6 +1821,28 @@ const ACTIONS={
     db.plan[v]=l;save();render();toast('Rutina agregada al '+longDate(v));
   },
   unplan(v){const k=S.calSel,l=(db.plan[k]||[]).filter(x=>x!==v);if(l.length)db.plan[k]=l;else delete db.plan[k];save();render();},
+  markOpen(v){S.m2={t:'mark',d:{step:v?'form':'pick',q:'',g:'',ex:v||null,kg:'',reps:'',date:today()}};render();},
+  markG(v){const d=S.m2.d;d.g=v==='Todos'?'':v;renderModal();},
+  markPick(v){const d=S.m2.d,ls=(lastSets(v)||[]).filter(s=>!s.w),b=bestE1(v);d.ex=v;d.step='form';const s=b||ls[0]||{};d.kg=s.kg||'';d.reps=s.reps||'';renderModal();},
+  markBack(){S.m2.d.step='pick';renderModal();},
+  markAgain(){const d=S.m2.d;d.step='form';d.res=null;renderModal();},
+  markGo(){
+    const d=S.m2.d,ex=exById(d.ex);if(!ex)return;
+    const reps=Math.round(+d.reps||0),kg=Math.max(0,+d.kg||0);
+    if(!(reps>0))return toast(ex.time?'Poné los segundos':'Poné las repeticiones');
+    if(!db.profile)return toast('Completá tu perfil primero');
+    const b0=bestE1(ex.id),e0=b0?b0.e:0,L0=b0?levelIdx(ex,e0):null,i0=b0?lvlInfo(ex,e0):null;
+    const date=d.date&&d.date<=today()?d.date:today();
+    db.tests.push({id:uid(),date,ex:ex.id,kg,reps});save();
+    const e=e1(ex,kg,reps),b=bestE1(ex.id),L=levelIdx(ex,b.e),i=lvlInfo(ex,b.e);
+    d.res={L,L0,p0:i0?clamp(i0.pct,0,1):0,pct:clamp(i.pct,0,1),rec:e0>0&&e>e0+.01,e0};
+    d.step='reveal';renderModal();
+    setTimeout(()=>{const bi=document.querySelector('.rv-bar i');if(bi)bi.style.width=bi.dataset.to+'%';},900);
+    if(L>(L0==null?-1:L0)&&L>=0)setTimeout(()=>{confetti(L0!=null&&L0>=0?70:40);try{navigator.vibrate&&navigator.vibrate([30,60,30,60,120]);}catch(e){}},950);
+    checkAch();
+  },
+  delTest(v){S.m2={t:'confirm',title:'Borrar marca',msg:'Se borra esta marca. Tu nivel en este ejercicio se recalcula.',act:'delTestGo',arg:v,ok:'Borrar'};render();},
+  delTestGo(v){db.tests=db.tests.filter(t=>t.id!==v);S.m2=null;save();render();toast('Marca borrada');},
   delLog(v){S.m2={t:'confirm',title:'Borrar entrenamiento',msg:'Se elimina este entrenamiento y sus series. Tus niveles pueden cambiar.',act:'delLogGo',arg:v,ok:'Borrar'};render();},
   delLogGo(v){db.logs=db.logs.filter(l=>l.id!==v);S.m2=null;if(S.modal&&S.modal.t==='logedit')S.modal=null;save();render();},
   editLog(v){const l=db.logs.find(x=>x.id===v);if(!l)return;S.modal={t:'logedit',d:JSON.parse(JSON.stringify(l))};render();},
@@ -1926,6 +2010,8 @@ document.addEventListener('input',e=>{
   else if(i==='item'){S.modal.d.items[+el.dataset.e][f]=el.value;}
   else if(i==='lset'){S.modal.d.entries[+el.dataset.e].sets[+el.dataset.s][f]=el.value;}
   else if(i==='genRep'){S.m2.d.replace=el.checked;}
+  else if(i==='mq'){S.m2.d.q=el.value;const l=$('#markList');if(l)l.innerHTML=markList(S.m2.d);}
+  else if(i==='mk'){S.m2.d[f]=el.value;const p=$('#markPrev');if(p)p.innerHTML=markPrev(S.m2.d);}
   else if(i==='enote'){db.active.entries[+el.dataset.e].note=el.value;save();}
   else if(i==='anote'){db.active.note=el.value;save();}
   else if(i==='pl'){S.m2.d[f]=el.value;const o=document.createElement('div');o.innerHTML=platesHTML(S.m2.d);const n=o.querySelector('#plOut'),c=$('#plOut');if(n&&c)c.replaceWith(n);const b=$('#modal2 [data-a="platesUse"]'),nb=o.querySelector('[data-a="platesUse"]');if(b&&nb)b.replaceWith(nb);}
