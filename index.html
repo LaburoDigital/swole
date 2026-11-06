@@ -6,8 +6,8 @@
 <meta name="color-scheme" content="light dark">
 <title>Swole</title>
 <meta name="description" content="Registrá tus entrenamientos, mirá tu nivel de fuerza y controlá nutrición, agua y creatina.">
-<meta name="theme-color" content="#F3F4FA" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0D1020" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F4F4F1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B0C0E" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/logo.svg" type="image/svg+xml">
 <link rel="alternate icon" href="icons/icon-192.png" type="image/png">
@@ -18,7 +18,7 @@
 <meta name="apple-mobile-web-app-title" content="Swole">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#F3F4FA;--surf:#FFFFFF;--raise:#E9ECF7;--line:#D9DDEE;--text:#14172B;--mut:#5F6588;
@@ -659,6 +659,131 @@ html.locked,html.locked body{overflow:hidden;overscroll-behavior:none}
 @keyframes riseR{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
 @keyframes riseL{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* ===== Estética v3: grafito, un solo acento, sin brillos (más adulto) ===== */
+:root{
+  --bg:#F4F4F1;--surf:#FFFFFF;--raise:#EDEDEA;--line:#E0E0DB;--text:#111214;--mut:#696D74;
+  --acc:#5B4BE0;--acc-ink:#FFFFFF;--hot:#D9434C;--body:#DADAD5;--muscle:#BEBEB8;
+  --ok:#1E8E5A;--bad:#D9434C;--shadow:0 1px 2px rgba(17,18,20,.06),0 8px 24px rgba(17,18,20,.06);
+  --f-d:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --f-b:"Geist",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --r-l:18px;--r-m:12px;--r-s:9px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B0C0E;--surf:#131518;--raise:#1B1E22;--line:#24272D;--text:#ECEDEF;--mut:#8B9098;
+    --acc:#8B7DFF;--acc-ink:#0B0C0E;--hot:#F0626A;--body:#1F2227;--muscle:#33373F;
+    --ok:#4CC38A;--bad:#F0626A;--shadow:0 1px 0 rgba(255,255,255,.03) inset,0 10px 30px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B0C0E;--surf:#131518;--raise:#1B1E22;--line:#24272D;--text:#ECEDEF;--mut:#8B9098;
+  --acc:#8B7DFF;--acc-ink:#0B0C0E;--hot:#F0626A;--body:#1F2227;--muscle:#33373F;
+  --ok:#4CC38A;--bad:#F0626A;--shadow:0 1px 0 rgba(255,255,255,.03) inset,0 10px 30px rgba(0,0,0,.35);
+}
+body{font-feature-settings:"ss01";letter-spacing:-.005em}
+b,strong,.stat b,.lh-ovr b,.vrow b,input[type=number]{font-variant-numeric:tabular-nums}
+h1,h2,h3,.pg,.onb-t{text-wrap:balance}
+
+/* fondo: sin manchas de colores; apenas una luz arriba y grano fino */
+.bgfx i{display:none}
+.bgfx{background:radial-gradient(120% 60% at 50% -10%,color-mix(in srgb,var(--tier,var(--acc)) 9%,transparent),transparent 60%)}
+.bgfx::after{content:"";position:absolute;inset:0;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* superficies: sólidas, borde fino, sin vidrio ni brillo que pasa */
+.card,.hero,.ex,.gen-cta+.btn,.qtile,.lvl-hero{background:var(--surf);-webkit-backdrop-filter:none;backdrop-filter:none;border:1px solid var(--line);box-shadow:var(--shadow)}
+.card{border-radius:var(--r-l)}
+.hero::after,.lvl-hero::after,.gen-cta::after{display:none}
+.hero .badge,.gen-cta .gen-ic{animation:none}
+
+/* títulos */
+.pg{font:800 40px/1 var(--f-d);letter-spacing:-.035em}
+.hello>span{font-weight:500;color:var(--mut)}
+.card h3,.card h4{font-family:var(--f-d);letter-spacing:-.015em}
+.stat b{font:700 34px/1 var(--f-d);letter-spacing:-.03em}
+.stat span{font-size:12.5px}
+
+/* botones: sólidos, sin degradé */
+.btn{border-radius:var(--r-m);font-weight:600;background:var(--raise);border:1px solid var(--line);transition:background .2s,border-color .2s,transform .15s}
+.btn.pri{background:var(--acc);color:var(--acc-ink);border-color:transparent;box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+.btn:active{transform:translateY(1px) scale(.99)}
+.chip{font-weight:600;border:1px solid var(--line)}
+.opt button{border-radius:var(--r-m);font-weight:600}
+
+/* rango general */
+.lvl-hero{border-radius:22px;padding:22px;gap:22px;background:
+  linear-gradient(90deg,color-mix(in srgb,var(--c,var(--acc)) 10%,transparent),transparent 55%),var(--surf);
+  border-color:var(--line)}
+.lvl-hero::before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:3px;border-radius:0 3px 3px 0;background:var(--c,var(--acc))}
+.lh-badge .badge{filter:drop-shadow(0 6px 12px rgba(0,0,0,.35))}
+.lh-fg{stroke-width:5;filter:none}.lh-bg{stroke-width:5;stroke:color-mix(in srgb,var(--text) 8%,transparent)}
+.lh-k{font-size:11.5px;font-weight:600;letter-spacing:.1em}
+.lh-txt h2{font:800 38px/1 var(--f-d);letter-spacing:-.035em;margin:6px 0 6px}
+.lh-chips span{background:var(--raise);border:1px solid var(--line);border-radius:8px;font-weight:600}
+.lh-ovr b{font:700 15px var(--f-d)}
+
+/* accesos: ícono monocromo, texto a la izquierda */
+.qgrid{gap:10px}
+.qtile{justify-items:start;text-align:left;gap:14px;padding:16px;border-radius:16px;font-size:14px;font-weight:600}
+.qi{width:38px;height:38px;border-radius:11px;color:var(--text);background:var(--raise);box-shadow:none;border:1px solid var(--line)}
+.qtile:hover .qi{color:var(--acc)}
+.qtile:active .qi .ic{transform:none}
+
+/* armar rutina */
+.gen-cta{background:var(--surf);color:var(--text);border:1px solid var(--line);border-radius:var(--r-l)}
+.gen-cta .gen-ic{background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--acc)}
+.gen-cta span span{color:var(--mut);opacity:1}
+
+/* menú */
+.nav{background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.nav button{font-weight:600}
+.nav button.on{color:var(--text)}
+.nav-ind{background:var(--raise)!important;box-shadow:inset 0 0 0 1px var(--line)!important}
+.fab{background:var(--acc);color:var(--acc-ink);box-shadow:0 8px 20px color-mix(in srgb,var(--acc) 30%,transparent),inset 0 1px 0 rgba(255,255,255,.2)}
+.nav .fab,.nav .fab.on{color:var(--acc-ink)}
+.fab:active{transform:scale(.94)}
+.fab.live{background:var(--ok);animation:none}
+.avatar{border-radius:13px;box-shadow:0 0 0 1.5px var(--ac);font:700 16px var(--f-d)}
+@media (min-width:900px){
+  .nav{background:var(--bg);border-right:1px solid var(--line)}
+  .nav button{border-radius:12px;padding:11px 14px}
+  .nav button.on{background:var(--raise);box-shadow:none}
+  .nav button:not(.on):hover{background:color-mix(in srgb,var(--raise) 60%,transparent);color:var(--text)}
+  .fab{border-radius:12px;height:46px;font-weight:700;font-size:14.5px;box-shadow:none}
+  .pg{font-size:48px}
+  .lvl-hero{padding:26px}
+  .qgrid{grid-template-columns:repeat(3,1fr)}
+  .qtile{padding:18px}
+}
+
+/* ventanas y bienvenida */
+.msheet{border:1px solid var(--line);box-shadow:0 -10px 40px rgba(0,0,0,.35)}
+.mback.onb{background:radial-gradient(90% 50% at 50% 0%,color-mix(in srgb,var(--acc) 14%,transparent),transparent 70%),var(--bg)}
+.onb-t{font-family:var(--f-d);font-weight:800;letter-spacing:-.035em}
+.onb-bars i.on{background:var(--acc)}
+.onb-opts button{border:1px solid var(--line);font-weight:600}
+.onb-opts button.on{transform:none}
+.steps i.on{background:var(--acc)}
+
+/* accesos compactos en fila */
+.qtile{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:64px}
+.qtile>span:last-child{line-height:1.2}
+.qgrid.big .qtile{min-height:70px}
+@media (min-width:900px){
+  .qtile{padding:14px 16px;min-height:68px}
+  .nav .fab{background:var(--raise);color:var(--text);border:1px solid var(--line);justify-content:flex-start;padding:0 14px}
+  .nav .fab .ic{color:var(--acc)}
+  .nav .fab:hover{border-color:color-mix(in srgb,var(--acc) 50%,var(--line))}
+}
+
+/* festejos más sobrios: rayos tenues y lentos */
+#rankup .ru-rays,.rv-rays{filter:opacity(.3);animation-duration:40s,.8s}
+#rankup .ru-flash{filter:opacity(.5)}
+
+.qgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:560px){.qgrid:not(.big){grid-template-columns:repeat(3,minmax(0,1fr))}}
+.qtile>span:last-child{min-width:0;overflow-wrap:anywhere}
+@media (max-width:520px){.lvl-hero{padding:18px 16px;gap:14px}.lh-txt h2{font-size:30px}}
 </style>
 </head>
 <body>
@@ -1172,7 +1297,7 @@ function badge(L,size){
   if(L==null||L<0)return wrap('<path d="'+OUT+'" fill="var(--raise)" stroke="var(--mut)" stroke-width="1.6" stroke-dasharray="3 3"/><path d="M26 34h12" stroke="var(--mut)" stroke-width="2.4" stroke-linecap="round"/>');
   const t=Math.min(6,Math.floor(L/3)),m='url(#bm'+t+')';
   const num=L>=18?'<path d="M21 41l2.6-12 5.4 4.6L32 25l3 8.6 5.4-4.6L43 41z" fill="'+m+'" stroke="rgba(0,0,0,.35)" stroke-width=".8" stroke-linejoin="round"/>'
-   :'<text x="32" y="42" text-anchor="middle" font-family="Bricolage Grotesque,system-ui,sans-serif" font-weight="800" font-size="'+(L%3===2?20:24)+'" letter-spacing=".5" fill="'+MET_L[t]+'" stroke="rgba(0,0,0,.55)" stroke-width="1.6" paint-order="stroke">'+['I','II','III'][L%3]+'</text>';
+   :'<text x="32" y="42" text-anchor="middle" font-family="Archivo,system-ui,sans-serif" font-weight="800" font-size="'+(L%3===2?20:24)+'" letter-spacing=".5" fill="'+MET_L[t]+'" stroke="rgba(0,0,0,.55)" stroke-width="1.6" paint-order="stroke">'+['I','II','III'][L%3]+'</text>';
   return wrap('<path d="'+OUT+'" fill="'+m+'"/>'+
    '<path d="'+OUT+'" fill="none" stroke="rgba(0,0,0,.35)" stroke-width=".8"/>'+
    '<path d="'+IN+'" fill="#10131E"/><path d="'+IN+'" fill="'+TCOL[t]+'" opacity=".16"/>'+
@@ -1671,7 +1796,7 @@ function cardSVG(){
   const st=cardStats(),p=db.profile||{},sp=SPORTS[(p.sports||[])[0]||p.sport];
   const nick=(p.nick||'Atleta').toUpperCase().slice(0,14);
   const defs=(document.querySelector('svg[focusable="false"] defs')||{innerHTML:''}).innerHTML;
-  const F='Bricolage Grotesque,Arial Black,Arial,sans-serif';
+  const F='Archivo,Arial Black,Arial,sans-serif';
   const badgeSvg=badge(L,132).replace('<svg class="badge"','<svg x="432" y="40"');
   const attr=(k,i)=>{const x=110+(i%3)*190,y=i<3?716:780,v=st[k];
     return '<text x="'+x+'" y="'+y+'" font-family="'+F+'" font-weight="800" font-size="44" fill="'+fg+'" text-anchor="end">'+(v==null?'--':v)+'</text>'+
@@ -1699,7 +1824,7 @@ function cardSVG(){
 function cardBackSVG(){
   const ov=overall(),L=ov?ov.L:-1,t=L<0?-1:Math.min(6,Math.floor(L/3));
   const bg=t<0?CARD_NONE:CARD_BG[t],dark=t===1||t===2,fg=dark?'#1B1D2E':'#FFFFFF',sub=dark?'rgba(27,29,46,.68)':'rgba(255,255,255,.78)',line=dark?'rgba(27,29,46,.22)':'rgba(255,255,255,.25)';
-  const F='Bricolage Grotesque,Arial Black,Arial,sans-serif',B='DM Sans,Arial,sans-serif',p=db.profile||{};
+  const F='Archivo,Arial Black,Arial,sans-serif',B='Geist,Arial,sans-serif',p=db.profile||{};
   const cut=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s;
   const top=rankedList().filter(x=>x.info.L>=0).slice(0,5),gl=groupLevels();
   const sess=allSess(),dates=sess.map(x=>x.date).sort(),since=dates[0];
@@ -1747,7 +1872,7 @@ async function shareCard(){
   try{
     const ov=overall(),t=ov?Math.min(6,Math.floor(ov.L/3)):-1,c=t<0?'#5B43F0':TCOL[t];
     const card=(S.modal&&S.modal.t==='carta'&&S.cardBack?cardBackSVG():cardSVG()).replace('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 840" class="carta-svg">','<svg x="120" y="300" width="840" height="1176" viewBox="0 0 600 840">');
-    const F='Bricolage Grotesque,Arial Black,Arial,sans-serif';
+    const F='Archivo,Arial Black,Arial,sans-serif';
     const svg='<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">'+
      '<defs><radialGradient id="sbg" cx=".5" cy=".45" r=".7"><stop offset="0" stop-color="'+c+'" stop-opacity=".55"/><stop offset="1" stop-color="#0D1020" stop-opacity="0"/></radialGradient></defs>'+
      '<rect width="1080" height="1920" fill="#0D1020"/><rect width="1080" height="1920" fill="url(#sbg)"/>'+
