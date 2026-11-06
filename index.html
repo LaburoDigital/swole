@@ -334,6 +334,56 @@ body.sessopen .dock{bottom:calc(14px + env(safe-area-inset-bottom,0px))}
 .rv-bar i{transition:width 1.3s cubic-bezier(.2,.8,.2,1)}
 .reveal.up .rv-badge{animation:flipIn 1.1s cubic-bezier(.2,1.25,.4,1) both,pulseUp 1.6s ease-in-out 1.2s infinite}
 @keyframes pulseUp{50%{transform:scale(1.06)}}
+/* ===== Carta ===== */
+.carta-card{display:grid;grid-template-columns:minmax(150px,220px) 1fr;gap:16px;align-items:center}
+@media (max-width:520px){.carta-card{grid-template-columns:1fr}.carta-card .carta-wrap{max-width:250px;margin:0 auto}}
+.carta-wrap{perspective:1000px;width:100%}
+.carta-wrap.big{max-width:400px;margin:0 auto}
+.carta{position:relative;border-radius:6.3%/4.5%;overflow:hidden;transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .2s ease-out;box-shadow:0 18px 40px rgba(0,0,0,.45);cursor:pointer;animation:sway 7s ease-in-out infinite;will-change:transform}
+.carta.live{animation:none}
+.carta-svg{display:block;width:100%;height:auto}
+@keyframes sway{0%,100%{transform:rotateY(-7deg) rotateX(3deg)}50%{transform:rotateY(7deg) rotateX(-3deg)}}
+.carta .holo{position:absolute;inset:0;pointer-events:none;mix-blend-mode:color-dodge;opacity:var(--holo,.3);
+  background:linear-gradient(115deg,transparent 20%,#ff2d95 32%,#ffd23f 40%,#3cf0d0 48%,#7a66ff 56%,transparent 70%);background-size:250% 250%;background-position:var(--mx,30%) var(--my,30%);animation:holo 6s ease-in-out infinite}
+.carta.live .holo{animation:none}
+@keyframes holo{0%,100%{background-position:10% 10%}50%{background-position:90% 90%}}
+.carta .glare{position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;background:radial-gradient(circle at var(--mx,30%) var(--my,20%),rgba(255,255,255,.6),transparent 45%)}
+.carta-side h3{font:800 22px var(--f-d)}
+.attr-list{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-top:12px}
+.attr-list div{display:grid;grid-template-columns:1fr auto;align-items:center;font-size:13px;font-weight:700;color:var(--mut);gap:2px 8px}
+.attr-list b{font:800 18px var(--f-d);color:var(--text)}
+.attr-list i{grid-column:1/-1;display:block;height:4px;border-radius:9px;background:linear-gradient(90deg,var(--acc),var(--hot));animation:grow 1s cubic-bezier(.2,.8,.2,1) .2s both;transform-origin:left}
+.carta-back{background:rgba(6,8,22,.85)}
+.carta-sheet{background:transparent!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.carta-sheet .mh-bar{background:transparent}
+.carta-wrap.big .carta{animation:cardIn .9s cubic-bezier(.2,1.2,.4,1) both,sway 7s ease-in-out 1s infinite}
+@keyframes cardIn{from{transform:rotateY(180deg) scale(.6);opacity:0}to{transform:none;opacity:1}}
+.rec-sug{margin-top:14px;padding:12px;border-radius:16px;background:var(--raise);gap:10px}
+.rec-sug b{color:var(--ok)}
+/* ===== Escena de subida de rango ===== */
+#rankup{position:fixed;inset:0;z-index:150;background:#05060F;display:grid;place-content:center;justify-items:center;text-align:center;color:#fff;padding:24px;animation:fade .3s both;overflow:hidden}
+#rankup.out{opacity:0;transition:opacity .35s}
+#rankup .ru-rays{position:absolute;left:50%;top:42%;width:900px;height:900px;margin:-450px 0 0 -450px;opacity:0;
+  background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--c) 45%,transparent) 0 7deg,transparent 7deg 20deg);
+  -webkit-mask:radial-gradient(circle,#000 15%,transparent 62%);mask:radial-gradient(circle,#000 15%,transparent 62%);animation:rays 10s linear infinite,raysIn .8s ease-out 1.75s forwards}
+#rankup .ru-flash{position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,#fff,var(--c) 30%,transparent 70%);opacity:0;animation:flash .9s ease-out 1.55s}
+@keyframes flash{0%{opacity:0}15%{opacity:1}100%{opacity:0}}
+#rankup .ru-old{position:absolute;top:42%;left:50%;width:150px;height:155px;margin:-77px 0 0 -75px;animation:shake .9s ease-in-out .35s}
+#rankup .ru-half{position:absolute;inset:0}
+#rankup .ru-half.l{clip-path:polygon(0 0,55% 0,42% 38%,58% 60%,44% 100%,0 100%);animation:splitL .7s cubic-bezier(.5,0,.8,.4) 1.3s forwards}
+#rankup .ru-half.r{clip-path:polygon(55% 0,100% 0,100% 100%,44% 100%,58% 60%,42% 38%);animation:splitR .7s cubic-bezier(.5,0,.8,.4) 1.3s forwards}
+@keyframes shake{0%,100%{transform:none}20%{transform:translate(-5px,2px) rotate(-3deg)}40%{transform:translate(6px,-2px) rotate(3deg)}60%{transform:translate(-6px,1px) rotate(-4deg)}80%{transform:translate(5px,-1px) rotate(4deg)}}
+@keyframes splitL{to{transform:translate(-160px,120px) rotate(-40deg);opacity:0}}
+@keyframes splitR{to{transform:translate(160px,140px) rotate(45deg);opacity:0}}
+#rankup .ru-new{position:relative;margin-top:-10vh;opacity:0;animation:drop 1s cubic-bezier(.2,1.3,.4,1) 1.75s forwards}
+#rankup .ru-new .badge{filter:drop-shadow(0 0 40px var(--c)) drop-shadow(0 16px 30px rgba(0,0,0,.6))}
+@keyframes drop{0%{opacity:0;transform:translateY(-60vh) rotateY(900deg) scale(.4)}70%{opacity:1}100%{opacity:1;transform:none}}
+#rankup .ru-kicker{position:relative;margin-top:22px;font:700 13px var(--f-b);letter-spacing:.2em;text-transform:uppercase;opacity:0;animation:rise .5s 2s forwards;color:rgba(255,255,255,.7)}
+#rankup .ru-name{position:relative;font:800 52px/1.05 var(--f-d);letter-spacing:-.03em;color:var(--c);margin:6px 0}
+#rankup .ru-name span{display:inline-block;opacity:0;animation:letter .55s cubic-bezier(.2,1.5,.4,1) forwards}
+#rankup .ru-from{position:relative;opacity:0;animation:rise .5s 2.8s forwards;color:rgba(255,255,255,.6)}
+#rankup .ru-btns{position:relative;display:flex;gap:10px;margin-top:22px;opacity:0;animation:rise .5s 3.1s forwards}
+@media (prefers-reduced-motion:reduce){#rankup .ru-old{display:none}#rankup .ru-new,#rankup .ru-kicker,#rankup .ru-name span,#rankup .ru-from,#rankup .ru-btns,#rankup .ru-rays{opacity:1!important}}
 /* ===== Estética v2 ===== */
 html{background:var(--bg)}body{background:transparent}
 .bgfx{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
@@ -848,7 +898,8 @@ function figure(view,I,x,o){
     const pts=V[k].map(p=>'<polygon points="'+p+'"/>').join('');
     if(k[0]==='_'){h+='<g class="bb">'+pts+'</g>';continue;}
     let cls='m0',style='',tip=MUSC[k]||k;
-    if(o.levels){
+    if(o.fills){const c=o.fills[k];if(c){cls='ml';style='fill:'+c+';color:'+c+';--d:'+(i++*45)+'ms';}}
+    else if(o.levels){
       const L=o.levels[k];
       if(L!=null){const t=Math.min(6,Math.floor(L/3));cls='ml'+(L>=18?' elite':'');style='fill:'+TCOL[t]+';color:'+TCOL[t]+';--d:'+(i++*45)+'ms';tip+=': '+lvlName(Math.floor(L));}
       else tip+=': sin rango';
@@ -967,11 +1018,9 @@ function viewHoy(){
   h+='</div>';
   /* stats */
   h+='<div class="card"><div class="g3"><div class="stat"><b data-n="'+st+'">'+st+'</b><span>'+(st===1?'día de racha':'días de racha')+'</span></div><div class="stat"><b data-n="'+ws.sessions+'">'+ws.sessions+'</b><span>entrenos en 7 días</span></div><div class="stat"><b data-n="'+ws.sets+'">'+ws.sets+'</b><span>series en 7 días</span></div></div></div>';
-  /* mapa */
-  const I={};Object.keys(ws.m).forEach(k=>I[k]=Math.min(1,ws.m[k]/10));
+  /* recuperación: qué está listo para entrenar */
   const top=Object.keys(ws.m).sort((a,b)=>ws.m[b]-ws.m[a]).slice(0,6);
-  h+='<div class="card"><div class="hd"><h3>Músculos de esta semana</h3></div><div class="big-map">'+bodyMap(I,{labels:1,cls:'live'})+'</div><div class="legend"><span>Poco</span><i></i><span>Mucho</span></div>'+
-   (top.length?'<div class="chips" style="margin-top:12px">'+top.map(k=>'<span class="chip">'+MUSC[k]+' '+num(ws.m[k],1)+'</span>').join('')+'</div>':'<p class="mut sm-t" style="margin-top:10px">Se va a pintar a medida que registres series.</p>')+'</div>';
+  h+=recoveryCard().replace(/<\/div>$/,(top.length?'<div class="chips" style="margin-top:12px"><span class="mut sm-t" style="align-self:center">Series esta semana:</span>'+top.map(k=>'<span class="chip">'+MUSC[k]+' '+num(ws.m[k],1)+'</span>').join('')+'</div>':'')+'</div>');
   /* creatina y agua */
   const taken=!!db.creatine[t],wa=db.water[t]||0,wg=waterGoal();
   const late=db.settings.remind.on&&!taken&&(pad(new Date().getHours())+':'+pad(new Date().getMinutes()))>=db.settings.remind.time;
@@ -1177,6 +1226,162 @@ function genHTML(d){
    '<button class="btn line wide" data-a="genStep" data-v="4">'+ic('swap',16)+' Variar ejercicios</button>';
 }
 
+/* ============ Carta de atleta ============
+   Una carta coleccionable con tu rango, tu figura pintada por nivel y 6 atributos del 0 al 99.
+   Es un SVG completo (sin depender del CSS de la página) para poder exportarlo como imagen. */
+const CARD_BG=[['#D49A62','#5E2F10'],['#F2F5FA','#76839C'],['#FFE07A','#A86600'],['#6BE6D5','#0B5F5A'],['#7DB8FF','#173A9E'],['#CF9BFF','#43168F'],['#FF7896','#6E0820']];
+const CARD_NONE=['#3A4270','#141830'];
+const ATTRS=[['FUE','Fuerza'],['EMP','Empuje'],['TIR','Tirón'],['PIE','Piernas'],['COR','Core'],['CAL','Calistenia']];
+/* nivel continuo (0-18) → puntaje de carta (40-99) */
+const rating=v=>v==null||v<0?null:Math.round(40+Math.min(18,v)/18*59);
+function cardStats(){
+  const r=rankedList().filter(x=>x.info.L>=0).map(x=>({ex:x.ex,v:x.info.L+clamp(x.info.pct,0,.999)}));
+  const best=f=>{const l=r.filter(f);return l.length?Math.max(...l.map(x=>x.v)):null;};
+  const top3=r.filter(x=>x.ex.st&&/^Barra/.test(x.ex.eq)).map(x=>x.v).sort((a,b)=>b-a).slice(0,3);
+  const has=(x,ks)=>ks.includes(x.ex.p[0]);
+  const v={
+    FUE:top3.length?top3.reduce((s,x)=>s+x,0)/top3.length:null,
+    EMP:best(x=>has(x,['pecho','hombros','triceps'])),
+    TIR:best(x=>has(x,['dorsales','biceps','trapecio','antebrazos'])),
+    PIE:best(x=>has(x,['cuadriceps','gluteos','isquios','gemelos','aductores'])),
+    COR:best(x=>has(x,['abs','oblicuos','lumbar'])),
+    CAL:best(x=>!!x.ex.sk)
+  };
+  const out={};ATTRS.forEach(([k])=>out[k]=rating(v[k]));
+  const vals=Object.values(out).filter(x=>x!=null);
+  out.OVR=vals.length?Math.round(vals.reduce((s,x)=>s+x,0)/vals.length):null;
+  return out;
+}
+/* la figura con colores puestos a mano (la imagen exportada no tiene el CSS de la página) */
+function bodyInline(levels,dark){
+  const base=dark?'rgba(20,23,43,.55)':'rgba(255,255,255,.5)',off=dark?'rgba(20,23,43,.22)':'rgba(255,255,255,.2)';
+  let h='';
+  ['front','back'].forEach((view,vi)=>{
+    h+='<g transform="translate('+(vi*110)+' 0)">';
+    const V=BODY[view];
+    for(const k in V){
+      const L=levels[k];
+      const fill=k[0]==='_'?base:L!=null?TCOL[Math.min(6,Math.floor(L/3))]:off;
+      h+='<g fill="'+fill+'"'+(L!=null&&k[0]!=='_'?' stroke="rgba(255,255,255,.55)" stroke-width=".6"':'')+'>'+V[k].map(p=>'<polygon points="'+p+'"/>').join('')+'</g>';
+    }
+    h+='</g>';
+  });
+  return h;
+}
+function cardSVG(){
+  const ov=overall(),L=ov?ov.L:-1,t=L<0?-1:Math.min(6,Math.floor(L/3));
+  const bg=t<0?CARD_NONE:CARD_BG[t],dark=t===1||t===2,fg=dark?'#1B1D2E':'#FFFFFF',sub=dark?'rgba(27,29,46,.7)':'rgba(255,255,255,.8)';
+  const st=cardStats(),p=db.profile||{},sp=SPORTS[p.sport];
+  const nick=(p.nick||'Atleta').toUpperCase().slice(0,14);
+  const defs=(document.querySelector('svg[focusable="false"] defs')||{innerHTML:''}).innerHTML;
+  const F='Bricolage Grotesque,Arial Black,Arial,sans-serif';
+  const badgeSvg=badge(L,132).replace('<svg class="badge"','<svg x="432" y="40"');
+  const attr=(k,i)=>{const x=110+(i%3)*190,y=i<3?716:780,v=st[k];
+    return '<text x="'+x+'" y="'+y+'" font-family="'+F+'" font-weight="800" font-size="44" fill="'+fg+'" text-anchor="end">'+(v==null?'--':v)+'</text>'+
+     '<text x="'+(x+12)+'" y="'+y+'" font-family="'+F+'" font-weight="800" font-size="26" fill="'+sub+'">'+k+'</text>';};
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 840" class="carta-svg"><defs>'+defs+
+   '<linearGradient id="cbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+bg[0]+'"/><stop offset="1" stop-color="'+bg[1]+'"/></linearGradient>'+
+   '<radialGradient id="cgl" cx=".5" cy=".42" r=".6"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'+
+   '<pattern id="cpt" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(32)"><rect width="9" height="22" fill="#fff" opacity=".06"/></pattern>'+
+   '<clipPath id="ccl"><rect width="600" height="840" rx="38"/></clipPath></defs>'+
+   '<g clip-path="url(#ccl)"><rect width="600" height="840" fill="url(#cbg)"/><rect width="600" height="840" fill="url(#cpt)"/><rect width="600" height="840" fill="url(#cgl)"/>'+
+   '<path d="M0 560 L600 470 L600 840 L0 840Z" fill="rgba(0,0,0,'+(dark?.08:.22)+')"/></g>'+
+   '<rect x="16" y="16" width="568" height="808" rx="28" fill="none" stroke="'+(dark?'rgba(27,29,46,.35)':'rgba(255,255,255,.45)')+'" stroke-width="3"/>'+
+   '<rect x="28" y="28" width="544" height="784" rx="20" fill="none" stroke="'+(dark?'rgba(27,29,46,.18)':'rgba(255,255,255,.2)')+'" stroke-width="1.5"/>'+
+   '<text x="60" y="152" font-family="'+F+'" font-weight="800" font-size="124" letter-spacing="-6" fill="'+fg+'">'+(st.OVR==null?'--':st.OVR)+'</text>'+
+   '<text x="64" y="196" font-family="'+F+'" font-weight="800" font-size="28" letter-spacing="1" fill="'+sub+'">'+esc(lvlName(L).toUpperCase())+'</text>'+
+   (sp?'<g transform="translate(64 222)"><circle cx="26" cy="26" r="26" fill="'+(dark?'rgba(27,29,46,.15)':'rgba(255,255,255,.18)')+'"/><g transform="translate(9 9) scale(1.42)" fill="none" stroke="'+fg+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+IC[sp.i]+'</g></g>':'')+
+   badgeSvg+
+   '<svg x="110" y="226" width="380" height="362" viewBox="0 0 210 200">'+bodyInline(muscleLevels(),dark)+'</svg>'+
+   '<text x="300" y="660" font-family="'+F+'" font-weight="800" font-size="54" letter-spacing="2" fill="'+fg+'" text-anchor="middle">'+esc(nick)+'</text>'+
+   '<rect x="90" y="678" width="420" height="2" fill="'+sub+'" opacity=".5"/>'+
+   ATTRS.map(([k],i)=>attr(k,i)).join('')+
+   '<text x="300" y="806" font-family="'+F+'" font-weight="800" font-size="20" letter-spacing="3" fill="'+sub+'" text-anchor="middle">SWOLE · '+streak()+' DÍAS DE RACHA</text></svg>';
+}
+function cartaHTML(big){
+  const ov=overall(),t=ov?Math.min(6,Math.floor(ov.L/3)):-1;
+  return '<div class="carta-wrap'+(big?' big':'')+'"><div class="carta" style="--holo:'+(t<0?.12:(.18+t*.07)).toFixed(2)+'"'+(big?'':' data-a="cardOpen"')+' role="img" aria-label="Tu carta de atleta">'+cardSVG()+'<i class="holo"></i><i class="glare"></i></div></div>';
+}
+/* exporta la carta como imagen para historias (1080×1920) */
+async function shareCard(){
+  try{
+    const ov=overall(),t=ov?Math.min(6,Math.floor(ov.L/3)):-1,c=t<0?'#5B43F0':TCOL[t];
+    const card=cardSVG().replace('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 840" class="carta-svg">','<svg x="120" y="300" width="840" height="1176" viewBox="0 0 600 840">');
+    const F='Bricolage Grotesque,Arial Black,Arial,sans-serif';
+    const svg='<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">'+
+     '<defs><radialGradient id="sbg" cx=".5" cy=".45" r=".7"><stop offset="0" stop-color="'+c+'" stop-opacity=".55"/><stop offset="1" stop-color="#0D1020" stop-opacity="0"/></radialGradient></defs>'+
+     '<rect width="1080" height="1920" fill="#0D1020"/><rect width="1080" height="1920" fill="url(#sbg)"/>'+
+     '<text x="540" y="200" font-family="'+F+'" font-weight="800" font-size="64" fill="#FFFFFF" text-anchor="middle">Mi carta de Swole</text>'+
+     '<text x="540" y="252" font-family="Arial,sans-serif" font-size="32" fill="rgba(255,255,255,.7)" text-anchor="middle">Rango general: '+esc(lvlName(ov?ov.L:-1))+'</text>'+
+     card+
+     '<text x="540" y="1640" font-family="'+F+'" font-weight="800" font-size="44" fill="#FFFFFF" text-anchor="middle">¿Qué tan fuerte sos vos?</text>'+
+     '<text x="540" y="1700" font-family="Arial,sans-serif" font-size="32" fill="rgba(255,255,255,.7)" text-anchor="middle">laburodigital.github.io/swole</text></svg>';
+    const img=new Image();img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);await img.decode();
+    const cv=document.createElement('canvas');cv.width=1080;cv.height=1920;cv.getContext('2d').drawImage(img,0,0);
+    const blob=await new Promise(r=>cv.toBlob(r,'image/png'));const name='swole-carta.png';
+    const file=new File([blob],name,{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Mi carta de Swole'});return;}
+    const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);
+    toast('Imagen descargada: '+name);
+  }catch(e){if(e&&e.name==='AbortError')return;toast('No se pudo crear la imagen');}
+}
+/* la carta se inclina con el dedo, el mouse o el giroscopio */
+(()=>{
+  const setV=(el,px,py)=>{el.style.setProperty('--rx',((.5-py)*22).toFixed(1)+'deg');el.style.setProperty('--ry',((px-.5)*26).toFixed(1)+'deg');el.style.setProperty('--mx',(px*100).toFixed(0)+'%');el.style.setProperty('--my',(py*100).toFixed(0)+'%');};
+  document.addEventListener('pointermove',e=>{const c=e.target.closest&&e.target.closest('.carta');if(!c)return;const r=c.getBoundingClientRect();c.classList.add('live');setV(c,clamp((e.clientX-r.left)/r.width,0,1),clamp((e.clientY-r.top)/r.height,0,1));},{passive:true});
+  document.addEventListener('pointerout',e=>{const c=e.target.closest&&e.target.closest('.carta');if(c&&!c.contains(e.relatedTarget)){c.classList.remove('live');['--rx','--ry','--mx','--my'].forEach(k=>c.style.removeProperty(k));}});
+  window.addEventListener('deviceorientation',e=>{if(e.beta==null)return;const px=clamp(.5+(e.gamma||0)/50,0,1),py=clamp(.5+((e.beta||0)-45)/50,0,1);document.querySelectorAll('.carta').forEach(c=>{c.classList.add('live','gyro');setV(c,px,py);});});
+})();
+/* ============ Escena de subida de rango ============ */
+function checkRankUp(delay){
+  if(!db.profile)return;
+  const ov=overall(),L=ov?ov.L:-1,prev=db.settings.lastOvL;
+  if(prev==null||L<prev){db.settings.lastOvL=L;save();return;}
+  if(L>prev){db.settings.lastOvL=L;save();setTimeout(()=>rankUpScene(prev,L),delay==null?500:delay);}
+}
+function rankUpScene(from,to){
+  const col=lvlColor(to),name=lvlName(to);
+  const el=document.createElement('div');el.id='rankup';el.setAttribute('role','dialog');el.setAttribute('aria-label','Nuevo rango: '+name);
+  el.style.setProperty('--c',col);
+  el.innerHTML='<div class="ru-rays"></div><div class="ru-flash"></div>'+
+   '<div class="ru-old"><span class="ru-half l">'+badge(from,150)+'</span><span class="ru-half r">'+badge(from,150)+'</span></div>'+
+   '<div class="ru-new">'+badge(to,180)+'</div>'+
+   '<p class="ru-kicker">Nuevo rango general</p>'+
+   '<h2 class="ru-name">'+[...name].map((ch,i)=>'<span style="animation-delay:'+(2150+i*60)+'ms">'+(ch===' '?'&nbsp;':esc(ch))+'</span>').join('')+'</h2>'+
+   '<p class="ru-from">Antes: '+esc(lvlName(from))+'</p>'+
+   '<div class="ru-btns"><button class="btn pri" data-ru="card">Ver mi carta</button><button class="btn" data-ru="close">Seguir</button></div>';
+  document.body.appendChild(el);
+  setTimeout(()=>{confetti(90);try{navigator.vibrate&&navigator.vibrate([40,40,40,40,200]);}catch(e){}},2000);
+  el.addEventListener('click',e=>{const b=e.target.closest('[data-ru]');if(!b)return;el.classList.add('out');setTimeout(()=>el.remove(),400);if(b.dataset.ru==='card'){S.m2=null;S.modal={t:'carta'};goTab('niveles');render();}});
+}
+/* ============ Mapa de recuperación ============ */
+const REC_COL={red:'#FF5C7A',yellow:'#FFC34D',green:'#3CCB8A'};
+function recovery(){
+  const now=Date.now(),last={};
+  db.logs.forEach(l=>{const t=parseK(l.date).getTime()+18*36e5;l.entries.forEach(en=>{const ex=exById(en.ex);if(!ex)return;const n=en.sets.filter(s=>!s.w).length;if(n<2)return;ex.p.forEach(k=>{if(!last[k]||t>last[k])last[k]=t;});});});
+  const st={},hrs={};
+  Object.keys(MUSC).forEach(k=>{const hh=last[k]?Math.max(0,(now-last[k])/36e5):Infinity;hrs[k]=hh;st[k]=hh<30?'red':hh<54?'yellow':'green';});
+  /* grupos listos: todos sus músculos en verde, primero los que hace más que no entrenás */
+  const ready=Object.keys(GROUPS).filter(g=>GROUPS[g].every(k=>st[k]==='green')).sort((a,b)=>Math.min(...GROUPS[b].map(k=>hrs[k]))-Math.min(...GROUPS[a].map(k=>hrs[k])));
+  return{st,hrs,ready};
+}
+function recoveryCard(){
+  const r=recovery(),fills={};Object.keys(r.st).forEach(k=>fills[k]=REC_COL[r.st[k]]);
+  const pick=r.ready.slice(0,2);
+  let sug,act='';
+  if(pick.length){
+    const ms=[].concat(...pick.map(g=>GROUPS[g]));
+    let bestR=null,bs=0;db.routines.forEach(rt=>{const m=mapOfRoutine(rt);const s=ms.reduce((a,k)=>a+(m[k]||0),0)-Object.keys(m).filter(k=>r.st[k]==='red').length;if(s>bs){bs=s;bestR=rt;}});
+    sug='Hoy te toca <b>'+pick.map(g=>g.toLowerCase()).join(' y ')+'</b>';
+    act=bestR&&bs>.5?'<button class="btn pri sm" data-a="startR" data-v="'+bestR.id+'">'+ic('play',16)+' '+esc(bestR.name)+'</button>':'<button class="btn pri sm" data-a="startFree">'+ic('play',16)+' Entrenar</button>';
+  }else sug='Todo está recuperándose: hoy conviene descansar o hacer algo suave.';
+  return '<div class="card"><div class="hd"><div><h3>Recuperación</h3><span class="mut sm-t">Qué músculos están listos para entrenar</span></div></div>'+
+   '<div class="big-map">'+bodyMap(null,{fills,labels:1,cls:'live'})+'</div>'+
+   '<div class="legend" style="gap:14px;justify-content:center"><span class="row" style="gap:6px"><u class="dot" style="background:'+REC_COL.green+'"></u>Listo</span><span class="row" style="gap:6px"><u class="dot" style="background:'+REC_COL.yellow+'"></u>Casi</span><span class="row" style="gap:6px"><u class="dot" style="background:'+REC_COL.red+'"></u>Recuperándose</span></div>'+
+   '<div class="row rec-sug"><span class="grow">'+sug+'</span>'+act+'</div></div>';
+}
+
+
 /* ============ Logros ============ */
 const ACH=[
  {id:'first',i:'flag',t:0,n:'Primer entreno',ok:s=>s.logs>=1},
@@ -1240,6 +1445,10 @@ function viewNiveles(){
   if(!db.profile)return h+'<div class="card empty">'+emptyArt()+'<b>Completá tu perfil</b>Necesito sexo, edad y peso para calcular tus niveles.</div>';
   const r=rankedList(),ov=overall(),ml=muscleLevels();
   h+='<button class="gen-cta mark-cta" data-a="markOpen"><span class="gen-ic">'+ic('bolt',22)+'</span><span class="grow"><b>Cargar marca</b><span>Poné tu peso y reps, y mirá tu nivel al instante</span></span>'+ic('right',18)+'</button>';
+  /* tu carta */
+  h+='<div class="card carta-card">'+cartaHTML(false)+'<div class="carta-side"><h3>Tu carta</h3><p class="mut sm-t">Tu rango, tu cuerpo y 6 atributos del 0 al 99. Movela con el dedo.</p>'+
+   '<div class="attr-list">'+(()=>{const s=cardStats();return ATTRS.map(([k,n])=>'<div><span>'+n+'</span><b>'+(s[k]==null?'--':s[k])+'</b><i style="width:'+(s[k]==null?0:Math.round((s[k]-40)/59*100))+'%"></i></div>').join('');})()+'</div>'+
+   '<div class="row" style="margin-top:12px;gap:8px"><button class="btn pri sm grow" data-a="cardOpen">Ver grande</button><button class="btn sm grow" data-a="cardShare">Compartir</button></div></div></div>';
   /* el cuerpo pintado por nivel */
   h+='<div class="card" style="padding-bottom:18px"><div class="hd"><div><h3>Tu cuerpo</h3><span class="mut sm-t">Cada músculo con el color de su mejor ejercicio. Tocá uno.</span></div>'+(ov?badge(ov.L,48):'')+'</div>'+
    '<div class="body-hero">'+bodyMap(null,{levels:ml,labels:1,cls:'live',tap:1})+'</div>'+tierLegend()+
@@ -1380,6 +1589,7 @@ function finishSession(){
   entries.forEach(en=>{const ex=exById(en.ex);en.sets.forEach(s=>{if(s.w)return;sets++;if(ex&&!ex.time)vol+=((ex.bw||0)*bwKg+s.kg)*s.reps;});});
   db.active=null;save();endRest(false);S.sessOpen=false;
   S.modal={t:'summary',log,prs,ups,vol,sets};render();
+  checkRankUp(900);
   if(ups.length||prs.length)setTimeout(()=>confetti(ups.length?70:36),250);
   checkAch();
 }
@@ -1607,6 +1817,9 @@ function modalBody(m,l2){
     case 'excreate':return sheet('Ejercicio propio',exCreateHTML(m.d),{l2:true});
     case 'confirm':return sheet(m.title,'<p>'+esc(m.msg)+'</p><div class="g2"><button class="btn" data-a="close" data-v="m2">Cancelar</button><button class="btn pri" data-a="'+m.act+'" data-v="'+esc(m.arg||'')+'">'+esc(m.ok||'Confirmar')+'</button></div>',{l2:true});
     case 'mark':return sheet(m.d.step==='reveal'?'Tu nivel':m.d.step==='form'?'Tu marca':'Elegí el ejercicio',markHTML(m.d),{l2:true});
+    case 'carta':return '<div class="mback carta-back" data-a="back" data-v="modal"><div class="msheet carta-sheet" role="dialog" aria-modal="true" aria-label="Tu carta"><div class="mh-bar"><h3>Tu carta</h3><button class="ib flat" data-a="close" data-v="modal" aria-label="Cerrar">'+ic('x')+'</button></div>'+cartaHTML(true)+
+     '<div class="g2" style="margin-top:16px"><button class="btn pri" data-a="cardShare">Compartir</button>'+(window.DeviceOrientationEvent&&DeviceOrientationEvent.requestPermission?'<button class="btn" data-a="cardGyro">Moverla con el celu</button>':'<button class="btn" data-a="close" data-v="modal">Listo</button>')+'</div>'+
+     '<p class="mut sm-t tc" style="margin-top:10px">FUE es tu fuerza en los básicos con barra; el resto, tu mejor ejercicio de cada zona. Suben a medida que subís de rango.</p></div></div>';
     case 'plates':return sheet('Calculadora de discos',platesHTML(m.d),{l2:true});
     case 'gen':return sheet('Armame una rutina',genHTML(m.d),{l2:true});
     case 'logedit':return sheet('Editar entrenamiento',logEditHTML(m.d));
@@ -1839,10 +2052,13 @@ const ACTIONS={
     d.step='reveal';renderModal();
     setTimeout(()=>{const bi=document.querySelector('.rv-bar i');if(bi)bi.style.width=bi.dataset.to+'%';},900);
     if(L>(L0==null?-1:L0)&&L>=0)setTimeout(()=>{confetti(L0!=null&&L0>=0?70:40);try{navigator.vibrate&&navigator.vibrate([30,60,30,60,120]);}catch(e){}},950);
-    checkAch();
+    checkAch();checkRankUp(2800);
   },
   delTest(v){S.m2={t:'confirm',title:'Borrar marca',msg:'Se borra esta marca. Tu nivel en este ejercicio se recalcula.',act:'delTestGo',arg:v,ok:'Borrar'};render();},
-  delTestGo(v){db.tests=db.tests.filter(t=>t.id!==v);S.m2=null;save();render();toast('Marca borrada');},
+  delTestGo(v){db.tests=db.tests.filter(t=>t.id!==v);S.m2=null;save();render();toast('Marca borrada');checkRankUp();},
+  cardOpen(){S.modal={t:'carta'};render();},
+  cardShare(){shareCard();},
+  cardGyro(){try{DeviceOrientationEvent.requestPermission().then(r=>toast(r==='granted'?'Mové el celu para inclinarla':'Sin permiso de movimiento'));}catch(e){}},
   delLog(v){S.m2={t:'confirm',title:'Borrar entrenamiento',msg:'Se elimina este entrenamiento y sus series. Tus niveles pueden cambiar.',act:'delLogGo',arg:v,ok:'Borrar'};render();},
   delLogGo(v){db.logs=db.logs.filter(l=>l.id!==v);S.m2=null;if(S.modal&&S.modal.t==='logedit')S.modal=null;save();render();},
   editLog(v){const l=db.logs.find(x=>x.id===v);if(!l)return;S.modal={t:'logedit',d:JSON.parse(JSON.stringify(l))};render();},
@@ -1856,7 +2072,7 @@ const ACTIONS={
     const l=db.logs.find(x=>x.id===d.id);if(!l){S.modal=null;render();return;}
     l.name=(d.name||'').trim()||l.name;l.dur=clamp(Math.round(+d.dur||l.dur),1,600);l.entries=entries;
     l.prs=(l.prs||[]).filter(id=>entries.some(en=>en.ex===id));
-    S.modal=null;save();render();toast('Entrenamiento actualizado');checkAch();
+    S.modal=null;save();render();toast('Entrenamiento actualizado');checkAch();checkRankUp();
   },
   startR(v,el){startSession(v,el.dataset.d);},
   startFree(v,el){startSession(null,el.dataset.d);},
@@ -2253,7 +2469,7 @@ render();
 if(!db.profile){if(!db.settings.welcomed&&!db.logs.length){S.modal={t:'welcome',step:0};render();}else openProfile();}
 /* la pantalla de carga se va sola */
 setTimeout(()=>{const s=$('#splash');if(s){s.classList.add('out');setTimeout(()=>s.remove(),600);}},matchMedia('(prefers-reduced-motion: reduce)').matches?150:1150);
-try{checkAch(true);}catch(e){}
+try{checkAch(true);checkRankUp();}catch(e){}
 Sync.fromLink();
 /* si los datos se borraron de este dispositivo pero hay sesión, se recuperan de la nube */
 if(Sync.user())Sync.run(false).then(()=>{if(db.profile&&S.modal&&S.modal.t==='profile'&&!S.modal.d.age){S.modal=null;render();}});
