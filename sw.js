@@ -1,6 +1,6 @@
 /* Service worker de Swole: hace que la app abra sin internet.
    Cuando cambies index.html, subí el número de VERSION para que los celulares bajen la nueva. */
-const VERSION = 'swole-v3';
+const VERSION = 'swole-v4';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -20,13 +20,25 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // La página: primero la red (para tener siempre la última versión), si no hay internet, la copia guardada.
+  // La página: primero la red (para tener siempre la última versión). Si no hay internet,
+  // o la red tarda más de 3 segundos (señal mala en el gym), abre la copia guardada y la
+  // versión nueva se guarda por detrás para la próxima vez.
   if (req.mode === 'navigate') {
-    e.respondWith(
-      fetch(req)
-        .then(res => { const copy = res.clone(); caches.open(VERSION).then(c => c.put('./index.html', copy)); return res; })
-        .catch(() => caches.match('./index.html'))
-    );
+    const net = fetch(req).then(res => {
+      if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put('./index.html', copy)); }
+      return res;
+    });
+    e.waitUntil(net.catch(() => {}));
+    e.respondWith(new Promise(resolve => {
+      let done = false;
+      const fallback = () => caches.match('./index.html').then(hit => {
+        if (hit && !done) { done = true; resolve(hit); }
+        return hit;
+      });
+      const t = setTimeout(fallback, 3000);
+      net.then(res => { clearTimeout(t); if (!done) { done = true; resolve(res); } })
+        .catch(() => { clearTimeout(t); fallback().then(hit => { if (!hit && !done) { done = true; resolve(Response.error()); } }); });
+    }));
     return;
   }
 

@@ -329,6 +329,14 @@ const defaults=()=>({v:1,profile:null,routines:[],customEx:[],plan:{},logs:[],we
 function normalize(x){const d=defaults();const o=Object.assign(d,x||{});o.settings=Object.assign(d.settings,(x&&x.settings)||{});o.settings.remind=Object.assign({on:false,time:'09:00'},o.settings.remind||{});
   ['routines','customEx','logs','weights'].forEach(k=>{if(!Array.isArray(o[k]))o[k]=[];});
   ['plan','creatine','water','clock','del'].forEach(k=>{if(!o[k]||typeof o[k]!=='object'||Array.isArray(o[k]))o[k]={};});
+  /* los IDs van dentro de atributos HTML: si vienen de un archivo importado raro, los limpio
+     (siempre igual, así las referencias entre rutinas, entrenos y ejercicios siguen coincidiendo) */
+  const sid=x=>String(x==null?'':x).replace(/[^\w-]/g,'');
+  o.customEx.forEach(e=>{e.id=sid(e.id);});
+  o.routines.forEach(r=>{r.id=sid(r.id);(r.items||[]).forEach(i=>{i.ex=sid(i.ex);});});
+  o.logs.forEach(l=>{l.id=sid(l.id);if(l.routineId)l.routineId=sid(l.routineId);(l.entries||[]).forEach(en=>{en.ex=sid(en.ex);});l.prs=(l.prs||[]).map(sid);});
+  Object.keys(o.plan).forEach(k=>{o.plan[k]=(Array.isArray(o.plan[k])?o.plan[k]:[]).map(sid);});
+  if(o.active&&Array.isArray(o.active.entries))o.active.entries.forEach(en=>{en.ex=sid(en.ex);});
   return o;}
 let db=normalize(Store.load());
 
@@ -440,12 +448,19 @@ function rankedList(){
   });
   return out.sort((a,b)=>(b.info.L-a.info.L)||(b.info.pct-a.info.pct));
 }
+/* Rango general: el mejor ejercicio de cada grupo muscular, promediado.
+   Así probar un ejercicio nuevo nunca te baja el rango; entrenar un grupo nuevo sí cuenta. */
 function overall(){
-  const r=rankedList().filter(x=>x.info.L>=0);
-  if(!r.length)return null;
-  const avg=r.reduce((s,x)=>s+x.info.L+x.info.pct,0)/r.length;
+  const best={};
+  rankedList().filter(x=>x.info.L>=0).forEach(x=>{
+    const g=groupOf(x.ex),v=x.info.L+clamp(x.info.pct,0,.999);
+    if(!best[g]||v>best[g])best[g]=v;
+  });
+  const vals=Object.values(best);
+  if(!vals.length)return null;
+  const avg=vals.reduce((s,v)=>s+v,0)/vals.length;
   const L=Math.min(18,Math.floor(avg));
-  return{L,pct:L>=18?1:avg-L,n:r.length};
+  return{L,pct:L>=18?1:avg-L,n:vals.length};
 }
 function e1Points(id){
   const ex=exById(id),map={};
@@ -652,7 +667,7 @@ function viewHoy(){
   if(ov){
     h+='<div class="hero">'+badge(ov.L,92)+'<div class="grow"><span class="mut sm-t">Rango general</span><h2 style="color:'+lvlColor(ov.L)+'">'+lvlName(ov.L)+'</h2>'+
      '<div class="bar" style="margin:10px 0 6px"><i style="width:'+Math.round(ov.pct*100)+'%;background:'+lvlColor(ov.L)+'"></i></div>'+
-     '<span class="mut sm-t">'+ov.n+(ov.n===1?' ejercicio con rango':' ejercicios con rango')+(ov.L<18?', '+Math.round(ov.pct*100)+'% hasta '+lvlName(ov.L+1):'')+'</span></div></div>';
+     '<span class="mut sm-t">Según '+ov.n+(ov.n===1?' grupo muscular':' grupos musculares')+(ov.L<18?', '+Math.round(ov.pct*100)+'% hasta '+lvlName(ov.L+1):'')+'</span></div></div>';
   }else{
     h+='<div class="hero">'+badge(-1,92)+'<div class="grow"><h2>Sin rango todavía</h2><p class="mut" style="margin:6px 0 12px">Registrá tus primeras series y Swole te dice en qué nivel estás.</p><button class="btn pri sm" data-a="startFree">'+ic('play',16)+' Entrenar ahora</button></div></div>';
   }
@@ -709,7 +724,7 @@ function viewRutinas(){
 function groupChips(){return ['Todos'].concat(Object.keys(GROUPS)).map(g=>'<button class="chip '+((S.grp||'Todos')===g?'on':'')+'" data-a="grp" data-v="'+g+'">'+g+'</button>').join('');}
 function filterEx(q,g){
   q=(q||'').toLowerCase().trim();
-  return allEx().filter(e=>(!g||g==='Todos'||groupOf(e)===g)&&(!q||String(e.n).toLowerCase().includes(q)||String(e.eq).toLowerCase().includes(q)||e.p.concat(e.s).some(k=>(MUSC[k]||'').toLowerCase().includes(q))));
+  return allEx().filter(e=>!e.hidden&&(!g||g==='Todos'||groupOf(e)===g)&&(!q||String(e.n).toLowerCase().includes(q)||String(e.eq).toLowerCase().includes(q)||e.p.concat(e.s).some(k=>(MUSC[k]||'').toLowerCase().includes(q))));
 }
 function exResults(){const l=filterEx(S.q,S.grp);return l.length?l.map(e=>exRow(e)).join(''):'<div class="empty">Ningún ejercicio coincide con la búsqueda.</div>';}
 
@@ -736,7 +751,7 @@ function dayPanel(dk){
   const done=doneOn(dk),pl=plannedFor(dk),fut=dk>today();
   let h='<div class="card"><div class="hd"><h3 style="text-transform:capitalize">'+esc(longDate(dk))+'</h3></div>';
   if(done.length){
-    h+=done.map(l=>'<div style="margin-bottom:12px"><div class="row"><b class="grow">'+esc(l.name)+'</b><span class="tag">'+l.dur+' min</span><button class="ib flat" data-a="delLog" data-v="'+l.id+'" aria-label="Borrar entrenamiento">'+ic('trash',18)+'</button></div>'+
+    h+=done.map(l=>'<div style="margin-bottom:12px"><div class="row"><b class="grow">'+esc(l.name)+'</b><span class="tag">'+l.dur+' min</span><button class="ib flat" data-a="editLog" data-v="'+l.id+'" aria-label="Editar entrenamiento">'+ic('edit',18)+'</button><button class="ib flat" data-a="delLog" data-v="'+l.id+'" aria-label="Borrar entrenamiento">'+ic('trash',18)+'</button></div>'+
       l.entries.map(en=>{const ex=exById(en.ex);return ex?'<div class="rowline"><span>'+esc(ex.n)+'</span><span class="mut">'+en.sets.map(s=>ex.time?s.reps+' s':(s.kg?num(s.kg,1)+'×'+s.reps:s.reps+' reps')).join(', ')+'</span></div>':'';}).join('')+'</div>').join('');
   }
   const pend=pl.filter(r=>!done.some(l=>l.routineId===r.id));
@@ -766,7 +781,7 @@ function viewNiveles(){
   const prs=[];
   db.logs.slice().sort((a,b)=>a.date<b.date?1:-1).forEach(l=>(l.prs||[]).forEach(id=>{const ex=exById(id);if(ex&&prs.length<5)prs.push({ex,l});}));
   if(prs.length)h+='<div class="card"><h3 style="margin-bottom:6px">Récords recientes</h3>'+prs.map(p=>'<div class="rowline"><span>'+esc(p.ex.n)+'</span><span class="mut">'+shortDate(parseK(p.l.date).getTime())+'</span></div>').join('')+'</div>';
-  h+='<div class="card"><h3 style="margin-bottom:8px">Cómo se calcula</h3><p class="mut sm-t">Con tus series estimo tu 1RM (la fuerza máxima en una repetición) y lo comparo con una tabla de cada ejercicio que depende de tu peso, tu edad y tu sexo. Es una referencia aproximada, no una medición exacta.</p></div>';
+  h+='<div class="card"><h3 style="margin-bottom:8px">Cómo se calcula</h3><p class="mut sm-t">Con tus series estimo tu 1RM (la fuerza máxima en una repetición) y lo comparo con una tabla de cada ejercicio que depende de tu peso, tu edad y tu sexo. Es una referencia aproximada, no una medición exacta. Tu rango general toma tu mejor ejercicio de cada grupo muscular (pecho, espalda, hombros, brazos, piernas y core) y los promedia: probar un ejercicio nuevo nunca te baja, y entrenar todos los grupos te sube.</p></div>';
   return h;
 }
 
@@ -833,6 +848,8 @@ function entryHTML(en,i){
 function sessHTML(){
   const a=db.active;
   return '<div class="sess"><div class="sess-in"><header class="sess-top"><button class="ib" data-a="sessMin" aria-label="Minimizar">'+ic('down')+'</button><div class="grow"><h2>'+esc(a.name)+'</h2><span class="mut sm-t" id="elapsed">'+fmtT((Date.now()-a.t0)/1000)+'</span></div><button class="btn pri sm" data-a="sessFinish">Terminar</button></header>'+
+   '<div class="row" style="margin:0 0 12px;gap:8px"><span class="mut sm-t" style="font-weight:700">'+ic('timer',16)+'</span><span class="mut sm-t" style="font-weight:700">Descanso</span><div class="scroll-x grow" style="padding:0">'+
+   [45,60,90,120,180,240].map(s=>'<button class="chip '+(db.settings.rest===s?'on':'')+'" data-a="restSet" data-v="'+s+'" aria-pressed="'+(db.settings.rest===s)+'">'+(s<60?s+' s':fmtT(s))+'</button>').join('')+'</div></div>'+
    (a.entries.length?a.entries.map(entryHTML).join(''):'<div class="card empty"><b>Sin ejercicios</b>Agregá el primero para empezar.</div>')+
    '<button class="btn wide" data-a="pickEx" data-v="sess">'+ic('plus',18)+' Agregar ejercicio</button><button class="btn wide bad" style="margin-top:10px" data-a="sessCancel">Cancelar entrenamiento</button></div></div>';
 }
@@ -852,7 +869,9 @@ function finishSession(){
     if(ex.st&&bf.L!=null){const L=levelIdx(ex,b.e);if(L>bf.L&&L>=0)ups.push({ex:ex.id,from:bf.L,to:L});}
   });
   let vol=0,sets=0;
-  entries.forEach(en=>{const ex=exById(en.ex);en.sets.forEach(s=>{sets++;if(ex&&!ex.time)vol+=s.kg*s.reps;});});
+  /* en ejercicios con peso corporal (dominadas, fondos...) también cuenta la parte del cuerpo que movés */
+  const bwKg=weightNow()||70;
+  entries.forEach(en=>{const ex=exById(en.ex);en.sets.forEach(s=>{sets++;if(ex&&!ex.time)vol+=((ex.bw||0)*bwKg+s.kg)*s.reps;});});
   db.active=null;save();endRest(false);S.sessOpen=false;
   S.modal={t:'summary',log,prs,ups,vol,sets};render();
 }
@@ -898,12 +917,12 @@ function exDetail(id){
   }else if(!ex.st)h+='<p class="mut sm-t">Este ejercicio no tiene escala de rangos, pero igual podés registrarlo y ver su progreso.</p>';
   const pts=e1Points(id);
   if(ex.st)h+='<div><h4 style="margin-bottom:8px">Progreso (1RM estimado)</h4>'+chart(pts,'kg')+'</div>';
-  if(ex.custom)h+='<button class="btn bad wide" data-a="delEx" data-v="'+id+'">Eliminar ejercicio</button>';
+  if(ex.custom&&!ex.hidden)h+='<button class="btn bad wide" data-a="delEx" data-v="'+id+'">Eliminar ejercicio</button>';
   return h;
 }
 function profileHTML(d){
   const sexo=[['m','Hombre'],['f','Mujer'],['x','Prefiero no decir']],first=!db.profile;
-  return '<p class="mut sm-t">'+(first?'Con estos datos calculo tus niveles de fuerza y tus calorías. Quedan guardados solo en este dispositivo.':'Se usan para tus niveles y tus calorías.')+'</p>'+
+  return '<p class="mut sm-t">'+(first?'Con estos datos calculo tus niveles de fuerza y tus calorías. Quedan en tu dispositivo, y en la nube si entrás con tu cuenta.':'Se usan para tus niveles y tus calorías.')+'</p>'+
    '<div class="field"><span>Sexo</span><div class="seg">'+sexo.map(x=>'<button class="'+(d.sex===x[0]?'on':'')+'" data-a="pfSex" data-v="'+x[0]+'">'+x[1]+'</button>').join('')+'</div></div>'+
    '<div class="g3"><label class="field">Edad<input type="number" inputmode="numeric" min="10" max="90" value="'+esc(d.age)+'" data-i="d" data-f="age" placeholder="años"></label>'+
    '<label class="field">Altura<input type="number" inputmode="numeric" min="120" max="230" value="'+esc(d.height)+'" data-i="d" data-f="height" placeholder="cm"></label>'+
@@ -958,6 +977,20 @@ function summaryHTML(m){
    (m.prs.length?'<div class="card" style="margin:0"><h4 style="margin-bottom:6px">Récords personales</h4>'+m.prs.map(p=>{const ex=exById(p.ex);if(!ex)return '';return '<div class="rowline"><span>'+esc(ex.n)+'</span><span class="mut">'+(ex.time?'Mejor: '+Math.round(p.e)+' s':ex.st?'1RM est. '+num(p.e,1)+' kg':'Mejor serie superada')+'</span></div>';}).join('')+'</div>':'')+
    '<button class="btn pri wide" data-a="close" data-v="modal">Listo</button>';
 }
+function logEditHTML(d){
+  return '<label class="field">Nombre<input type="text" maxlength="40" value="'+esc(d.name)+'" data-i="d" data-f="name"></label>'+
+   '<label class="field">Duración (minutos)<input type="number" inputmode="numeric" min="1" max="600" value="'+esc(d.dur)+'" data-i="d" data-f="dur"></label>'+
+   (d.entries.length?d.entries.map((en,i)=>{
+     const ex=exById(en.ex);if(!ex)return '';
+     return '<div class="card" style="margin:0;padding:12px"><div class="row"><b class="grow">'+esc(ex.n)+'</b><button class="ib flat" data-a="leDelEntry" data-e="'+i+'" aria-label="Quitar ejercicio">'+ic('trash',18)+'</button></div><div class="sets">'+
+      en.sets.map((s,j)=>'<div class="set"><span class="sn">'+(j+1)+'</span>'+
+        (ex.time?'<span></span>':'<label><input class="num" type="number" inputmode="decimal" step="0.5" min="0" value="'+esc(s.kg)+'" data-i="lset" data-e="'+i+'" data-s="'+j+'" data-f="kg" aria-label="Peso de la serie '+(j+1)+'"><small>'+(ex.bw?'kg extra':'kg')+'</small></label>')+
+        '<label><input class="num" type="number" inputmode="numeric" min="0" value="'+esc(s.reps)+'" data-i="lset" data-e="'+i+'" data-s="'+j+'" data-f="reps" aria-label="Repeticiones de la serie '+(j+1)+'"><small>'+(ex.time?'segundos':'reps')+'</small></label>'+
+        '<button class="chk" data-a="leDelSet" data-e="'+i+'" data-s="'+j+'" aria-label="Borrar serie '+(j+1)+'">'+ic('x',20)+'</button></div>').join('')+
+      '</div><button class="btn sm wide" style="margin-top:8px" data-a="leAddSet" data-e="'+i+'">'+ic('plus',16)+' Serie</button></div>';
+   }).join(''):'<p class="mut sm-t">Este entrenamiento se quedó sin ejercicios.</p>')+
+   '<button class="btn pri wide" data-a="leSave">Guardar cambios</button>';
+}
 function exCreateHTML(d){
   return '<label class="field">Nombre<input type="text" maxlength="40" value="'+esc(d.n)+'" data-i="d" data-f="n" placeholder="Ej: Remo en máquina"></label>'+
    '<label class="field">Músculo principal<select data-i="d" data-f="p">'+Object.keys(MUSC).map(k=>'<option value="'+k+'"'+(d.p===k?' selected':'')+'>'+MUSC[k]+'</option>').join('')+'</select></label>'+
@@ -974,6 +1007,7 @@ function modalBody(m,l2){
     case 'summary':return sheet('Entrenamiento guardado',summaryHTML(m));
     case 'excreate':return sheet('Ejercicio propio',exCreateHTML(m.d),{l2:true});
     case 'confirm':return sheet(m.title,'<p>'+esc(m.msg)+'</p><div class="g2"><button class="btn" data-a="close" data-v="m2">Cancelar</button><button class="btn pri" data-a="'+m.act+'" data-v="'+esc(m.arg||'')+'">'+esc(m.ok||'Confirmar')+'</button></div>',{l2:true});
+    case 'logedit':return sheet('Editar entrenamiento',logEditHTML(m.d));
     case 'login':return sheet(LOGIN_T[m.d.mode]||'Tu cuenta',loginHTML(m.d),{l2:true,noClose:m.d.mode==='newpw'});
     case 'import':return sheet('Importar datos','<p class="mut sm-t">Pegá el contenido de un archivo exportado de Swole o elegí el archivo. Esto reemplaza lo que tenés ahora.</p><label class="field">Archivo<input type="file" accept=".json,application/json" data-i="file"></label><label class="field">O pegá el texto<textarea id="impTxt" spellcheck="false">'+esc(m.text||'')+'</textarea></label><button class="btn pri wide" data-a="importGo">Importar</button>',{l2:true});
   }
@@ -1119,7 +1153,20 @@ const ACTIONS={
   },
   unplan(v){const k=S.calSel,l=(db.plan[k]||[]).filter(x=>x!==v);if(l.length)db.plan[k]=l;else delete db.plan[k];save();render();},
   delLog(v){S.m2={t:'confirm',title:'Borrar entrenamiento',msg:'Se elimina este entrenamiento y sus series. Tus niveles pueden cambiar.',act:'delLogGo',arg:v,ok:'Borrar'};render();},
-  delLogGo(v){db.logs=db.logs.filter(l=>l.id!==v);S.m2=null;save();render();},
+  delLogGo(v){db.logs=db.logs.filter(l=>l.id!==v);S.m2=null;if(S.modal&&S.modal.t==='logedit')S.modal=null;save();render();},
+  editLog(v){const l=db.logs.find(x=>x.id===v);if(!l)return;S.modal={t:'logedit',d:JSON.parse(JSON.stringify(l))};render();},
+  leAddSet(v,el){const en=S.modal.d.entries[+el.dataset.e],l=en.sets[en.sets.length-1]||{kg:0,reps:10};en.sets.push({kg:l.kg,reps:l.reps});renderModal();},
+  leDelSet(v,el){const en=S.modal.d.entries[+el.dataset.e];en.sets.splice(+el.dataset.s,1);if(!en.sets.length)S.modal.d.entries.splice(+el.dataset.e,1);renderModal();},
+  leDelEntry(v,el){S.modal.d.entries.splice(+el.dataset.e,1);renderModal();},
+  leSave(){
+    const d=S.modal.d;
+    const entries=d.entries.map(en=>({ex:en.ex,sets:en.sets.map(s=>({kg:Math.max(0,+s.kg||0),reps:Math.max(0,Math.round(+s.reps||0))})).filter(s=>s.reps>0)})).filter(en=>en.sets.length);
+    if(!entries.length){S.m2={t:'confirm',title:'Entrenamiento vacío',msg:'No quedó ninguna serie. ¿Querés borrar este entrenamiento?',act:'delLogGo',arg:d.id,ok:'Borrar'};render();return;}
+    const l=db.logs.find(x=>x.id===d.id);if(!l){S.modal=null;render();return;}
+    l.name=(d.name||'').trim()||l.name;l.dur=clamp(Math.round(+d.dur||l.dur),1,600);l.entries=entries;
+    l.prs=(l.prs||[]).filter(id=>entries.some(en=>en.ex===id));
+    S.modal=null;save();render();toast('Entrenamiento actualizado');
+  },
   startR(v,el){startSession(v,el.dataset.d);},
   startFree(v,el){startSession(null,el.dataset.d);},
   sessOpen(){S.sessOpen=true;render();},
@@ -1187,7 +1234,10 @@ const ACTIONS={
   },
   delEx(v){S.m2={t:'confirm',title:'Eliminar ejercicio',msg:'Se elimina de la biblioteca y de tus rutinas. Tus entrenamientos registrados se mantienen.',act:'delExGo',arg:v,ok:'Eliminar'};render();},
   delExGo(v){
-    db.customEx=db.customEx.filter(e=>e.id!==v);
+    /* si ya lo registraste, queda oculto (no borrado) para que tu historial lo siga mostrando */
+    const used=db.logs.some(l=>l.entries.some(en=>en.ex===v));
+    if(used)db.customEx.forEach(e=>{if(e.id===v)e.hidden=1;});
+    else db.customEx=db.customEx.filter(e=>e.id!==v);
     db.routines.forEach(r=>r.items=r.items.filter(i=>i.ex!==v));
     S.m2=null;S.modal=null;save();render();
   },
@@ -1215,7 +1265,8 @@ const ACTIONS={
     if(S.rest.end<=Date.now()){endRest(false);return;}
     renderRest();
   },
-  restSkip(){endRest(false);}
+  restSkip(){endRest(false);},
+  restSet(v){db.settings.rest=clamp(+v||90,15,600);save();renderSess();toast('Descanso: '+(+v<60?v+' s':fmtT(+v)));}
 };
 
 document.addEventListener('click',e=>{
@@ -1242,6 +1293,7 @@ document.addEventListener('input',e=>{
     if(m.t==='excreate'&&f==='p'){m.d.s=m.d.s.filter(k=>k!==el.value);renderModal();}
   }
   else if(i==='item'){S.modal.d.items[+el.dataset.e][f]=el.value;}
+  else if(i==='lset'){S.modal.d.entries[+el.dataset.e].sets[+el.dataset.s][f]=el.value;}
   else if(i==='file'){
     const file=el.files&&el.files[0];if(!file)return;
     const r=new FileReader();
