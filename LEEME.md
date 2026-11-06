@@ -7,28 +7,15 @@ Esta carpeta es la app entera. Para que sea instalable, funcione sin internet y 
 
 La sirve GitHub Pages desde el repo https://github.com/LaburoDigital/swole (rama `main`).
 
-## 2. Configurar Supabase (una sola vez, 3 minutos)
+## 2. Supabase (ya configurado)
 El proyecto se llama **swole**: https://supabase.com/dashboard/project/couuuvckplstgksanzgr
 
-**a) Decirle a Supabase dónde vive la app**
-Authentication → URL Configuration:
-- **Site URL:** `https://laburodigital.github.io/swole/`
-- **Redirect URLs:** agregá `https://laburodigital.github.io/swole/**`
+- **URL Configuration:** Site URL `https://laburodigital.github.io/swole/` y Redirect URL `https://laburodigital.github.io/swole/**`. Así los links de los emails vuelven a la app.
+- **Login:** email + contraseña. Al crear la cuenta llega un email para confirmarla una sola vez; después se entra con la contraseña. "Me olvidé la contraseña" manda un link para elegir una nueva.
 
-**b) Que el email traiga el código de 6 números**
-Authentication → Emails (Templates). Editá **"Magic Link"** y también **"Confirm signup"**, y pegá esto en el cuerpo de los dos:
-
-```html
-<h2>Tu código de Swole</h2>
-<p style="font-size:28px;font-weight:bold;letter-spacing:4px">{{ .Token }}</p>
-<p>Ponelo en la app. Vence en 1 hora.</p>
-<p>O tocá este link desde el navegador: <a href="{{ .ConfirmationURL }}">Entrar</a></p>
-```
-
-Hacen falta las dos plantillas: la primera vez que alguien entra, Supabase manda "Confirm signup"; las siguientes, "Magic Link".
-
-**c) Si querés que otras personas la usen**
-El email que trae Supabase de fábrica **solo manda a los emails de tu organización** (o sea, a vos) y como mucho unos pocos por hora. Para amigos, conectá un servicio de email gratis como Resend en Authentication → Emails → SMTP Settings.
+**Para que otras personas se puedan registrar:** el email que trae Supabase de fábrica **solo manda a los emails de tu organización** (o sea, a vos), y sin email no pueden confirmar la cuenta. Hay dos caminos:
+- Conectar un servicio de email (por ejemplo Resend, gratis) en Authentication → Emails → SMTP Settings. Es lo recomendado y además permite personalizar los emails.
+- O apagar "Confirm email" en Authentication → Sign In / Providers. Es más fácil, pero cualquiera podría registrarse con un email que no es suyo.
 
 ## 3. Instalarla en el celular
 - **iPhone (Safari):** abrí el link → Compartir → "Agregar a inicio".
