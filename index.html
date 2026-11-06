@@ -1346,6 +1346,7 @@ function loginHTML(d){
    '<p class="mut sm-t">'+(up?'Guardá todo en la nube y usá Swole en el celular y la compu a la vez.':'Lo que ya tenés en este dispositivo se une con lo de la nube.')+'</p>'+
    em+pw('Contraseña','pw',up?'new-password':'current-password')+
    '<button class="btn pri wide" data-a="loginGo"'+dis+'>'+(d.busy?(up?'Creando…':'Entrando…'):(up?'Crear cuenta':'Entrar'))+'</button>'+
+   (d.unconf&&!up?'<div class="warn">Tu cuenta todavía no está confirmada. Buscá el email de Swole (fijate en spam) o pedí otro.</div><button class="btn wide" data-a="loginResend">Reenviar email de confirmación</button>':'')+
    (up?'':'<button class="btn line wide" data-a="loginMode" data-v="forgot">Me olvidé la contraseña</button>');
 }
 function routineHTML(d){
@@ -1675,6 +1676,7 @@ const ACTIONS={
   loginOpen(){S.m2={t:'login',d:{email:(Sync.user()||{}).email||'',pw:'',mode:'in',busy:false}};render();},
   loginMode(v){const d=S.m2.d;d.mode=v;d.pw='';renderModal();const i=document.querySelector('#modal2 input');if(i)i.focus();},
   loginGo(){Sync.loginGo();},
+  loginResend(){const d=S.m2.d;d.mode='resend';Sync.loginGo().then(()=>{if(S.m2&&S.m2.d===d&&d.mode==='resend'){d.mode='in';renderModal();}});},
   syncNow(){Sync.run(true);},
   logoutAsk(){S.m2={t:'confirm',title:'Cerrar sesión',msg:'Tus datos quedan en este dispositivo y en la nube. Este dispositivo deja de sincronizarse hasta que vuelvas a entrar.',act:'logoutGo',ok:'Cerrar sesión'};render();},
   logoutGo(){Sync.logout();S.m2=null;render();toast('Sesión cerrada');},
@@ -1880,6 +1882,7 @@ const Sync=(()=>{
     if(c==='weak_password'||/password should/i.test(m))return 'La contraseña tiene que tener al menos 6 caracteres';
     if(c==='same_password')return 'Elegí una contraseña distinta a la anterior';
     if(e.status===429||/rate limit/i.test(m))return 'Muchos intentos: esperá un rato y probá de nuevo';
+    if(/sending.*email|email.*send|smtp/i.test(m))return 'No pudimos mandarte el email. Probá de nuevo en un rato';
     if(e instanceof TypeError)return 'Sin conexión a internet';
     return m||'Algo falló';
   }
@@ -1887,10 +1890,18 @@ const Sync=(()=>{
     const d=S.m2&&S.m2.d;if(!d||d.busy)return;
     const email=(d.email||'').trim().toLowerCase(),pw=d.pw||'';
     if(d.mode!=='newpw'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return toast('Revisá el email');
-    if(d.mode!=='forgot'&&pw.length<6)return toast('La contraseña tiene que tener al menos 6 caracteres');
+    if(d.mode!=='forgot'&&d.mode!=='resend'&&pw.length<6)return toast('La contraseña tiene que tener al menos 6 caracteres');
     d.email=d.mode==='newpw'?d.email:email;d.busy=true;renderModal();
     try{
-      if(d.mode==='in'){setSess(await req('/auth/v1/token?grant_type=password',{method:'POST',body:{email,password:pw}}));d.busy=false;return afterLogin();}
+      if(d.mode==='in'){
+        try{setSess(await req('/auth/v1/token?grant_type=password',{method:'POST',body:{email,password:pw}}));}
+        catch(e){if(e.code==='email_not_confirmed'||/not confirmed/i.test(e.message))d.unconf=true;throw e;}
+        d.busy=false;return afterLogin();
+      }
+      if(d.mode==='resend'){
+        await req('/auth/v1/resend'+redir(),{method:'POST',body:{type:'signup',email}});
+        d.mode='sent';d.unconf=false;d.msg='Te mandamos de nuevo el email de confirmación a '+email+'. Tocá el link y después entrá acá.';
+      }else
       if(d.mode==='up'){
         const j=await req('/auth/v1/signup'+redir(),{method:'POST',body:{email,password:pw}});
         if(j&&j.access_token){setSess(j);d.busy=false;return afterLogin();}
