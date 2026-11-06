@@ -784,6 +784,46 @@ h1,h2,h3,.pg,.onb-t{text-wrap:balance}
 @media (min-width:560px){.qgrid:not(.big){grid-template-columns:repeat(3,minmax(0,1fr))}}
 .qtile>span:last-child{min-width:0;overflow-wrap:anywhere}
 @media (max-width:520px){.lvl-hero{padding:18px 16px;gap:14px}.lh-txt h2{font-size:30px}}
+
+/* entreno de hoy */
+.today .td-list{margin-top:10px}.today h3,.skg h3{font:800 22px var(--f-d);letter-spacing:-.02em;margin:4px 0 2px}
+/* anotar rápido */
+.stepr{display:flex;gap:6px;margin:0 0 8px}
+.stepr button{flex:1;min-height:34px;border-radius:9px;background:var(--raise);border:1px solid var(--line);font:600 13px var(--f-b);color:var(--text)}
+.stepr i{width:1px;background:var(--line);margin:4px 2px}
+.rir{display:flex;align-items:center;gap:6px;margin:0 0 8px;font-size:12.5px;color:var(--mut);animation:stIn .25s cubic-bezier(.22,1,.36,1)}
+.rir span{flex:1}
+.rir button{min-width:40px;min-height:32px;border-radius:9px;background:var(--raise);border:1px solid var(--line);font-weight:700;color:var(--text)}
+/* árbol de habilidades */
+.tree-top{margin-bottom:6px}
+.tb{padding:14px 0 10px;border-top:1px solid var(--line);min-width:0;max-width:100%}
+.tb-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.tb-h b{font:700 15px var(--f-d)}
+.tb-row{min-width:0;max-width:100%;display:flex;align-items:flex-start;overflow-x:auto;scrollbar-width:none;padding:4px 2px 2px;scroll-snap-type:x proximity}
+.tb-row::-webkit-scrollbar{display:none}
+.tn{flex:none;width:62px;display:grid;justify-items:center;gap:6px;scroll-snap-align:start}
+.tn-c{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;position:relative;font:700 11px var(--f-b);color:var(--mut);
+  background:conic-gradient(var(--c) calc(var(--p)*1%),var(--raise) 0);transition:transform .25s cubic-bezier(.22,1,.36,1)}
+.tn-c::before{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--surf)}
+.tn-c>*{position:relative}
+.tn.done .tn-c{background:var(--c);color:#fff}.tn.done .tn-c::before{display:none}
+.tn.avail .tn-c{box-shadow:0 0 0 2px var(--acc);color:var(--text)}
+.tn.lock{opacity:.45}
+.tn.sel .tn-c{transform:scale(1.08);outline:2px solid var(--text);outline-offset:3px}
+.tn.goal .tn-c::after{content:'';position:absolute;top:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:var(--acc);border:2px solid var(--surf)}
+.tn-l{font-size:10.5px;line-height:1.15;text-align:center;color:var(--mut);font-weight:600}
+.tn.done .tn-l,.tn.avail .tn-l{color:var(--text)}
+.tb-ln{flex:none;width:10px;height:2px;margin-top:23px;background:var(--line);border-radius:2px}.tb-ln.on{background:var(--acc)}
+.td-det{position:sticky;bottom:0;z-index:2;background:var(--surf);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:12px;box-shadow:0 -10px 30px rgba(0,0,0,.3);animation:stIn .3s cubic-bezier(.22,1,.36,1)}
+.reqs{display:grid;gap:6px;margin-top:10px}
+.rq{display:flex;align-items:center;gap:8px;font-size:13.5px;padding:7px 10px;border-radius:10px;background:var(--raise);color:var(--mut)}
+.rq.ok{color:var(--ok)}.rq .grow{color:var(--text)}
+.skpath{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
+.skpath span{padding:6px 10px;border-radius:9px;background:var(--raise);border:1px solid var(--line);font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
+.skpath span.cur{background:var(--acc);color:var(--acc-ink);border-color:transparent}
+.skpath span.ok{color:var(--ok)}
+.skpath i{display:inline-flex;color:var(--mut)}
+.msheet{overflow-x:hidden}
 </style>
 </head>
 <body>
@@ -1959,6 +1999,203 @@ function recoveryCard(){
 }
 
 
+/* ============ Entreno de hoy (según qué músculos están recuperados) ============ */
+Object.assign(IC,{
+  lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>',
+  tree:'<circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="6" cy="6" r="2.5"/><path d="M6 8.5v7M8.5 6h7M7.8 16.2 16.2 7.8"/>',
+  share:'<path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/>'
+});
+/* lo que elegiste la última vez que armaste rutina (objetivos, equipo, nivel) */
+const genPrefs=()=>{const g=db.settings.gen||{},ov=overall();return{goals:g.goals&&g.goals.length?g.goals:['hip'],eq:g.eq||'gym',lvl:g.lvl||(!ov||ov.L<6?'beg':ov.L<12?'int':'adv')};};
+const REC_SC={green:1,yellow:.2,red:-1.5};
+const heavyEq=ex=>!ex.time&&!ex.sk&&ex.st&&!/Peso corporal|Barra fija|Paralelas|Anillas/.test(ex.eq);
+function todayPlan(seed){
+  const r=recovery(),p=db.profile||{},age=p.age||25,P=genPrefs(),gs=P.goals,onlyCali=gs.length===1&&gs[0]==='cali';
+  const dow=new Date().getDay(),dT=dayInfo(dow),dM=dayInfo((dow+1)%7);
+  const pool=POOL[onlyCali?'bw':P.eq]||POOL.gym;
+  const musOf=pt=>{const ex=exById((pool[pt]||[])[0]);return ex?ex.p:[];};
+  const cands=onlyCali?['skPush','skPull','skLegs']:['fullA','fullB','upA','upB','lowA','lowB','push','pull','legs'];
+  /* puntaje de cada tipo de día: músculos frescos suman, los cansados restan; piernas no antes de un partido */
+  const score=t=>{const T=DAYT[t];let s=0,n=0;T.p.slice(0,5).forEach(pt=>musOf(pt).forEach(k=>{s+=REC_SC[r.st[k]]||0;n++;}));let v=n?s/n:0;
+    if(T.low&&(dM.type==='match'||dT.type==='match'))v-=3;if(T.low&&dT.type==='prac')v-=.6;return v;};
+  const ranked=cands.filter(t=>DAYT[t]).map(t=>({t,s:score(t)})).sort((a,b)=>b.s-a.s);
+  const pick=ranked[(seed||0)%Math.min(3,ranked.length)];
+  const T=DAYT[pick.t],lvlI={beg:0,int:1,adv:2}[P.lvl],used=new Set(),items=[];
+  let first=true;
+  T.p.forEach((pt,pi)=>{
+    const ms=musOf(pt);if(ms.length&&ms.every(k=>r.st[k]==='red'))return;
+    const list=(pool[pt]||[]).filter(id=>exById(id)&&!used.has(id));if(!list.length)return;
+    const id=list[Math.min(list.length-1,lvlI)];used.add(id);
+    const ex=exById(id),ds=genDose(ex,gs,P.lvl,pt,pi<4,age),it={ex:id,sets:ds[0],reps:ds[1]};
+    if(first&&pi<4&&heavyEq(ex)){it.warm=2;first=false;}
+    items.push(it);
+  });
+  const its=items.slice(0,6);
+  const fresh=[...new Set([].concat(...its.map(it=>exById(it.ex).p)))].filter(k=>r.st[k]==='green');
+  let why=!db.logs.length?'Arrancá por acá: una sesión completa para tu objetivo':fresh.length?'Están frescos: '+fresh.slice(0,4).map(k=>(MUSC[k]||k).toLowerCase()).join(', '):'Sesión suave: casi todo se está recuperando';
+  if(dM.type==='match')why='Mañana tenés '+actName(dM).toLowerCase()+': nada de piernas pesadas';
+  return{name:'Hoy: '+T.n,items:its,rest:GEN_GOALS[primGoal(gs)].rest,why};
+}
+function todayCard(){
+  if(!db.profile)return '';
+  const t=today(),dT=dayInfo(new Date().getDay());
+  if(dT.type==='match'||plannedFor(t).length||doneOn(t).length)return '';
+  const pl=todayPlan(S.todaySeed||0);if(!pl.items.length)return '';
+  return '<div class="card today"><div class="hd"><div class="grow"><span class="lh-k">Entreno de hoy</span><h3>'+esc(pl.name.replace('Hoy: ',''))+'</h3><span class="mut sm-t">'+esc(pl.why)+'</span></div>'+miniMap(mapOfRoutine(pl)).replace('mini','mini" style="width:54px')+'</div>'+
+   '<div class="td-list">'+pl.items.map(it=>{const ex=exById(it.ex);return '<div class="rowline"><span>'+esc(ex.n)+(it.warm?' <span class="tag" style="font-size:10.5px">+'+it.warm+' de calentamiento</span>':'')+'</span><span class="mut">'+it.sets+' × '+it.reps+(ex.time?' s':'')+'</span></div>';}).join('')+'</div>'+
+   '<div class="row" style="gap:8px;margin-top:12px"><button class="btn pri grow" data-a="todayGo">'+ic('play',16)+' Empezar</button><button class="btn" data-a="todayAlt">'+ic('swap',16)+' Otra opción</button></div></div>';
+}
+
+/* ============ Resumen para compartir ============ */
+async function pngShare(svg,name,title){
+  try{
+    const img=new Image();img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);await img.decode();
+    const cv=document.createElement('canvas');cv.width=1080;cv.height=1920;cv.getContext('2d').drawImage(img,0,0);
+    const blob=await new Promise(r=>cv.toBlob(r,'image/png')),file=new File([blob],name,{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title});return;}
+    const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000);
+    toast('Imagen descargada: '+name);
+  }catch(e){if(e&&e.name==='AbortError')return;toast('No se pudo crear la imagen');}
+}
+function summarySVG(m){
+  const F='Archivo,Arial Black,Arial,sans-serif',B='Geist,Arial,sans-serif',acc='#8B7DFF',log=m.log;
+  const ov=overall(),c=ov?lvlColor(ov.L):acc;
+  const ms={};log.entries.forEach(en=>{const ex=exById(en.ex);if(!ex)return;const n=en.sets.filter(s=>!s.w).length;ex.p.forEach(k=>ms[k]=(ms[k]||0)+n);});
+  const top=Object.keys(ms).sort((a,b)=>ms[b]-ms[a]).slice(0,5).map(k=>MUSC[k]||k);
+  const stat=(x,v,l)=>'<rect x="'+x+'" y="560" width="300" height="200" rx="28" fill="#15171B" stroke="#24272D" stroke-width="2"/><text x="'+(x+150)+'" y="670" font-family="'+F+'" font-weight="800" font-size="76" fill="#ECEDEF" text-anchor="middle">'+esc(v)+'</text><text x="'+(x+150)+'" y="720" font-family="'+B+'" font-size="30" fill="#8B9098" text-anchor="middle">'+l+'</text>';
+  let y=860,rows='';
+  const line=(l,r,col)=>{rows+='<text x="90" y="'+y+'" font-family="'+B+'" font-weight="600" font-size="38" fill="#ECEDEF">'+esc(l)+'</text><text x="990" y="'+y+'" font-family="'+B+'" font-weight="600" font-size="34" fill="'+(col||'#8B9098')+'" text-anchor="end">'+esc(r)+'</text>';y+=72;};
+  if(m.ups.length){rows+='<text x="90" y="'+y+'" font-family="'+B+'" font-weight="700" font-size="28" fill="'+acc+'" letter-spacing="3">SUBÍ DE RANGO</text>';y+=60;m.ups.slice(0,3).forEach(u=>{const ex=exById(u.ex);line(ex.n.replace(' (segundos)',''),lvlName(u.to),lvlColor(u.to));});y+=24;}
+  if(m.prs.length){rows+='<text x="90" y="'+y+'" font-family="'+B+'" font-weight="700" font-size="28" fill="'+acc+'" letter-spacing="3">RÉCORDS</text>';y+=60;m.prs.slice(0,4).forEach(p=>{const ex=exById(p.ex);if(ex)line(ex.n.replace(' (segundos)',''),ex.time||ex.sk?Math.round(p.e)+unitOf(ex):'1RM '+num(p.e,1)+' kg');});y+=24;}
+  if(y<1400){rows+='<text x="90" y="'+y+'" font-family="'+B+'" font-weight="700" font-size="28" fill="'+acc+'" letter-spacing="3">EJERCICIOS</text>';y+=60;log.entries.slice(0,Math.max(1,Math.floor((1560-y)/72))).forEach(en=>{const ex=exById(en.ex);if(ex)line(ex.n.replace(' (segundos)',''),(()=>{const ws=en.sets.filter(s=>!s.w),b=ws.reduce((a,s)=>e1(ex,s.kg,s.reps)>e1(ex,a.kg,a.reps)?s:a,ws[0]);return ws.length+' × '+(ex.time?b.reps+' s':(+b.kg?num(+b.kg,1)+' kg × ':'')+b.reps);})());});}
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920"><defs><radialGradient id="g" cx=".5" cy="0" r=".9"><stop offset="0" stop-color="'+c+'" stop-opacity=".35"/><stop offset="1" stop-color="#0B0C0E" stop-opacity="0"/></radialGradient></defs>'+
+   '<rect width="1080" height="1920" fill="#0B0C0E"/><rect width="1080" height="1100" fill="url(#g)"/>'+
+   '<text x="90" y="170" font-family="'+F+'" font-weight="800" font-size="52" fill="#ECEDEF">swole</text>'+
+   '<text x="990" y="170" font-family="'+B+'" font-size="32" fill="#8B9098" text-anchor="end">'+esc(longDate(log.date))+'</text>'+
+   '<text x="90" y="360" font-family="'+B+'" font-weight="700" font-size="30" fill="'+acc+'" letter-spacing="4">ENTRENAMIENTO</text>'+
+   '<text x="90" y="450" font-family="'+F+'" font-weight="800" font-size="'+(log.name.length>22?62:84)+'" fill="#ECEDEF" letter-spacing="-2">'+esc(log.name.slice(0,34))+'</text>'+
+   (top.length?'<text x="90" y="510" font-family="'+B+'" font-size="32" fill="#8B9098">'+esc(top.join(' · '))+'</text>':'')+
+   stat(90,String(log.dur),'minutos')+stat(390,String(m.sets),'series')+stat(690,nf(m.vol),'kg movidos')+rows+
+   (ov?'<text x="540" y="1700" font-family="'+B+'" font-size="32" fill="#8B9098" text-anchor="middle">Rango general</text><text x="540" y="1770" font-family="'+F+'" font-weight="800" font-size="60" fill="'+c+'" text-anchor="middle">'+esc(lvlName(ov.L))+'</text>':'')+
+   '<text x="540" y="1860" font-family="'+B+'" font-size="28" fill="#5E636B" text-anchor="middle">laburodigital.github.io/swole</text></svg>';
+}
+
+/* ============ Árbol de habilidades de calistenia ============ */
+/* cada rama va de lo más fácil a lo más difícil; "id:n" = ejercicio con meta propia de n repeticiones */
+const TREE=[
+  {f:'push',n:'Empuje',ids:['kneepush','pushup','diamond','archerpush','pppush','oapush','planchepush']},
+  {f:'pull',n:'Tirón',ids:['austrow','pullup:10','lpullup','archerpull','muscleup','oapull']},
+  {f:'dip',n:'Fondos',ids:['benchdip','dips:15','ringdip']},
+  {f:'legs',n:'Piernas',ids:['airsquat','shrimp','pistol','dragon']},
+  {f:'lsit',n:'L-sit',ids:['tucklsit','lsit','vsit']},
+  {f:'hs',n:'Vertical',ids:['wallhs','freehs','hspu','freehspu']},
+  {f:'fl',n:'Front lever',ids:['tuckfl','advfl','straddlefl','fullfl']},
+  {f:'bl',n:'Back lever',ids:['tuckbl','straddlebl','fullbl']},
+  {f:'pl',n:'Planche',ids:['tuckpl','advpl','straddlepl','fullpl']},
+  {f:'flag',n:'Bandera',ids:['flag']}
+];
+/* requisitos de otras ramas (la fuerza base que hace falta antes) */
+const XREQ={muscleup:[['dips',10]],lpullup:[['tucklsit',15]],tuckfl:[['pullup',8]],tuckbl:[['pullup',6],['dips',8]],tuckpl:[['pppush',10],['dips',15]],freehs:[['wallhs',45]],flag:[['pullup',12],['wallhs',45]],ringdip:[['dips',12]]};
+const shortN=n=>n.replace(/ \(segundos\)/,'');
+function bestRep(id){let b=0;allSess().forEach(l=>l.entries.forEach(en=>{if(en.ex===id)en.sets.forEach(s=>{if(!s.w&&+s.reps>b)b=+s.reps;});}));return b;}
+function treeNode(s){const [id,t]=s.split(':'),ex=exById(id);return ex?{id,ex,t:+t||(ex.sk?ex.sk.t:10),time:!!ex.time}:null;}
+const branches=()=>TREE.map(b=>Object.assign({},b,{nodes:b.ids.map(treeNode).filter(Boolean)}));
+/* dominada = llegaste a la meta de esta o de cualquier variante más difícil de la misma rama */
+const nodeDone=(b,i)=>b.nodes.slice(i).some(n=>bestRep(n.id)>=n.t);
+function nodeState(b,i){
+  const n=b.nodes[i],best=bestRep(n.id),done=nodeDone(b,i);
+  const prevOk=i===0||nodeDone(b,i-1)||best>0;
+  const reqs=(XREQ[n.id]||[]).map(([id,t])=>{const bb=bestRep(id);return{id,t,best:bb,ok:bb>=t};});
+  const ok=prevOk&&reqs.every(r=>r.ok);
+  return{n,best,done,pct:Math.min(1,best/n.t),avail:!done&&ok,locked:!done&&!ok,reqs,prevOk};
+}
+function findNode(id){const bs=branches();for(const b of bs){const i=b.nodes.findIndex(n=>n.id===id);if(i>=0)return{b,i};}return null;}
+const nodeTier=ex=>ex.sk?Math.min(6,Math.floor(ex.sk.b/3)):1;
+function treeHTML(m){
+  const bs=branches(),goal=db.settings.skillGoal;let tot=0,dn=0;
+  const rows=bs.map(b=>{
+    const st=b.nodes.map((_,i)=>nodeState(b,i)),d=st.filter(x=>x.done).length;tot+=st.length;dn+=d;
+    return '<div class="tb"><div class="tb-h"><b>'+b.n+'</b><span class="mut sm-t">'+d+' de '+st.length+'</span></div><div class="tb-row">'+st.map((s,i)=>{
+      const cls=s.done?'done':s.avail?'avail':'lock',col=TCOL[nodeTier(s.n.ex)];
+      return (i?'<i class="tb-ln'+(s.done||s.avail?' on':'')+'"></i>':'')+
+       '<button class="tn '+cls+(m.sel===s.n.id?' sel':'')+(goal&&goal.id===s.n.id?' goal':'')+'" style="--c:'+col+';--p:'+Math.round(s.pct*100)+'" data-a="treeSel" data-v="'+s.n.id+'" aria-pressed="'+(m.sel===s.n.id)+'">'+
+       '<span class="tn-c">'+(s.done?ic('check',18):!s.best&&s.locked?ic('lock',15):'<small>'+(s.best?Math.round(s.pct*100)+'%':'0%')+'</small>')+'</span><span class="tn-l">'+esc(shortN(s.n.ex.n))+'</span></button>';
+    }).join('')+'</div></div>';
+  }).join('');
+  return '<div class="tree-top"><div><b style="font:800 30px var(--f-d)">'+dn+'</b><span class="mut"> de '+tot+' habilidades dominadas</span></div><div class="bar" style="margin-top:8px"><i style="width:'+Math.round(dn/tot*100)+'%;background:var(--acc)"></i></div>'+
+   '<p class="mut sm-t" style="margin-top:8px">Cada rama va de lo más fácil a lo más difícil. Dominás una cuando llegás a su meta. Tocá cualquiera para ver qué te falta.</p></div>'+
+   rows+(m.sel?nodeDetail(m.sel):'');
+}
+function nodeDetail(id){
+  const f=findNode(id);if(!f)return '';
+  const s=nodeState(f.b,f.i),ex=s.n.ex,u=s.n.time?' s':' reps',prev=f.i>0?f.b.nodes[f.i-1]:null;
+  const req=(prev&&!s.best&&!nodeDone(f.b,f.i-1)?[{id:prev.id,t:prev.t,best:bestRep(prev.id),ok:false}]:[]).concat(s.reqs);
+  return '<div class="td-det" id="tdDet"><div class="row" style="gap:12px">'+badge(ex.sk?ex.sk.b:3,46)+'<div class="grow"><b style="font:800 18px var(--f-d)">'+esc(shortN(ex.n))+'</b><br>'+
+   '<span class="mut sm-t">Meta: '+s.n.t+u+' seguid'+(s.n.time?'os':'as')+' · Tu mejor: '+(s.best?s.best+u:'sin registrar')+'</span></div></div>'+
+   '<div class="bar" style="margin:10px 0 4px"><i style="width:'+Math.round(s.pct*100)+'%;background:'+TCOL[nodeTier(ex)]+'"></i></div>'+
+   '<p class="sm-t" style="margin-top:8px">'+esc(ex.d)+'</p>'+
+   (req.length?'<div class="reqs"><span class="mut sm-t" style="font-weight:600">Antes necesitás</span>'+req.map(r=>{const e=exById(r.id),ru=e&&e.time?' s':' reps';return '<div class="rq'+(r.ok?' ok':'')+'">'+ic(r.ok?'check':'lock',14)+'<span class="grow">'+esc(shortN(e?e.n:r.id))+' · '+r.t+ru+'</span><span class="mut sm-t">'+(r.best?r.best+ru:'—')+'</span></div>';}).join('')+'</div>':'')+
+   '<div class="row" style="gap:8px;margin-top:12px">'+(s.done?'<span class="tag" style="color:var(--ok)">'+ic('check',14)+' Dominada</span><span class="grow"></span>':'<button class="btn pri grow" data-a="skGoal" data-v="'+id+'">'+ic('target',16)+' Quiero lograrla</button>')+
+   '<button class="btn" data-a="exInfo" data-v="'+id+'">Ver ejercicio</button></div></div>';
+}
+/* fuerza que ayuda a cada habilidad (si entrenás sin equipo, se cambia por su versión con peso corporal) */
+const SK_ACC={push:['dips','plank'],pull:['row','legraise'],dip:['pushup','plank'],legs:['bulgarian','calf'],lsit:['legraise','plank'],hs:['ohp','plank'],fl:['row','legraise'],bl:['dips','plank'],pl:['dips','plank'],flag:['legraise','ohp']};
+const BW_ALT={row:'austrow',ohp:'pushup',bulgarian:'shrimp',calf:'airsquat'};
+function skillPlan(id){
+  const f=findNode(id);if(!f)return null;
+  const b=f.b,ti=f.i,st=b.nodes.map((_,i)=>nodeState(b,i));
+  /* arranca en la variante más difícil que ya venís practicando; si no, en la primera que te falta */
+  const open=st.map((s,i)=>i).filter(i=>i<=ti&&!st[i].done),worked=open.filter(i=>st[i].best>0);
+  let si=worked.length?worked[worked.length-1]:open.length?open[0]:ti;
+  const step=st[si],P=genPrefs(),bw=P.eq==='bw'||P.goals.length===1&&P.goals[0]==='cali';
+  /* práctica de habilidad: series cortas y de calidad, a ~70 % de tu máximo (lejos del fallo) */
+  const dose=(n,best,main)=>{
+    if(n.time){const h=best?Math.max(5,Math.min(n.t,Math.round(best*.7))):Math.max(5,Math.round(n.t*.4));return[main?6:3,h];}
+    const r=best?Math.max(2,Math.min(n.t,Math.round(best*.7))):Math.max(3,Math.round(n.t*.3));return[main?5:3,r];
+  };
+  const items=[],d0=dose(step.n,step.best,true);
+  items.push({ex:step.n.id,sets:d0[0],reps:d0[1]});
+  if(si>0){const pv=st[si-1],d=dose(pv.n,pv.best,false);items.push({ex:pv.n.id,sets:d[0],reps:Math.max(d[1],pv.n.time?15:5)});}
+  const reqs=(XREQ[step.n.id]||[]).concat(si!==ti?(XREQ[id]||[]):[]).filter(([rid,t])=>bestRep(rid)<t);
+  reqs.forEach(([rid,t])=>{const e=exById(rid);if(!e||items.some(x=>x.ex===rid))return;const bb=bestRep(rid);items.push({ex:rid,sets:4,reps:e.time?Math.max(10,Math.round((bb||t*.5)*.8)):Math.max(3,Math.round((bb||t*.5)*.75))});});
+  (SK_ACC[b.f]||[]).forEach(a=>{const aid=bw&&BW_ALT[a]?BW_ALT[a]:a,e=exById(aid);if(!e||items.some(x=>x.ex===aid))return;items.push({ex:aid,sets:3,reps:e.time?40:LOWER.includes(e.p[0])?10:8});});
+  const tg=b.nodes[ti].ex,from=si>0?st[si-1].n.ex:null;
+  const gap=Math.max(1,(tg.sk?tg.sk.b:4)-(from&&from.sk?from.sk.b:from?3:0));
+  return{target:id,tg,b,path:st.slice(si,ti+1),done:st.slice(0,si),step:step.n,stepBest:step.best,items:items.slice(0,6),weeks:[Math.max(3,Math.round(gap*1.5)),Math.max(5,Math.round(gap*3))]};
+}
+function skPlanHTML(p){
+  if(!p)return '<p class="mut">No encontré esa habilidad.</p>';
+  const u=n=>n.time?' s':' reps';
+  return '<p class="mut sm-t">Tu camino a <b style="color:var(--text)">'+esc(shortN(p.tg.n))+'</b>, paso por paso:</p>'+
+   '<div class="skpath">'+p.done.slice(-1).map(s=>'<span class="ok">'+ic('check',13)+' '+esc(shortN(s.n.ex.n))+'</span>').join('')+p.path.map((s,i)=>(i||p.done.length?'<i>'+ic('right',14)+'</i>':'')+'<span class="'+(i===0?'cur':'')+'">'+esc(shortN(s.n.ex.n))+' · '+s.n.t+u(s.n)+'</span>').join('')+'</div>'+
+   '<div class="card" style="margin:12px 0 0"><div class="hd"><div><h4>Cada sesión</h4><span class="mut sm-t">3 veces por semana · se actualiza sola cuando progresás</span></div></div>'+
+   p.items.map((it,k)=>{const e=exById(it.ex);return '<div class="rowline" style="padding:6px 0"><span>'+esc(shortN(e.n))+(k===0?' <span class="tag" style="font-size:10.5px;color:var(--acc)">habilidad</span>':'')+'</span><span class="mut">'+it.sets+' × '+it.reps+(e.time?' s':'')+'</span></div>';}).join('')+'</div>'+
+   '<div class="goal" style="margin-top:12px"><span class="grow"><span class="mut sm-t">Estimado (aproximado)</span><br><b>'+p.weeks[0]+' a '+p.weeks[1]+' semanas</b></span>'+ic('cal',22)+'</div>'+
+   '<details class="why"><summary>¿Cómo funciona?</summary><div class="mut sm-t">'+
+   '<p><b>Calidad antes que cantidad:</b> la habilidad va primero, fresco. Series cortas al 70 % de tu máximo: cortá antes de perder la forma.</p>'+
+   '<p><b>Frecuencia:</b> las habilidades se aprenden practicándolas seguido, por eso son 3 veces por semana con descansos de 2 a 3 minutos.</p>'+
+   '<p><b>Progresión:</b> cada sesión intentá +1 repetición o +2 a 3 segundos. Cuando llegás a la meta, el plan pasa solo a la siguiente variante.</p>'+
+   '<p><b>Base de fuerza:</b> los ejercicios de abajo construyen la fuerza que la habilidad necesita (y cuidan hombros, codos y muñecas).</p></div></details>'+
+   '<div class="g2" style="margin-top:12px"><button class="btn" data-a="skStart" data-v="'+p.target+'">'+ic('play',16)+' Empezar hoy</button><button class="btn pri" data-a="skSave" data-v="'+p.target+'">Agregar a mi semana</button></div>';
+}
+function pick3(wk){
+  const o=wk.slice().sort((a,b)=>((a+6)%7)-((b+6)%7));
+  if(o.length>=3)return[o[0],o[Math.floor(o.length/2)],o[o.length-1]];
+  return[1,3,5];
+}
+/* tu habilidad objetivo, en Inicio */
+function skillGoalCard(){
+  const g=db.settings.skillGoal;if(!g)return '';
+  const p=skillPlan(g.id);if(!p)return '';
+  const done=bestRep(g.id)>=findNode(g.id).b.nodes[findNode(g.id).i].t;
+  const s=p.path[0],pct=Math.round(s.pct*100);
+  return '<div class="card skg"><div class="hd"><div class="grow"><span class="lh-k">Tu habilidad objetivo</span><h3>'+esc(shortN(p.tg.n))+'</h3>'+
+   '<span class="mut sm-t">'+(done?'¡La lograste! Elegí la próxima en el árbol.':'Paso '+(p.done.length+1)+' de '+(p.done.length+p.path.length)+': '+esc(shortN(s.n.ex.n))+' · '+(s.best||0)+' de '+s.n.t+(s.n.time?' s':' reps'))+'</span></div>'+badge(p.tg.sk?p.tg.sk.b:3,44)+'</div>'+
+   '<div class="bar" style="margin:4px 0 12px"><i style="width:'+(done?100:pct)+'%;background:'+TCOL[nodeTier(p.tg)]+'"></i></div>'+
+   '<div class="row" style="gap:8px">'+(done?'':'<button class="btn pri grow" data-a="skStart" data-v="'+g.id+'">'+ic('play',16)+' Entrenar</button>')+'<button class="btn'+(done?' pri grow':'')+'" data-a="treeOpen">'+ic('tree',16)+' Árbol</button></div></div>';
+}
+
 /* ============ Entrenar mejor ============ */
 /* Meta de hoy (sobrecarga progresiva): mira la última vez y propone un poquito más. */
 function goalFor(id){
@@ -1971,7 +2208,11 @@ function goalFor(id){
   const allHit=ls.every(s=>+s.reps>=+top.reps);
   if(!allHit)return{kg:+top.kg,reps:+top.reps,prev,why:'completá todas las series con este peso'};
   const kg=+top.kg,low=LOWER.includes(ex.p[0]);
-  const inc=ex.ph?(kg>=12?2:1):low?(kg>=60?5:2.5):(kg>=20?2.5:1);
+  let inc=ex.ph?(kg>=12?2:1):low?(kg>=60?5:2.5):(kg>=20?2.5:1);
+  /* si la última vez te sobraban 3 o más, el salto es doble; si llegaste al fallo, se mantiene el peso */
+  const rr=ls.filter(s=>s.rir!=null).map(s=>+s.rir);
+  if(rr.length&&Math.min(...rr)>=3)return{kg:Math.round((kg+inc*2)*4)/4,reps:+top.reps,prev,why:'+'+num(inc*2,2)+' kg (te sobraba)'};
+  if(rr.length&&Math.max(...rr)===0)return{kg,reps:+top.reps+1,prev,why:'+1 repetición (llegaste al fallo)'};
   return{kg:Math.round((kg+inc)*4)/4,reps:+top.reps,prev,why:'+'+num(inc,2)+' kg'};
 }
 const goalTxt=(ex,g)=>ex.time?g.reps+' s':(g.kg?num(g.kg,2)+' kg × ':'')+g.reps+(ex.time?'':' reps');
@@ -2041,7 +2282,7 @@ const QUICK=[
   {i:'play',l:'Entrenar',a:'quickTrain',c:'#7A66FF'},
   {i:'bolt',l:'Cargar marca',a:'markOpen',c:'#FF4F93'},
   {i:'dumb',l:'Rutinas',a:'tab',v:'rutinas',c:'#1F9E95'},
-  {i:'cal',l:'Calendario',a:'tab',v:'cal',c:'#2F73E0'},
+  {i:'tree',l:'Habilidades',a:'treeOpen',c:'#2F73E0'},
   {i:'flame',l:'Nutrición',a:'tab',v:'nutri',c:'#CC8A12'},
   {i:'spark',l:'Armar rutina',a:'genOpen',c:'#8F43EA'}
 ];
@@ -2049,7 +2290,7 @@ const qTile=q=>'<button class="qtile" data-a="'+q.a+'"'+(q.v?' data-v="'+q.v+'"'
 function viewInicio(){
   const p=db.profile||{};
   return '<div class="home"><div class="home-l"><div class="hello"><span class="mut">'+greet()+(p.nick?',':'')+'</span><h1 class="pg">'+(p.nick?esc(p.nick):'Swole')+'</h1></div>'+
-   levelHero()+goalsCard(true)+'<div class="qgrid">'+QUICK.map(qTile).join('')+'</div></div><div class="home-r">'+stripTitle(viewHoy())+'</div></div>';
+   levelHero()+skillGoalCard()+goalsCard(true)+'<div class="qgrid">'+QUICK.map(qTile).join('')+'</div></div><div class="home-r">'+todayCard()+stripTitle(viewHoy())+'</div></div>';
 }
 /* botón central: lo que más se usa, a un toque */
 function quickHTML(){
@@ -2246,7 +2487,7 @@ function viewNiveles(){
     }).join('')+'</div>';
   }
   /* calistenia: progresiones */
-  h+='<div class="card"><div class="hd"><div><h3>Calistenia</h3><span class="mut sm-t">Tu nivel sale de la variante que dominás, no de los kilos.</span></div></div><div class="gap">'+
+  h+='<div class="card"><div class="hd"><div><h3>Calistenia</h3><span class="mut sm-t">Tu nivel sale de la variante que dominás, no de los kilos.</span></div><button class="btn sm" data-a="treeOpen">'+ic('tree',16)+' Árbol</button></div><div class="gap">'+
    Object.keys(SKFAM).map(f=>{
      const vs=skFam(f);let best=-1,bestEx=null;
      vs.forEach(e=>{const b=bestE1(e.id);if(b){const v=levelVal(e,b.e);if(v>best){best=v;bestEx=e;}}});
@@ -2323,15 +2564,19 @@ function mkEntry(id,n,reps,warm){
   for(let i=0;i<n;i++){const l=ls.length?(ls[i]||ls[ls.length-1]):null;sets.push({kg:l&&l.kg?l.kg:'',reps:reps,done:false});}
   return{ex:id,sets,note:''};
 }
-function startSession(rid,dk){
+function startSession(rid,dk,adhoc){
   if(db.active){S.sessOpen=true;render();toast('Ya tenés un entrenamiento en curso');return;}
   if(dk&&dk>today()){toast('No podés registrar un entrenamiento en un día que todavía no llegó');return;}
-  const r=rid?db.routines.find(x=>x.id===rid):null;
+  const r=adhoc||(rid?db.routines.find(x=>x.id===rid):null);
+  /* rutina de habilidad: se recalcula con tu progreso de hoy */
+  if(r&&r.skill&&!adhoc){const sp=skillPlan(r.skill);if(sp)r.items=sp.items;}
   if(r&&r.rest)db.settings.rest=r.rest;
-  db.active={id:uid(),date:dk||today(),routineId:r?r.id:null,name:r?r.name:'Entrenamiento libre',t0:Date.now(),note:'',entries:(r?r.items:[]).map(it=>mkEntry(it.ex,it.sets,it.reps,it.warm))};
+  db.active={id:uid(),date:dk||today(),routineId:r&&!adhoc?r.id:null,name:r?r.name:'Entrenamiento libre',t0:Date.now(),note:'',entries:(r?r.items:[]).map(it=>mkEntry(it.ex,it.sets,it.reps,it.warm))};
   save();S.sessOpen=true;render();
 }
 const isBarbell=ex=>/^Barra( Z)?$/.test(ex.eq);
+/* cuánto sube cada toque: mancuernas de a 1 kg, barra y máquinas de a 2,5 */
+const kgStep=ex=>ex.ph||/Mancuerna|Pesa rusa/.test(ex.eq)?1:2.5;
 const kgLbl=ex=>ex.ph?'kg c/mano':ex.bw||ex.sk?'kg extra':'kg';
 const setTxt=(ex,s)=>(s.w?'C ':'')+(ex.time?s.reps+' s':(s.kg?num(s.kg,1)+' kg'+(ex.ph?' c/u':'')+' × '+s.reps:s.reps+' reps'));
 function entryHTML(en,i){
@@ -2342,11 +2587,15 @@ function entryHTML(en,i){
   if(en.goal===undefined)en.goal=goalFor(en.ex);
   const g=en.goal,goal=g?'<div class="goal'+(en.hit?' hit':'')+'"><span class="grow"><span class="mut sm-t">'+(en.hit?'¡Meta cumplida!':'Meta de hoy · '+esc(g.why))+'</span><br><b>'+goalTxt(ex,g)+'</b></span>'+(en.hit?ic('check',22):'<button class="btn sm" data-a="goalUse" data-e="'+i+'">Usar</button>')+'</div>':'';
   const ssPrev=i>0&&db.active.entries[i-1].ss,ssNext=en.ss&&i<n-1;
+  const aj=en.sets.findIndex(s=>!s.done),inc=kgStep(ex);
   const rows=en.sets.map((s,j)=>'<div class="set'+(s.done?' done':'')+(s.w?' warm':'')+(S.justDone===i+':'+j?' just':'')+'">'+
     '<button class="sn" data-a="setW" data-e="'+i+'" data-s="'+j+'" aria-pressed="'+!!s.w+'" aria-label="'+(s.w?'Serie de calentamiento: tocá para hacerla efectiva':'Marcar serie '+(j+1)+' como calentamiento')+'">'+(s.w?'C':(j+1-en.sets.slice(0,j).filter(x=>x.w).length))+'</button>'+
     (ex.time?'<span></span>':'<label><input class="num" type="number" inputmode="decimal" step="0.5" min="0" value="'+esc(s.kg)+'" data-i="set" data-e="'+i+'" data-s="'+j+'" data-f="kg" aria-label="Peso de la serie '+(j+1)+'"><small>'+kgLbl(ex)+'</small></label>')+
     '<label><input class="num" type="number" inputmode="numeric" min="0" value="'+esc(s.reps)+'" data-i="set" data-e="'+i+'" data-s="'+j+'" data-f="reps" aria-label="Repeticiones de la serie '+(j+1)+'"><small>'+(ex.time?'segundos':'reps')+'</small></label>'+
-    '<button class="chk" data-a="setDone" data-e="'+i+'" data-s="'+j+'" aria-pressed="'+s.done+'" aria-label="Marcar serie '+(j+1)+'">'+ic('check',22)+'</button></div>').join('');
+    '<button class="chk" data-a="setDone" data-e="'+i+'" data-s="'+j+'" aria-pressed="'+s.done+'" aria-label="Marcar serie '+(j+1)+'">'+ic('check',22)+'</button></div>'+
+    (S.rirAsk===i+':'+j&&s.done&&!s.w?'<div class="rir"><span>¿Cuántas más podías?</span>'+[0,1,2,3].map(v=>'<button data-a="rirSet" data-e="'+i+'" data-s="'+j+'" data-v="'+v+'">'+(v===3?'3+':v)+'</button>').join('')+'</div>':'')+
+    (j===aj?'<div class="stepr">'+(ex.time?'':'<button data-a="stepKg" data-e="'+i+'" data-s="'+j+'" data-v="-'+inc+'">−'+num(inc,2)+' kg</button><button data-a="stepKg" data-e="'+i+'" data-s="'+j+'" data-v="'+inc+'">+'+num(inc,2)+' kg</button><i></i>')+
+      '<button data-a="stepRep" data-e="'+i+'" data-s="'+j+'" data-v="-'+(ex.time?5:1)+'">−'+(ex.time?'5 s':'1')+'</button><button data-a="stepRep" data-e="'+i+'" data-s="'+j+'" data-v="'+(ex.time?5:1)+'">+'+(ex.time?'5 s':'1 rep')+'</button></div>':'')).join('');
   return (ssNext&&!ssPrev?'<p class="ss-tag">'+ic('swap',14)+' Superserie</p>':'')+'<div class="card entry'+(ssNext?' ss-a':'')+(ssPrev?' ss-b':'')+'"><div class="row">'+miniMap(mapOf(ex)).replace('mini','mini" style="width:52px')+'<button class="grow" style="text-align:left" data-a="exInfo" data-v="'+ex.id+'"><h3 style="font-size:17px">'+esc(ex.n)+'</h3><span class="mut sm-t">'+esc(ex.eq)+'</span></button>'+
    (i>0?'<button class="ib flat" data-a="moveEntry" data-e="'+i+'" aria-label="Subir ejercicio">'+ic('up',18)+'</button>':'')+
    '<button class="ib flat" data-a="replEx" data-e="'+i+'" aria-label="Cambiar por otro ejercicio">'+ic('swap',18)+'</button>'+
@@ -2370,7 +2619,7 @@ function sessHTML(){
 }
 function finishSession(){
   const a=db.active;
-  const entries=a.entries.map(en=>{const o={ex:en.ex,sets:en.sets.filter(s=>s.done&&(+s.reps)>0).map(s=>{const r={kg:+s.kg||0,reps:+s.reps};if(s.w)r.w=1;return r;})};if((en.note||'').trim())o.note=en.note.trim();return o;}).filter(en=>en.sets.length);
+  const entries=a.entries.map(en=>{const o={ex:en.ex,sets:en.sets.filter(s=>s.done&&(+s.reps)>0).map(s=>{const r={kg:+s.kg||0,reps:+s.reps};if(s.w)r.w=1;if(s.rir!=null)r.rir=s.rir;return r;})};if((en.note||'').trim())o.note=en.note.trim();return o;}).filter(en=>en.sets.length);
   if(!entries.length){toast('Marcá al menos una serie como hecha');return;}
   const before={};
   entries.forEach(en=>{const ex=exById(en.ex),b=bestE1(en.ex);before[en.ex]={e:b?b.e:0,L:hasRank(ex)?(b?levelIdx(ex,b.e):-1):null};});
@@ -2537,7 +2786,7 @@ function summaryHTML(m){
    (m.ups.length?m.ups.map(u=>{const ex=exById(u.ex);return '<div class="card row pop" style="margin:0">'+badge(u.to,64)+'<div class="grow"><span class="mut sm-t">¡Subiste de nivel!</span><div style="font:800 20px var(--f-d)">'+esc(ex.n)+'</div><span class="sm-t">'+lvlName(u.from)+' a '+lvlSpan(u.to)+'</span></div></div>';}).join(''):'')+
    (m.prs.length?'<div class="card" style="margin:0"><h4 style="margin-bottom:6px">Récords personales</h4>'+m.prs.map(p=>{const ex=exById(p.ex);if(!ex)return '';return '<div class="rowline"><span>'+esc(ex.n)+'</span><span class="mut">'+(ex.time||ex.sk?'Mejor: '+Math.round(p.e)+unitOf(ex):ex.st?'1RM est. '+num(p.e,1)+' kg':'Mejor serie superada')+'</span></div>';}).join('')+'</div>':'')+
    (m.goals&&m.goals.tot?'<div class="goal'+(m.goals.hit?' hit':'')+'"><span class="grow"><span class="mut sm-t">Sobrecarga progresiva</span><br><b>'+m.goals.hit+' de '+m.goals.tot+' metas cumplidas</b></span>'+ic(m.goals.hit===m.goals.tot?'trophy':'bolt',22)+'</div>':'')+
-   '<button class="btn pri wide" data-a="close" data-v="modal">Listo</button>';
+   '<div class="g2"><button class="btn" data-a="sumShare">'+ic('share',16)+' Compartir</button><button class="btn pri" data-a="close" data-v="modal">Listo</button></div>';
 }
 function logEditHTML(d){
   return '<label class="field">Nombre<input type="text" maxlength="40" value="'+esc(d.name)+'" data-i="d" data-f="name"></label>'+
@@ -2623,6 +2872,8 @@ function modalBody(m,l2){
     case 'routine':return sheet(m.d.id?'Editar rutina':'Nueva rutina',routineHTML(m.d));
     case 'ex':{const ex=exById(m.id);return sheet(ex?ex.n:'Ejercicio',exDetail(m.id));}
     case 'summary':return sheet('Entrenamiento guardado',summaryHTML(m));
+    case 'tree':return sheet('Árbol de habilidades',treeHTML(m));
+    case 'skplan':return sheet('Tu camino',skPlanHTML(skillPlan(m.id)),{l2:true});
     case 'excreate':return sheet('Ejercicio propio',exCreateHTML(m.d),{l2:true});
     case 'confirm':return sheet(m.title,'<p>'+esc(m.msg)+'</p><div class="g2"><button class="btn" data-a="close" data-v="m2">Cancelar</button><button class="btn pri" data-a="'+m.act+'" data-v="'+esc(m.arg||'')+'">'+esc(m.ok||'Confirmar')+'</button></div>',{l2:true});
     case 'mark':return sheet(m.d.step==='reveal'?'Tu nivel':m.d.step==='form'?'Tu marca':'Elegí el ejercicio',markHTML(m.d),{l2:true});
@@ -2959,6 +3210,9 @@ const ACTIONS={
     s.done=!s.done;
     if(s.done){
       S.justDone=el.dataset.e+':'+el.dataset.s;try{navigator.vibrate&&navigator.vibrate(18);}catch(e){}
+      /* la primera vez: el peso de esta serie pasa a las que siguen */
+      const j=+el.dataset.s;en.sets.forEach((x,k)=>{if(k>j&&!x.done&&!x.w&&(x.kg===''||x.kg==null)&&s.kg!=='')x.kg=s.kg;});
+      if(!s.w&&!ex.time)S.rirAsk=ei+':'+j;
       if(!s.w&&!en.hit&&hitGoal(en.goal,s)){en.hit=1;setTimeout(()=>{toast('¡Meta cumplida en '+(ex?ex.n:'')+'!');confetti(24);},150);}
       if(en.ss&&nx){endRest(false);const nxe=exById(nx.ex);toast('Superserie: ahora '+(nxe?nxe.n:'el siguiente'));}
       else startRest(restFor(ex));
@@ -2966,6 +3220,21 @@ const ACTIONS={
     save();
     render();S.justDone=null;
   },
+  stepKg(v,el){const en=db.active.entries[+el.dataset.e],j=+el.dataset.s,s=en.sets[j],old=s.kg;s.kg=Math.max(0,Math.round(((+s.kg||0)+(+v))*4)/4);
+    en.sets.forEach((x,k)=>{if(k>j&&!x.done&&!x.w&&String(x.kg)===String(old))x.kg=s.kg;});save();renderSess();},
+  stepRep(v,el){const s=db.active.entries[+el.dataset.e].sets[+el.dataset.s];s.reps=Math.max(0,(+s.reps||0)+(+v));save();renderSess();},
+  rirSet(v,el){const s=db.active.entries[+el.dataset.e].sets[+el.dataset.s];s.rir=+v;S.rirAsk=null;save();renderSess();},
+  todayGo(){const pl=todayPlan(S.todaySeed||0);startSession(null,null,pl);},
+  todayAlt(){S.todaySeed=(S.todaySeed||0)+1;render();},
+  sumShare(){if(S.modal&&S.modal.t==='summary')pngShare(summarySVG(S.modal),'swole-entreno.png','Mi entreno en Swole');},
+  treeOpen(){S.modal={t:'tree',sel:null};render();},
+  treeSel(v){S.modal.sel=S.modal.sel===v?null:v;renderModal();const d=document.getElementById('tdDet');if(d)d.scrollIntoView({block:'nearest',behavior:'smooth'});},
+  skGoal(v){S.m2={t:'skplan',id:v};render();},
+  skStart(v){const p=skillPlan(v);if(!p)return;db.settings.skillGoal={id:v,since:today()};S.m2=null;S.modal=null;save();startSession(null,null,{name:'Camino a '+shortN(p.tg.n),items:p.items,rest:150});},
+  skSave(v){const p=skillPlan(v);if(!p)return;
+    db.routines=db.routines.filter(r=>!r.skill);
+    db.routines.push({id:uid(),name:'Camino a '+shortN(p.tg.n),days:pick3(weekGymDays()),since:today(),items:p.items,rest:150,skill:v,note:'Se actualiza sola a medida que progresás'});
+    db.settings.skillGoal={id:v,since:today()};S.m2=null;S.modal=null;goTab('rutinas');S.rtab='rut';save();render();confetti(30);toast('Listo: Camino a '+shortN(p.tg.n)+' en tu semana');},
   addSet(v,el){
     const en=db.active.entries[+el.dataset.e],l=en.sets[en.sets.length-1]||{kg:'',reps:10};
     en.sets.push({kg:l.kg,reps:l.reps,done:false});save();renderSess();
@@ -2993,6 +3262,7 @@ const ACTIONS={
   genSave(){
     const d=S.m2.d;if(!d.plan||!d.plan.length)return;
     if(d.replace){const old=db.routines.filter(r=>r.gen).map(r=>r.id);db.routines=db.routines.filter(r=>!r.gen);Object.keys(db.plan).forEach(k=>{db.plan[k]=db.plan[k].filter(x=>!old.includes(x));if(!db.plan[k].length)delete db.plan[k];});}
+    db.settings.gen={goals:d.goals.slice(),eq:d.eq,lvl:d.lvl};
     d.plan.forEach(r=>db.routines.push({id:uid(),name:r.name,days:r.days,since:today(),items:r.items,rest:r.rest,note:r.note,gen:1}));
     S.m2=null;goTab('rutinas');S.rtab='rut';save();render();confetti(40);toast('Listo: '+d.plan.length+' rutinas en tu semana');checkAch();
   },
