@@ -449,6 +449,13 @@ body.sessopen .dock{bottom:calc(14px + env(safe-area-inset-bottom,0px))}
   .home-r{padding-top:62px}
 }
 .wlist{margin-top:10px}
+/* ===== Grupos y objetivos ===== */
+.glist{display:grid;gap:12px}
+@media (min-width:760px){.glist{grid-template-columns:1fr 1fr;gap:14px 20px}}
+.grow-row,.goal-row{display:flex;gap:12px;align-items:center}
+.goal-row{padding:10px 12px;border-radius:16px;background:var(--raise)}
+.goal-row.done{background:color-mix(in srgb,var(--ok) 14%,var(--raise))}
+.goal-sug{padding:8px 10px;border-radius:14px;border:1px dashed var(--line)}
 /* ===== Inicio y menú ===== */
 .hello{margin:6px 0 2px}.hello .pg{margin:0 0 14px}.hello>span{font-weight:700}
 .lvl-hero{position:relative;display:flex;gap:16px;align-items:center;padding:18px;border-radius:28px;margin-bottom:14px;overflow:hidden;
@@ -741,9 +748,9 @@ const Store=(()=>{
     wipe(){mem=null;try{localStorage.removeItem(K);}catch(e){}}
   };
 })();
-const defaults=()=>({v:1,profile:null,routines:[],customEx:[],plan:{},logs:[],weights:[],creatine:{},water:{},settings:{theme:'dark',rest:90,remind:{on:false,time:'09:00'},lastRemind:''},active:null,clock:{},del:{},ach:{},tests:[]});
+const defaults=()=>({v:1,profile:null,routines:[],customEx:[],plan:{},logs:[],weights:[],creatine:{},water:{},settings:{theme:'dark',rest:90,remind:{on:false,time:'09:00'},lastRemind:''},active:null,clock:{},del:{},ach:{},tests:[],goals:[]});
 function normalize(x){const d=defaults();const o=Object.assign(d,x||{});o.settings=Object.assign(d.settings,(x&&x.settings)||{});o.settings.remind=Object.assign({on:false,time:'09:00'},o.settings.remind||{});
-  ['routines','customEx','logs','weights','tests'].forEach(k=>{if(!Array.isArray(o[k]))o[k]=[];});
+  ['routines','customEx','logs','weights','tests','goals'].forEach(k=>{if(!Array.isArray(o[k]))o[k]=[];});
   ['plan','creatine','water','clock','del','ach'].forEach(k=>{if(!o[k]||typeof o[k]!=='object'||Array.isArray(o[k]))o[k]={};});
   /* los IDs van dentro de atributos HTML: si vienen de un archivo importado raro, los limpio
      (siempre igual, así las referencias entre rutinas, entrenos y ejercicios siguen coincidiendo) */
@@ -762,7 +769,7 @@ if(!db.settings.look2){if(db.settings.theme==='auto')db.settings.theme='dark';db
    Al guardar se compara con la foto anterior: lo que cambió recibe la hora en db.clock y
    lo que desapareció queda anotado como borrado en db.del. Al unir dos dispositivos, por
    cada clave gana lo más reciente (y un borrado más nuevo le gana a la cosa). */
-const SYNC_COLL={logs:'id',routines:'id',customEx:'id',weights:'date',tests:'id'};
+const SYNC_COLL={logs:'id',routines:'id',customEx:'id',weights:'date',tests:'id',goals:'id'};
 const SYNC_MAP=['creatine','water','ach'];
 const SYNC_ONE=['profile','plan','settings'];
 function syncKeys(d){
@@ -818,9 +825,14 @@ function e1(ex,kg,reps){
   const r=Math.min(+reps||0,ex.bw?30:15);
   return r>0?load*(1+r/30):0;
 }
+/* La fuerza no crece igual que el peso corporal: crece aprox. con el peso elevado a 2/3 (escala alométrica,
+   la idea detrás de las fórmulas de las federaciones). Las tablas están pensadas para 75 kg: a 60 kg te piden
+   un poco más por kilo de cuerpo y a 95 kg un poco menos, así todos se miden parejo.
+   En ejercicios con el propio cuerpo (dominadas, fondos) la parte del cuerpo sigue siendo lineal: la movés entera. */
+const allo=w=>75*Math.pow(w/75,2/3);
 function stdFor(ex){
-  const p=db.profile,b=ex.bw||0,sf=sexF(p.sex,ex.reg)*ageF(p.age);
-  const f=x=>(b+(x-b)*sf)*p.weight;
+  const p=db.profile,b=ex.bw||0,sf=sexF(p.sex,ex.reg)*ageF(p.age),W=p.weight,Wa=allo(W);
+  const f=x=>b*W+(x-b)*sf*Wa;
   return{lo:f(b?ex.st[0]:ex.st[0]*1.6),hi:f(b?ex.st[1]:ex.st[1]*.95)};
 }
 /* nivel con decimales (puede ser negativo si todavía no llegás a Bronce 1) */
@@ -893,13 +905,18 @@ function rankedList(){
 }
 /* Rango general: el mejor ejercicio de cada grupo muscular, promediado.
    Así probar un ejercicio nuevo nunca te baja el rango; entrenar un grupo nuevo sí cuenta. */
+/* Rango de cada grupo muscular: promedio de sus (hasta) 3 mejores ejercicios.
+   Así cuenta más de un ejercicio, pero probar uno nuevo y flojo no te hunde el grupo. */
+function groupLevels(){
+  const by={};
+  rankedList().filter(x=>x.info.L>=0).forEach(x=>{const g=groupOf(x.ex);(by[g]=by[g]||[]).push({ex:x.ex,v:x.info.L+clamp(x.info.pct,0,.999)});});
+  const out={};
+  Object.keys(GROUPS).forEach(g=>{const l=(by[g]||[]).sort((a,b)=>b.v-a.v),top=l.slice(0,3);out[g]=top.length?{v:top.reduce((s,x)=>s+x.v,0)/top.length,n:l.length,used:top.map(x=>x.ex)}:null;});
+  return out;
+}
+/* Rango general: promedio de los grupos que tienen datos */
 function overall(){
-  const best={};
-  rankedList().filter(x=>x.info.L>=0).forEach(x=>{
-    const g=groupOf(x.ex),v=x.info.L+clamp(x.info.pct,0,.999);
-    if(!best[g]||v>best[g])best[g]=v;
-  });
-  const vals=Object.values(best);
+  const vals=Object.values(groupLevels()).filter(Boolean).map(x=>x.v);
   if(!vals.length)return null;
   const avg=vals.reduce((s,v)=>s+v,0)/vals.length;
   const L=Math.min(18,Math.floor(avg));
@@ -1610,7 +1627,7 @@ const qTile=q=>'<button class="qtile" data-a="'+q.a+'"'+(q.v?' data-v="'+q.v+'"'
 function viewInicio(){
   const p=db.profile||{};
   return '<div class="home"><div class="home-l"><div class="hello"><span class="mut">'+greet()+(p.nick?',':'')+'</span><h1 class="pg">'+(p.nick?esc(p.nick):'Swole')+'</h1></div>'+
-   levelHero()+'<div class="qgrid">'+QUICK.map(qTile).join('')+'</div></div><div class="home-r">'+stripTitle(viewHoy())+'</div></div>';
+   levelHero()+goalsCard(true)+'<div class="qgrid">'+QUICK.map(qTile).join('')+'</div></div><div class="home-r">'+stripTitle(viewHoy())+'</div></div>';
 }
 /* botón central: lo que más se usa, a un toque */
 function quickHTML(){
@@ -1677,6 +1694,44 @@ function demoCard(){
   }finally{db.profile=keep;db.tests=tests;db.logs=lg;}
 }
 
+/* ============ Objetivos ============ */
+/* un objetivo = llegar a un nivel en un ejercicio. El progreso va desde dónde estabas al fijarlo hasta la meta. */
+const curV=ex=>{const b=bestE1(ex.id);return b?Math.max(-1,levelVal(ex,b.e)):-1;};
+function goalProg(g){const ex=exById(g.ex);if(!ex)return null;const v=curV(ex),v0=Math.min(g.v0,g.L-.01);return{ex,v,pct:clamp((v-v0)/(g.L-v0),0,1)};}
+function goalSuggest(){
+  const have=new Set((db.goals||[]).filter(g=>!g.done).map(g=>g.ex)),out=[];
+  /* el próximo nivel de tus mejores ejercicios y del grupo más flojo */
+  const r=rankedList().filter(x=>x.info.L>=0&&x.info.L<18&&!have.has(x.ex.id));
+  const gl=groupLevels(),weak=Object.keys(gl).filter(g=>gl[g]).sort((a,b)=>gl[a].v-gl[b].v)[0];
+  if(weak){const x=r.find(y=>groupOf(y.ex)===weak);if(x)out.push({ex:x.ex,L:x.info.L+1,why:'Tu grupo más flojo: '+weak.toLowerCase()});}
+  r.forEach(x=>{if(out.length<3&&!out.some(o=>o.ex.id===x.ex.id))out.push({ex:x.ex,L:x.info.L+1,why:'Estás a '+Math.round((1-x.info.pct)*100)+' % del próximo rango'});});
+  return out;
+}
+function goalRow(g){
+  const p=goalProg(g);if(!p)return '';
+  return '<div class="goal-row'+(g.done?' done':'')+'">'+badge(g.L,40)+'<div class="grow"><b>'+esc(p.ex.n)+'</b> → '+lvlSpan(g.L)+
+   '<div class="bar" style="margin:6px 0 4px"><i style="width:'+Math.round((g.done?1:p.pct)*100)+'%;background:'+lvlColor(g.L)+'"></i></div>'+
+   '<span class="mut sm-t">'+(g.done?'¡Cumplido el '+esc(shortDate(parseK(g.done).getTime()))+'!':'Te falta: '+needTxt(p.ex,g.L))+'</span></div>'+
+   '<button class="ib flat" data-a="goalDel" data-v="'+g.id+'" aria-label="Quitar objetivo">'+ic('x',16)+'</button></div>';
+}
+function goalsCard(home){
+  const act=(db.goals||[]).filter(g=>!g.done),done=(db.goals||[]).filter(g=>g.done).slice(-3).reverse();
+  if(home&&!act.length)return '';
+  let h='<div class="card"><div class="hd"><div><h3>Tus objetivos</h3><span class="mut sm-t">'+(act.length?'Hasta 3 a la vez':'Elegí qué rango querés alcanzar')+'</span></div><span class="tag">'+act.length+'/3</span></div><div class="gap">'+act.map(goalRow).join('')+'</div>';
+  if(!home){
+    const sug=act.length<3?goalSuggest():[];
+    if(sug.length)h+='<p class="mut sm-t" style="margin:12px 0 6px;font-weight:700">Sugeridos para vos</p><div class="gap">'+sug.map(s=>'<div class="row goal-sug">'+badge(s.L,34)+'<div class="grow"><b>'+esc(s.ex.n)+'</b> → '+lvlSpan(s.L)+'<br><span class="mut sm-t">'+esc(s.why)+' · '+needTxt(s.ex,s.L)+'</span></div><button class="btn sm" data-a="goalAdd" data-v="'+s.ex.id+'" data-l="'+s.L+'">'+ic('plus',14)+' Fijar</button></div>').join('')+'</div>';
+    else if(!act.length)h+='<p class="mut sm-t" style="margin-top:8px">Cargá alguna marca y te sugiero objetivos.</p>';
+    if(done.length)h+='<p class="mut sm-t" style="margin:12px 0 6px;font-weight:700">Cumplidos</p><div class="gap">'+done.map(goalRow).join('')+'</div>';
+  }
+  return h+'</div>';
+}
+/* revisa si cumpliste algún objetivo (después de entrenar o cargar una marca) */
+function checkGoals(){
+  let hit=[];
+  (db.goals||[]).forEach(g=>{if(g.done)return;const p=goalProg(g);if(p&&p.v>=g.L){g.done=today();hit.push(p.ex.n+' → '+lvlName(g.L));}});
+  if(hit.length){save();setTimeout(()=>{confetti(60);toast('¡Objetivo cumplido! '+hit.join(', '));try{navigator.vibrate&&navigator.vibrate([30,50,30,50,120]);}catch(e){}},1200);}
+}
 /* ============ Logros ============ */
 const ACH=[
  {id:'first',i:'flag',t:0,n:'Primer entreno',ok:s=>s.logs>=1},
@@ -1702,7 +1757,9 @@ const ACH=[
  {id:'var20',i:'list',t:2,n:'20 ejercicios distintos',ok:s=>s.distinct>=20},
  {id:'crea30',i:'pill',t:2,n:'30 días de creatina',ok:s=>s.crea>=30},
  {id:'agua7',i:'drop',t:1,n:'7 días con el agua completa',ok:s=>s.water>=7},
- {id:'plan',i:'spark',t:3,n:'Primera rutina armada a medida',ok:s=>s.gen>=1}
+ {id:'plan',i:'spark',t:3,n:'Primera rutina armada a medida',ok:s=>s.gen>=1},
+ {id:'goal1',i:'flag',t:2,n:'Primer objetivo cumplido',ok:s=>s.goals>=1},
+ {id:'goal5',i:'trophy',t:4,n:'5 objetivos cumplidos',ok:s=>s.goals>=5}
 ];
 function achStats(){
   const bw=weightNow()||70,has={},ex=new Set();let vol=0;
@@ -1710,7 +1767,7 @@ function achStats(){
   const r=rankedList(),wg=waterGoal();
   return{logs:db.logs.length,streak:streak(),maxL:r.reduce((m,x)=>Math.max(m,x.info.L),-1),groups:(overall()||{n:0}).n,
     sk:r.filter(x=>x.ex.sk&&x.info.L>=0).length,has,vol,distinct:ex.size,crea:Object.keys(db.creatine).length,
-    water:Object.keys(db.water).filter(k=>db.water[k]>=wg).length,gen:db.routines.filter(x=>x.gen).length};
+    water:Object.keys(db.water).filter(k=>db.water[k]>=wg).length,gen:db.routines.filter(x=>x.gen).length,goals:(db.goals||[]).filter(g=>g.done).length};
 }
 /* revisa logros nuevos; silent = marcarlos sin festejo (al abrir la app) */
 function checkAch(silent){
@@ -1740,6 +1797,12 @@ function viewNiveles(){
   if(!db.profile)return h+'<div class="card empty">'+emptyArt()+'<b>Completá tu perfil</b>Necesito sexo, edad y peso para calcular tus niveles.</div>';
   const r=rankedList(),ov=overall(),ml=muscleLevels();
   h+='<button class="gen-cta mark-cta" data-a="markOpen"><span class="gen-ic">'+ic('bolt',22)+'</span><span class="grow"><b>Cargar marca</b><span>Poné tu peso y reps, y mirá tu nivel al instante</span></span>'+ic('right',18)+'</button>';
+  /* rango de cada grupo muscular */
+  const gl=groupLevels();
+  h+='<div class="card"><div class="hd"><div><h3>Por grupo muscular</h3><span class="mut sm-t">Promedio de tus 3 mejores ejercicios de cada grupo. Tu rango general es el promedio de estos.</span></div></div><div class="glist">'+
+   Object.keys(GROUPS).map(g=>{const x=gl[g],L=x?Math.min(18,Math.floor(x.v)):-1;return '<div class="grow-row">'+badge(x?L:-1,40)+'<div class="grow"><div class="row" style="justify-content:space-between"><b>'+g+'</b>'+(x?lvlSpan(L):'<span class="mut sm-t">Sin datos</span>')+'</div>'+
+    '<div class="bar" style="margin:6px 0 3px"><i style="width:'+(x?Math.round((L>=18?1:x.v-L)*100):0)+'%;background:'+lvlColor(L)+'"></i></div><span class="mut sm-t">'+(x?'Según '+x.used.map(e=>esc(e.n)).join(', '):'Cargá un ejercicio de '+g.toLowerCase()+' para ver tu rango')+'</span></div></div>';}).join('')+'</div></div>';
+  h+=goalsCard(false);
   /* tu carta */
   h+='<div class="card carta-card">'+cartaHTML(false)+'<div class="carta-side"><h3>Tu carta</h3><p class="mut sm-t">'+(cardStats().OVR==null?'Todavía está vacía: cargá marcas o entrená para que se llene con tus números reales.':'Tu rango, tu cuerpo y 6 atributos del 40 al 99. Movela con el dedo.')+'</p>'+
    '<div class="attr-list">'+(()=>{const s=cardStats();return ATTRS.map(([k,n])=>'<div><span>'+n+'</span><b>'+(s[k]==null?'--':s[k])+'</b><i style="width:'+(s[k]==null?0:Math.round((s[k]-40)/59*100))+'%"></i></div>').join('');})()+'</div>'+
@@ -1893,7 +1956,7 @@ function finishSession(){
   const gTot=a.entries.filter(en=>en.goal).length,gHit=a.entries.filter(en=>en.hit).length;
   db.active=null;save();endRest(false);S.sessOpen=false;
   S.modal={t:'summary',log,prs,ups,vol,sets,goals:{hit:gHit,tot:gTot}};render();
-  checkRankUp(900);
+  checkGoals();checkRankUp(900);
   if(ups.length||prs.length)setTimeout(()=>confetti(ups.length?70:36),250);
   checkAch();
 }
@@ -1955,6 +2018,9 @@ function exDetail(id){
   h+='<div class="row" style="gap:8px;flex-wrap:wrap">'+(hasRank(ex)?'<button class="btn sm pri" data-a="markOpen" data-v="'+ex.id+'">'+ic('bolt',16)+' Cargar marca</button>':'')+(isBarbell(ex)?'<button class="btn sm line" data-a="platesOpen">'+ic('disc',16)+' Calculadora de discos</button>':'')+'</div>';
   const b=bestE1(id);
   if(hasRank(ex)&&db.profile){
+    const cur=curV(ex),nextL=Math.max(0,Math.min(18,Math.floor(cur)+1)),has=(db.goals||[]).find(g=>g.ex===id&&!g.done);
+    if(cur<18)h+=has?'<div class="goal hit" style="border-style:dashed"><span class="grow"><span class="mut sm-t">Tu objetivo</span><br><b>'+lvlName(has.L)+'</b></span>'+ic('flag',20)+'</div>'
+      :'<div class="goal"><span class="grow"><span class="mut sm-t">Próximo objetivo</span><br><b>'+lvlName(nextL)+'</b> <span class="mut sm-t">· '+needTxt(ex,nextL)+'</span></span><button class="btn sm" data-a="goalAdd" data-v="'+id+'" data-l="'+nextL+'">'+ic('flag',14)+' Fijar</button></div>';
     if(b){
       const i=lvlInfo(ex,b.e);
       h+='<div class="card" style="margin:0"><div class="row">'+badge(i.L,60)+'<div class="grow"><div style="font:800 24px var(--f-d)">'+lvlSpan(i.L)+'</div><span class="mut sm-t">Mejor serie: '+(b.kg?num(b.kg,1)+' kg × ':'')+b.reps+(ex.time?' s':'')+' · '+bestTxt(ex,b)+'</span></div></div>'+pctTxt(pctStronger(ex,b.e))+
@@ -2380,7 +2446,7 @@ const ACTIONS={
     d.step='reveal';renderModal();
     setTimeout(()=>{const bi=document.querySelector('.rv-bar i');if(bi)bi.style.width=bi.dataset.to+'%';},900);
     if(L>(L0==null?-1:L0)&&L>=0)setTimeout(()=>{confetti(L0!=null&&L0>=0?70:40);try{navigator.vibrate&&navigator.vibrate([30,60,30,60,120]);}catch(e){}},950);
-    checkAch();checkRankUp(2800);
+    checkGoals();checkAch();checkRankUp(2800);
   },
   delTest(v){S.m2={t:'confirm',title:'Borrar marca',msg:'Se borra esta marca. Tu nivel en este ejercicio se recalcula.',act:'delTestGo',arg:v,ok:'Borrar'};render();},
   delTestGo(v){db.tests=db.tests.filter(t=>t.id!==v);S.m2=null;save();render();toast('Marca borrada');checkRankUp();},
@@ -2403,6 +2469,13 @@ const ACTIONS={
   onbSet(v,el){S.modal.d[el.dataset.f]=v;renderModal();},
   onbDone(){S.modal=null;goTab('inicio');render();checkAch();},
   onbFirst(){S.modal=null;goTab('niveles');render();ACTIONS.markOpen();},
+  goalAdd(v,el){
+    const act=(db.goals||[]).filter(g=>!g.done);if(act.length>=3)return toast('Ya tenés 3 objetivos: quitá uno para sumar otro');
+    const ex=exById(v),L=+el.dataset.l;if(!ex)return;
+    db.goals=(db.goals||[]).filter(g=>!(g.ex===v&&!g.done));
+    db.goals.push({id:uid(),ex:v,L,v0:curV(ex),since:today()});save();render();toast('Objetivo: '+ex.n+' → '+lvlName(L));
+  },
+  goalDel(v){db.goals=(db.goals||[]).filter(g=>g.id!==v);save();render();},
   delLog(v){S.m2={t:'confirm',title:'Borrar entrenamiento',msg:'Se elimina este entrenamiento y sus series. Tus niveles pueden cambiar.',act:'delLogGo',arg:v,ok:'Borrar'};render();},
   delLogGo(v){db.logs=db.logs.filter(l=>l.id!==v);S.m2=null;if(S.modal&&S.modal.t==='logedit')S.modal=null;save();render();},
   editLog(v){const l=db.logs.find(x=>x.id===v);if(!l)return;S.modal={t:'logedit',d:JSON.parse(JSON.stringify(l))};render();},
