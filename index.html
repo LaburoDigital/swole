@@ -361,6 +361,14 @@ body.sessopen .dock{bottom:calc(14px + env(safe-area-inset-bottom,0px))}
 .carta-sheet{background:transparent!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 .carta-sheet .mh-bar{background:transparent}
 .carta-wrap.big .carta{animation:cardIn .9s cubic-bezier(.22,1,.36,1) both,sway 7s ease-in-out 1s infinite}
+/* la carta grande: dos caras que giran */
+.carta.dual{overflow:visible;border-radius:0;box-shadow:none;transform-style:preserve-3d;cursor:pointer}
+.cflip{position:relative;transform-style:preserve-3d;transition:transform .85s cubic-bezier(.22,1,.36,1)}
+.cflip.flipped{transform:rotateY(180deg)}
+.cface{position:relative;border-radius:6.3%/4.5%;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.cface.back{position:absolute;inset:0;transform:rotateY(180deg)}
+.cbtns{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.cbtns>:last-child:nth-child(3){grid-column:1/-1}
+@media (min-width:520px){.cbtns{grid-template-columns:repeat(3,1fr)}.cbtns>:last-child:nth-child(3){grid-column:auto}}
 @keyframes cardIn{from{transform:rotateY(180deg) scale(.6);opacity:0}to{transform:none;opacity:1}}
 .rec-sug{margin-top:14px;padding:12px;border-radius:16px;background:var(--raise);gap:10px}
 .rec-sug b{color:var(--ok)}
@@ -1564,15 +1572,58 @@ function cardSVG(){
    ATTRS.map(([k],i)=>attr(k,i)).join('')+
    '<text x="300" y="806" font-family="'+F+'" font-weight="800" font-size="20" letter-spacing="3" fill="'+sub+'" text-anchor="middle">SWOLE · '+streak()+' DÍAS DE RACHA</text></svg>';
 }
+/* Dorso: tus 5 mejores marcas, el rango de cada grupo y tus números. Mismo material que el frente. */
+function cardBackSVG(){
+  const ov=overall(),L=ov?ov.L:-1,t=L<0?-1:Math.min(6,Math.floor(L/3));
+  const bg=t<0?CARD_NONE:CARD_BG[t],dark=t===1||t===2,fg=dark?'#1B1D2E':'#FFFFFF',sub=dark?'rgba(27,29,46,.68)':'rgba(255,255,255,.78)',line=dark?'rgba(27,29,46,.22)':'rgba(255,255,255,.25)';
+  const F='Bricolage Grotesque,Arial Black,Arial,sans-serif',B='DM Sans,Arial,sans-serif',p=db.profile||{};
+  const cut=(s,n)=>s.length>n?s.slice(0,n-1)+'…':s;
+  const top=rankedList().filter(x=>x.info.L>=0).slice(0,5),gl=groupLevels();
+  const sess=allSess(),dates=sess.map(x=>x.date).sort(),since=dates[0];
+  const lastPr=db.logs.slice().sort((a,b)=>a.date<b.date?1:-1).find(l=>(l.prs||[]).length),prEx=lastPr?exById(lastPr.prs[0]):null;
+  const sp=(p.sports||[]).filter(k=>SPORTS[k]).slice(0,3);
+  let s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 840" class="carta-svg"><defs>'+
+   '<linearGradient id="cbb" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+bg[0]+'"/><stop offset="1" stop-color="'+bg[1]+'"/></linearGradient>'+
+   '<pattern id="cbp" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(-32)"><rect width="9" height="22" fill="#fff" opacity=".05"/></pattern>'+
+   '<clipPath id="cbc"><rect width="600" height="840" rx="38"/></clipPath></defs>'+
+   '<g clip-path="url(#cbc)"><rect width="600" height="840" fill="url(#cbb)"/><rect width="600" height="840" fill="url(#cbp)"/><rect width="600" height="840" fill="rgba(0,0,0,'+(dark?.06:.2)+')"/></g>'+
+   '<rect x="16" y="16" width="568" height="808" rx="28" fill="none" stroke="'+line+'" stroke-width="3"/>'+
+   '<text x="52" y="78" font-family="'+F+'" font-weight="800" font-size="30" letter-spacing="3" fill="'+fg+'">'+esc((p.nick||'ATLETA').toUpperCase().slice(0,14))+'</text>'+
+   '<text x="548" y="78" font-family="'+F+'" font-weight="800" font-size="18" letter-spacing="3" fill="'+sub+'" text-anchor="end">SWOLE</text>'+
+   sp.map((k,i)=>'<g transform="translate('+(52+i*34)+' 94)" fill="none" stroke="'+sub+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g transform="scale(1.1)">'+IC[SPORTS[k].i]+'</g></g>').join('')+
+   '<rect x="52" y="132" width="496" height="2" fill="'+line+'"/>';
+  /* mejores marcas */
+  s+='<text x="52" y="170" font-family="'+B+'" font-weight="700" font-size="16" letter-spacing="3" fill="'+sub+'">MEJORES MARCAS</text>';
+  if(!top.length)s+='<text x="52" y="212" font-family="'+B+'" font-size="20" fill="'+sub+'">Todavía no hay marcas.</text>';
+  top.forEach((x,i)=>{const y=210+i*42,b=x.b,ex=x.ex;
+    const val=ex.sk||ex.time?Math.round(b.e)+(ex.time?' s':' reps'):'1RM '+Math.round(b.e)+' kg';
+    s+='<text x="52" y="'+y+'" font-family="'+B+'" font-weight="700" font-size="21" fill="'+fg+'">'+esc(cut(ex.n,24))+'</text>'+
+     '<text x="420" y="'+y+'" font-family="'+F+'" font-weight="800" font-size="21" fill="'+fg+'" text-anchor="end">'+val+'</text>'+
+     '<text x="548" y="'+y+'" font-family="'+B+'" font-weight="700" font-size="16" fill="'+sub+'" text-anchor="end">'+esc(lvlName(x.info.L))+'</text>';});
+  /* por grupo */
+  s+='<rect x="52" y="412" width="496" height="2" fill="'+line+'"/><text x="52" y="448" font-family="'+B+'" font-weight="700" font-size="16" letter-spacing="3" fill="'+sub+'">POR GRUPO</text>';
+  Object.keys(GROUPS).forEach((g,i)=>{const col=i%2,row=Math.floor(i/2),x=52+col*258,y=490+row*58,gv=gl[g],Lg=gv?Math.min(18,Math.floor(gv.v)):-1,w=gv?Math.round(214*(Lg>=18?1:gv.v-Lg)):0;
+    s+='<text x="'+x+'" y="'+y+'" font-family="'+B+'" font-weight="700" font-size="19" fill="'+fg+'">'+g+'</text>'+
+     '<text x="'+(x+238)+'" y="'+y+'" font-family="'+B+'" font-weight="700" font-size="15" fill="'+sub+'" text-anchor="end">'+(gv?esc(lvlName(Lg)):'—')+'</text>'+
+     '<rect x="'+x+'" y="'+(y+10)+'" width="238" height="5" rx="2.5" fill="'+line+'"/>'+(w?'<rect x="'+x+'" y="'+(y+10)+'" width="'+w+'" height="5" rx="2.5" fill="'+fg+'"/>':'');});
+  /* tus números */
+  const stat=(x,v,l)=>'<text x="'+x+'" y="700" font-family="'+F+'" font-weight="800" font-size="44" fill="'+fg+'" text-anchor="middle">'+v+'</text><text x="'+x+'" y="728" font-family="'+B+'" font-weight="700" font-size="15" letter-spacing="2" fill="'+sub+'" text-anchor="middle">'+l+'</text>';
+  s+='<rect x="52" y="648" width="496" height="2" fill="'+line+'" transform="translate(0 -14)"/>'+stat(135,db.logs.length,'ENTRENOS')+stat(300,(db.tests||[]).length,'MARCAS')+stat(465,ACH.filter(a=>db.ach[a.id]).length+'/'+ACH.length,'LOGROS');
+  s+='<text x="300" y="782" font-family="'+B+'" font-weight="700" font-size="16" fill="'+sub+'" text-anchor="middle">'+(since?'Desde el '+esc(shortDate(parseK(since).getTime()))+' '+parseK(since).getFullYear():'Recién empezando')+(prEx?' · Último récord: '+esc(cut(prEx.n,20)):'')+'</text>';
+  return s+'</svg>';
+}
 function cartaHTML(big){
   const ov=overall(),t=ov?Math.min(6,Math.floor(ov.L/3)):-1;
-  return '<div class="carta-wrap'+(big?' big':'')+'"><div class="carta" style="--holo:'+(t<0?.12:(.18+t*.07)).toFixed(2)+'"'+(big?'':' data-a="cardOpen"')+' role="img" aria-label="Tu carta de atleta">'+cardSVG()+'<i class="holo"></i><i class="glare"></i></div></div>';
+  const holo='--holo:'+(t<0?.12:(.18+t*.07)).toFixed(2);
+  if(!big)return '<div class="carta-wrap"><div class="carta" style="'+holo+'" data-a="cardOpen" role="img" aria-label="Tu carta de atleta">'+cardSVG()+'<i class="holo"></i><i class="glare"></i></div></div>';
+  return '<div class="carta-wrap big"><div class="carta dual" style="'+holo+'" data-a="cardFlip" role="button" aria-label="Tu carta: tocá para darla vuelta"><div class="cflip'+(S.cardBack?' flipped':'')+'">'+
+   '<div class="cface front">'+cardSVG()+'<i class="holo"></i><i class="glare"></i></div><div class="cface back">'+cardBackSVG()+'<i class="holo"></i><i class="glare"></i></div></div></div></div>';
 }
 /* exporta la carta como imagen para historias (1080×1920) */
 async function shareCard(){
   try{
     const ov=overall(),t=ov?Math.min(6,Math.floor(ov.L/3)):-1,c=t<0?'#5B43F0':TCOL[t];
-    const card=cardSVG().replace('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 840" class="carta-svg">','<svg x="120" y="300" width="840" height="1176" viewBox="0 0 600 840">');
+    const card=(S.modal&&S.modal.t==='carta'&&S.cardBack?cardBackSVG():cardSVG()).replace('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 840" class="carta-svg">','<svg x="120" y="300" width="840" height="1176" viewBox="0 0 600 840">');
     const F='Bricolage Grotesque,Arial Black,Arial,sans-serif';
     const svg='<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">'+
      '<defs><radialGradient id="sbg" cx=".5" cy=".45" r=".7"><stop offset="0" stop-color="'+c+'" stop-opacity=".55"/><stop offset="1" stop-color="#0D1020" stop-opacity="0"/></radialGradient></defs>'+
@@ -1594,6 +1645,9 @@ async function shareCard(){
 /* la carta se inclina con el dedo, el mouse o el giroscopio */
 (()=>{
   const setV=(el,px,py)=>{el.style.setProperty('--rx',((.5-py)*22).toFixed(1)+'deg');el.style.setProperty('--ry',((px-.5)*26).toFixed(1)+'deg');el.style.setProperty('--mx',(px*100).toFixed(0)+'%');el.style.setProperty('--my',(py*100).toFixed(0)+'%');};
+  let fx=null;
+  document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('.carta.dual'))fx=e.clientX;},{passive:true});
+  document.addEventListener('pointerup',e=>{if(fx==null)return;const dx=e.clientX-fx;fx=null;if(Math.abs(dx)>50){ACTIONS.cardFlip();S.flipBlock=true;setTimeout(()=>S.flipBlock=false,350);}},{passive:true});
   document.addEventListener('pointermove',e=>{const c=e.target.closest&&e.target.closest('.carta');if(!c)return;const r=c.getBoundingClientRect();c.classList.add('live');setV(c,clamp((e.clientX-r.left)/r.width,0,1),clamp((e.clientY-r.top)/r.height,0,1));},{passive:true});
   document.addEventListener('pointerout',e=>{const c=e.target.closest&&e.target.closest('.carta');if(c&&!c.contains(e.relatedTarget)){c.classList.remove('live');['--rx','--ry','--mx','--my'].forEach(k=>c.style.removeProperty(k));}});
   window.addEventListener('deviceorientation',e=>{if(e.beta==null)return;const px=clamp(.5+(e.gamma||0)/50,0,1),py=clamp(.5+((e.beta||0)-45)/50,0,1);document.querySelectorAll('.carta').forEach(c=>{c.classList.add('live','gyro');setV(c,px,py);});});
@@ -1905,6 +1959,13 @@ function confetti(n){
   c.innerHTML=h;document.body.appendChild(c);setTimeout(()=>c.remove(),2200);
 }
 
+/* medalla hexagonal del logro: color de su tier, ícono blanco adentro; gris si está bloqueado */
+function achBadge(a,on){
+  const c=on?TCOL[a.t||0]:'var(--muscle)';
+  return '<svg class="medal" viewBox="0 0 48 52" aria-hidden="true"><path d="M24 2 44 13.5v25L24 50 4 38.5v-25z" fill="'+(on?'url(#bm'+(a.t||0)+')':c)+'"/>'+
+   '<path d="M24 7 39.5 16v20L24 45 8.5 36V16z" fill="#10131E" opacity="'+(on?.55:0)+'"/><path d="M24 7 39.5 16v20L24 45 8.5 36V16z" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1.2"/>'+
+   '<g transform="translate(12 14)" fill="none" stroke="'+(on?MET_L[a.t||0]:'#fff')+'" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+IC[a.i]+'</g></svg>';
+}
 /* ============ Vista: Niveles ============ */
 function tierLegend(){return '<div class="tiers">'+TIERS.map((t,i)=>'<span><i style="background:'+TCOL[i]+'"></i>'+t+'</span>').join('')+'<span><i style="background:var(--muscle)"></i>Sin rango</span></div>';}
 function viewNiveles(){
@@ -2316,7 +2377,7 @@ function modalBody(m,l2){
     case 'confirm':return sheet(m.title,'<p>'+esc(m.msg)+'</p><div class="g2"><button class="btn" data-a="close" data-v="m2">Cancelar</button><button class="btn pri" data-a="'+m.act+'" data-v="'+esc(m.arg||'')+'">'+esc(m.ok||'Confirmar')+'</button></div>',{l2:true});
     case 'mark':return sheet(m.d.step==='reveal'?'Tu nivel':m.d.step==='form'?'Tu marca':'Elegí el ejercicio',markHTML(m.d),{l2:true});
     case 'carta':return '<div class="mback carta-back" data-a="back" data-v="modal"><div class="msheet carta-sheet" role="dialog" aria-modal="true" aria-label="Tu carta"><div class="mh-bar"><h3>Tu carta</h3><button class="ib flat" data-a="close" data-v="modal" aria-label="Cerrar">'+ic('x')+'</button></div>'+cartaHTML(true)+
-     '<div class="g2" style="margin-top:16px"><button class="btn pri" data-a="cardShare">Compartir</button>'+(window.DeviceOrientationEvent&&DeviceOrientationEvent.requestPermission?'<button class="btn" data-a="cardGyro">Moverla con el celu</button>':'<button class="btn" data-a="close" data-v="modal">Listo</button>')+'</div>'+
+     '<p class="mut sm-t tc" style="margin-top:12px">Tocala o deslizala para darla vuelta</p><div class="cbtns" style="margin-top:10px"><button class="btn" data-a="cardFlip">'+ic('swap',16)+' Dar vuelta</button><button class="btn pri" data-a="cardShare">Compartir</button>'+(window.DeviceOrientationEvent&&DeviceOrientationEvent.requestPermission?'<button class="btn" data-a="cardGyro">Moverla con el celu</button>':'<button class="btn" data-a="close" data-v="modal">Listo</button>')+'</div>'+
      '<p class="mut sm-t tc" style="margin-top:10px">FUE es tu fuerza en los básicos con barra; el resto, tu mejor ejercicio de cada zona. Suben a medida que subís de rango.</p></div></div>';
     case 'recap':return recapHTML(m);
     case 'quick':return sheet('¿Qué hacemos?',quickHTML());
@@ -2574,7 +2635,8 @@ const ACTIONS={
   },
   delTest(v){S.m2={t:'confirm',title:'Borrar marca',msg:'Se borra esta marca. Tu nivel en este ejercicio se recalcula.',act:'delTestGo',arg:v,ok:'Borrar'};render();},
   delTestGo(v){db.tests=db.tests.filter(t=>t.id!==v);S.m2=null;save();render();toast('Marca borrada');checkRankUp();},
-  cardOpen(){S.modal={t:'carta'};render();},
+  cardOpen(){S.cardBack=false;S.modal={t:'carta'};render();},
+  cardFlip(){if(S.flipBlock)return;S.cardBack=!S.cardBack;const c=document.querySelector('.cflip');if(c)c.classList.toggle('flipped',S.cardBack);try{navigator.vibrate&&navigator.vibrate(10);}catch(e){}},
   cardShare(){shareCard();},
   cardGyro(){try{DeviceOrientationEvent.requestPermission().then(r=>toast(r==='granted'?'Mové el celu para inclinarla':'Sin permiso de movimiento'));}catch(e){}},
   quickOpen(){S.modal={t:'quick'};render();},
