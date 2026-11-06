@@ -1,6 +1,6 @@
 /* Service worker de Swole: hace que la app abra sin internet.
    Cuando cambies index.html, subí el número de VERSION para que los celulares bajen la nueva. */
-const VERSION = 'swole-v16';
+const VERSION = 'swole-v17';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/logo.svg'];
 
 self.addEventListener('install', e => {
