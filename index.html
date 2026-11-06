@@ -923,13 +923,22 @@ function accountHTML(){
    '<div class="g2"><button class="btn sm" data-a="syncNow">'+ic('cloud',16)+' Sincronizar</button><button class="btn sm" data-a="logoutAsk">Cerrar sesión</button></div></div>';
 }
 function agoTxt(t){if(!t)return '';const s=Math.round((Date.now()-t)/1000);if(s<60)return 'recién';if(s<3600)return 'hace '+Math.round(s/60)+' min';if(s<86400)return 'hace '+Math.round(s/3600)+' h';return 'el '+shortDate(t);}
+const LOGIN_T={in:'Entrar',up:'Crear cuenta',forgot:'Recuperar contraseña',newpw:'Contraseña nueva',sent:'Revisá tu email'};
 function loginHTML(d){
-  if(d.step==='code')return '<p class="mut sm-t">Te mandé un código a <b>'+esc(d.email)+'</b>. Puede tardar un minuto; si no está, fijate en spam. También podés tocar el link del email.</p>'+
-   '<label class="field">Código<input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" value="'+esc(d.code)+'" data-i="d" data-f="code" placeholder="123456" style="font-size:24px;letter-spacing:.2em;text-align:center"></label>'+
-   '<button class="btn pri wide" data-a="loginVerify"'+(d.busy?' disabled':'')+'>'+(d.busy?'Entrando…':'Entrar')+'</button><button class="btn line wide" data-a="loginBack">Cambiar email</button>';
-  return '<p class="mut sm-t">Sin contraseñas: te mando un código al email y listo. Si es la primera vez, la cuenta se crea sola. Lo que ya tenés en este dispositivo se une con lo de la nube.</p>'+
-   '<label class="field">Email<input type="email" inputmode="email" autocomplete="email" value="'+esc(d.email)+'" data-i="d" data-f="email" placeholder="vos@ejemplo.com"></label>'+
-   '<button class="btn pri wide" data-a="loginSend"'+(d.busy?' disabled':'')+'>'+(d.busy?'Mandando…':'Mandarme el código')+'</button>';
+  const dis=d.busy?' disabled':'';
+  const em='<label class="field">Email<input type="email" inputmode="email" autocomplete="email" value="'+esc(d.email)+'" data-i="d" data-f="email" placeholder="vos@ejemplo.com"></label>';
+  const pw=(lbl,f,ac)=>'<label class="field">'+lbl+'<input type="password" autocomplete="'+ac+'" value="'+esc(d[f]||'')+'" data-i="d" data-f="'+f+'" placeholder="Mínimo 6 caracteres"></label>';
+  if(d.mode==='sent')return '<p>'+esc(d.msg||'')+'</p><p class="mut sm-t">Si no lo ves en un par de minutos, fijate en spam.</p><button class="btn pri wide" data-a="loginMode" data-v="in">Ya está, entrar</button>';
+  if(d.mode==='forgot')return '<p class="mut sm-t">Te mando un link para elegir una contraseña nueva.</p>'+em+
+   '<button class="btn pri wide" data-a="loginGo"'+dis+'>'+(d.busy?'Mandando…':'Mandarme el link')+'</button><button class="btn line wide" data-a="loginMode" data-v="in">Volver</button>';
+  if(d.mode==='newpw')return '<p class="mut sm-t">Elegí tu contraseña nueva para <b>'+esc(d.email)+'</b>.</p>'+pw('Contraseña nueva','pw','new-password')+
+   '<button class="btn pri wide" data-a="loginGo"'+dis+'>'+(d.busy?'Guardando…':'Guardar contraseña')+'</button>';
+  const up=d.mode==='up';
+  return '<div class="seg"><button class="'+(up?'':'on')+'" data-a="loginMode" data-v="in">Entrar</button><button class="'+(up?'on':'')+'" data-a="loginMode" data-v="up">Crear cuenta</button></div>'+
+   '<p class="mut sm-t">'+(up?'Guardá todo en la nube y usá Swole en el celular y la compu a la vez.':'Lo que ya tenés en este dispositivo se une con lo de la nube.')+'</p>'+
+   em+pw('Contraseña','pw',up?'new-password':'current-password')+
+   '<button class="btn pri wide" data-a="loginGo"'+dis+'>'+(d.busy?(up?'Creando…':'Entrando…'):(up?'Crear cuenta':'Entrar'))+'</button>'+
+   (up?'':'<button class="btn line wide" data-a="loginMode" data-v="forgot">Me olvidé la contraseña</button>');
 }
 function routineHTML(d){
   const days=[1,2,3,4,5,6,0];
@@ -965,7 +974,7 @@ function modalBody(m,l2){
     case 'summary':return sheet('Entrenamiento guardado',summaryHTML(m));
     case 'excreate':return sheet('Ejercicio propio',exCreateHTML(m.d),{l2:true});
     case 'confirm':return sheet(m.title,'<p>'+esc(m.msg)+'</p><div class="g2"><button class="btn" data-a="close" data-v="m2">Cancelar</button><button class="btn pri" data-a="'+m.act+'" data-v="'+esc(m.arg||'')+'">'+esc(m.ok||'Confirmar')+'</button></div>',{l2:true});
-    case 'login':return sheet(m.d.step==='code'?'Poné el código':'Tu cuenta',loginHTML(m.d),{l2:true});
+    case 'login':return sheet(LOGIN_T[m.d.mode]||'Tu cuenta',loginHTML(m.d),{l2:true,noClose:m.d.mode==='newpw'});
     case 'import':return sheet('Importar datos','<p class="mut sm-t">Pegá el contenido de un archivo exportado de Swole o elegí el archivo. Esto reemplaza lo que tenés ahora.</p><label class="field">Archivo<input type="file" accept=".json,application/json" data-i="file"></label><label class="field">O pegá el texto<textarea id="impTxt" spellcheck="false">'+esc(m.text||'')+'</textarea></label><button class="btn pri wide" data-a="importGo">Importar</button>',{l2:true});
   }
   return '';
@@ -1194,10 +1203,9 @@ const ACTIONS={
   },
   wipeAsk(){S.m2={t:'confirm',title:'Borrar todos los datos',msg:Sync.user()?'Se borran tus datos de este dispositivo y se cierra la sesión. Tu copia en la nube no se toca: si volvés a entrar, se recupera.':'Se borran tu perfil, rutinas, entrenamientos y registros de este dispositivo. No se puede deshacer.',act:'wipeGo',ok:'Borrar todo'};render();},
   wipeGo(){Sync.forget();Store.wipe();db=normalize(null);snap=syncKeys(db);S.m2=null;S.modal=null;S.tab='hoy';endRest(false);openProfile();},
-  loginOpen(){S.m2={t:'login',d:{email:(Sync.user()||{}).email||'',code:'',step:'email',busy:false}};render();},
-  loginSend(){Sync.sendCode();},
-  loginVerify(){Sync.verify();},
-  loginBack(){S.m2.d.step='email';S.m2.d.code='';renderModal();},
+  loginOpen(){S.m2={t:'login',d:{email:(Sync.user()||{}).email||'',pw:'',mode:'in',busy:false}};render();},
+  loginMode(v){const d=S.m2.d;d.mode=v;d.pw='';renderModal();const i=document.querySelector('#modal2 input');if(i)i.focus();},
+  loginGo(){Sync.loginGo();},
   syncNow(){Sync.run(true);},
   logoutAsk(){S.m2={t:'confirm',title:'Cerrar sesión',msg:'Tus datos quedan en este dispositivo y en la nube. Este dispositivo deja de sincronizarse hasta que vuelvas a entrar.',act:'logoutGo',ok:'Cerrar sesión'};render();},
   logoutGo(){Sync.logout();S.m2=null;render();toast('Sesión cerrada');},
@@ -1246,7 +1254,7 @@ document.addEventListener('change',e=>{
   if(el.dataset&&el.dataset.a==='act'&&db.profile){db.profile.activity=+el.value;save();render();}
 });
 document.addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&S.m2&&S.m2.t==='login'&&e.target.tagName==='INPUT'){e.preventDefault();S.m2.d.step==='code'?Sync.verify():Sync.sendCode();return;}
+  if(e.key==='Enter'&&S.m2&&S.m2.t==='login'&&e.target.tagName==='INPUT'){e.preventDefault();Sync.loginGo();return;}
   if(e.key!=='Escape')return;
   if(S.m2)closeLayer('m2');
   else if(S.picker){S.picker=null;renderPicker();}
@@ -1388,25 +1396,41 @@ const Sync=(()=>{
     }
   }
   function schedule(ms){if(!sess)return;clearTimeout(timer);timer=setTimeout(()=>run(false),ms==null?2500:ms);}
-  async function sendCode(){
-    const d=S.m2.d,email=(d.email||'').trim().toLowerCase();
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return toast('Revisá el email');
-    d.email=email;d.busy=true;renderModal();
-    try{
-      const redir=/^https?:$/.test(location.protocol)?'?redirect_to='+encodeURIComponent(location.origin+location.pathname):'';
-      await req('/auth/v1/otp'+redir,{method:'POST',body:{email,create_user:true}});
-      d.step='code';d.code='';toast('Código enviado a '+email);
-    }catch(e){toast(e.status===429?'Muchos intentos: esperá un rato y probá de nuevo':'No se pudo mandar el código: '+e.message);}
-    d.busy=false;if(S.m2===null||S.m2.t!=='login')return;renderModal();
-    const i=document.querySelector('#modal2 input');if(i)i.focus();
+  const redir=()=>/^https?:$/.test(location.protocol)?'?redirect_to='+encodeURIComponent(location.origin+location.pathname):'';
+  function authMsg(e){
+    const m=String(e.message||''),c=e.code||'';
+    if(c==='invalid_credentials'||/invalid login/i.test(m))return 'Email o contraseña incorrectos';
+    if(c==='email_not_confirmed'||/not confirmed/i.test(m))return 'Primero confirmá tu email con el link que te mandamos';
+    if(c==='user_already_exists'||/already registered/i.test(m))return 'Ese email ya tiene cuenta: entrá con tu contraseña';
+    if(c==='weak_password'||/password should/i.test(m))return 'La contraseña tiene que tener al menos 6 caracteres';
+    if(c==='same_password')return 'Elegí una contraseña distinta a la anterior';
+    if(e.status===429||/rate limit/i.test(m))return 'Muchos intentos: esperá un rato y probá de nuevo';
+    if(e instanceof TypeError)return 'Sin conexión a internet';
+    return m||'Algo falló';
   }
-  async function verify(){
-    const d=S.m2.d,code=String(d.code||'').replace(/\D/g,'');
-    if(code.length<6)return toast('Poné el código del email');
-    d.busy=true;renderModal();
-    try{setSess(await req('/auth/v1/verify',{method:'POST',body:{type:'email',email:d.email,token:code}}));}
-    catch(e){d.busy=false;renderModal();return toast(e.status===403||e.status===400?'Código incorrecto o vencido':'No se pudo entrar: '+e.message);}
-    await afterLogin();
+  async function loginGo(){
+    const d=S.m2&&S.m2.d;if(!d||d.busy)return;
+    const email=(d.email||'').trim().toLowerCase(),pw=d.pw||'';
+    if(d.mode!=='newpw'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return toast('Revisá el email');
+    if(d.mode!=='forgot'&&pw.length<6)return toast('La contraseña tiene que tener al menos 6 caracteres');
+    d.email=d.mode==='newpw'?d.email:email;d.busy=true;renderModal();
+    try{
+      if(d.mode==='in'){setSess(await req('/auth/v1/token?grant_type=password',{method:'POST',body:{email,password:pw}}));d.busy=false;return afterLogin();}
+      if(d.mode==='up'){
+        const j=await req('/auth/v1/signup'+redir(),{method:'POST',body:{email,password:pw}});
+        if(j&&j.access_token){setSess(j);d.busy=false;return afterLogin();}
+        /* Supabase no avisa si el email ya existía: devuelve un usuario sin identidades */
+        if(j&&Array.isArray(j.identities)&&!j.identities.length)throw Object.assign(new Error('x'),{code:'user_already_exists'});
+        d.mode='sent';d.msg='Te mandamos un email a '+email+' para confirmar la cuenta. Tocá el link y después entrá acá con tu contraseña.';
+      }else if(d.mode==='forgot'){
+        await req('/auth/v1/recover'+redir(),{method:'POST',body:{email}});
+        d.mode='sent';d.msg='Si '+email+' tiene cuenta, te llega un link para elegir una contraseña nueva.';
+      }else if(d.mode==='newpw'){
+        await req('/auth/v1/user',{method:'PUT',auth:true,body:{password:pw}});
+        S.m2=null;toast('Contraseña guardada');render();return;
+      }
+    }catch(e){toast(authMsg(e));}
+    if(S.m2&&S.m2.d===d){d.busy=false;d.pw='';renderModal();}
   }
   async function afterLogin(){
     S.m2=null;
@@ -1415,7 +1439,7 @@ const Sync=(()=>{
     render();
     toast(st.s==='ok'?'Conectado: tus datos están en la nube':'Conectado. Se sincroniza cuando haya conexión');
   }
-  /* si el usuario tocó el link del email en vez de poner el código */
+  /* links de los emails (confirmar cuenta o recuperar contraseña) vuelven acá con la sesión en el #hash */
   async function fromLink(){
     const h=location.hash.slice(1);if(!h)return;
     const p=new URLSearchParams(h);
@@ -1426,7 +1450,8 @@ const Sync=(()=>{
       const u=await fetch(URL_+'/auth/v1/user',{headers:{apikey:KEY,Authorization:'Bearer '+p.get('access_token')}}).then(r=>r.ok?r.json():Promise.reject(new Error('link')));
       setSess({access_token:p.get('access_token'),refresh_token:p.get('refresh_token'),expires_at:+p.get('expires_at')||0,expires_in:+p.get('expires_in')||3600,user:u});
       await afterLogin();
-    }catch(e){toast('El link no sirvió: probá con el código');}
+      if(p.get('type')==='recovery'){S.m2={t:'login',d:{email:u.email,pw:'',mode:'newpw',busy:false}};render();}
+    }catch(e){toast('El link venció o ya se usó: pedí uno nuevo');}
   }
   function logout(){
     const t=sess&&sess.access_token;
@@ -1437,7 +1462,7 @@ const Sync=(()=>{
   window.addEventListener('online',()=>schedule(300));
   document.addEventListener('visibilitychange',()=>{if(!sess)return;if(document.visibilityState==='visible')schedule(300);else if(timer)run(false);});
   setInterval(()=>{if(sess&&document.visibilityState==='visible')run(false);},120000);
-  return{run,schedule,sendCode,verify,logout,fromLink,forget:logout,user:()=>sess&&sess.user,state:st};
+  return{run,schedule,loginGo,logout,fromLink,forget:logout,user:()=>sess&&sess.user,state:st};
 })();
 
 /* ============ Inicio ============ */

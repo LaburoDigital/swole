@@ -44,7 +44,7 @@ Después, en la app: Perfil → **Entrar o crear cuenta**. En un celular nuevo, 
 
 ## Cuando cambies algo
 1. Editá `index.html`.
-2. En `sw.js`, subí la versión (`swole-v2` → `swole-v3`). Si no la subís, los celulares siguen mostrando la versión vieja.
+2. En `sw.js`, subí la versión (`swole-v3` → `swole-v4`). Si no la subís, los celulares siguen mostrando la versión vieja.
 3. Subí los cambios (en 1 o 2 minutos GitHub Pages publica la versión nueva):
    ```bash
    git add -A && git commit -m "Cambios" && git push
