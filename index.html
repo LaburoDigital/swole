@@ -191,7 +191,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 
 /* layers */
 .mback{position:fixed;inset:0;z-index:60;background:rgba(6,8,22,.58);display:flex;align-items:flex-end;justify-content:center}
-.mback.l2{z-index:66}
+.mback.l2{z-index:90}
 .msheet{background:var(--surf);width:100%;max-width:580px;max-height:92%;overflow:auto;border-radius:28px 28px 0 0;padding:0 18px calc(20px + env(safe-area-inset-bottom,0px));animation:up .22s ease-out}
 @media (min-width:700px){.mback{align-items:center}.msheet{border-radius:28px;max-height:88%}}
 @keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
@@ -241,7 +241,7 @@ body.sessopen .dock{bottom:calc(14px + env(safe-area-inset-bottom,0px))}
 .restb b{font:800 28px var(--f-d);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .restb .btn{background:rgba(127,127,127,.28);color:inherit;min-height:38px;padding:6px 12px}
 .pillb{background:var(--acc);color:var(--acc-ink);border-radius:18px;padding:12px 16px;display:flex;align-items:center;gap:10px;font-weight:700;width:100%;text-align:left;box-shadow:var(--shadow)}
-.toast{position:fixed;z-index:90;left:50%;bottom:calc(150px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:11px 16px;border-radius:14px;font-weight:700;font-size:14px;max-width:90%;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast{position:fixed;z-index:120;left:50%;bottom:calc(150px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:11px 16px;border-radius:14px;font-weight:700;font-size:14px;max-width:90%;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.on{opacity:1}
 .pop{animation:pop .5s cubic-bezier(.22,1,.36,1)}
 @keyframes pop{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
@@ -5077,13 +5077,14 @@ const ACTIONS={
       const o=JSON.parse(($('#impTxt')||{}).value||'');
       if(!o||typeof o!=='object'||!Array.isArray(o.logs)||!Array.isArray(o.routines))throw new Error('formato');
       db=normalize(o);save();S.m2=null;S.modal=null;render();toast('Datos importados');
-      if(!db.profile)openProfile();
+      if(!db.profile)ACTIONS.startOnb();
     }catch(e){toast('Ese texto no parece un archivo de Swole');}
   },
   wipeAsk(){S.m2={t:'confirm',title:'Borrar todos los datos',msg:Sync.user()?'Se borran tus datos de este dispositivo y se cierra la sesión. Tu copia en la nube no se toca: si volvés a entrar, se recupera.':'Se borran tu perfil, rutinas, entrenamientos y registros de este dispositivo. No se puede deshacer.',act:'wipeGo',ok:'Borrar todo'};render();},
   wipeGo(){Sync.forget();Store.wipe();db=normalize(null);snap=syncKeys(db);S.m2=null;S.modal=null;goTab('inicio');endRest(false);ACTIONS.startOnb();},
   welNext(){const m=S.modal;if(m.step<WEL.length-1){m.step++;renderModal();}else{db.settings.welcomed=1;save();openProfile();}},
-  welLogin(){db.settings.welcomed=1;save();openProfile();ACTIONS.loginOpen();},
+  /* entrar con tu cuenta: el login se abre encima; si lo cerrás, volvés a la bienvenida donde estabas */
+  welLogin(){if(!S.modal||S.modal.t!=='onb')ACTIONS.startOnb();ACTIONS.loginOpen();},
   startOnb(){S.modal={t:'onb',step:db.settings.welcomed?ONB_SLIDES.length:0,d:{sex:'m',goal:'recomp',sports:[],nick:''}};render();},
   loginOpen(){S.m2={t:'login',d:{email:(Sync.user()||{}).email||'',pw:'',mode:'in',busy:false}};render();},
   loginMode(v){const d=S.m2.d;d.mode=v;d.pw='';renderModal();const i=document.querySelector('#modal2 input');if(i)i.focus();},
