@@ -23,7 +23,7 @@ El objetivo no cambia: **entrenar y saber qué tan fuerte sos**. Todo lo de abaj
 3. **Esfuerzo por serie (RIR)**: opcional, "me quedaban 0-1-2-3+". Lo usa la progresión: si te sobró mucho, la próxima sube el peso.
 4. **Resumen al terminar**: tarjeta lindísima con volumen, récords y músculos trabajados, lista para compartir en historias.
 
-### Tanda B: saber qué tan fuerte sos, mejor
+### Tanda B: saber qué tan fuerte sos, mejor (hecha en v23)
 5. **Percentil**: "Sos más fuerte que el 72 % de los hombres de 17 años y 72 kg" en cada ejercicio y en general.
 6. **Gráficos de progreso por ejercicio**:
    - 1RM estimado en el tiempo;

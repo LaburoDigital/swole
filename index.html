@@ -824,6 +824,44 @@ h1,h2,h3,.pg,.onb-t{text-wrap:balance}
 .skpath span.ok{color:var(--ok)}
 .skpath i{display:inline-flex;color:var(--mut)}
 .msheet{overflow-x:hidden}
+
+/* percentil y próximo rango */
+.lh-pct{font-size:13px;margin:0 0 8px;color:var(--mut)}.lh-pct b{color:var(--text)}
+.lh-next{display:flex;gap:6px;align-items:flex-start;font-size:12.5px;margin:0 0 12px;padding:8px 10px;border-radius:10px;background:var(--raise);border:1px solid var(--line);color:var(--mut)}
+.lh-next .ic{flex:none;margin-top:1px;color:var(--acc)}.lh-next b{color:var(--text)}
+.pctl{display:inline-block;font-size:12.5px;color:var(--mut);margin-top:4px}.pctl b{color:var(--text)}
+/* mapa de calor */
+.heat{display:grid;grid-template-columns:62px repeat(var(--n),minmax(0,1fr));gap:4px;align-items:center}
+.heat small{font-size:10px;color:var(--mut);text-align:center}
+.heat b{font-size:12.5px;font-weight:600}
+.heat i{aspect-ratio:1;border-radius:6px;display:grid;place-items:center;font:600 10.5px var(--f-b);font-style:normal;color:var(--mut);background:var(--raise)}
+.heat i.h1{background:color-mix(in srgb,var(--acc) 22%,var(--raise));color:var(--text)}
+.heat i.h2{background:color-mix(in srgb,var(--acc) 45%,var(--raise));color:var(--text)}
+.heat i.h3{background:color-mix(in srgb,var(--acc) 75%,var(--raise));color:#fff}
+.heat i.h4{background:var(--acc);color:var(--acc-ink);box-shadow:0 0 0 1.5px color-mix(in srgb,var(--hot) 70%,transparent)}
+.heat-leg{display:flex;align-items:center;gap:4px;justify-content:flex-end;margin-top:10px;font-size:11px;color:var(--mut)}
+.heat-leg i{width:14px;height:14px;border-radius:4px}
+.heat-leg .h1{background:color-mix(in srgb,var(--acc) 22%,var(--raise))}.heat-leg .h2{background:color-mix(in srgb,var(--acc) 45%,var(--raise))}.heat-leg .h3{background:color-mix(in srgb,var(--acc) 75%,var(--raise))}.heat-leg .h4{background:var(--acc)}
+.up-t{color:var(--ok);font-weight:700}.up-t small{color:var(--mut);font-weight:500}
+/* medidas */
+.meas{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.meas label{display:grid;gap:4px;font-size:12.5px;font-weight:600;color:var(--mut)}
+.meas input{width:100%;padding:10px;border-radius:10px;background:var(--raise);border:1px solid var(--line);font:600 16px var(--f-b);color:var(--text)}
+.meas small{font-size:12px;color:var(--text);font-weight:600}.meas em{font-style:normal}.meas em.p{color:var(--ok)}.meas em.n{color:var(--hot)}
+/* fotos */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+.ph{position:relative;aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:var(--raise)}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph span{position:absolute;left:6px;bottom:6px;font-size:11px;font-weight:700;color:#fff;background:rgba(0,0,0,.55);padding:2px 6px;border-radius:6px}
+.ph-big{width:100%;max-height:65vh;object-fit:contain;border-radius:14px;background:#000;display:block}
+.cmp{position:relative;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:3/4;width:min(100%,46vh);margin:0 auto;touch-action:pan-y}
+.cmp img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cmp-b{position:absolute;inset:0;clip-path:inset(0 0 0 var(--x))}
+.cmp-h{position:absolute;top:0;bottom:0;left:var(--x);width:2px;margin-left:-1px;background:#fff;box-shadow:0 0 10px rgba(0,0,0,.5);pointer-events:none}
+.cmp-h::after{content:'';position:absolute;top:50%;left:50%;width:30px;height:30px;margin:-15px;border-radius:50%;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+.cmp-l,.cmp-r{position:absolute;top:10px;font-size:11.5px;font-weight:700;color:#fff;background:rgba(0,0,0,.55);padding:3px 8px;border-radius:7px}
+.cmp-l{left:10px}.cmp-r{right:10px}
+.cmp input[type=range]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;margin:0}
 </style>
 </head>
 <body>
@@ -994,7 +1032,7 @@ const Store=(()=>{
     wipe(){mem=null;try{localStorage.removeItem(K);}catch(e){}}
   };
 })();
-const defaults=()=>({v:1,profile:null,routines:[],customEx:[],plan:{},logs:[],weights:[],creatine:{},water:{},settings:{theme:'dark',rest:90,remind:{on:false,time:'09:00'},lastRemind:''},active:null,clock:{},del:{},ach:{},tests:[],goals:[]});
+const defaults=()=>({v:1,profile:null,routines:[],customEx:[],plan:{},logs:[],weights:[],creatine:{},water:{},settings:{theme:'dark',rest:90,remind:{on:false,time:'09:00'},lastRemind:''},active:null,clock:{},del:{},ach:{},tests:[],goals:[],meas:[]});
 function normalize(x){const d=defaults();const o=Object.assign(d,x||{});o.settings=Object.assign(d.settings,(x&&x.settings)||{});o.settings.remind=Object.assign({on:false,time:'09:00'},o.settings.remind||{});
   ['routines','customEx','logs','weights','tests','goals'].forEach(k=>{if(!Array.isArray(o[k]))o[k]=[];});
   ['plan','creatine','water','clock','del','ach'].forEach(k=>{if(!o[k]||typeof o[k]!=='object'||Array.isArray(o[k]))o[k]={};});
@@ -1017,7 +1055,7 @@ if(!db.settings.look2){if(db.settings.theme==='auto')db.settings.theme='dark';db
    Al guardar se compara con la foto anterior: lo que cambió recibe la hora en db.clock y
    lo que desapareció queda anotado como borrado en db.del. Al unir dos dispositivos, por
    cada clave gana lo más reciente (y un borrado más nuevo le gana a la cosa). */
-const SYNC_COLL={logs:'id',routines:'id',customEx:'id',weights:'date',tests:'id',goals:'id'};
+const SYNC_COLL={logs:'id',routines:'id',customEx:'id',weights:'date',tests:'id',goals:'id',meas:'date'};
 const SYNC_MAP=['creatine','water','ach'];
 const SYNC_ONE=['profile','plan','settings'];
 function syncKeys(d){
@@ -2196,6 +2234,126 @@ function skillGoalCard(){
    '<div class="row" style="gap:8px">'+(done?'':'<button class="btn pri grow" data-a="skStart" data-v="'+g.id+'">'+ic('play',16)+' Entrenar</button>')+'<button class="btn'+(done?' pri grow':'')+'" data-a="treeOpen">'+ic('tree',16)+' Árbol</button></div></div>';
 }
 
+/* ============ Qué tan fuerte sos: percentil, próximo rango y progreso ============ */
+/* percentil a partir de un nivel con decimales (misma tabla que pctStronger) */
+function pctFromV(v){
+  if(v<0)return 3;
+  const T=[[0,5],[3,25],[6,50],[9,68],[12,80],[15,90],[18,97]];
+  for(let i=1;i<T.length;i++)if(v<=T[i][0]){const a=T[i-1],b=T[i];return Math.round(a[1]+(b[1]-a[1])*(v-a[0])/(b[0]-a[0]));}
+  return 97;
+}
+const whoTxt=()=>{const p=db.profile||{};return (p.sex==='f'?'mujeres':p.sex==='m'?'hombres':'personas')+' que entrenan, con tu edad y tu peso';};
+const pctLine=p=>p==null?'':'<span class="pctl">Más fuerte que el <b>'+p+' %</b></span>';
+/* el ejercicio que tenés más cerca de subir de rango (de los que cuentan para tu rango general) */
+function nextRankHint(){
+  const gl=groupLevels(),used=new Set([].concat(...Object.values(gl).filter(Boolean).map(x=>x.used.map(e=>e.id))));
+  let best=null;
+  rankedList().forEach(x=>{
+    if(!used.has(x.ex.id)||x.info.next==null)return;
+    const gap=1-clamp(x.info.pct,0,1);
+    if(!best||gap<best.gap)best={ex:x.ex,gap,L:x.info.next};
+  });
+  if(!best)return null;
+  /* el grupo más flojo: subirlo es lo que más mueve el promedio */
+  const weak=Object.keys(gl).filter(g=>gl[g]).sort((a,b)=>gl[a].v-gl[b].v)[0];
+  return{ex:best.ex,L:best.L,txt:needTxt(best.ex,best.L),weak:weak&&Object.values(gl).filter(Boolean).length>1?weak:null};
+}
+/* series efectivas por grupo en las últimas 8 semanas (de lunes a domingo) */
+function weeklyGroupSets(n){
+  const mon=d=>{const x=parseK(d),w=(x.getDay()+6)%7;return addDays(d,-w);};
+  const w0=mon(today()),weeks=[];for(let i=n-1;i>=0;i--)weeks.push(addDays(w0,-7*i));
+  const grid={};Object.keys(GROUPS).forEach(g=>grid[g]=weeks.map(()=>0));
+  db.logs.forEach(l=>{const wi=weeks.indexOf(mon(l.date));if(wi<0)return;
+    l.entries.forEach(en=>{const ex=exById(en.ex);if(!ex)return;const g=groupOf(ex),s=en.sets.filter(x=>!x.w).length;if(grid[g])grid[g][wi]+=s;});});
+  return{weeks,grid};
+}
+function heatCard(){
+  if(!db.logs.length)return '';
+  const {weeks,grid}=weeklyGroupSets(8),[lo,hi]=volTarget(genPrefs().goals);
+  const lvl=x=>x===0?0:x<lo*.5?1:x<lo?2:x<=hi*1.3?3:4;
+  return '<div class="card"><div class="hd"><div><h3>Series por semana</h3><span class="mut sm-t">Cada cuadrado es una semana. Más intenso = más series.</span></div></div>'+
+   '<div class="heat" style="--n:'+weeks.length+'"><span></span>'+weeks.map((w,i)=>'<small>'+(i===weeks.length-1?'Esta':parseK(w).getDate()+'/'+(parseK(w).getMonth()+1))+'</small>').join('')+
+   Object.keys(GROUPS).map(g=>'<b>'+g+'</b>'+grid[g].map((x,i)=>'<i class="h'+lvl(x)+'" title="'+g+': '+x+' series la semana del '+esc(longDate(weeks[i]))+'">'+(x||'')+'</i>').join('')).join('')+'</div>'+
+   '<div class="heat-leg"><span>Poco</span><i class="h1"></i><i class="h2"></i><i class="h3"></i><i class="h4"></i><span>Mucho</span></div></div>';
+}
+/* lo que más mejoraste en las últimas 4 semanas */
+function improvements(){
+  const cut=addDays(today(),-28),out=[];
+  rankedList().forEach(x=>{
+    let before=0,after=0;
+    allSess().forEach(l=>l.entries.forEach(en=>{if(en.ex!==x.ex.id)return;en.sets.forEach(s=>{if(s.w)return;const e=e1(x.ex,s.kg,s.reps);if(l.date<cut)before=Math.max(before,e);else after=Math.max(after,e);});}));
+    if(before>0&&after>before*1.005)out.push({ex:x.ex,d:after-before,rel:after/before-1});
+  });
+  return out.sort((a,b)=>b.rel-a.rel).slice(0,4);
+}
+function improveCard(){
+  const im=improvements();if(!im.length)return '';
+  return '<div class="card"><div class="hd"><div><h3>Lo que más mejoraste</h3><span class="mut sm-t">Últimas 4 semanas contra antes</span></div>'+ic('trophy',20)+'</div>'+
+   im.map(x=>'<div class="rowline"><span>'+esc(shortN(x.ex.n))+'</span><span class="up-t">+'+(x.ex.sk||x.ex.time?Math.round(x.d)+unitOf(x.ex):num(x.d,1)+' kg')+' <small>('+Math.round(x.rel*100)+' %)</small></span></div>').join('')+'</div>';
+}
+
+/* ============ Medidas del cuerpo ============ */
+const MEAS=[['cintura','Cintura'],['cadera','Cadera'],['pecho','Pecho'],['brazo','Brazo'],['muslo','Muslo']];
+function measCard(){
+  const ms=(db.meas||[]).slice().sort((a,b)=>a.date<b.date?-1:1),last=ms[ms.length-1],first=ms[0];
+  const val=k=>{for(let i=ms.length-1;i>=0;i--)if(ms[i][k])return ms[i][k];return null;},fst=k=>{for(const m of ms)if(m[k])return m[k];return null;};
+  return '<div class="card"><div class="hd"><div><h3>Medidas</h3><span class="mut sm-t">En centímetros. Medí siempre en el mismo lugar y a la misma hora.</span></div></div>'+
+   '<div class="meas">'+MEAS.map(([k,n])=>{const v=val(k),f0=fst(k),d=v&&f0&&ms.length>1?v-f0:null;
+     return '<label><span>'+n+'</span><input type="text" inputmode="decimal" autocomplete="off" placeholder="'+(v?num(v,1):'cm')+'" data-mk="'+k+'" aria-label="'+n+' en centímetros">'+
+      (v?'<small>'+num(v,1)+(d?' <em class="'+(d>0?'p':'n')+'">'+(d>0?'+':'')+num(d,1)+'</em>':'')+'</small>':'<small class="mut">—</small>')+'</label>';}).join('')+'</div>'+
+   '<button class="btn pri wide" style="margin-top:10px" data-a="measSave">Guardar medidas de hoy</button>'+
+   (ms.length?'<p class="mut sm-t" style="margin-top:8px">'+ms.length+(ms.length===1?' registro':' registros')+(first&&last&&first!==last?', desde el '+esc(longDate(first.date)):'')+'. Los números en color son el cambio desde la primera vez.</p>':'')+'</div>';
+}
+
+/* ============ Fotos de progreso (solo en este dispositivo) ============ */
+const PhotoDB={
+  db:null,
+  open(){return this.db?Promise.resolve(this.db):new Promise((ok,ko)=>{const r=indexedDB.open('swole-photos',1);r.onupgradeneeded=()=>r.result.createObjectStore('p',{keyPath:'id'});r.onsuccess=()=>{this.db=r.result;ok(r.result);};r.onerror=()=>ko(r.error);});},
+  async all(){const d=await this.open();return new Promise((ok,ko)=>{const q=d.transaction('p').objectStore('p').getAll();q.onsuccess=()=>ok(q.result.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:a.t-b.t));q.onerror=()=>ko(q.error);});},
+  async put(o){const d=await this.open();return new Promise((ok,ko)=>{const t=d.transaction('p','readwrite');t.objectStore('p').put(o);t.oncomplete=ok;t.onerror=()=>ko(t.error);});},
+  async del(id){const d=await this.open();return new Promise((ok,ko)=>{const t=d.transaction('p','readwrite');t.objectStore('p').delete(id);t.oncomplete=ok;t.onerror=()=>ko(t.error);});}
+};
+let photoCache=null,photoURLs={};
+async function loadPhotos(){
+  try{photoCache=await PhotoDB.all();}catch(e){photoCache=[];}
+  Object.values(photoURLs).forEach(u=>URL.revokeObjectURL(u));photoURLs={};
+  photoCache.forEach(p=>photoURLs[p.id]=URL.createObjectURL(p.blob));
+  const el=document.getElementById('photoBox');if(el)el.innerHTML=photoGrid();
+}
+/* achica la foto a 1080 px de alto como máximo antes de guardarla */
+async function shrinkPhoto(file){
+  const bmp=await createImageBitmap(file),k=Math.min(1,1080/Math.max(bmp.width,bmp.height));
+  const cv=document.createElement('canvas');cv.width=Math.round(bmp.width*k);cv.height=Math.round(bmp.height*k);cv.getContext('2d').drawImage(bmp,0,0,cv.width,cv.height);
+  return new Promise(r=>cv.toBlob(r,'image/jpeg',.82));
+}
+function photoGrid(){
+  if(!photoCache)return '<p class="mut sm-t">Cargando…</p>';
+  if(!photoCache.length)return '<p class="mut sm-t">Todavía no hay fotos. Sacate una de frente y otra de costado, con la misma luz cada vez.</p>';
+  return '<div class="pgrid">'+photoCache.slice().reverse().map(p=>'<button class="ph" data-a="photoView" data-v="'+p.id+'"><img src="'+photoURLs[p.id]+'" alt="Foto de progreso del '+esc(longDate(p.date))+'"><span>'+esc(shortDate(parseK(p.date).getTime()))+'</span></button>').join('')+'</div>'+
+   (photoCache.length>1?'<button class="btn wide" style="margin-top:10px" data-a="photoCompare">'+ic('swap',16)+' Comparar antes y después</button>':'');
+}
+function photoCard(){
+  if(photoCache===null)setTimeout(loadPhotos,0);
+  return '<div class="card"><div class="hd"><div><h3>Fotos de progreso</h3><span class="mut sm-t">Se guardan solo en este dispositivo: no se suben a ningún lado.</span></div></div>'+
+   '<div id="photoBox">'+photoGrid()+'</div>'+
+   '<label class="btn pri wide" style="margin-top:10px;cursor:pointer">'+ic('plus',16)+' Agregar foto<input type="file" accept="image/*" data-i="photoAdd" hidden></label></div>';
+}
+function photoCmpHTML(m){
+  const ps=photoCache||[],a=ps.find(p=>p.id===m.a),b=ps.find(p=>p.id===m.b);
+  if(!a||!b)return '<p class="mut">Necesitás al menos dos fotos.</p>';
+  const days=Math.round((parseK(b.date)-parseK(a.date))/864e5);
+  const sel=(f,cur)=>'<select data-i="phSel" data-f="'+f+'">'+ps.map(p=>'<option value="'+p.id+'"'+(p.id===cur?' selected':'')+'>'+esc(longDate(p.date))+'</option>').join('')+'</select>';
+  return '<div class="cmp" style="--x:'+(m.x||50)+'%"><img src="'+photoURLs[a.id]+'" alt="Antes"><div class="cmp-b"><img src="'+photoURLs[b.id]+'" alt="Después"></div><i class="cmp-h"></i>'+
+   '<span class="cmp-l">Antes</span><span class="cmp-r">Después</span><input type="range" min="0" max="100" value="'+(m.x||50)+'" data-i="phX" aria-label="Deslizá para comparar"></div>'+
+   '<p class="tc mut sm-t" style="margin-top:8px">'+(days>0?days+' días de diferencia':'Mismo día')+'. Deslizá para comparar.</p>'+
+   '<div class="g2"><label class="field">Antes'+sel('a',a.id)+'</label><label class="field">Después'+sel('b',b.id)+'</label></div>';
+}
+function photoViewHTML(m){
+  const p=(photoCache||[]).find(x=>x.id===m.id);if(!p)return '';
+  return '<img class="ph-big" src="'+photoURLs[p.id]+'" alt="Foto de progreso del '+esc(longDate(p.date))+'"><p class="tc mut sm-t" style="margin:8px 0 12px">'+esc(longDate(p.date))+'</p>'+
+   '<button class="btn bad wide" data-a="photoDel" data-v="'+p.id+'">'+ic('trash',16)+' Borrar foto</button>';
+}
+
 /* ============ Entrenar mejor ============ */
 /* Meta de hoy (sobrecarga progresiva): mira la última vez y propone un poquito más. */
 function goalFor(id){
@@ -2276,6 +2434,8 @@ function levelHero(){
   return '<div class="lvl-hero" style="--c:'+col+'"><div class="lh-badge" data-a="cardOpen">'+ring+badge(L,84)+'</div><div class="lh-txt"><span class="lh-k">Tu rango general</span><h2 style="color:'+col+'">'+lvlName(L)+'</h2>'+
    '<p class="mut sm-t">'+(L<18?Math.round(pct*100)+' % hacia '+lvlName(L+1):'Nivel máximo')+'</p>'+
    '<div class="lh-chips"><span class="lh-ovr"><b data-n="'+st.OVR+'">'+st.OVR+'</b> puntaje</span>'+(top?'<span>'+ic('trophy',14)+' '+esc(top.ex.n)+'</span>':'')+'</div>'+
+   '<p class="lh-pct">Más fuerte que el <b>'+pctFromV(ov.L+ov.pct)+' %</b> de '+whoTxt()+' <span class="mut">(estimado)</span></p>'+
+   (()=>{const nh=nextRankHint();return nh?'<p class="lh-next">'+ic('up',14)+' <span>Más cerca de subir: <b>'+esc(shortN(nh.ex.n))+'</b> a '+lvlName(nh.L)+' con '+esc(nh.txt)+'</span></p>':'';})()+
    '<div class="lh-btns"><button class="btn pri sm" data-a="cardOpen">Ver mi carta</button><button class="btn sm" data-a="markOpen">'+ic('bolt',16)+' Marca</button></div></div></div>';
 }
 const QUICK=[
@@ -2467,7 +2627,7 @@ function viewNiveles(){
   h+='<div class="card"><div class="hd"><div><h3>Por grupo muscular</h3><span class="mut sm-t">Promedio de tus 3 mejores ejercicios de cada grupo. Tu rango general es el promedio de estos.</span></div></div><div class="glist">'+
    Object.keys(GROUPS).map(g=>{const x=gl[g],L=x?Math.min(18,Math.floor(x.v)):-1;return '<div class="grow-row">'+badge(x?L:-1,40)+'<div class="grow"><div class="row" style="justify-content:space-between"><b>'+g+'</b>'+(x?lvlSpan(L):'<span class="mut sm-t">Sin datos</span>')+'</div>'+
     '<div class="bar" style="margin:6px 0 3px"><i style="width:'+(x?Math.round((L>=18?1:x.v-L)*100):0)+'%;background:'+lvlColor(L)+'"></i></div><span class="mut sm-t">'+(x?'Según '+x.used.map(e=>esc(e.n)).join(', '):'Cargá un ejercicio de '+g.toLowerCase()+' para ver tu rango')+'</span></div></div>';}).join('')+'</div></div>';
-  h+=goalsCard(false);
+  h+=goalsCard(false)+improveCard()+heatCard();
   /* tu carta */
   h+='<div class="card carta-card">'+cartaHTML(false)+'<div class="carta-side"><h3>Tu carta</h3><p class="mut sm-t">'+(cardStats().OVR==null?'Todavía está vacía: cargá marcas o entrená para que se llene con tus números reales.':'Tu rango, tu cuerpo y 6 atributos del 40 al 99. Movela con el dedo.')+'</p>'+
    '<div class="attr-list">'+(()=>{const s=cardStats();return ATTRS.map(([k,n])=>'<div><span>'+n+'</span><b>'+(s[k]==null?'--':s[k])+'</b><i style="width:'+(s[k]==null?0:Math.round((s[k]-40)/59*100))+'%"></i></div>').join('');})()+'</div>'+
@@ -2483,7 +2643,7 @@ function viewNiveles(){
       const i=x.info;
       return '<button class="ex" data-a="exInfo" data-v="'+x.ex.id+'" style="align-items:flex-start">'+badge(i.L,52)+'<span class="grow"><h4>'+esc(x.ex.n)+'</h4><span class="sm-t">'+lvlSpan(i.L)+'<span class="mut"> · '+bestTxt(x.ex,x.b)+'</span></span>'+
        '<div class="bar" style="margin:8px 0 4px"><i style="width:'+Math.round(clamp(i.pct,0,1)*100)+'%;background:'+lvlColor(i.L)+'"></i></div>'+
-       '<span class="mut sm-t">'+(i.next==null?'Nivel máximo alcanzado':'Para '+lvlName(i.next||0)+': '+needTxt(x.ex,i.next||0))+'</span></span></button>';
+       '<span class="mut sm-t">'+(i.next==null?'Nivel máximo alcanzado':'Para '+lvlName(i.next||0)+': '+needTxt(x.ex,i.next||0))+'</span>'+(x.ex.st?pctLine(pctStronger(x.ex,x.b.e)):'')+'</span></button>';
     }).join('')+'</div>';
   }
   /* calistenia: progresiones */
@@ -2539,6 +2699,7 @@ function viewNutri(){
    '<div class="field" style="margin:0;width:150px"><input id="wDate" type="date" max="'+t+'" value="'+t+'" aria-label="Fecha del peso"></div><button class="btn pri" data-a="addW">Guardar</button></div>'+
    (ws.length?'<div class="wlist">'+ws.slice().reverse().slice(0,S.wAll?999:6).map(w=>'<div class="rowline"><span>'+esc(longDate(w.date))+'</span><span class="row" style="gap:6px"><b>'+num(w.kg,1)+' kg</b><button class="ib flat" style="width:32px;height:32px" data-a="editW" data-v="'+w.date+'" aria-label="Corregir">'+ic('edit',15)+'</button><button class="ib flat" style="width:32px;height:32px" data-a="delW" data-v="'+w.date+'" aria-label="Borrar">'+ic('trash',15)+'</button></span></div>').join('')+'</div>'+
    (ws.length>6?'<button class="btn sm line wide" style="margin-top:8px" data-a="wAll">'+(S.wAll?'Ver menos':'Ver los '+ws.length+' registros')+'</button>':''):'')+'</div>';
+  h+=measCard()+photoCard();
   /* creatina */
   const cm=S.crM,cnt=Object.keys(db.creatine).filter(k=>k.startsWith(cm.getFullYear()+'-'+pad(cm.getMonth()+1))).length;
   const rm=db.settings.remind;
@@ -2708,7 +2869,7 @@ function exDetail(id){
     if(b){
       const i=lvlInfo(ex,b.e);
       h+='<div class="card" style="margin:0"><div class="row">'+badge(i.L,60)+'<div class="grow"><div style="font:800 24px var(--f-d)">'+lvlSpan(i.L)+'</div><span class="mut sm-t">Mejor serie: '+(b.kg?num(b.kg,1)+' kg × ':'')+b.reps+(ex.time?' s':'')+' · '+bestTxt(ex,b)+'</span></div></div>'+pctTxt(pctStronger(ex,b.e))+
-       (i.next!=null?'<div class="bar" style="margin:12px 0 6px"><i style="width:'+Math.round(clamp(i.pct,0,1)*100)+'%;background:'+lvlColor(i.L)+'"></i></div><span class="sm-t mut">Para '+lvlName(i.next||0)+': '+needTxt(ex,i.next||0)+'</span>':'')+'</div>';
+       (i.next!=null?'<div class="bar" style="margin:12px 0 6px"><i style="width:'+Math.round(clamp(i.pct,0,1)*100)+'%;background:'+lvlColor(i.L)+'"></i></div><span class="sm-t mut">Para '+lvlName(i.next||0)+': '+needTxt(ex,i.next||0)+'</span>':'')+(ex.st?'<p class="sm-t" style="margin-top:8px">'+pctLine(pctStronger(ex,b.e))+' <span class="mut">de '+whoTxt()+' (estimado)</span></p>':'')+'</div>';
     }else h+='<div class="warn">Todavía no registraste este ejercicio. '+(ex.sk?'Con '+needTxt(ex,ex.sk.b)+' ya entrás en '+lvlName(ex.sk.b)+'.':'Para llegar a Bronce 1 necesitás un 1RM estimado de '+num(stdFor(ex).lo,1)+' kg.')+'</div>';
     if(ex.sk){
       /* la escalera de la progresión */
@@ -2872,6 +3033,8 @@ function modalBody(m,l2){
     case 'routine':return sheet(m.d.id?'Editar rutina':'Nueva rutina',routineHTML(m.d));
     case 'ex':{const ex=exById(m.id);return sheet(ex?ex.n:'Ejercicio',exDetail(m.id));}
     case 'summary':return sheet('Entrenamiento guardado',summaryHTML(m));
+    case 'phcmp':return sheet('Antes y después',photoCmpHTML(m));
+    case 'phview':return sheet('Foto de progreso',photoViewHTML(m),{l2:true});
     case 'tree':return sheet('Árbol de habilidades',treeHTML(m));
     case 'skplan':return sheet('Tu camino',skPlanHTML(skillPlan(m.id)),{l2:true});
     case 'excreate':return sheet('Ejercicio propio',exCreateHTML(m.d),{l2:true});
@@ -3224,6 +3387,17 @@ const ACTIONS={
     en.sets.forEach((x,k)=>{if(k>j&&!x.done&&!x.w&&String(x.kg)===String(old))x.kg=s.kg;});save();renderSess();},
   stepRep(v,el){const s=db.active.entries[+el.dataset.e].sets[+el.dataset.s];s.reps=Math.max(0,(+s.reps||0)+(+v));save();renderSess();},
   rirSet(v,el){const s=db.active.entries[+el.dataset.e].sets[+el.dataset.s];s.rir=+v;S.rirAsk=null;save();renderSess();},
+  measSave(){
+    const o={date:today()};let n=0;
+    document.querySelectorAll('[data-mk]').forEach(i=>{const v=parseFloat(String(i.value).replace(',','.'));if(v>=10&&v<=250){o[i.dataset.mk]=Math.round(v*10)/10;n++;}});
+    if(!n){toast('Poné al menos una medida en centímetros');return;}
+    db.meas=db.meas||[];const old=db.meas.find(m=>m.date===o.date);
+    if(old)Object.assign(old,o);else db.meas.push(o);
+    save();render();toast('Medidas guardadas');
+  },
+  photoView(v){S.m2={t:'phview',id:v};render();},
+  photoDel(v){PhotoDB.del(v).then(()=>{S.m2=null;if(S.modal&&S.modal.t==='phcmp')S.modal=null;render();loadPhotos();toast('Foto borrada');});},
+  photoCompare(){const ps=photoCache||[];if(ps.length<2)return;S.modal={t:'phcmp',a:ps[0].id,b:ps[ps.length-1].id,x:50};render();},
   todayGo(){const pl=todayPlan(S.todaySeed||0);startSession(null,null,pl);},
   todayAlt(){S.todaySeed=(S.todaySeed||0)+1;render();},
   sumShare(){if(S.modal&&S.modal.t==='summary')pngShare(summarySVG(S.modal),'swole-entreno.png','Mi entreno en Swole');},
@@ -3384,6 +3558,10 @@ document.addEventListener('input',e=>{
   else if(i==='item'){S.modal.d.items[+el.dataset.e][f]=el.value;}
   else if(i==='lset'){S.modal.d.entries[+el.dataset.e].sets[+el.dataset.s][f]=el.value;}
   else if(i==='genRep'){S.m2.d.replace=el.checked;}
+  else if(i==='phX'){S.modal.x=+el.value;const c=el.closest('.cmp');if(c)c.style.setProperty('--x',el.value+'%');}
+  else if(i==='phSel'){S.modal[f]=el.value;renderModal();}
+  else if(i==='photoAdd'){const file=el.files&&el.files[0];el.value='';if(!file)return;
+    shrinkPhoto(file).then(blob=>PhotoDB.put({id:uid(),date:today(),t:Date.now(),blob})).then(()=>{loadPhotos();toast('Foto guardada en este dispositivo');}).catch(()=>toast('No se pudo guardar la foto'));}
   else if(i==='mq'){S.m2.d.q=el.value;const l=$('#markList');if(l)l.innerHTML=markList(S.m2.d);}
   else if(i==='mk'){S.m2.d[f]=el.value;const p=$('#markPrev');if(p)p.innerHTML=markPrev(S.m2.d);}
   else if(i==='onb'){S.modal.d[f]=el.value;}
