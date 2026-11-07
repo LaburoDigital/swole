@@ -1228,6 +1228,23 @@ rect.tq-eq{stroke-width:1.5}
 .ph-ic{width:26px;height:26px;display:grid;place-items:center;border-radius:8px;background:var(--surf);color:var(--mut)}
 .ph.ok .ph-ic{background:var(--ok);color:#fff}.ph.ok small{color:var(--ok);font-weight:700}
 .pl-tag{color:#F2B33D}
+
+/* articulaciones */
+.jt-hero{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:center}
+.jt-ring{position:relative;width:120px;height:120px;display:grid;place-items:center;text-align:center}
+.jt-ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.jt-trk{fill:none;stroke:var(--raise);stroke-width:8}
+.jt-prog{fill:none;stroke:url(#none);stroke:var(--acc2);stroke-width:8;stroke-linecap:round;filter:drop-shadow(0 0 6px var(--acc2));animation:cprog 1.4s cubic-bezier(.22,1,.36,1) both}
+.jt-ring b{font:800 34px/1 var(--f-d)}.jt-ring small{font-size:11px;color:var(--mut);margin-top:-14px}
+.jt-body{max-width:220px;justify-self:center;width:100%}
+.jt-block.on{border-color:color-mix(in srgb,var(--ok) 50%,var(--line))}
+.jz{padding:14px;border-radius:16px;background:var(--raise);border:1px solid var(--line);border-left:4px solid var(--zc);margin-bottom:10px}
+.jz-h{display:flex;align-items:center;gap:10px}.jz-h b{display:block;margin-bottom:6px}.jz-h .bar{display:block;height:6px}
+.jz-p{font:800 18px var(--f-d);color:var(--zc)}
+.jtest{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+.jtest .jt-n{text-align:left;min-width:0}.jtest b{display:block;font-size:14px}.jtest small{display:block;font-size:12px}
+.jtest input{width:64px;padding:8px;border-radius:10px;background:var(--surf);border:1px solid var(--line);color:var(--text);font:600 15px var(--f-b);text-align:center}
+.jtest.ok b::after{content:' ✓';color:var(--ok)}
 </style>
 </head>
 <body>
@@ -1379,7 +1396,20 @@ E('copenhagen','Plancha Copenhague (segundos)','Banco',['aductores'],['oblicuos'
 E('pallof','Press Pallof','Polea',['oblicuos','abs'],['hombros'],'De costado a la polea, empujá el agarre al frente sin dejar que te gire.',null,{sport:1}),
 E('medslam','Lanzamiento de balón medicinal','Balón medicinal',['abs','dorsales'],['hombros','triceps'],'Subí el balón sobre la cabeza y estrellalo contra el piso con todo.',null,{sport:1}),
 E('farmer','Paseo del granjero (segundos)','Mancuernas',['antebrazos','trapecio'],['abs','gluteos'],'Caminá con una mancuerna pesada en cada mano, torso firme.',null,{time:1,sport:1}),
-E('neckiso','Isométrico de cuello (segundos)','Peso corporal',['trapecio'],['hombros'],'Empujá la cabeza contra tu mano en las 4 direcciones sin moverla. Clave en rugby.',null,{time:1,sport:1})
+E('neckiso','Isométrico de cuello (segundos)','Peso corporal',['trapecio'],['hombros'],'Empujá la cabeza contra tu mano en las 4 direcciones sin moverla. Clave en rugby.',null,{time:1,sport:1}),
+E('spansq','Sentadilla española (segundos)','Banda',['cuadriceps'],['gluteos'],'Una banda atrás de las rodillas sujeta a algo firme. Bajá a media sentadilla con el torso derecho y sostené. Cuida el tendón de la rodilla.',null,{time:1,joint:1}),
+E('tibraise','Elevación de tibial','Peso corporal',['gemelos'],['cuadriceps'],'Espalda contra la pared y talones adelante: subí las puntas de los pies lo más que puedas y bajá lento.',null,{joint:1}),
+E('slcalf','Gemelo a una pierna','Peso corporal',['gemelos'],[],'Parado en un escalón sobre una pierna: subí bien alto y bajá lento hasta estirar.',null,{joint:1}),
+E('slbal','Equilibrio a una pierna (segundos)','Peso corporal',['gemelos'],['abs','gluteos'],'Parado en una pierna, rodilla apenas flexionada. Cuando sea fácil, cerrá los ojos.',null,{time:1,joint:1}),
+E('kneewall','Rodilla a la pared','Peso corporal',['gemelos'],[],'Pie a unos centímetros de la pared: llevá la rodilla a tocarla sin levantar el talón. Movilidad de tobillo.',null,{joint:1}),
+E('slbridge','Puente a una pierna (segundos)','Peso corporal',['gluteos','isquios'],['lumbar'],'Acostado, una pierna arriba: subí la cadera con la otra y sostené con el cuerpo en línea.',null,{time:1,joint:1}),
+E('sidepl','Plancha lateral (segundos)','Peso corporal',['oblicuos'],['abs','gluteos'],'De costado sobre el antebrazo, cuerpo en línea recta. Cada lado.',null,{time:1,joint:1}),
+E('birddog','Bird dog','Peso corporal',['lumbar'],['gluteos','abs'],'En cuatro patas: estirá brazo y pierna contrarios sin mover la cadera. Pausa de 5 segundos.',null,{joint:1}),
+E('curlup','Curl-up de McGill','Peso corporal',['abs'],['oblicuos'],'Acostado con una pierna doblada y manos bajo la zona lumbar: levantá apenas la cabeza y los hombros, sin flexionar la espalda baja.',null,{joint:1}),
+E('biering','Extensión isométrica de espalda (segundos)','Banco romano',['lumbar'],['gluteos','isquios'],'Torso en el aire, cuerpo en línea con las piernas: sostené sin arquear.',null,{time:1,joint:1}),
+E('deadhang','Colgarse de la barra (segundos)','Barra fija',['antebrazos'],['dorsales','hombros'],'Colgado con los brazos estirados y los hombros activos. Descomprime y fortalece el agarre.',null,{time:1,joint:1}),
+E('extrot','Rotación externa con banda','Banda',['hombros'],['trapecio'],'Codo pegado al cuerpo a 90°: llevá la mano hacia afuera contra la banda, lento.',null,{joint:1}),
+E('wallslide','Deslizamiento en la pared','Peso corporal',['hombros'],['trapecio'],'Espalda y brazos contra la pared: subí los brazos sin despegarlos. Movilidad de hombro.',null,{joint:1})
 ];
 /* largo de cada variante de calistenia: hasta dónde empieza la siguiente de su familia */
 (()=>{const fam={};EX.forEach(e=>{if(e.sk)(fam[e.sk.f]=fam[e.sk.f]||[]).push(e);});
@@ -2151,6 +2181,7 @@ function genPlan(d){
     });
     if(!changed)break;
   }
+  if(db.settings.jointBlock)plan.forEach(r=>{r.items=jBlock().concat(r.items);});
   plan.forEach(r=>d.min?fitTime(r,+d.min):(r.min=routineMinutes(r)));
   plan.vol=weekVolume(plan);plan.gs=gs;
   return plan;
@@ -2968,6 +2999,8 @@ function cmdItems(){
     {g:'Acciones',i:'spark',n:'Armar una rutina',a:'genOpen',k:'generar rutina plan'},
     {g:'Acciones',i:'tree',n:'Árbol de habilidades',a:'treeOpen',k:'calistenia skills habilidades'},
     {g:'Acciones',i:'user',n:'Amigos y ranking',a:'socOpen',k:'amigos ranking temporada social'},
+    {g:'Acciones',i:'heart',n:'Articulaciones de acero',a:'jOpen',k:'articulaciones rodilla tobillo hombro espalda tendon cartilago prevencion lesiones'},
+    {g:'Acciones',i:'weight',n:'Powerlifting: total y DOTS',a:'plOpen',k:'powerlifting total dots sentadilla banca peso muerto'},
     {g:'Acciones',i:'rank',n:'Ver mi carta',a:'cardOpen',k:'carta tarjeta compartir'},
     {g:'Acciones',i:'disc',n:'Calculadora de discos',a:'platesOpen',k:'discos barra calculadora'},
     {g:'Acciones',i:'weight',n:'Calculadora de 1RM y porcentajes',a:'toolsOpen',v:'rm',k:'1rm maximo porcentaje calculadora'},
@@ -3269,6 +3302,8 @@ Object.assign(TECH,{
     cues:['Subí la pelota bien arriba','Tirala al piso con todo el cuerpo','Doblá las piernas al lanzar','Agarrala del rebote y repetí'],err:'Lanzar solo con los brazos'},
   carry:{eq:['floor'],A:{h:[61,26],n:[60,36],p:[60,66],k:[66,88],f:[70,110],k2:[54,88],f2:[50,110],e:[60,51],a:[60,66],b:[60,68]},B:{h:[61,28],n:[60,38],p:[60,68],k:[54,88],f:[50,110],k2:[66,88],f2:[70,110],e:[60,53],a:[60,68],b:[60,70]},
     cues:['Peso pesado en cada mano','Pecho arriba y hombros atrás','Pasos cortos y firmes','Abdomen apretado'],err:'Encorvarse o inclinarse para un lado'},
+  hang:{eq:['pullbar'],A:{h:[60,30],n:[60,40],p:[60,72],k:[60,90],f:[60,106],e:[60,26],a:[60,12]},B:{h:[61,31],n:[60,41],p:[61,73],k:[62,91],f:[62,107],e:[60,26],a:[60,12]},
+    cues:['Agarre firme, brazos estirados','Hombros activos (alejalos un poco de las orejas)','Cuerpo quieto, sin balancearte','Respirá tranquilo'],err:'Soltar los hombros del todo'},
   neck:{eq:['floor'],A:{h:[61,26],n:[60,36],p:[59,66],k:[60,88],f:[60,110],e:[72,38],a:[68,24]},B:{h:[60,26],n:[60,36],p:[59,66],k:[60,88],f:[60,110],e:[71,38],a:[67,24]},
     cues:['Mano en la frente (o en el costado de la cabeza)','Empujá la cabeza contra la mano sin moverla','10 a 20 segundos por lado','Fuerza suave y progresiva'],err:'Hacer fuerza de golpe'}
 });
@@ -3283,7 +3318,7 @@ function techOf(ex){
     planchepush:'planche',dips:'dip',benchdip:'dip',ringdip:'dip',lunge:'lunge',bulgarian:'lunge',curl:'curl',dbcurl:'curl',hammer:'curl',
     lateral:'lateral',plank:'plank',calf:'calf',seatedcalf:'calf',pppush:'pushup',
     cablefly:'fly',dbfly:'bench',shrug:'shrug',pushdown:'pushdown',skull:'skull',wrist:'wrist',legext:'legext',legcurl:'legcurl',crunch:'crunch',legraise:'legraise',
-    russian:'russian',flag:'flag',boxjump:'jump',nordic:'nordic',copenhagen:'sideplank',pallof:'pallof',medslam:'slam',farmer:'carry',neckiso:'neck'};
+    russian:'russian',flag:'flag',spansq:'squat',tibraise:'calf',slcalf:'calf',slbal:'calf',kneewall:'lunge',slbridge:'thrust',sidepl:'sideplank',birddog:'plank',curlup:'crunch',biering:'hinge',deadhang:'hang',extrot:'pallof',wallslide:'press',boxjump:'jump',nordic:'nordic',copenhagen:'sideplank',pallof:'pallof',medslam:'slam',farmer:'carry',neckiso:'neck'};
   if(M[id])return M[id];
   /* ejercicios propios: la figura del músculo principal */
   const BYM={pecho:'bench',dorsales:'row',trapecio:'shrug',hombros:'press',biceps:'curl',triceps:'pushdown',antebrazos:'wrist',cuadriceps:'squat',isquios:'legcurl',gluteos:'thrust',gemelos:'calf',aductores:'sideplank',lumbar:'hinge',abs:'crunch',oblicuos:'russian'};
@@ -3580,12 +3615,12 @@ const routineMinutes=r=>Math.round(6+(r.items||[]).reduce((s,it)=>s+itemMin(it,r
 function fitTime(r,target){
   if(!target)return r;let g=0;
   while(routineMinutes(r)>target+4&&g++<40){
-    const acc=r.items.map((it,i)=>({it,i})).filter(x=>x.i>=2&&!x.it.main);
+    const np=r.items.filter(it=>!it.prehab),acc=np.map((it,i)=>({it,i})).filter(x=>x.i>=2&&!x.it.main);
     const c=acc.filter(x=>x.it.sets>2).sort((a,b)=>b.it.sets-a.it.sets)[0];
     if(c)c.it.sets--;else if(r.items.length>3&&!r.items[r.items.length-1].main)r.items.pop();
     else{const m=r.items.find(it=>it.sets>3);if(m)m.sets--;else break;}
   }
-  g=0;while(routineMinutes(r)<target-10&&g++<20){const c=r.items.filter((it,i)=>i>=1&&!it.main&&it.sets<4).sort((a,b)=>a.sets-b.sets)[0];if(!c)break;c.sets++;}
+  g=0;while(routineMinutes(r)<target-10&&g++<20){const c=r.items.filter(it=>!it.prehab).filter((it,i)=>i>=1&&!it.main&&it.sets<4).sort((a,b)=>a.sets-b.sets)[0];if(!c)break;c.sets++;}
   r.min=routineMinutes(r);return r;
 }
 
@@ -3609,6 +3644,7 @@ function plPlan(d){
     const notes=['Los básicos van por porcentaje de tu máximo: la app te dice los kilos'];if(age<18)notes.push('Sos menor: nada de máximos, primero la técnica');
     return{name:'Powerlifting · '+lifts.map(x=>PL_LIFT[x]?PL_LIFT[x].n:shortN(exById(x).n)).join(' + '),days:[days[i]],items,rest:180,note:notes.join(' · '),pl:1};
   });
+  if(db.settings.jointBlock)plan.forEach(r=>{r.items=jBlock().concat(r.items);});
   if(d.min)plan.forEach(r=>fitTime(r,+d.min));else plan.forEach(r=>r.min=routineMinutes(r));
   plan.vol=weekVolume(plan);plan.gs=['pl'];plan.extra=all.length>4?all.length-4:0;
   return plan;
@@ -3617,7 +3653,7 @@ function plPlan(d){
 function plApply(r,act){
   const w=plWeek(r),teen=(db.profile&&db.profile.age||25)<18,M=(teen?PL_MAIN_TEEN:PL_MAIN)[w],SC=PL_SEC[w];
   act.name=r.name+' · semana '+(w+1)+(w===4?' (liviana)':'');
-  act.entries.forEach((en,k)=>{const it=r.items[k];if(!it||!(it.main||it.sec))return;
+  act.entries.forEach((en,k)=>{const it=r.items[k];if(!it||it.ex!==en.ex||!(it.main||it.sec))return;
     const [s,rp,pct]=it.main?M:SC,b=bestE1(it.ex),kg=b?Math.round(b.e*pct/2.5)*2.5:0;
     const warm=en.sets.filter(x=>x.w);en.sets=warm.map((x,i)=>({kg:kg?Math.round(kg*(i?.7:.5)/2.5)*2.5:'',reps:i?3:5,done:false,w:1}));
     for(let i=0;i<s;i++)en.sets.push({kg:kg||'',reps:rp,done:false});
@@ -3663,8 +3699,62 @@ function caminosCard(){
   return '<div class="card"><div class="hd"><div><h3>Caminos</h3><span class="mut sm-t">Elegí qué querés dominar: cada camino tiene su progreso y su plan</span></div></div><div class="cams">'+
    t('cali','img/cali.jpg','Calistenia',sk+' de 39 habilidades','treeOpen')+
    t('pl','img/fuerza.jpg','Powerlifting',s.total?'Total '+num(s.total,0)+' kg'+(s.all3?' · '+Math.round(s.dots)+' DOTS':''):'Sentadilla, banca y peso muerto','plOpen')+
-   t('art','img/salud.jpg','Articulaciones de acero','Rodillas, hombros y espalda','soon',1)+
+   t('art','img/salud.jpg','Articulaciones de acero','Índice '+jScore()+' de 100'+(db.settings.jointBlock?' · bloque activo':''),'jOpen')+
    t('atl','img/dep.jpg','Atleta','Salto, velocidad y potencia','soon',1)+'</div></div>';
+}
+
+/* ============ Articulaciones de acero ============
+   Lo que respalda la evidencia (resumen):
+   - Tendón: isométricos (sostener 30-45 s) calman el dolor a corto plazo; la carga lenta y pesada y los excéntricos lo fortalecen a largo plazo.
+   - Cartílago: cargarlo de forma progresiva no lo daña; lo que importa es subir de a poco.
+   - Isquios: el curl nórdico baja las lesiones a la mitad o menos. Ingle: el Copenhague bajó 41 % los problemas en futbolistas.
+   - Tobillo: el equilibrio a una pierna baja ~35 % los esguinces (sobre todo si ya tuviste uno).
+   - Hombro: fortalecer la rotación externa. Espalda baja: resistencia del tronco (evidencia más débil: mantenimiento). */
+const JZ=[
+  {k:'rod',n:'Rodillas',i:'muscle',m:['cuadriceps'],tests:[['spansq',60,'s'],['pistol',5,'reps']],ex:[['spansq',4,45],['tibraise',2,15],['bulgarian',3,8]],tip:'Isométricos para el tendón y fuerza lenta para la rodilla.'},
+  {k:'tob',n:'Tobillos',i:'run',m:['gemelos'],tests:[['kneewall',10,'cm'],['slcalf',25,'reps'],['slbal',30,'s']],ex:[['slbal',3,30],['slcalf',3,15],['kneewall',2,10]],tip:'Equilibrio y gemelo fuerte: menos esguinces.'},
+  {k:'isq',n:'Isquios',i:'bolt',m:['isquios'],tests:[['nordic',6,'reps'],['slbridge',60,'s']],ex:[['nordic',2,5],['slbridge',3,30]],tip:'El nórdico es lo que más protege de desgarros.'},
+  {k:'ing',n:'Ingle',i:'acro',m:['aductores'],tests:[['copenhagen',30,'s']],ex:[['copenhagen',3,20]],tip:'El Copenhague previene la pubalgia.'},
+  {k:'esp',n:'Espalda baja',i:'body',m:['lumbar','abs','oblicuos'],tests:[['sidepl',90,'s'],['biering',120,'s']],ex:[['sidepl',3,30],['birddog',2,8],['curlup',2,8]],tip:'Un tronco resistente sostiene la espalda.'},
+  {k:'hom',n:'Hombros',i:'up',m:['hombros','trapecio'],tests:[['deadhang',60,'s']],ex:[['extrot',3,15],['facepull',3,15],['deadhang',2,30]],tip:'Rotadores fuertes cuidan el hombro en tackles y caídas.'}
+];
+const jUnit=u=>u==='s'?' s':u==='cm'?' cm':' reps';
+function jZoneScore(z){const v=z.tests.map(([id,t])=>Math.min(1,bestRep(id)/t));return v.reduce((a,b)=>a+b,0)/v.length;}
+function jScore(){const s=JZ.map(jZoneScore);return Math.round(s.reduce((a,b)=>a+b,0)/s.length*100);}
+const jCol=s=>s<.4?'#F0626A':s<.75?'#FFC34D':'#4CC38A';
+/* zonas para el bloque: las que elegiste, o las 2 más flojas */
+function jZones(){const pick=db.settings.jz;if(pick&&pick.length)return JZ.filter(z=>pick.includes(z.k));return JZ.slice().sort((a,b)=>jZoneScore(a)-jZoneScore(b)).slice(0,2);}
+/* bloque corto (unos 10 minutos) para el principio de tus rutinas */
+function jBlock(){
+  const its=[];jZones().forEach(z=>z.ex.slice(0,2).forEach(([id,s,r])=>{if(exById(id)&&!its.some(x=>x.ex===id))its.push({ex:id,sets:Math.min(2,s),reps:r,prehab:1});}));
+  return its.slice(0,4);
+}
+function jApplyBlock(on){
+  db.routines.forEach(r=>{r.items=r.items.filter(it=>!it.prehab);if(on&&!r.skill)r.items=jBlock().concat(r.items);});
+  db.settings.jointBlock=!!on;save();
+}
+function jointsHTML(){
+  const sc=jScore(),fills={};JZ.forEach(z=>{const s=jZoneScore(z);z.m.forEach(k=>fills[k]=jCol(s));});
+  const C=2*Math.PI*42,on=!!db.settings.jointBlock,zs=jZones().map(z=>z.n.toLowerCase());
+  let h='<div class="jt-hero"><div class="jt-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" class="jt-trk"/><circle cx="50" cy="50" r="42" class="jt-prog" style="stroke-dasharray:'+(C*sc/100).toFixed(1)+' '+C.toFixed(1)+'"/></svg><b>'+sc+'</b><small>de 100</small></div>'+
+   '<div class="jt-body">'+bodyMap(null,{fills})+'</div></div>'+
+   '<p class="mut sm-t tc" style="margin:8px 0 12px">Tu índice de articulaciones. Hacé las pruebas de cada zona y cargá tu resultado: el mapa se pinta de rojo a verde.</p>';
+  h+='<div class="card jt-block'+(on?' on':'')+'" style="margin:0 0 12px"><div class="row" style="gap:10px"><span class="mi-ic">'+ic('heart',16)+'</span><div class="grow"><b>Bloque de articulaciones en tus rutinas</b><br><span class="mut sm-t">'+(on?'Activo: ':'Se suma al principio, como calentamiento (~10 min): ')+esc(zs.join(' y '))+'</span></div></div>'+
+   '<div class="g2" style="margin-top:10px">'+(on?'<button class="btn" data-a="jBlock" data-v="0">Quitar</button><button class="btn pri" data-a="jBlock" data-v="1">Actualizar</button>':'<button class="btn" data-a="jNow">'+ic('play',16)+' Sesión de 15 min</button><button class="btn pri" data-a="jBlock" data-v="1">Sumar a mis rutinas</button>')+'</div></div>';
+  h+=JZ.map(z=>{const s=jZoneScore(z),pick=(db.settings.jz||[]).includes(z.k);
+    return '<div class="jz" style="--zc:'+jCol(s)+'"><div class="jz-h"><span class="mi-ic">'+ic(z.i,16)+'</span><div class="grow"><b>'+z.n+'</b><span class="bar"><i style="width:'+Math.round(s*100)+'%;background:var(--zc)"></i></span></div><b class="jz-p">'+Math.round(s*100)+'</b>'+
+     '<button class="chip sm'+(pick?' on':'')+'" data-a="jPick" data-v="'+z.k+'" aria-pressed="'+pick+'">'+(pick?'En mi bloque':'Priorizar')+'</button></div>'+
+     '<p class="mut sm-t" style="margin:6px 0 8px">'+esc(z.tip)+'</p>'+
+     z.tests.map(([id,t,u])=>{const e=exById(id),b=bestRep(id),ok=b>=t;return '<div class="jtest'+(ok?' ok':'')+'"><button class="grow jt-n" data-a="exInfo" data-v="'+id+'"><b>'+esc(shortN(e?e.n:id))+'</b><small class="mut">Meta: '+t+jUnit(u)+' · Tu mejor: '+(b?b+jUnit(u):'—')+'</small></button>'+
+       '<input type="text" inputmode="decimal" placeholder="'+(u==='s'?'seg':u)+'" data-jt="'+id+'" aria-label="Resultado de '+esc(e?e.n:id)+'"><button class="btn sm" data-a="jSave" data-v="'+id+'">Guardar</button></div>';}).join('')+
+     '<div class="chips" style="margin-top:8px">'+z.ex.map(([id,se,r])=>{const e=exById(id);return e?'<button class="chip" data-a="exInfo" data-v="'+id+'">'+esc(shortN(e.n))+' '+se+'×'+r+(e.time?'s':'')+'</button>':'';}).join('')+'</div></div>';}).join('');
+  h+='<details class="why"><summary>¿Por qué funciona?</summary><div class="mut sm-t">'+
+   '<p><b>Tendones:</b> sostener 30 a 45 segundos (isométricos) calma el dolor; la carga lenta y pesada y bajar lento (excéntricos) los fortalece a largo plazo.</p>'+
+   '<p><b>Cartílago:</b> cargarlo no lo gasta: se adapta si la carga sube de a poco. Lo que lastima son los saltos bruscos.</p>'+
+   '<p><b>Lo más probado:</b> el curl nórdico baja a la mitad o menos los desgarros de isquios; el Copenhague bajó 41 % los problemas de ingle en futbolistas; el equilibrio a una pierna baja ~35 % los esguinces de tobillo.</p>'+
+   '<p><b>Hombro y espalda:</b> rotadores fuertes y un tronco resistente ayudan, aunque la evidencia es más débil: son de mantenimiento.</p>'+
+   '<p>Esto es prevención, no tratamiento: si tenés dolor fuerte o una lesión, consultá a un profesional.</p></div></details>';
+  return h;
 }
 
 /* ============ Entrenar mejor ============ */
@@ -4362,6 +4452,7 @@ function modalBody(m,l2){
     case 'tools':return sheet('Herramientas',toolsHTML(m));
     case 'rimport':return sheet('Rutina compartida',rimportHTML(m));
     case 'pl':return sheet('Powerlifting',plHTML());
+    case 'joints':return sheet('Articulaciones de acero',jointsHTML());
     case 'tree':return sheet('Árbol de habilidades',treeWrap(m));
     case 'skplan':return sheet('Tu camino',skPlanHTML(skillPlan(m.id)),{l2:true});
     case 'excreate':return sheet('Ejercicio propio',exCreateHTML(m.d),{l2:true});
@@ -4775,6 +4866,14 @@ const ACTIONS={
   plOpen(){S.modal={t:'pl'};render();},
   plPlanGo(){S.modal=null;ACTIONS.genOpen();const d=S.m2&&S.m2.d;if(d){d.goals=['pl'];d.step=1;renderModal();}},
   soon(){toast('Próximamente: lo estamos armando');},
+  jOpen(){S.modal={t:'joints'};render();},
+  jSave(v){const i=document.querySelector('[data-jt="'+v+'"]'),n=parseFloat(String(i&&i.value||'').replace(',','.'));
+    if(!(n>0&&n<1000))return toast('Poné tu resultado (un número)');
+    db.tests.push({id:uid(),date:today(),ex:v,kg:0,reps:Math.round(n*10)/10});save();renderModal();toast('Guardado');checkMissions();},
+  jPick(v){const a=db.settings.jz=db.settings.jz||[],i=a.indexOf(v);if(i>=0)a.splice(i,1);else{if(a.length>=3)return toast('Elegí hasta 3 zonas');a.push(v);}
+    if(db.settings.jointBlock)jApplyBlock(true);else save();renderModal();},
+  jBlock(v){jApplyBlock(v==='1');renderModal();toast(v==='1'?'Listo: tus rutinas arrancan con el bloque de articulaciones':'Bloque quitado de tus rutinas');},
+  jNow(){const items=[];JZ.forEach(z=>{const [id,s,r]=z.ex[0];if(exById(id))items.push({ex:id,sets:2,reps:r});});S.modal=null;startSession(null,null,{name:'Articulaciones de acero',items,rest:45});},
   todayGo(){const pl=todayPlan(S.todaySeed||0);startSession(null,null,pl);},
   todayAlt(){S.todaySeed=(S.todaySeed||0)+1;render();},
   sumShare(){if(S.modal&&S.modal.t==='summary')pngShare(summarySVG(S.modal),'swole-entreno.png','Mi entreno en Swole');},
