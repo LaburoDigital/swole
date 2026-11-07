@@ -1200,6 +1200,34 @@ rect.tq-eq{stroke-width:1.5}
 .rt-c-trk{fill:none;stroke:rgba(255,255,255,.12);stroke-width:5}
 .rt-c-prog{fill:none;stroke:var(--acc2);stroke-width:5;stroke-linecap:round;transform:rotate(-90deg);transform-origin:0 0;filter:drop-shadow(0 0 6px var(--acc2));animation:cprog 1.6s cubic-bezier(.22,1,.36,1) .3s both}
 @keyframes cprog{from{stroke-dasharray:0 1}}
+
+/* caminos */
+.cams{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.cam{position:relative;height:110px;border-radius:16px;overflow:hidden;display:flex;align-items:flex-end;justify-content:space-between;gap:6px;padding:12px;text-align:left;color:#fff;
+  background:var(--raise) var(--img) center/cover;isolation:isolate;border:1px solid var(--line);transition:transform .25s cubic-bezier(.22,1,.36,1)}
+.cam::before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(8,8,16,.1),rgba(8,8,16,.85))}
+.cam b{display:block;font:800 16px var(--f-d)}.cam small{display:block;font-size:11.5px;opacity:.85}
+.cam.soon{filter:grayscale(.8);opacity:.6}.cam .tag{background:rgba(0,0,0,.5);color:#fff}
+.cam:active{transform:scale(.97)}
+/* powerlifting */
+.pl-hero{position:relative;display:grid;justify-items:center;text-align:center;gap:4px;padding:18px 12px;border-radius:18px;overflow:hidden;
+  background:radial-gradient(80% 90% at 50% 0%,rgba(229,72,77,.22),transparent 60%),radial-gradient(70% 80% at 100% 100%,rgba(62,123,250,.2),transparent 60%),radial-gradient(70% 80% at 0% 100%,rgba(242,179,61,.18),transparent 60%),var(--raise);border:1px solid var(--line)}
+.pl-bar{position:relative;display:flex;align-items:center;gap:4px;height:46px;margin-bottom:6px}
+.pl-bar i{position:absolute;left:-40px;right:-40px;top:50%;height:6px;margin-top:-3px;border-radius:3px;background:linear-gradient(90deg,#8C93A3,#E4E7EE,#8C93A3)}
+.pl-plate{position:relative;display:inline-block;width:14px;height:30px;border-radius:4px;background:var(--pc);box-shadow:inset 0 0 0 2px rgba(255,255,255,.18),0 4px 10px rgba(0,0,0,.35)}
+.pl-plate.big{width:16px;height:44px;animation:plIn .6s cubic-bezier(.34,1.5,.64,1) both}
+.pl-plate.big:nth-of-type(2){animation-delay:.1s}.pl-plate.big:nth-of-type(3){animation-delay:.2s}
+@keyframes plIn{from{transform:translateY(-30px) scaleY(.6);opacity:0}}
+.pl-total{font:800 46px/1 var(--f-d);letter-spacing:-.03em}
+.pl-dots{font-size:14px}.pl-dots b{font:800 18px var(--f-d);color:var(--acc2)}.pl-dots span{font-weight:700}
+.pl-lifts{display:grid;gap:8px;margin-top:12px}
+.pl-l{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:var(--raise);border-left:4px solid var(--pc)}
+.pl-l b{display:block}.pl-l .bar{display:block;height:6px}.pl-l small{display:block;margin-top:4px;font-size:11.5px}
+.pl-hitos{display:grid;gap:6px}
+.ph{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;background:var(--raise);font-size:14px}
+.ph-ic{width:26px;height:26px;display:grid;place-items:center;border-radius:8px;background:var(--surf);color:var(--mut)}
+.ph.ok .ph-ic{background:var(--ok);color:#fff}.ph.ok small{color:var(--ok);font-weight:700}
+.pl-tag{color:#F2B33D}
 </style>
 </head>
 <body>
@@ -1823,7 +1851,7 @@ function viewHoy(){
 /* ============ Vista: Rutinas y ejercicios ============ */
 function routineCard(r){
   const days=(r.days||[]).slice().sort((a,b)=>((a+6)%7)-((b+6)%7)).map(d=>DIAS3[d]).join(' ');
-  return '<div class="card"><div class="row top-a">'+miniMap(mapOfRoutine(r))+'<div class="grow"><h3>'+esc(r.name)+'</h3><p class="mut sm-t" style="margin:4px 0 8px">'+(r.gen?'<span class="tag" style="color:var(--acc)">A medida</span> ':'')+(blockWeek(r)?'<span class="tag'+(blockWeek(r).deload?' dl':'')+'">'+blockTxt(blockWeek(r))+'</span> ':'')+r.items.length+' ejercicios'+(days?', cada '+days:'')+'</p>'+
+  return '<div class="card"><div class="row top-a">'+miniMap(mapOfRoutine(r))+'<div class="grow"><h3>'+esc(r.name)+'</h3><p class="mut sm-t" style="margin:4px 0 8px">'+(r.gen?'<span class="tag" style="color:var(--acc)">A medida</span> ':'')+(r.pl?'<span class="tag pl-tag">Powerlifting · semana '+(plWeek(r)+1)+(plWeek(r)===4?' liviana':'')+'</span> ':'')+(blockWeek(r)?'<span class="tag'+(blockWeek(r).deload?' dl':'')+'">'+blockTxt(blockWeek(r))+'</span> ':'')+r.items.length+' ejercicios · ~'+routineMinutes(r)+' min'+(days?', cada '+days:'')+'</p>'+
    '<p class="sm-t mut">'+r.items.slice(0,4).map(i=>{const e=exById(i.ex);return e?esc(e.n):'';}).filter(Boolean).join(', ')+(r.items.length>4?'…':'')+'</p>'+(r.note?'<p class="rnote">'+ic('spark',13)+' '+esc(r.note)+'</p>':'')+'</div></div>'+
    '<div class="row" style="margin-top:14px"><button class="btn pri sm grow" data-a="startR" data-v="'+r.id+'">'+ic('play',16)+' Empezar</button><button class="btn sm grow" data-a="editR" data-v="'+r.id+'">'+ic('edit',16)+' Editar</button><button class="btn sm" data-a="shareR" data-v="'+r.id+'" aria-label="Compartir rutina">'+ic('share',16)+'</button></div></div>';
 }
@@ -1971,7 +1999,7 @@ const SPORTS={
    - Articulaciones: cargar progresivamente no daña el cartílago; lo que lastima son los saltos bruscos de carga. Por eso el
      calentamiento automático y subir de a poco. */
 const GEN_GOALS={hip:{n:'Ganar músculo',i:'muscle',rest:120},fuerza:{n:'Ganar fuerza',i:'dumb',rest:180},dep:{n:'Rendir en mi deporte',i:'trophy',rest:120},
-  cali:{n:'Calistenia',i:'acro',rest:120},grasa:{n:'Bajar grasa',i:'flame',rest:75},salud:{n:'Estar en forma',i:'heart',rest:90}};
+  cali:{n:'Calistenia',i:'acro',rest:120},pl:{n:'Powerlifting',i:'weight',rest:180},grasa:{n:'Bajar grasa',i:'flame',rest:75},salud:{n:'Estar en forma',i:'heart',rest:90}};
 const GEN_EQ={gym:'Gimnasio completo',dumb:'Mancuernas en casa',bw:'Sin equipo (barra fija y piso)'};
 const GEN_LVL={beg:'Principiante',int:'Intermedio',adv:'Avanzado'};
 /* el objetivo que manda en series y repeticiones (calistenia se suma como bloque de habilidades) */
@@ -2063,6 +2091,7 @@ const volTarget=gs=>gs.includes('hip')?[10,20]:[6,18];
 const VOLX={Piernas:1.6,Espalda:1.3,Brazos:1.3,Pecho:1,Hombros:1,Core:1};
 const volRange=(g,gs)=>volTarget(gs).map(x=>Math.round(x*VOLX[g]));
 function genPlan(d){
+  if((d.goals||[]).includes('pl'))return plPlan(d);
   const p=db.profile||{},age=p.age||25,eq=d.eq||'gym',lvl=d.lvl||'beg',gs=(d.goals&&d.goals.length?d.goals:['hip']),prim=primGoal(gs);
   const onlyCali=gs.length===1&&gs[0]==='cali',withCali=gs.includes('cali');
   const base=POOL[onlyCali?'bw':eq],pool=withCali&&!onlyCali?Object.assign({},base,{hpush:POOL.bw.hpush,vpull:POOL.bw.vpull,triceps:POOL.bw.triceps,core:POOL.bw.core}):base;
@@ -2122,11 +2151,12 @@ function genPlan(d){
     });
     if(!changed)break;
   }
+  plan.forEach(r=>d.min?fitTime(r,+d.min):(r.min=routineMinutes(r)));
   plan.vol=weekVolume(plan);plan.gs=gs;
   return plan;
 }
 /* fotos libres de Wikimedia Commons (créditos en TERCEROS.md) */
-const PHOTOS=Object.fromEntries('rugby futbol basquet tenis natacion running combate hockey voley ciclismo hip fuerza dep grasa salud cali'.split(' ').map(k=>[k,{u:'img/'+k+'.jpg'}]));
+const PHOTOS=Object.fromEntries('rugby futbol basquet tenis natacion running combate hockey voley ciclismo hip fuerza dep grasa salud cali'.split(' ').map(k=>[k,{u:'img/'+k+'.jpg'}]));PHOTOS.pl={u:'img/fuerza.jpg'};
 /* fichas grandes con foto del deporte u objetivo */
 function photoTile(k,label,icon,on,act,v,extra){
   const ph=PHOTOS[k];
@@ -2149,6 +2179,7 @@ function genHTML(d){
   if(d.step===3){const wk=weekGymDays(),onlyCali=d.goals.length===1&&d.goals[0]==='cali';
     return st+(wk.length?'<h4>Tus días de gym</h4><p class="mut sm-t">Según tu semana: '+wk.map(x=>DIAS3[x]+(dayInfo(x).gym==='antes'?' (antes del deporte)':dayInfo(x).gym==='despues'?' (después del deporte)':'')).join(', ')+'.</p>'
      :'<h4>¿Cuántos días por semana vas a entrenar?</h4><div class="opt">'+[2,3,4,5,6].map(n=>'<button class="'+(+d.days===n?'on':'')+'" data-a="genSet" data-f="days" data-v="'+n+'">'+n+' días</button>').join('')+'</div>')+
+    '<h4>¿Cuánto tiempo tenés por sesión?</h4><div class="opt">'+[30,45,60,75,90].map(n=>'<button class="'+(+d.min===n?'on':'')+'" data-a="genSet" data-f="min" data-v="'+n+'">'+n+' min</button>').join('')+'</div>'+
     (onlyCali?'':'<h4>¿Con qué entrenás?</h4>'+opt('eq',GEN_EQ))+'<h4>¿Qué nivel tenés?</h4>'+opt('lvl',GEN_LVL)+nav(2,4,'Armar mi rutina');}
   const plan=d.plan||[],v=plan.vol||{},gs=plan.gs||d.goals,[mn,mx]=volTarget(gs);
   return st+'<p class="mut sm-t">'+d.goals.map(g=>GEN_GOALS[g].n).join(' + ')+(d.sports.length?' · para '+esc(d.sports.map(k=>SPORTS[k].n).join(' y ')):'')+' · '+plan.length+' días por semana.</p>'+
@@ -2416,7 +2447,7 @@ function todayPlan(seed){
   const fresh=[...new Set([].concat(...its.map(it=>exById(it.ex).p)))].filter(k=>r.st[k]==='green');
   let why=!db.logs.length?'Arrancá por acá: una sesión completa para tu objetivo':fresh.length?'Están frescos: '+fresh.slice(0,4).map(k=>(MUSC[k]||k).toLowerCase()).join(', '):'Sesión suave: casi todo se está recuperando';
   if(dM.type==='match')why='Mañana tenés '+actName(dM).toLowerCase()+': nada de piernas pesadas';
-  return{name:'Hoy: '+T.n,items:its,rest:GEN_GOALS[primGoal(gs)].rest,why};
+  return fitTime({name:'Hoy: '+T.n,items:its,rest:GEN_GOALS[primGoal(gs)].rest||120,why},(db.settings.gen&&db.settings.gen.min)||0);
 }
 function todayCard(){
   if(!db.profile)return '';
@@ -3538,6 +3569,104 @@ function rtFocus(x,y,w){
   const step=t=>{const p=Math.min(1,(t-t0)/D),e=1-Math.pow(1-p,3);S.rt={x:a.x+(b.x-a.x)*e,y:a.y+(b.y-a.y)*e,w:a.w+(b.w-a.w)*e};window.rtApply&&window.rtApply();if(p<1)requestAnimationFrame(step);};
   requestAnimationFrame(step);
 }
+/* ============ Tiempo por sesión: cada rutina entra en el tiempo que tenés ============ */
+const BIGMOV=['squat','bench','deadlift','ohp','row','frontsquat','incbench','rdl','hipthrust','legpress','pullup','dips','muscleup'];
+function itemMin(it,rest){
+  const ex=exById(it.ex);if(!ex)return 0;
+  const big=BIGMOV.includes(ex.id)||it.main,work=ex.time?(+it.reps||30):(+it.reps||10)*3.2,rs=big?Math.max(rest,150):Math.min(rest,105);
+  return ((+it.sets||3)*(work+rs)+(it.warm?it.warm*75:0)+40)/60;
+}
+const routineMinutes=r=>Math.round(6+(r.items||[]).reduce((s,it)=>s+itemMin(it,r.rest||90),0));
+function fitTime(r,target){
+  if(!target)return r;let g=0;
+  while(routineMinutes(r)>target+4&&g++<40){
+    const acc=r.items.map((it,i)=>({it,i})).filter(x=>x.i>=2&&!x.it.main);
+    const c=acc.filter(x=>x.it.sets>2).sort((a,b)=>b.it.sets-a.it.sets)[0];
+    if(c)c.it.sets--;else if(r.items.length>3&&!r.items[r.items.length-1].main)r.items.pop();
+    else{const m=r.items.find(it=>it.sets>3);if(m)m.sets--;else break;}
+  }
+  g=0;while(routineMinutes(r)<target-10&&g++<20){const c=r.items.filter((it,i)=>i>=1&&!it.main&&it.sets<4).sort((a,b)=>a.sets-b.sets)[0];if(!c)break;c.sets++;}
+  r.min=routineMinutes(r);return r;
+}
+
+/* ============ Powerlifting ============ */
+/* bloque de 5 semanas para los básicos: sube la intensidad y la 5.ª es liviana (series, reps, % del máximo) */
+const PL_MAIN=[[5,5,.75],[4,4,.80],[4,3,.85],[3,2,.90],[3,5,.65]],PL_SEC=[[3,6,.70],[3,6,.72],[3,5,.75],[3,5,.75],[2,6,.60]];
+const PL_MAIN_TEEN=[[4,6,.65],[4,5,.70],[4,5,.72],[3,4,.75],[3,6,.60]];
+const PL_DAYS={2:[['squat','bench'],['deadlift','incbench']],3:[['squat','bench'],['deadlift','bench'],['squat','incbench']],4:[['squat'],['bench'],['deadlift'],['bench','frontsquat']]};
+const PL_ACC={squat:['bulgarian','legcurl','plank'],deadlift:['row','hipthrust','legraise'],bench:['dbrow','dbohp','pushdown'],incbench:['pullup','lateral','curl'],frontsquat:['rdl','facepull','pushdown']};
+const PL_LIFT={squat:{n:'Sentadilla',c:'#E5484D'},bench:{n:'Banca',c:'#3E7BFA'},deadlift:{n:'Peso muerto',c:'#F2B33D'}};
+const plWeek=r=>r&&r.since?Math.max(0,Math.floor((parseK(today())-parseK(r.since))/864e5/7))%5:0;
+function plPlan(d){
+  const p=db.profile||{},age=p.age||25,wk=weekGymDays(),act=[0,1,2,3,4,5,6].filter(x=>dayInfo(x).type);
+  const all=wk.length?wk:genDays(+d.days||3,act),n=Math.max(2,Math.min(4,all.length));
+  const days=all.slice().sort((a,b)=>((a+6)%7)-((b+6)%7)).slice(0,n);
+  const plan=PL_DAYS[n].map((lifts,i)=>{
+    const items=[];
+    lifts.forEach((id,j)=>items.push(j===0?{ex:id,sets:5,reps:5,pct:.75,main:1,warm:2}:{ex:id,sets:3,reps:6,pct:.7,sec:1}));
+    (PL_ACC[lifts[0]]||[]).concat(lifts[1]?(PL_ACC[lifts[1]]||[]).slice(0,1):[]).filter(x=>exById(x)&&!items.some(it=>it.ex===x)).slice(0,3)
+      .forEach(x=>{const ds=genDose(exById(x),['hip'],d.lvl||'int','acc',false,age);items.push({ex:x,sets:3,reps:ds[1]});});
+    const notes=['Los básicos van por porcentaje de tu máximo: la app te dice los kilos'];if(age<18)notes.push('Sos menor: nada de máximos, primero la técnica');
+    return{name:'Powerlifting · '+lifts.map(x=>PL_LIFT[x]?PL_LIFT[x].n:shortN(exById(x).n)).join(' + '),days:[days[i]],items,rest:180,note:notes.join(' · '),pl:1};
+  });
+  if(d.min)plan.forEach(r=>fitTime(r,+d.min));else plan.forEach(r=>r.min=routineMinutes(r));
+  plan.vol=weekVolume(plan);plan.gs=['pl'];plan.extra=all.length>4?all.length-4:0;
+  return plan;
+}
+/* al empezar una rutina de powerlifting: series, reps y kilos de la semana del bloque */
+function plApply(r,act){
+  const w=plWeek(r),teen=(db.profile&&db.profile.age||25)<18,M=(teen?PL_MAIN_TEEN:PL_MAIN)[w],SC=PL_SEC[w];
+  act.name=r.name+' · semana '+(w+1)+(w===4?' (liviana)':'');
+  act.entries.forEach((en,k)=>{const it=r.items[k];if(!it||!(it.main||it.sec))return;
+    const [s,rp,pct]=it.main?M:SC,b=bestE1(it.ex),kg=b?Math.round(b.e*pct/2.5)*2.5:0;
+    const warm=en.sets.filter(x=>x.w);en.sets=warm.map((x,i)=>({kg:kg?Math.round(kg*(i?.7:.5)/2.5)*2.5:'',reps:i?3:5,done:false,w:1}));
+    for(let i=0;i<s;i++)en.sets.push({kg:kg||'',reps:rp,done:false});
+    en.goal=kg?{kg,reps:rp,prev:Math.round(pct*100)+' %',why:Math.round(pct*100)+' % de tu máximo'}:null;
+    if(!kg)en.note='Todavía no tengo tu máximo: hacé una serie pesada de 3-5 y cargala como marca';
+  });
+}
+/* total, DOTS y clase */
+function dots(total,w,sex){
+  const C=sex==='f'?[-0.0000010706,0.0005158568,-0.1126655495,13.6175032,-57.96288]:[-0.0000010930,0.0007391293,-0.1918759221,24.0900756,-307.75076];
+  const x=Math.min(Math.max(w,40),sex==='f'?150:210),den=C[0]*x**4+C[1]*x**3+C[2]*x**2+C[3]*x+C[4];
+  return den>0?total*500/den:0;
+}
+const PL_CLASS=[[0,'Principiante'],[200,'Intermedio'],[275,'Avanzado'],[350,'Élite'],[425,'Nivel internacional']];
+function plStats(){
+  const bw=weightNow()||(db.profile&&db.profile.weight)||75,L={};let total=0;
+  ['squat','bench','deadlift'].forEach(id=>{const b=bestE1(id);L[id]=b?b.e:0;total+=L[id];});
+  const all3=L.squat&&L.bench&&L.deadlift,d=all3?dots(total,bw,db.profile&&db.profile.sex):0;
+  const cls=PL_CLASS.filter(c=>d>=c[0]).pop();
+  return{bw,L,total,dots:d,cls:all3?cls[1]:null,all3};
+}
+const PL_HITOS=[['bench',1,'Banca con tu peso'],['squat',1.5,'Sentadilla 1,5× tu peso'],['deadlift',2,'Peso muerto 2× tu peso'],['total',300,'Club de los 300 kg'],
+  ['bench',1.5,'Banca 1,5× tu peso'],['squat',2,'Sentadilla 2× tu peso'],['deadlift',2.5,'Peso muerto 2,5× tu peso'],['total',400,'Club de los 400 kg'],['total',500,'Club de los 500 kg']];
+function plHTML(){
+  const s=plStats(),plate=(id,big)=>'<span class="pl-plate'+(big?' big':'')+'" style="--pc:'+PL_LIFT[id].c+'"></span>';
+  const h='<div class="pl-hero"><div class="pl-bar"><i></i>'+['squat','bench','deadlift'].map(id=>plate(id,1)).join('')+'</div>'+
+   '<span class="lh-k">Tu total</span><b class="pl-total">'+(s.total?num(s.total,1)+' kg':'—')+'</b>'+
+   (s.all3?'<div class="pl-dots"><b>'+Math.round(s.dots)+'</b> DOTS · <span>'+s.cls+'</span></div>':'<p class="mut sm-t">Cargá sentadilla, banca y peso muerto para ver tu total y tu puntaje DOTS.</p>')+'</div>'+
+   '<div class="pl-lifts">'+['squat','bench','deadlift'].map(id=>{const e=s.L[id],r=e/s.bw,nxt=PL_HITOS.filter(x=>x[0]===id&&r<x[1])[0];
+     return '<div class="pl-l" style="--pc:'+PL_LIFT[id].c+'">'+plate(id)+'<div class="grow"><b>'+PL_LIFT[id].n+'</b><span class="mut sm-t">'+(e?num(e,1)+' kg · '+num(r,2)+'× tu peso':'Sin marca todavía')+'</span>'+
+      (nxt?'<span class="bar" style="margin-top:6px"><i style="width:'+Math.round(Math.min(1,r/nxt[1])*100)+'%;background:'+PL_LIFT[id].c+'"></i></span><small class="mut">Próximo: '+esc(nxt[2])+' ('+num(nxt[1]*s.bw,1)+' kg)</small>':'')+
+      '</div><button class="btn sm" data-a="markOpen" data-v="'+id+'">'+ic('bolt',14)+'</button></div>';}).join('')+'</div>'+
+   '<h4 style="margin:14px 0 8px">Hitos</h4><div class="pl-hitos">'+PL_HITOS.map(x=>{const v=x[0]==='total'?s.total:s.L[x[0]]/s.bw,ok=v>=x[1],pc=Math.min(1,v/x[1]);
+     return '<div class="ph'+(ok?' ok':'')+'"><span class="ph-ic">'+ic(ok?'check':'flag',14)+'</span><span class="grow">'+esc(x[2])+'</span><small>'+(ok?'¡Listo!':Math.round(pc*100)+' %')+'</small></div>';}).join('')+'</div>'+
+   '<details class="why"><summary>¿Qué es DOTS?</summary><div class="mut sm-t"><p>Es el puntaje que usan las competencias para comparar levantadores de distinto peso corporal: tu total ajustado por tu peso.</p><p>Como referencia: 200 intermedio, 275 avanzado, 350 élite, 425 o más es nivel internacional.</p><p>Tus máximos son estimados a partir de tus series (fórmula de Epley), no de un máximo real.</p></div></details>'+
+   '<button class="btn pri wide" style="margin-top:12px" data-a="plPlanGo">'+ic('spark',16)+' Armar mi plan de powerlifting</button>';
+  return h;
+}
+/* caminos: lo que podés dominar */
+function caminosCard(){
+  const t=(k,img,n,sub,a,soon)=>'<button class="cam'+(soon?' soon':'')+'" data-a="'+a+'" style="--img:url(\''+img+'\')"><span class="cam-t"><b>'+n+'</b><small>'+sub+'</small></span>'+(soon?'<span class="tag">Pronto</span>':ic('right',18))+'</button>';
+  const s=plStats(),sk=skillsMastered().length;
+  return '<div class="card"><div class="hd"><div><h3>Caminos</h3><span class="mut sm-t">Elegí qué querés dominar: cada camino tiene su progreso y su plan</span></div></div><div class="cams">'+
+   t('cali','img/cali.jpg','Calistenia',sk+' de 39 habilidades','treeOpen')+
+   t('pl','img/fuerza.jpg','Powerlifting',s.total?'Total '+num(s.total,0)+' kg'+(s.all3?' · '+Math.round(s.dots)+' DOTS':''):'Sentadilla, banca y peso muerto','plOpen')+
+   t('art','img/salud.jpg','Articulaciones de acero','Rodillas, hombros y espalda','soon',1)+
+   t('atl','img/dep.jpg','Atleta','Salto, velocidad y potencia','soon',1)+'</div></div>';
+}
+
 /* ============ Entrenar mejor ============ */
 /* Meta de hoy (sobrecarga progresiva): mira la última vez y propone un poquito más. */
 function goalFor(id){
@@ -3805,6 +3934,7 @@ function viewNiveles(){
   let h='<h1 class="pg">Nivel</h1>';
   if(!db.profile)return h+'<div class="card empty">'+emptyArt()+'<b>Completá tu perfil</b>Necesito sexo, edad y peso para calcular tus niveles.</div>';
   const r=rankedList(),ov=overall(),ml=muscleLevels();
+  h+=caminosCard();
   h+='<button class="gen-cta soc-cta" data-a="socOpen"><span class="gen-ic">'+ic('user',22)+'</span><span class="grow"><b>Amigos</b><span>'+(Social.on()?(S.social&&S.social.friends.length?S.social.friends.length+(S.social.friends.length===1?' amigo':' amigos')+' · ranking y temporada':'Invitá a tus amigos con tu código'):'Rankings justos y una temporada por mes')+'</span></span>'+ic('right',18)+'</button>';
   h+='<button class="gen-cta mark-cta" data-a="markOpen"><span class="gen-ic">'+ic('bolt',22)+'</span><span class="grow"><b>Cargar marca</b><span>Poné tu peso y reps, y mirá tu nivel al instante</span></span>'+ic('right',18)+'</button>';
   /* rango de cada grupo muscular */
@@ -3917,9 +4047,10 @@ function startSession(rid,dk,adhoc){
   /* rutina de habilidad: se recalcula con tu progreso de hoy */
   if(r&&r.skill&&!adhoc){const sp=skillPlan(r.skill);if(sp)r.items=sp.items;}
   if(r&&r.rest)db.settings.rest=r.rest;
-  const bw=adhoc?null:blockWeek(r);
+  const bw=adhoc||(r&&r.pl)?null:blockWeek(r);
   const its=(r?r.items:[]).map(it=>bw&&bw.deload?Object.assign({},it,{sets:Math.max(2,Math.round(it.sets*.6))}):it);
   db.active={id:uid(),date:dk||today(),routineId:r&&!adhoc?r.id:null,name:r?r.name+(bw&&bw.deload?' · descarga':''):'Entrenamiento libre',t0:Date.now(),note:'',entries:its.map(it=>mkEntry(it.ex,it.sets,it.reps,it.warm))};
+  if(r&&r.pl&&!adhoc)plApply(r,db.active);
   /* semana de descarga: ~90 % del peso y sin meta de subir */
   if(bw&&bw.deload){db.active.deload=1;db.active.entries.forEach(en=>{en.goal=null;en.sets.forEach(s=>{if(+s.kg)s.kg=Math.round(+s.kg*.9/2.5)*2.5;});});setTimeout(()=>toast('Semana de descarga: menos series y un poco menos de peso para recuperar'),400);}
   save();S.sessOpen=true;render();
@@ -4230,6 +4361,7 @@ function modalBody(m,l2){
     case 'cmd':return cmdHTML(m);
     case 'tools':return sheet('Herramientas',toolsHTML(m));
     case 'rimport':return sheet('Rutina compartida',rimportHTML(m));
+    case 'pl':return sheet('Powerlifting',plHTML());
     case 'tree':return sheet('Árbol de habilidades',treeWrap(m));
     case 'skplan':return sheet('Tu camino',skPlanHTML(skillPlan(m.id)),{l2:true});
     case 'excreate':return sheet('Ejercicio propio',exCreateHTML(m.d),{l2:true});
@@ -4640,6 +4772,9 @@ const ACTIONS={
     db.routines.push({id:uid(),name:o.n,days:[],since:today(),items,rest:Math.min(600,Math.max(30,+o.r||90))});
     S.modal=null;goTab('rutinas');save();render();confetti(30);toast('Rutina agregada: elegí qué días hacerla en Editar');},
   accent(v){db.settings.accent=v;save();applyTheme();render();},
+  plOpen(){S.modal={t:'pl'};render();},
+  plPlanGo(){S.modal=null;ACTIONS.genOpen();const d=S.m2&&S.m2.d;if(d){d.goals=['pl'];d.step=1;renderModal();}},
+  soon(){toast('Próximamente: lo estamos armando');},
   todayGo(){const pl=todayPlan(S.todaySeed||0);startSession(null,null,pl);},
   todayAlt(){S.todaySeed=(S.todaySeed||0)+1;render();},
   sumShare(){if(S.modal&&S.modal.t==='summary')pngShare(summarySVG(S.modal),'swole-entreno.png','Mi entreno en Swole');},
@@ -4671,17 +4806,21 @@ const ACTIONS={
   plates(v,el){const en=db.active.entries[+el.dataset.e],s=en.sets.find(x=>!x.done)||en.sets[en.sets.length-1]||{};S.m2={t:'plates',d:{kg:s.kg||'',bar:20,e:+el.dataset.e}};render();},
   platesOpen(){S.m2={t:'plates',d:{kg:'',bar:20,e:null}};render();},
   platesUse(){const d=S.m2.d,en=db.active&&db.active.entries[d.e];if(en)en.sets.forEach(s=>{if(!s.done)s.kg=+d.kg||0;});S.m2=null;save();render();toast('Peso puesto en las series que faltan');},
-  genOpen(){const ov=overall();S.m2={t:'gen',d:{step:1,sports:[],sdays:[],goals:['hip'],days:3,eq:'gym',lvl:!ov||ov.L<6?'beg':ov.L<12?'int':'adv',plan:null,seed:0,replace:true}};render();},
+  genOpen(){const ov=overall();S.m2={t:'gen',d:{step:1,sports:[],sdays:[],goals:(db.settings.gen&&db.settings.gen.goals||['hip']).slice(),min:(db.settings.gen&&db.settings.gen.min)||60,days:3,eq:'gym',lvl:!ov||ov.L<6?'beg':ov.L<12?'int':'adv',plan:null,seed:0,replace:true}};render();},
   genTog(v,el){const a=S.m2.d[el.dataset.f];const i=a.indexOf(v);if(i>=0)a.splice(i,1);else a.push(v);if(!S.m2.d.sports.length)S.m2.d.sdays=[];renderModal();},
   genSD(v){const a=S.m2.d.sdays,n=+v,i=a.indexOf(n);if(i>=0)a.splice(i,1);else a.push(n);renderModal();},
-  genGoal(v){const g=S.m2.d.goals,i=g.indexOf(v);if(i>=0){if(g.length>1)g.splice(i,1);else toast('Elegí al menos un objetivo');}else g.push(v);renderModal();},
+  genGoal(v){let g=S.m2.d.goals;
+    /* powerlifting arma su propia semana: no se mezcla con los otros objetivos */
+    if(v==='pl'&&!g.includes('pl')){S.m2.d.goals=['pl'];renderModal();toast('Powerlifting arma su propia semana (con accesorios incluidos)');return;}
+    if(v!=='pl'&&g.includes('pl')){S.m2.d.goals=g=[];}
+    const i=g.indexOf(v);if(i>=0){if(g.length>1)g.splice(i,1);else toast('Elegí al menos un objetivo');}else g.push(v);renderModal();},
   genSet(v,el){const d=S.m2.d;d[el.dataset.f]=el.dataset.f==='days'?+v:v;renderModal();},
   genStep(v){const d=S.m2.d,n=+v;if(n===4){if(d.step===4)d.seed=(d.seed||0)+1;d.plan=genPlan(d);}d.step=n;renderModal();const s=document.querySelector('#modal2 .msheet');if(s)s.scrollTop=0;},
   genSave(){
     const d=S.m2.d;if(!d.plan||!d.plan.length)return;
     if(d.replace){const old=db.routines.filter(r=>r.gen).map(r=>r.id);db.routines=db.routines.filter(r=>!r.gen);Object.keys(db.plan).forEach(k=>{db.plan[k]=db.plan[k].filter(x=>!old.includes(x));if(!db.plan[k].length)delete db.plan[k];});}
-    db.settings.gen={goals:d.goals.slice(),eq:d.eq,lvl:d.lvl};
-    d.plan.forEach(r=>db.routines.push({id:uid(),name:r.name,days:r.days,since:today(),items:r.items,rest:r.rest,note:r.note,gen:1}));
+    db.settings.gen={goals:d.goals.slice(),eq:d.eq,lvl:d.lvl,min:+d.min||60};
+    d.plan.forEach(r=>{const o={id:uid(),name:r.name,days:r.days,since:today(),items:r.items,rest:r.rest,note:r.note,gen:1,min:r.min};if(r.pl)o.pl=1;db.routines.push(o);});
     S.m2=null;goTab('rutinas');S.rtab='rut';save();render();confetti(40);toast('Listo: '+d.plan.length+' rutinas en tu semana');checkAch();
   },
   muscle(v){const m=muscleLevels()[v];const best=rankedList().filter(x=>x.ex.p.includes(v)&&x.info.L>=0)[0];toast((MUSC[v]||v)+': '+(m==null?'todavía sin rango':lvlName(Math.floor(m))+(best?' con '+best.ex.n:'')));},
