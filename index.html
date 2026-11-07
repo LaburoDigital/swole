@@ -1245,6 +1245,13 @@ rect.tq-eq{stroke-width:1.5}
 .jtest .jt-n{text-align:left;min-width:0}.jtest b{display:block;font-size:14px}.jtest small{display:block;font-size:12px}
 .jtest input{width:64px;padding:8px;border-radius:10px;background:var(--surf);border:1px solid var(--line);color:var(--text);font:600 15px var(--f-b);text-align:center}
 .jtest.ok b::after{content:' ✓';color:var(--ok)}
+
+/* atleta */
+.ath-hero{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:center}
+.jt-prog.ath{stroke:#FFC34D;filter:drop-shadow(0 0 6px #FFC34D)}
+.ath-bars{display:grid;gap:10px}
+.ab{display:grid;grid-template-columns:72px 1fr 30px;align-items:center;gap:8px;font-size:13px;font-weight:600}
+.ab .bar{height:8px}.ab .bar i{background:linear-gradient(90deg,#FFC34D,#FF7A45)}.ab b{text-align:right}
 </style>
 </head>
 <body>
@@ -1409,7 +1416,12 @@ E('curlup','Curl-up de McGill','Peso corporal',['abs'],['oblicuos'],'Acostado co
 E('biering','Extensión isométrica de espalda (segundos)','Banco romano',['lumbar'],['gluteos','isquios'],'Torso en el aire, cuerpo en línea con las piernas: sostené sin arquear.',null,{time:1,joint:1}),
 E('deadhang','Colgarse de la barra (segundos)','Barra fija',['antebrazos'],['dorsales','hombros'],'Colgado con los brazos estirados y los hombros activos. Descomprime y fortalece el agarre.',null,{time:1,joint:1}),
 E('extrot','Rotación externa con banda','Banda',['hombros'],['trapecio'],'Codo pegado al cuerpo a 90°: llevá la mano hacia afuera contra la banda, lento.',null,{joint:1}),
-E('wallslide','Deslizamiento en la pared','Peso corporal',['hombros'],['trapecio'],'Espalda y brazos contra la pared: subí los brazos sin despegarlos. Movilidad de hombro.',null,{joint:1})
+E('wallslide','Deslizamiento en la pared','Peso corporal',['hombros'],['trapecio'],'Espalda y brazos contra la pared: subí los brazos sin despegarlos. Movilidad de hombro.',null,{joint:1}),
+E('cmj','Salto vertical','Peso corporal',['cuadriceps','gluteos'],['gemelos'],'Bajá rápido a un cuarto de sentadilla y saltá lo más alto que puedas usando los brazos. Caé suave.',null,{power:1}),
+E('broadjump','Salto en largo','Peso corporal',['gluteos','cuadriceps'],['isquios','gemelos'],'Desde parado, balanceá los brazos y saltá lo más lejos posible con los dos pies. Aguantá la caída.',null,{power:1}),
+E('pogo','Saltitos de tobillo','Peso corporal',['gemelos'],['cuadriceps'],'Saltos cortos y rápidos casi sin doblar las rodillas, rebotando como un resorte.',null,{power:1}),
+E('skater','Saltos de patinador','Peso corporal',['gluteos','aductores'],['cuadriceps','gemelos'],'Saltá de costado de una pierna a la otra y frená firme cada caída.',null,{power:1}),
+E('sprint','Sprint 20 m','Peso corporal',['isquios','cuadriceps'],['gluteos','gemelos'],'Sprint corto al máximo con descanso completo entre cada uno (1-2 min). Cada repetición es un sprint.',null,{power:1})
 ];
 /* largo de cada variante de calistenia: hasta dónde empieza la siguiente de su familia */
 (()=>{const fam={};EX.forEach(e=>{if(e.sk)(fam[e.sk.f]=fam[e.sk.f]||[]).push(e);});
@@ -2182,6 +2194,7 @@ function genPlan(d){
     if(!changed)break;
   }
   if(db.settings.jointBlock)plan.forEach(r=>{r.items=jBlock().concat(r.items);});
+  if(db.settings.athBlock)plan.forEach(r=>{if(!preMatch(r)){const k=r.items.filter(it=>it.prehab).length;r.items.splice(k,0,...aBlock());}});
   plan.forEach(r=>d.min?fitTime(r,+d.min):(r.min=routineMinutes(r)));
   plan.vol=weekVolume(plan);plan.gs=gs;
   return plan;
@@ -2999,6 +3012,7 @@ function cmdItems(){
     {g:'Acciones',i:'spark',n:'Armar una rutina',a:'genOpen',k:'generar rutina plan'},
     {g:'Acciones',i:'tree',n:'Árbol de habilidades',a:'treeOpen',k:'calistenia skills habilidades'},
     {g:'Acciones',i:'user',n:'Amigos y ranking',a:'socOpen',k:'amigos ranking temporada social'},
+    {g:'Acciones',i:'bolt',n:'Atleta: salto, velocidad y potencia',a:'aOpen',k:'atleta salto vertical sprint velocidad potencia pliometria'},
     {g:'Acciones',i:'heart',n:'Articulaciones de acero',a:'jOpen',k:'articulaciones rodilla tobillo hombro espalda tendon cartilago prevencion lesiones'},
     {g:'Acciones',i:'weight',n:'Powerlifting: total y DOTS',a:'plOpen',k:'powerlifting total dots sentadilla banca peso muerto'},
     {g:'Acciones',i:'rank',n:'Ver mi carta',a:'cardOpen',k:'carta tarjeta compartir'},
@@ -3302,6 +3316,12 @@ Object.assign(TECH,{
     cues:['Subí la pelota bien arriba','Tirala al piso con todo el cuerpo','Doblá las piernas al lanzar','Agarrala del rebote y repetí'],err:'Lanzar solo con los brazos'},
   carry:{eq:['floor'],A:{h:[61,26],n:[60,36],p:[60,66],k:[66,88],f:[70,110],k2:[54,88],f2:[50,110],e:[60,51],a:[60,66],b:[60,68]},B:{h:[61,28],n:[60,38],p:[60,68],k:[54,88],f:[50,110],k2:[66,88],f2:[70,110],e:[60,53],a:[60,68],b:[60,70]},
     cues:['Peso pesado en cada mano','Pecho arriba y hombros atrás','Pasos cortos y firmes','Abdomen apretado'],err:'Encorvarse o inclinarse para un lado'},
+  vjump:{eq:['floor'],A:{h:[64,46],n:[62,56],p:[48,80],k:[64,92],f:[58,110],e:[52,70],a:[44,82]},B:{h:[61,14],n:[60,24],p:[59,54],k:[60,74],f:[60,94],e:[62,12],a:[63,2]},
+    cues:['Bajada rápida a un cuarto de sentadilla','Usá los brazos: tiralos hacia arriba','Extendé tobillos, rodillas y cadera juntos','Caé suave, con las rodillas dobladas'],err:'Bajar demasiado lento (se pierde el rebote)'},
+  broad:{eq:['floor'],A:{h:[44,54],n:[38,62],p:[22,84],k:[38,94],f:[30,110],e:[28,74],a:[20,82]},B:{h:[98,54],n:[92,62],p:[78,86],k:[96,94],f:[88,110],e:[100,72],a:[108,66]},
+    cues:['Balanceá los brazos atrás y adelante','Empujá con todo hacia adelante y arriba','Caé con los dos pies y aguantá la posición','Descansá bien entre saltos'],err:'Caer con las rodillas hacia adentro'},
+  sprint:{eq:['floor'],A:{h:[66,26],n:[64,36],p:[58,66],k:[74,80],f:[68,100],k2:[50,88],f2:[38,104],e:[54,50],a:[60,62],e2:[74,46],a2:[80,36]},B:{h:[66,26],n:[64,36],p:[58,66],k:[50,88],f:[38,104],k2:[74,80],f2:[68,100],e:[74,46],a:[80,36],e2:[54,50],a2:[60,62]},
+    cues:['Primeros pasos cortos y potentes, inclinado','Brazos fuertes, de la cadera a la cara','Pisá debajo del cuerpo, no adelante','Descanso completo entre sprints'],err:'Hacerlos cansado: pierde el sentido'},
   hang:{eq:['pullbar'],A:{h:[60,30],n:[60,40],p:[60,72],k:[60,90],f:[60,106],e:[60,26],a:[60,12]},B:{h:[61,31],n:[60,41],p:[61,73],k:[62,91],f:[62,107],e:[60,26],a:[60,12]},
     cues:['Agarre firme, brazos estirados','Hombros activos (alejalos un poco de las orejas)','Cuerpo quieto, sin balancearte','Respirá tranquilo'],err:'Soltar los hombros del todo'},
   neck:{eq:['floor'],A:{h:[61,26],n:[60,36],p:[59,66],k:[60,88],f:[60,110],e:[72,38],a:[68,24]},B:{h:[60,26],n:[60,36],p:[59,66],k:[60,88],f:[60,110],e:[71,38],a:[67,24]},
@@ -3318,7 +3338,7 @@ function techOf(ex){
     planchepush:'planche',dips:'dip',benchdip:'dip',ringdip:'dip',lunge:'lunge',bulgarian:'lunge',curl:'curl',dbcurl:'curl',hammer:'curl',
     lateral:'lateral',plank:'plank',calf:'calf',seatedcalf:'calf',pppush:'pushup',
     cablefly:'fly',dbfly:'bench',shrug:'shrug',pushdown:'pushdown',skull:'skull',wrist:'wrist',legext:'legext',legcurl:'legcurl',crunch:'crunch',legraise:'legraise',
-    russian:'russian',flag:'flag',spansq:'squat',tibraise:'calf',slcalf:'calf',slbal:'calf',kneewall:'lunge',slbridge:'thrust',sidepl:'sideplank',birddog:'plank',curlup:'crunch',biering:'hinge',deadhang:'hang',extrot:'pallof',wallslide:'press',boxjump:'jump',nordic:'nordic',copenhagen:'sideplank',pallof:'pallof',medslam:'slam',farmer:'carry',neckiso:'neck'};
+    russian:'russian',flag:'flag',spansq:'squat',tibraise:'calf',slcalf:'calf',slbal:'calf',kneewall:'lunge',slbridge:'thrust',sidepl:'sideplank',birddog:'plank',curlup:'crunch',biering:'hinge',deadhang:'hang',extrot:'pallof',wallslide:'press',cmj:'vjump',broadjump:'broad',pogo:'calf',skater:'lunge',sprint:'sprint',boxjump:'jump',nordic:'nordic',copenhagen:'sideplank',pallof:'pallof',medslam:'slam',farmer:'carry',neckiso:'neck'};
   if(M[id])return M[id];
   /* ejercicios propios: la figura del músculo principal */
   const BYM={pecho:'bench',dorsales:'row',trapecio:'shrug',hombros:'press',biceps:'curl',triceps:'pushdown',antebrazos:'wrist',cuadriceps:'squat',isquios:'legcurl',gluteos:'thrust',gemelos:'calf',aductores:'sideplank',lumbar:'hinge',abs:'crunch',oblicuos:'russian'};
@@ -3615,12 +3635,12 @@ const routineMinutes=r=>Math.round(6+(r.items||[]).reduce((s,it)=>s+itemMin(it,r
 function fitTime(r,target){
   if(!target)return r;let g=0;
   while(routineMinutes(r)>target+4&&g++<40){
-    const np=r.items.filter(it=>!it.prehab),acc=np.map((it,i)=>({it,i})).filter(x=>x.i>=2&&!x.it.main);
+    const np=r.items.filter(it=>!it.prehab&&!it.power),acc=np.map((it,i)=>({it,i})).filter(x=>x.i>=2&&!x.it.main);
     const c=acc.filter(x=>x.it.sets>2).sort((a,b)=>b.it.sets-a.it.sets)[0];
     if(c)c.it.sets--;else if(r.items.length>3&&!r.items[r.items.length-1].main)r.items.pop();
     else{const m=r.items.find(it=>it.sets>3);if(m)m.sets--;else break;}
   }
-  g=0;while(routineMinutes(r)<target-10&&g++<20){const c=r.items.filter(it=>!it.prehab).filter((it,i)=>i>=1&&!it.main&&it.sets<4).sort((a,b)=>a.sets-b.sets)[0];if(!c)break;c.sets++;}
+  g=0;while(routineMinutes(r)<target-10&&g++<20){const c=r.items.filter(it=>!it.prehab&&!it.power).filter((it,i)=>i>=1&&!it.main&&it.sets<4).sort((a,b)=>a.sets-b.sets)[0];if(!c)break;c.sets++;}
   r.min=routineMinutes(r);return r;
 }
 
@@ -3645,6 +3665,7 @@ function plPlan(d){
     return{name:'Powerlifting · '+lifts.map(x=>PL_LIFT[x]?PL_LIFT[x].n:shortN(exById(x).n)).join(' + '),days:[days[i]],items,rest:180,note:notes.join(' · '),pl:1};
   });
   if(db.settings.jointBlock)plan.forEach(r=>{r.items=jBlock().concat(r.items);});
+  if(db.settings.athBlock)plan.forEach(r=>{if(!preMatch(r)){const k=r.items.filter(it=>it.prehab).length;r.items.splice(k,0,...aBlock());}});
   if(d.min)plan.forEach(r=>fitTime(r,+d.min));else plan.forEach(r=>r.min=routineMinutes(r));
   plan.vol=weekVolume(plan);plan.gs=['pl'];plan.extra=all.length>4?all.length-4:0;
   return plan;
@@ -3700,7 +3721,7 @@ function caminosCard(){
    t('cali','img/cali.jpg','Calistenia',sk+' de 39 habilidades','treeOpen')+
    t('pl','img/fuerza.jpg','Powerlifting',s.total?'Total '+num(s.total,0)+' kg'+(s.all3?' · '+Math.round(s.dots)+' DOTS':''):'Sentadilla, banca y peso muerto','plOpen')+
    t('art','img/salud.jpg','Articulaciones de acero','Índice '+jScore()+' de 100'+(db.settings.jointBlock?' · bloque activo':''),'jOpen')+
-   t('atl','img/dep.jpg','Atleta','Salto, velocidad y potencia','soon',1)+'</div></div>';
+   t('atl','img/dep.jpg','Atleta',(athIndex()==null?'Salto, velocidad y potencia':'Índice '+athIndex()+' · '+athLvl(athIndex()))+(db.settings.athBlock?' · bloque activo':''),'aOpen')+'</div></div>';
 }
 
 /* ============ Articulaciones de acero ============
@@ -3754,6 +3775,65 @@ function jointsHTML(){
    '<p><b>Lo más probado:</b> el curl nórdico baja a la mitad o menos los desgarros de isquios; el Copenhague bajó 41 % los problemas de ingle en futbolistas; el equilibrio a una pierna baja ~35 % los esguinces de tobillo.</p>'+
    '<p><b>Hombro y espalda:</b> rotadores fuertes y un tronco resistente ayudan, aunque la evidencia es más débil: son de mantenimiento.</p>'+
    '<p>Esto es prevención, no tratamiento: si tenés dolor fuerte o una lesión, consultá a un profesional.</p></div></details>';
+  return h;
+}
+
+/* ============ Atleta: salto, potencia y velocidad ============
+   Evidencia: la pliometría mejora el salto vertical y el sprint (efectos chicos a moderados), más en programas de 7+ semanas;
+   calidad antes que cantidad, descansos largos y nada de saltos pesados el día antes de un partido.
+   Las escalas son referencias aproximadas para adultos (las mujeres y los menores de 16 se ajustan). */
+const ATH_T=[
+  {k:'cmj',n:'Salto vertical',u:'cm',i:'up',g:'Salto',S:[[25,0],[35,30],[45,60],[55,80],[65,95],[70,100]],how:'Marcá en la pared lo más alto que llegás parado y después saltando: la diferencia.'},
+  {k:'box',n:'Salto al cajón',u:'cm',i:'up',g:'Salto',S:[[30,0],[50,40],[70,75],[90,100]],how:'La altura del cajón más alto al que subís saltando con los dos pies.'},
+  {k:'broad',n:'Salto en largo',u:'cm',i:'right',g:'Potencia',S:[[160,0],[200,30],[230,60],[260,85],[290,100]],how:'Desde una línea, con los dos pies, hasta el talón de atrás.'},
+  {k:'sprint',n:'Sprint 20 m',u:'s',i:'run',g:'Velocidad',low:1,S:[[4,0],[3.5,30],[3.2,60],[3,80],[2.85,95],[2.75,100]],how:'Con salida parada, tomá el tiempo con alguien o con el cronómetro del celu.'}
+];
+function athAdj(t,v){const p=db.profile||{},f=p.sex==='f',y=(p.age||25)<16;
+  if(t.low)return v-(f?.3:0)-(y?.2:0);return v/((f?.82:1)*(y?.9:1));}
+function athScore(t,v){
+  if(!(v>0))return null;const x=athAdj(t,v),S=t.S;
+  if(t.low){if(x>=S[0][0])return 0;for(let i=1;i<S.length;i++)if(x>=S[i][0]){const a=S[i-1],b=S[i];return a[1]+(b[1]-a[1])*(a[0]-x)/(a[0]-b[0]);}return 100;}
+  if(x<=S[0][0])return 0;for(let i=1;i<S.length;i++)if(x<=S[i][0]){const a=S[i-1],b=S[i];return a[1]+(b[1]-a[1])*(x-a[0])/(b[0]-a[0]);}return 100;
+}
+const athList=k=>((db.settings.ath||{})[k]||[]);
+function athBest(t){const l=athList(t.k).map(x=>x[1]);return l.length?(t.low?Math.min(...l):Math.max(...l)):0;}
+function athIndex(){const s=ATH_T.map(t=>athScore(t,athBest(t))).filter(x=>x!=null);return s.length?Math.round(s.reduce((a,b)=>a+b,0)/s.length):null;}
+const athLvl=s=>s==null?'Sin medir':s<30?'En desarrollo':s<55?'Bueno':s<75?'Muy bueno':s<90?'Excelente':'Élite';
+/* bloque de potencia según tu deporte (~10 min, después del calentamiento y antes de los básicos) */
+function aBlock(){
+  const sp=(db.profile&&db.profile.sports)||[],its=[{ex:'cmj',sets:3,reps:3,power:1}];
+  const add=(ex,s,r)=>{if(exById(ex)&&!its.some(i=>i.ex===ex)&&its.length<3)its.push({ex,sets:s,reps:r,power:1});};
+  if(sp.some(x=>['rugby','futbol','hockey'].includes(x)))add('sprint',1,5);
+  if(sp.some(x=>['basquet','voley'].includes(x)))add('boxjump',3,3);
+  if(sp.includes('tenis'))add('skater',3,6);
+  if(sp.includes('combate'))add('medslam',3,5);
+  if(sp.some(x=>['running','ciclismo'].includes(x)))add('pogo',2,15);
+  add('broadjump',3,3);add('pogo',2,15);
+  return its;
+}
+/* no va en rutinas que caen todas el día antes de un partido */
+const preMatch=r=>(r.days||[]).length&&r.days.every(d=>dayInfo((d+1)%7).type==='match');
+function aApplyBlock(on){
+  db.routines.forEach(r=>{r.items=r.items.filter(it=>!it.power);if(on&&!r.skill&&!preMatch(r)){const k=r.items.filter(it=>it.prehab).length;r.items.splice(k,0,...aBlock());}});
+  db.settings.athBlock=!!on;save();
+}
+function athHTML(){
+  const idx=athIndex(),C=2*Math.PI*42,on=!!db.settings.athBlock;
+  const grp={};ATH_T.forEach(t=>{const s=athScore(t,athBest(t));if(s!=null)(grp[t.g]=grp[t.g]||[]).push(s);});
+  const bars=['Salto','Potencia','Velocidad'].map(g=>{const v=grp[g]?Math.round(grp[g].reduce((a,b)=>a+b,0)/grp[g].length):null;return '<div class="ab"><span>'+g+'</span><span class="bar"><i style="width:'+(v||0)+'%"></i></span><b>'+(v==null?'—':v)+'</b></div>';}).join('');
+  let h='<div class="ath-hero"><div class="jt-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" class="jt-trk"/><circle cx="50" cy="50" r="42" class="jt-prog ath" style="stroke-dasharray:'+(C*(idx||0)/100).toFixed(1)+' '+C.toFixed(1)+'"/></svg><b>'+(idx==null?'—':idx)+'</b><small>'+athLvl(idx)+'</small></div><div class="ath-bars">'+bars+'</div></div>';
+  h+='<div class="card jt-block'+(on?' on':'')+'" style="margin:12px 0"><div class="row" style="gap:10px"><span class="mi-ic">'+ic('bolt',16)+'</span><div class="grow"><b>Bloque de potencia en tus rutinas</b><br><span class="mut sm-t">'+(on?'Activo: ':'~10 min antes de los básicos, según tu deporte: ')+esc(aBlock().map(i=>shortN(exById(i.ex).n)).join(', '))+'</span></div></div>'+
+   '<div class="g2" style="margin-top:10px">'+(on?'<button class="btn" data-a="aBlock" data-v="0">Quitar</button><button class="btn pri" data-a="aBlock" data-v="1">Actualizar</button>':'<button class="btn" data-a="aNow">'+ic('play',16)+' Sesión de potencia</button><button class="btn pri" data-a="aBlock" data-v="1">Sumar a mis rutinas</button>')+'</div></div>';
+  h+=ATH_T.map(t=>{const b=athBest(t),s=athScore(t,b);
+    return '<div class="jz" style="--zc:'+(s==null?'var(--line)':jCol(s/100))+'"><div class="jz-h"><span class="mi-ic">'+ic(t.i,16)+'</span><div class="grow"><b>'+t.n+'</b><span class="mut sm-t">'+(b?'Tu mejor: '+num(b,t.u==='s'?2:0)+' '+t.u+' · '+athLvl(s):'Sin medir')+'</span></div>'+(s!=null?'<b class="jz-p">'+Math.round(s)+'</b>':'')+'</div>'+
+     '<p class="mut sm-t" style="margin:6px 0 8px">'+esc(t.how)+'</p>'+
+     '<div class="jtest"><span class="grow mut sm-t">Cargá tu resultado</span><input type="text" inputmode="decimal" placeholder="'+t.u+'" data-at="'+t.k+'" aria-label="'+esc(t.n)+'"><button class="btn sm" data-a="aSave" data-v="'+t.k+'">Guardar</button></div></div>';}).join('');
+  h+='<details class="why"><summary>¿Cómo se entrena la potencia?</summary><div class="mut sm-t">'+
+   '<p><b>Pliometría:</b> saltos y rebotes mejoran el salto vertical y el sprint. El efecto es real pero gradual: se nota más después de 7 semanas o más.</p>'+
+   '<p><b>Calidad, no cantidad:</b> pocas repeticiones al máximo, con descanso completo (2-3 minutos). Si se vuelven lentas, cortá.</p>'+
+   '<p><b>Cuándo:</b> al principio de la sesión, fresco. Nada de saltos fuertes el día antes de un partido (por eso el bloque no se suma ahí).</p>'+
+   '<p><b>Fuerza primero:</b> una buena sentadilla y peso muerto hacen que los saltos rindan más.</p>'+
+   '<p>Las escalas son aproximadas para adultos y se ajustan para mujeres y menores de 16.</p></div></details>';
   return h;
 }
 
@@ -4453,6 +4533,7 @@ function modalBody(m,l2){
     case 'rimport':return sheet('Rutina compartida',rimportHTML(m));
     case 'pl':return sheet('Powerlifting',plHTML());
     case 'joints':return sheet('Articulaciones de acero',jointsHTML());
+    case 'ath':return sheet('Atleta',athHTML());
     case 'tree':return sheet('Árbol de habilidades',treeWrap(m));
     case 'skplan':return sheet('Tu camino',skPlanHTML(skillPlan(m.id)),{l2:true});
     case 'excreate':return sheet('Ejercicio propio',exCreateHTML(m.d),{l2:true});
@@ -4874,6 +4955,15 @@ const ACTIONS={
     if(db.settings.jointBlock)jApplyBlock(true);else save();renderModal();},
   jBlock(v){jApplyBlock(v==='1');renderModal();toast(v==='1'?'Listo: tus rutinas arrancan con el bloque de articulaciones':'Bloque quitado de tus rutinas');},
   jNow(){const items=[];JZ.forEach(z=>{const [id,s,r]=z.ex[0];if(exById(id))items.push({ex:id,sets:2,reps:r});});S.modal=null;startSession(null,null,{name:'Articulaciones de acero',items,rest:45});},
+  aOpen(){S.modal={t:'ath'};render();},
+  aSave(v){const i=document.querySelector('[data-at="'+v+'"]'),n=parseFloat(String(i&&i.value||'').replace(',','.')),t=ATH_T.find(x=>x.k===v);
+    if(!t||!(n>0&&n<(t.u==='s'?20:400)))return toast(t&&t.u==='s'?'Poné el tiempo en segundos (ej: 3,2)':'Poné tu resultado en centímetros');
+    const a=db.settings.ath=db.settings.ath||{};(a[v]=a[v]||[]).push([today(),Math.round(n*100)/100]);
+    const prev=athList(v).slice(0,-1).map(x=>x[1]),rec=prev.length&&(t.low?n<Math.min(...prev):n>Math.max(...prev));
+    if(rec)addEv({k:'pr',x:v==='sprint'?'sprint':v==='broad'?'broadjump':v==='box'?'boxjump':'cmj'});
+    save();renderModal();toast(rec?'¡Récord!':'Guardado');if(rec)confetti(30);},
+  aBlock(v){aApplyBlock(v==='1');renderModal();toast(v==='1'?'Listo: tus rutinas suman el bloque de potencia (menos las del día antes de un partido)':'Bloque de potencia quitado');},
+  aNow(){S.modal=null;startSession(null,null,{name:'Potencia de atleta',items:[{ex:'cmj',sets:3,reps:3},{ex:'broadjump',sets:3,reps:3},{ex:'sprint',sets:1,reps:5},{ex:'skater',sets:2,reps:6},{ex:'medslam',sets:3,reps:5}],rest:120});},
   todayGo(){const pl=todayPlan(S.todaySeed||0);startSession(null,null,pl);},
   todayAlt(){S.todaySeed=(S.todaySeed||0)+1;render();},
   sumShare(){if(S.modal&&S.modal.t==='summary')pngShare(summarySVG(S.modal),'swole-entreno.png','Mi entreno en Swole');},
