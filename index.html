@@ -1148,6 +1148,33 @@ rect.tq-eq{stroke-width:1.5}
 @keyframes phZoom{from{transform:scale(1.08)}}
 @media (min-width:900px){.msheet:has(.rt-wrap){max-width:min(1000px,94vw)}.msheet:has(.rt-wrap) .rt-wrap{height:min(70vh,720px)}}
 .rt-fig .tq-floor,.rt-fig .tq-sh{display:none}.rt-n.lock .rt-fig{opacity:.55}.tech-fig .tq{width:130px;height:130px}
+.mback.onb{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.mback.onb .onb-in-wrap{min-height:100%;height:auto}
+.onb-c .week{margin-top:4px}
+
+/* árbol con aura */
+.rt-wrap{background:radial-gradient(70% 70% at 50% 50%,color-mix(in srgb,var(--acc) 16%,#0A0B14),#06070D 80%)}
+.rt-sky circle{fill:#fff;opacity:.5;animation:twk 4s ease-in-out infinite}
+@keyframes twk{0%,100%{opacity:.15}50%{opacity:.85}}
+.rt-neb.a{fill:url(#rtNebA);animation:neb 18s ease-in-out infinite alternate}
+.rt-neb.b{fill:url(#rtNebB);animation:neb 22s ease-in-out infinite alternate-reverse}
+@keyframes neb{to{transform:translate(40px,-30px) scale(1.08)}}
+.rt-rays{transform-origin:0 0;animation:spin 60s linear infinite}
+.rt-rays line{stroke:color-mix(in srgb,var(--acc) 60%,#fff);stroke-width:2;opacity:.25;stroke-linecap:round}
+.rt-c-orbit{fill:none;stroke:color-mix(in srgb,var(--acc2) 70%,#fff);stroke-width:1.5;stroke-dasharray:4 10;opacity:.6;transform-origin:0 0;animation:spin 24s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.rt-c-bg{filter:drop-shadow(0 0 18px var(--acc)) drop-shadow(0 0 40px color-mix(in srgb,var(--acc2) 60%,transparent))}
+.rt-flow{stroke:color-mix(in srgb,var(--acc2) 60%,#fff);stroke-width:3;stroke-linecap:round;stroke-dasharray:3 16;animation:flow 1.6s linear infinite;opacity:.9;filter:drop-shadow(0 0 4px var(--acc2))}
+.rt-flow.weak{opacity:.4;animation-duration:2.6s}
+@keyframes flow{to{stroke-dashoffset:-19}}
+.rt-orb{fill:none;stroke:#FFD36B;stroke-width:2;stroke-dasharray:6 8;transform-origin:0 0;animation:spin 8s linear infinite;filter:drop-shadow(0 0 6px #FFC34D)}
+.rt-n.avail .rt-halo{fill:color-mix(in srgb,#FFC34D 20%,transparent)}
+.rt-n.done .rt-bg{filter:drop-shadow(0 0 10px var(--c)) drop-shadow(0 0 22px color-mix(in srgb,var(--c) 50%,transparent))}
+.rt-spk path{fill:#fff;transform-box:fill-box;transform-origin:center;animation:spk 2.4s ease-in-out infinite}
+@keyframes spk{0%,100%{opacity:0;transform:scale(.4)}50%{opacity:1;transform:scale(1)}}
+.rt-n.lock .rt-bg{fill:color-mix(in srgb,var(--surf) 70%,#000)}
+.rt-t{stroke:#06070D}.rt-bl{stroke:#06070D;fill:color-mix(in srgb,var(--acc) 50%,#fff)}
+@media (prefers-reduced-motion:reduce){.rt-sky circle,.rt-neb,.rt-rays,.rt-c-orbit,.rt-flow,.rt-orb,.rt-spk path{animation:none!important}}
 </style>
 </head>
 <body>
@@ -3409,6 +3436,11 @@ function rtLayout(){
     b.nodes.forEach((n,i)=>{const r=185+i*108;out.push({b,bi,i,n,ang,x:Math.cos(ang)*r,y:Math.sin(ang)*r,s:nodeState(b,i)});});});
   return out;
 }
+function rtSky(){
+  let s='<g class="rt-sky">',seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+  for(let i=0;i<90;i++){const a=rnd()*Math.PI*2,d=120+rnd()*860,r=rnd()<.15?2.2:1+rnd();s+='<circle cx="'+(Math.cos(a)*d).toFixed(0)+'" cy="'+(Math.sin(a)*d).toFixed(0)+'" r="'+r.toFixed(1)+'" style="animation-delay:-'+(rnd()*5).toFixed(1)+'s;animation-duration:'+(3+rnd()*4).toFixed(1)+'s"/>';}
+  return s+'</g><circle class="rt-neb a" cx="-260" cy="-200" r="420"/><circle class="rt-neb b" cx="300" cy="260" r="460"/>';
+}
 function radialHTML(m){
   const L=rtLayout(),goal=db.settings.skillGoal,C=2*Math.PI*36;
   let edges='',nodes='',labels='';
@@ -3416,12 +3448,12 @@ function radialHTML(m){
   Object.values(byB).forEach(ps=>{
     const a=ps[0].ang;labels+='<text class="rt-bl" x="'+(Math.cos(a)*118).toFixed(1)+'" y="'+(Math.sin(a)*118+4).toFixed(1)+'" text-anchor="middle">'+esc(ps[0].b.n)+'</text>';
     ps.forEach((p,i)=>{const px=i?ps[i-1].x:Math.cos(a)*58,py=i?ps[i-1].y:Math.sin(a)*58,on=p.s.done||p.s.avail,len=Math.hypot(p.x-px,p.y-py);
-      edges+='<line class="rt-e'+(p.s.done?' done':on?' on':'')+'" x1="'+px.toFixed(1)+'" y1="'+py.toFixed(1)+'" x2="'+p.x.toFixed(1)+'" y2="'+p.y.toFixed(1)+'" style="--l:'+len.toFixed(0)+';--d:'+(i*90+p.bi*25)+'ms"/>';});
+      edges+='<line class="rt-e'+(p.s.done?' done':on?' on':'')+'" x1="'+px.toFixed(1)+'" y1="'+py.toFixed(1)+'" x2="'+p.x.toFixed(1)+'" y2="'+p.y.toFixed(1)+'" style="--l:'+len.toFixed(0)+';--d:'+(i*90+p.bi*25)+'ms"/>'+(p.s.done||p.s.avail?'<line class="rt-flow'+(p.s.done?'':' weak')+'" x1="'+px.toFixed(1)+'" y1="'+py.toFixed(1)+'" x2="'+p.x.toFixed(1)+'" y2="'+p.y.toFixed(1)+'"/>':'');});
   });
   L.forEach(p=>{
     const s=p.s,ex=p.n.ex,col=TCOL[nodeTier(ex)],cls=s.done?'done':s.avail?'avail':'lock',sel=m.sel===p.n.id,id='rc'+p.bi+'_'+p.i;
     nodes+='<g class="rt-n '+cls+(sel?' sel':'')+(goal&&goal.id===p.n.id?' goal':'')+'" data-a="treeSel" data-v="'+p.n.id+'" transform="translate('+p.x.toFixed(1)+' '+p.y.toFixed(1)+')" style="--c:'+col+';--d:'+(p.i*90+p.bi*25+120)+'ms" tabindex="0" role="button" aria-label="'+esc(shortN(ex.n))+'">'+
-     '<g class="rt-in"><circle class="rt-halo" r="46"/><circle class="rt-bg" r="36"/>'+
+     '<g class="rt-in"><circle class="rt-halo" r="46"/>'+(s.avail?'<circle class="rt-orb" r="45"/>':'')+(s.done?'<g class="rt-spk"><path d="M-40 -30l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/><path d="M38 26l1.5 3.5 3.5 1.5-3.5 1.5-1.5 3.5-1.5-3.5-3.5-1.5 3.5-1.5z" style="animation-delay:-1.2s"/></g>':'')+'<circle class="rt-bg" r="36"/>'+
      (techOf(ex)?techSVG(techOf(ex),true).replace('<svg class="tq st"','<svg class="tq st rt-fig" x="-27" y="-29" width="54" height="54"')
         :'<g class="rt-ic" transform="translate(-13 -13) scale(1.1)">'+ic(RT_IC[p.b.f]||'acro',24).replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'')+'</g>')+
      '<circle class="rt-ring" r="36" style="stroke-dasharray:'+(C*s.pct).toFixed(1)+' '+C.toFixed(1)+'"/>'+
@@ -3429,11 +3461,11 @@ function radialHTML(m){
      '<text class="rt-t" y="56" text-anchor="middle">'+esc(RT_SHORT[p.n.id]||shortN(ex.n).slice(0,16))+'</text></g></g>';
   });
   const mastered=L.filter(p=>p.s.done).length,ini=((db.profile&&db.profile.nick)||'V').trim().slice(0,1).toUpperCase();
-  const ctr='<g class="rt-c"><circle class="rt-c-glow" r="70"/><circle class="rt-c-bg" r="52"/><text class="rt-c-i" y="-2" text-anchor="middle">'+esc(ini)+'</text><text class="rt-c-n" y="22" text-anchor="middle">'+mastered+' de '+L.length+'</text></g>';
+  const ctr='<g class="rt-c"><g class="rt-rays">'+Array.from({length:24},(_,i)=>{const a=i*Math.PI/12,l=i%2?120:170;return '<line x1="'+(Math.cos(a)*58).toFixed(1)+'" y1="'+(Math.sin(a)*58).toFixed(1)+'" x2="'+(Math.cos(a)*l).toFixed(1)+'" y2="'+(Math.sin(a)*l).toFixed(1)+'"/>';}).join('')+'</g><circle class="rt-c-orbit" r="82"/><circle class="rt-c-glow" r="70"/><circle class="rt-c-bg" r="52"/><text class="rt-c-i" y="-2" text-anchor="middle">'+esc(ini)+'</text><text class="rt-c-n" y="22" text-anchor="middle">'+mastered+' de '+L.length+'</text></g>';
   const v=S.rt||{x:0,y:0,w:820};
   return '<div class="rt-wrap" id="rtWrap" data-noswipe><svg id="rtSvg" viewBox="'+(v.x-v.w/2)+' '+(v.y-v.w/2)+' '+v.w+' '+v.w+'" aria-label="Árbol de habilidades">'+
-   '<defs><radialGradient id="rtBgG"><stop offset="0" stop-color="var(--acc)" stop-opacity=".22"/><stop offset="1" stop-color="var(--acc)" stop-opacity="0"/></radialGradient></defs>'+
-   '<circle r="900" fill="url(#rtBgG)"/>'+[185,293,401,509,617,725,833].map(r=>'<circle class="rt-ring-bg" r="'+r+'"/>').join('')+
+   '<defs><radialGradient id="rtNebA"><stop offset="0" stop-color="var(--acc)" stop-opacity=".28"/><stop offset="1" stop-color="var(--acc)" stop-opacity="0"/></radialGradient><radialGradient id="rtNebB"><stop offset="0" stop-color="var(--acc2)" stop-opacity=".2"/><stop offset="1" stop-color="var(--acc2)" stop-opacity="0"/></radialGradient><radialGradient id="rtBgG"><stop offset="0" stop-color="var(--acc)" stop-opacity=".22"/><stop offset="1" stop-color="var(--acc)" stop-opacity="0"/></radialGradient></defs>'+
+   '<circle r="900" fill="url(#rtBgG)"/>'+rtSky()+[185,293,401,509,617,725,833].map(r=>'<circle class="rt-ring-bg" r="'+r+'"/>').join('')+
    edges+labels+ctr+nodes+'</svg>'+
    '<div class="rt-ctrl"><button class="ib" data-a="rtZoom" data-v="in" aria-label="Acercar">'+ic('plus',18)+'</button><button class="ib" data-a="rtZoom" data-v="out" aria-label="Alejar">'+ic('minus',18)+'</button><button class="ib" data-a="rtZoom" data-v="home" aria-label="Centrar">'+ic('home',18)+'</button></div>'+
    '<p class="rt-hint">Arrastrá para moverte · pellizcá o usá + y − para el zoom</p></div>';
@@ -3586,7 +3618,7 @@ const ONB_SLIDES=[
   {t:'Cada músculo tiene su rango',p:'De Bronce a Élite. Con pesas o con calistenia, cada uno con su escala.'},
   {t:'Tu carta de atleta',p:'Sumá puntaje, desbloqueá logros y compartí tu carta.'}
 ];
-const ONB_N=ONB_SLIDES.length+5; /* 3 diapositivas + apodo + cuerpo + medidas + objetivo + el final */
+const ONB_N=ONB_SLIDES.length+6; /* 3 diapositivas + apodo + cuerpo + medidas + objetivo + el final */
 function onbHTML(m){
   const s=m.step||0,d=m.d;
   const bars='<div class="onb-bars">'+Array.from({length:ONB_N},(_,k)=>'<i class="'+(k<=s?'on':'')+'"></i>').join('')+'</div>';
@@ -3610,8 +3642,8 @@ function onbHTML(m){
     else if(q===2)body='<h2 class="onb-t left">Tus medidas</h2><p class="onb-p left">Con esto calculo tus niveles y tus calorías.</p>'+
       '<div class="g2"><label class="onb-lbl">Altura<input class="onb-in" type="number" inputmode="numeric" min="120" max="230" placeholder="cm" value="'+esc(d.height||'')+'" data-i="onb" data-f="height"></label>'+
       '<label class="onb-lbl">Peso<input class="onb-in" type="number" inputmode="decimal" step="0.1" min="30" max="250" placeholder="kg" value="'+esc(d.weight||'')+'" data-i="onb" data-f="weight"></label></div>';
-    else if(q===3){body='<h2 class="onb-t left">¿Qué buscás?</h2><div class="onb-opts col">'+[['bulk','muscle','Ganar músculo'],['recomp','body','Recomponer: más músculo, menos grasa'],['cut','flame','Bajar grasa']].map(x=>'<button class="'+(d.goal===x[0]?'on':'')+'" data-a="onbSet" data-f="goal" data-v="'+x[0]+'">'+ic(x[1],20)+' '+x[2]+'</button>').join('')+'</div>'+
-      '<p class="onb-lbl" style="margin-top:14px">¿Hacés algún deporte? Podés elegir varios.</p><div class="ptiles">'+Object.keys(SPORTS).map(k=>photoTile(k,SPORTS[k].n,SPORTS[k].i,(d.sports||[]).includes(k),'onbSport',k)).join('')+'</div><div class="opt" style="margin-top:8px"><button class="'+(!(d.sports||[]).length?'on':'')+'" data-a="onbSport" data-v="">Ninguno por ahora</button></div>';btn='Listo';}
+    else if(q===3){d.goals=d.goals||[];body='<h2 class="onb-t left">¿Qué querés lograr?</h2><p class="onb-p left">Podés elegir varios. Con esto armo tus rutinas y tus calorías.</p><div class="ptiles">'+Object.keys(GEN_GOALS).map(k=>photoTile(k,GEN_GOALS[k].n,GEN_GOALS[k].i,d.goals.includes(k),'onbGoal',k)).join('')+'</div>';btn='Siguiente';}
+    else if(q===4){body='<h2 class="onb-t left">Tu semana</h2><p class="onb-p left">Marcá tus deportes y qué días practicás, jugás o vas al gym. Lo podés cambiar cuando quieras en Perfil.</p>'+weekEditor();btn='Listo';}
     else{
       body='<div class="onb-art"><div class="onb-final">'+badge(0,120)+'</div></div><h2 class="onb-t">¡Bienvenid'+(d.sex==='f'?'a':'o')+', '+esc(d.nick||'atleta')+'!</h2><p class="onb-p">Todos arrancan en Bronce. Cargá tu primera marca y descubrí tu nivel real.</p>';
       btn='Cargar mi primera marca';alt='<button class="btn line wide" data-a="onbDone">Ir al inicio</button>';
@@ -4458,10 +4490,14 @@ const ACTIONS={
     if(q===1&&!(+d.age>=10&&+d.age<=90))return toast('Poné una edad entre 10 y 90');
     if(q===2&&!(+d.height>=120&&+d.height<=230))return toast('Poné una altura entre 120 y 230 cm');
     if(q===2&&!(+d.weight>=30&&+d.weight<=250))return toast('Poné un peso entre 30 y 250 kg');
-    if(q===3){db.profile={sex:d.sex,age:Math.round(+d.age),height:Math.round(+d.height),weight:+d.weight,activity:2,goal:d.goal,nick:String(d.nick).trim().slice(0,20),sports:(d.sports||[]).slice(),week:{},activity:'auto'};setWeight(+d.weight);db.settings.welcomed=1;save();}
+    if(q===3&&!(d.goals||[]).length)return toast('Elegí al menos un objetivo');
+    if(q===3&&!db.profile){const g=d.goals,goal=g.includes('grasa')?(g.some(x=>x==='hip'||x==='fuerza')?'recomp':'cut'):(g.includes('hip')||g.includes('fuerza'))?'bulk':'recomp';
+      db.profile={sex:d.sex,age:Math.round(+d.age),height:Math.round(+d.height),weight:+d.weight,goal,nick:String(d.nick).trim().slice(0,20),sports:[],week:{},activity:'auto'};setWeight(+d.weight);db.settings.welcomed=1;db.settings.gen={goals:g.slice(),eq:'gym',lvl:'beg'};save();}
+    else if(q===3&&db.profile){db.settings.gen=Object.assign({},db.settings.gen||{eq:'gym',lvl:'beg'},{goals:d.goals.slice()});save();}
     m.step++;renderModal();const i=document.querySelector('#modal .onb-in');if(i)setTimeout(()=>i.focus(),350);
   },
-  onbBack(){const m=S.modal;if(m.step>0&&!(db.profile&&m.step>=ONB_SLIDES.length+4)){m.step--;renderModal();}},
+  onbBack(){const m=S.modal;if(m.step>0&&!(db.profile&&m.step>=ONB_SLIDES.length+5)){m.step--;renderModal();}},
+  onbGoal(v){const g=S.modal.d.goals=S.modal.d.goals||[],i=g.indexOf(v);if(i>=0)g.splice(i,1);else g.push(v);renderModal();},
   onbSet(v,el){S.modal.d[el.dataset.f]=v;renderModal();},
   onbDone(){S.modal=null;goTab('inicio');render();checkAch();},
   onbFirst(){S.modal=null;goTab('niveles');render();ACTIONS.markOpen();},
