@@ -1051,6 +1051,102 @@ rect.tq-eq{stroke-width:1.5}
 .rec-r{display:flex;align-items:center;gap:10px;width:100%;padding:10px 0;border-top:1px solid var(--line);text-align:left}
 .rec-r:first-of-type{border-top:0}.rec-r b{display:block;font-size:14.5px}.rec-r small{display:block;font-size:12.5px}
 .rec-d{font-size:12px;color:var(--mut);white-space:nowrap}
+/* ===== Estética v5: color propio (Aurora y 3 más), degradés vivos y luz que respira ===== */
+:root:not(#_){--acc:#9B7BFF;--acc2:#FF5FA2;--glow:#3EE0D0;--acc-ink:#fff;
+  --grad:linear-gradient(135deg,var(--acc) 0%,color-mix(in srgb,var(--acc) 45%,var(--acc2)) 55%,var(--acc2) 100%)}
+:root[data-accent="fuego"]:not(#_){--acc:#FF7A45;--acc2:#FF3D7A;--glow:#FFC24B}
+:root[data-accent="oceano"]:not(#_){--acc:#3FA0FF;--acc2:#2FE0C8;--glow:#8E7BFF}
+:root[data-accent="lima"]:not(#_){--acc:#A8E83A;--acc2:#2FE0A0;--glow:#3FA0FF;--acc-ink:#0D1A05}
+:root[data-accent="lima"] .btn.pri,:root[data-accent="lima"] .fab,:root[data-accent="lima"] .nav .fab{color:#0D1A05}
+:root[data-theme="light"]:not(#_){--acc:#7A55F0;--acc2:#E83F86}
+:root[data-theme="light"][data-accent="fuego"]:not(#_){--acc:#E85A22;--acc2:#E02660}
+:root[data-theme="light"][data-accent="oceano"]:not(#_){--acc:#1F7FE0;--acc2:#0FB3A0}
+:root[data-theme="light"][data-accent="lima"]:not(#_){--acc:#5E9E0E;--acc2:#0F9E6A}
+/* fondo: auroras más vivas que respiran despacio */
+.bgfx{background:none}
+.bgfx::before,.bgfx::after{content:"";position:absolute;inset:-20%;pointer-events:none}
+.bgfx::before{background:
+  radial-gradient(40% 35% at 18% 8%,color-mix(in srgb,var(--acc) 42%,transparent),transparent 70%),
+  radial-gradient(35% 30% at 88% 22%,color-mix(in srgb,var(--acc2) 30%,transparent),transparent 70%),
+  radial-gradient(45% 35% at 70% 95%,color-mix(in srgb,var(--glow) 24%,transparent),transparent 70%);
+  animation:aurora 26s ease-in-out infinite alternate;opacity:1;mix-blend-mode:normal}
+.bgfx::after{inset:0;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:none}
+:root[data-theme="light"] .bgfx::before{opacity:.55}
+@keyframes aurora{0%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(3%,2%,0) scale(1.06)}100%{transform:translate3d(-3%,-1%,0) scale(1.02)}}
+@media (prefers-reduced-motion:reduce){.bgfx::before{animation:none}}
+/* acentos con degradé */
+.btn.pri,.fab{background:var(--grad);color:var(--acc-ink);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 8px 24px color-mix(in srgb,var(--acc) 35%,transparent)}
+@media (min-width:900px){.nav .fab{background:var(--grad);color:var(--acc-ink)}.nav .fab .ic{color:currentColor}}
+.bar i{background:var(--grad)}
+.nav-ind{background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 28%,var(--raise)),color-mix(in srgb,var(--acc2) 20%,var(--raise)))!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 40%,transparent)!important}
+@media (min-width:900px){.nav button.on{background:linear-gradient(90deg,color-mix(in srgb,var(--acc) 20%,var(--raise)),color-mix(in srgb,var(--acc2) 8%,transparent));box-shadow:inset 3px 0 0 var(--acc)}}
+.hello .pg{background:linear-gradient(100deg,var(--text) 30%,color-mix(in srgb,var(--acc) 70%,var(--text)) 65%,color-mix(in srgb,var(--acc2) 70%,var(--text)));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lh-k,.cmd-g{color:color-mix(in srgb,var(--acc) 55%,var(--mut))}
+.chip.on,.opt button.on,.seg button.on{background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 26%,var(--raise)),color-mix(in srgb,var(--acc2) 16%,var(--raise)));border-color:color-mix(in srgb,var(--acc) 50%,transparent)}
+.qi,.mi-ic,.cmd-ic,.gen-cta .gen-ic,.fd-ic{background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 22%,var(--raise)),color-mix(in srgb,var(--acc2) 14%,var(--raise)));color:color-mix(in srgb,var(--acc) 75%,var(--text));border-color:color-mix(in srgb,var(--acc) 30%,var(--line))}
+/* tarjeta destacada con borde de degradé */
+.lvl-hero{position:relative}
+.lvl-hero::after{content:"";display:block!important;position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--c,var(--acc)) 70%,transparent),transparent 40%,color-mix(in srgb,var(--acc2) 45%,transparent));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:none;left:0;width:auto;top:0;bottom:0}
+/* elegir color */
+.acc-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.acc-sw{display:grid;justify-items:center;gap:6px;padding:10px 4px;border-radius:14px;background:var(--raise);border:1.5px solid transparent;font-size:12.5px;font-weight:600}
+.acc-sw i{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--b));box-shadow:0 4px 14px color-mix(in srgb,var(--a) 45%,transparent)}
+.acc-sw.on{border-color:var(--acc)}
+
+/* árbol radial */
+.rt-wrap{position:relative;height:min(62vh,600px);margin:0 -18px;overflow:hidden;touch-action:none;border-block:1px solid var(--line);
+  background:radial-gradient(60% 60% at 50% 50%,color-mix(in srgb,var(--acc) 12%,transparent),transparent 75%)}
+#rtSvg{width:100%;height:100%;display:block;cursor:grab;user-select:none;-webkit-user-select:none}
+#rtSvg:active{cursor:grabbing}
+.rt-ring-bg{fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:3 10;opacity:.7}
+.rt-e{stroke:var(--line);stroke-width:5;stroke-linecap:round;stroke-dasharray:var(--l);stroke-dashoffset:var(--l);animation:rtDraw .8s cubic-bezier(.22,1,.36,1) var(--d) forwards}
+.rt-e.on{stroke:color-mix(in srgb,var(--acc) 55%,var(--line))}
+.rt-e.done{stroke:var(--acc);filter:drop-shadow(0 0 6px color-mix(in srgb,var(--acc) 70%,transparent))}
+@keyframes rtDraw{to{stroke-dashoffset:0}}
+.rt-n{cursor:pointer;outline:none}
+.rt-in{transform-origin:0 0;animation:rtPop .6s cubic-bezier(.34,1.45,.64,1) var(--d) both}
+@keyframes rtPop{from{transform:scale(0);opacity:0}}
+.rt-halo{fill:none;transform-origin:0 0}
+.rt-bg{fill:var(--surf);stroke:var(--line);stroke-width:2;transition:stroke .2s}
+.rt-ring{fill:none;stroke:var(--c);stroke-width:5;stroke-linecap:round;transform:rotate(-90deg);transform-origin:0 0}
+.rt-n.avail .rt-halo{fill:color-mix(in srgb,var(--acc) 22%,transparent);animation:rtPulse 2.4s ease-in-out infinite}
+.rt-n.done .rt-halo{fill:color-mix(in srgb,var(--c) 22%,transparent)}
+.rt-n.done .rt-bg{stroke:var(--c);stroke-width:3}
+.rt-n.lock{opacity:.5}.rt-n.lock .rt-img{filter:grayscale(1) brightness(.8)}
+.rt-n.goal .rt-bg{stroke:var(--acc2);stroke-width:3.5}
+.rt-n.sel .rt-bg{stroke:var(--text);stroke-width:3.5}
+.rt-n.sel .rt-in{animation:rtSel .45s cubic-bezier(.34,1.45,.64,1)}
+@keyframes rtSel{40%{transform:scale(1.15)}}
+.rt-n:hover .rt-bg{stroke:color-mix(in srgb,var(--acc) 70%,var(--line))}
+@keyframes rtPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.14);opacity:.45}}
+.rt-ic{color:var(--text)}.rt-ic *{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.rt-n.lock .rt-ic{color:var(--mut)}
+.rt-t{font:600 15px var(--f-b);fill:var(--text);paint-order:stroke;stroke:var(--bg);stroke-width:4px}
+.rt-n.lock .rt-t{fill:var(--mut)}
+.rt-bl{font:800 13px var(--f-d);fill:color-mix(in srgb,var(--acc) 70%,var(--text));letter-spacing:.08em;text-transform:uppercase;paint-order:stroke;stroke:var(--bg);stroke-width:4px}
+.rt-c-glow{fill:color-mix(in srgb,var(--acc) 28%,transparent);transform-origin:0 0;animation:rtPulse 3.2s ease-in-out infinite}
+.rt-c-bg{fill:var(--acc);stroke:color-mix(in srgb,var(--acc2) 70%,#fff);stroke-width:3}
+.rt-c-i{font:800 34px var(--f-d);fill:#fff}.rt-c-n{font:700 12px var(--f-b);fill:rgba(255,255,255,.9)}
+.rt-ok circle{fill:var(--ok)}.rt-ok path{fill:none;stroke:#fff;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.rt-lk circle{fill:var(--raise);stroke:var(--line)}.rt-lk rect,.rt-lk path{fill:none;stroke:var(--mut);stroke-width:1.6}
+.rt-ctrl{position:absolute;right:10px;top:10px;display:grid;gap:6px}
+.rt-ctrl .ib{background:color-mix(in srgb,var(--surf) 85%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid var(--line)}
+.rt-hint{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:11.5px;color:var(--mut);pointer-events:none}
+.mback.same .rt-in,.mback.same .rt-e{animation:none;stroke-dashoffset:0}
+.mback.same .rt-n.sel .rt-in{animation:rtSel .45s cubic-bezier(.34,1.45,.64,1)}
+@media (prefers-reduced-motion:reduce){.rt-in,.rt-e,.rt-halo,.rt-c-glow{animation:none!important;stroke-dashoffset:0}}
+
+/* foto del ejercicio */
+.ex-photo{position:relative;margin:0;border-radius:18px;overflow:hidden;aspect-ratio:16/10;background:var(--raise);animation:phIn .6s cubic-bezier(.22,1,.36,1) both}
+.ex-photo img{width:100%;height:100%;object-fit:cover;display:block;animation:phZoom 9s ease-out both}
+.ex-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(5,6,15,.6))}
+.ex-photo figcaption{position:absolute;right:8px;bottom:6px;z-index:1;font-size:10px;color:rgba(255,255,255,.75)}
+@keyframes phIn{from{opacity:0;transform:translateY(8px) scale(.98)}}
+@keyframes phZoom{from{transform:scale(1.08)}}
+@media (min-width:900px){.msheet:has(.rt-wrap){max-width:min(1000px,94vw)}.msheet:has(.rt-wrap) .rt-wrap{height:min(70vh,720px)}}
 </style>
 </head>
 <body>
@@ -1613,7 +1709,8 @@ function goTab(v){if(v==='hoy')v='inicio';if(['rutinas','cal'].includes(v)){S.ta
 let toastT=null;
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2800);}
 function effTheme(){const t=document.documentElement.dataset.theme;if(t)return t;return window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}
-function applyTheme(){const t=db.settings.theme;if(t==='auto')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=t;const b=$('#themeBtn');if(b)b.innerHTML=ic(effTheme()==='dark'?'sun':'moon');}
+const ACCENTS=[['aurora','Aurora','#9B7BFF','#FF5FA2'],['fuego','Fuego','#FF7A45','#FF3D7A'],['oceano','Océano','#3FA0FF','#2FE0C8'],['lima','Lima','#A8E83A','#2FE0A0']];
+function applyTheme(){const ac=db.settings.accent;if(ac&&ac!=='aurora')document.documentElement.dataset.accent=ac;else delete document.documentElement.dataset.accent;const t=db.settings.theme;if(t==='auto')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=t;const b=$('#themeBtn');if(b)b.innerHTML=ic(effTheme()==='dark'?'sun':'moon');}
 
 /* ============ Piezas reutilizables ============ */
 function miniMap(I){return '<div class="mini">'+bodyMap(I)+'</div>';}
@@ -3248,6 +3345,77 @@ function rimportHTML(m){
    '<button class="btn pri wide" style="margin-top:12px" data-a="rimportGo">Agregar a mis rutinas</button>';
 }
 
+/* fotos de ejercicios (Wikimedia Commons, créditos en TERCEROS.md) */
+const EXPH={"bench":{"a":"Al dayan","l":"CC BY-SA 3.0"},"incbench":{"a":"Everkinetic","l":"CC BY-SA 3.0"},"dbpress":{"a":"PTPioneer","l":"CC BY 2.0"},"dbfly":{"a":"Everkinetic","l":"CC BY-SA 3.0"},"cablefly":{"a":"Nenad Stojkovic","l":"CC BY 2.0"},"dips":{"a":"soh32's","l":"CC BY-SA 3.0"},"pullup":{"a":"PTPioneer","l":"CC BY 2.0"},"latpull":{"a":"No machine-readable author provided. GeorgeStepane","l":"CC BY-SA 3.0"},"row":{"a":"Everkinetic","l":"CC BY-SA 3.0"},"dbrow":{"a":"Eric Astrauskas, www.PTinTO.com","l":"CC BY 2.0"},"cablerow":{"a":"Everkinetic","l":"CC BY-SA 3.0"},"deadlift":{"a":"Nenad Stojkovic","l":"CC BY 2.0"},"shrug":{"a":"Everkineteic","l":"CC BY-SA 3.0"},"ohp":{"a":"Richardkiwi","l":"CC BY-SA 4.0"},"lateral":{"a":"No machine-readable author provided. GeorgeStepane","l":"CC BY-SA 3.0"},"dbcurl":{"a":"PTPioneer","l":"CC BY 2.0"},"pushdown":{"a":"No machine-readable author provided. GeorgeStepane","l":"CC BY-SA 3.0"},"skull":{"a":"No machine-readable author provided. GeorgeStepane","l":"CC BY-SA 3.0"},"wrist":{"a":"BruceBlaus","l":"CC BY-SA 4.0"},"squat":{"a":"Nenad Stojkovic","l":"CC BY 2.0"},"frontsquat":{"a":"Everkinetic","l":"CC BY-SA 3.0"},"legpress":{"a":"Teemeah","l":"CC BY-SA 4.0"},"legcurl":{"a":"No machine-readable author provided. GeorgeStepane","l":"CC BY-SA 3.0"},"rdl":{"a":"Everkinetic","l":"CC BY-SA 3.0"},"lunge":{"a":"Yashjoshi2102","l":"CC BY-SA 4.0"},"crunch":{"a":"PTPioneer","l":"CC BY 2.0"},"plank":{"a":"Jaykayfit","l":"CC BY-SA 3.0"},"austrow":{"a":"Colossus Fitness","l":"CC BY 3.0"},"oapull":{"a":"Bifty","l":"CC BY-SA 4.0"},"lsit":{"a":"Tommy Gilligan/West Point Public Affairs","l":"Public domain"},"wallhs":{"a":"Sascha Kohlmann","l":"CC BY-SA 3.0"},"freehs":{"a":"Yogazilla","l":"CC BY-SA 4.0"},"hspu":{"a":"autor en la página","l":"Public domain"},"fullbl":{"a":"Martin Rulsch, Wikimedia Commons","l":"CC BY-SA 4.0"},"fullpl":{"a":"Jonathanfv","l":"CC BY 3.0"},"boxjump":{"a":"Trougnouf","l":"CC BY 4.0"},"kbswing":{"a":"Taco fleur","l":"CC BY-SA 4.0"},"farmer":{"a":"stu_spivack","l":"CC BY-SA 2.0"},"medslam":{"a":"Staff Sgt. Clinton Firstbrook","l":"Public domain"}};
+/* ============ Árbol radial: de vos (el centro) hacia afuera ============ */
+const RT_IC={push:'dumb',pull:'up',dip:'down',legs:'muscle',lsit:'acro',hs:'up',fl:'lever',bl:'lever',pl:'planche',flag:'flag'};
+const RT_SHORT={kneepush:'De rodillas',pushup:'Flexiones',diamond:'Diamante',archerpush:'Arquero',pppush:'Pseudo planche',oapush:'A un brazo',planchepush:'En planche',austrow:'Remo invertido',pullup:'Dominadas',lpullup:'En L',archerpull:'Arquero',muscleup:'Muscle-up',oapull:'A un brazo',benchdip:'En banco',dips:'Paralelas',ringdip:'Anillas',airsquat:'Sentadilla',shrimp:'Shrimp',pistol:'Pistol',dragon:'Dragon pistol',tucklsit:'Encogido',lsit:'L-sit',vsit:'V-sit',wallhs:'En pared',freehs:'Libre',hspu:'Flexión en pared',freehspu:'Flexión libre',tuckfl:'Encogido',advfl:'Avanzado',straddlefl:'Abierto',fullfl:'Completo',tuckbl:'Encogido',straddlebl:'Abierto',fullbl:'Completo',tuckpl:'Encogida',advpl:'Avanzada',straddlepl:'Abierta',fullpl:'Completa',flag:'Bandera'};
+const exPhoto=id=>(typeof EXPH!=='undefined'&&EXPH[id])?'img/ex/'+id+'.jpg':null;
+function rtLayout(){
+  const bs=branches(),N=bs.length,out=[];
+  bs.forEach((b,bi)=>{const ang=-Math.PI/2+bi*2*Math.PI/N;
+    b.nodes.forEach((n,i)=>{const r=185+i*108;out.push({b,bi,i,n,ang,x:Math.cos(ang)*r,y:Math.sin(ang)*r,s:nodeState(b,i)});});});
+  return out;
+}
+function radialHTML(m){
+  const L=rtLayout(),goal=db.settings.skillGoal,C=2*Math.PI*36;
+  let edges='',nodes='',labels='';
+  const byB={};L.forEach(p=>(byB[p.bi]=byB[p.bi]||[]).push(p));
+  Object.values(byB).forEach(ps=>{
+    const a=ps[0].ang;labels+='<text class="rt-bl" x="'+(Math.cos(a)*118).toFixed(1)+'" y="'+(Math.sin(a)*118+4).toFixed(1)+'" text-anchor="middle">'+esc(ps[0].b.n)+'</text>';
+    ps.forEach((p,i)=>{const px=i?ps[i-1].x:Math.cos(a)*58,py=i?ps[i-1].y:Math.sin(a)*58,on=p.s.done||p.s.avail,len=Math.hypot(p.x-px,p.y-py);
+      edges+='<line class="rt-e'+(p.s.done?' done':on?' on':'')+'" x1="'+px.toFixed(1)+'" y1="'+py.toFixed(1)+'" x2="'+p.x.toFixed(1)+'" y2="'+p.y.toFixed(1)+'" style="--l:'+len.toFixed(0)+';--d:'+(i*90+p.bi*25)+'ms"/>';});
+  });
+  L.forEach(p=>{
+    const s=p.s,ex=p.n.ex,col=TCOL[nodeTier(ex)],ph=exPhoto(p.n.id),cls=s.done?'done':s.avail?'avail':'lock',sel=m.sel===p.n.id,id='rc'+p.bi+'_'+p.i;
+    nodes+='<g class="rt-n '+cls+(sel?' sel':'')+(goal&&goal.id===p.n.id?' goal':'')+'" data-a="treeSel" data-v="'+p.n.id+'" transform="translate('+p.x.toFixed(1)+' '+p.y.toFixed(1)+')" style="--c:'+col+';--d:'+(p.i*90+p.bi*25+120)+'ms" tabindex="0" role="button" aria-label="'+esc(shortN(ex.n))+'">'+
+     '<g class="rt-in"><circle class="rt-halo" r="46"/><circle class="rt-bg" r="36"/>'+
+     (ph?'<clipPath id="'+id+'"><circle r="31"/></clipPath><image href="'+ph+'" x="-31" y="-31" width="62" height="62" preserveAspectRatio="xMidYMid slice" clip-path="url(#'+id+')" class="rt-img"/>'
+        :'<g class="rt-ic" transform="translate(-13 -13) scale(1.1)">'+ic(RT_IC[p.b.f]||'acro',24).replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'')+'</g>')+
+     '<circle class="rt-ring" r="36" style="stroke-dasharray:'+(C*s.pct).toFixed(1)+' '+C.toFixed(1)+'"/>'+
+     (s.done?'<g class="rt-ok" transform="translate(24 -24)"><circle r="11"/><path d="M-5 0l3.5 3.5L5-4"/></g>':s.locked&&!s.best?'<g class="rt-lk" transform="translate(24 -24)"><circle r="11"/><rect x="-4.5" y="-1.5" width="9" height="7" rx="1.5"/><path d="M-2.6-1.5v-2.2a2.6 2.6 0 0 1 5.2 0v2.2"/></g>':'')+
+     '<text class="rt-t" y="56" text-anchor="middle">'+esc(RT_SHORT[p.n.id]||shortN(ex.n).slice(0,16))+'</text></g></g>';
+  });
+  const mastered=L.filter(p=>p.s.done).length,ini=((db.profile&&db.profile.nick)||'V').trim().slice(0,1).toUpperCase();
+  const ctr='<g class="rt-c"><circle class="rt-c-glow" r="70"/><circle class="rt-c-bg" r="52"/><text class="rt-c-i" y="-2" text-anchor="middle">'+esc(ini)+'</text><text class="rt-c-n" y="22" text-anchor="middle">'+mastered+' de '+L.length+'</text></g>';
+  const v=S.rt||{x:0,y:0,w:820};
+  return '<div class="rt-wrap" id="rtWrap" data-noswipe><svg id="rtSvg" viewBox="'+(v.x-v.w/2)+' '+(v.y-v.w/2)+' '+v.w+' '+v.w+'" aria-label="Árbol de habilidades">'+
+   '<defs><radialGradient id="rtBgG"><stop offset="0" stop-color="var(--acc)" stop-opacity=".22"/><stop offset="1" stop-color="var(--acc)" stop-opacity="0"/></radialGradient></defs>'+
+   '<circle r="900" fill="url(#rtBgG)"/>'+[185,293,401,509,617,725,833].map(r=>'<circle class="rt-ring-bg" r="'+r+'"/>').join('')+
+   edges+labels+ctr+nodes+'</svg>'+
+   '<div class="rt-ctrl"><button class="ib" data-a="rtZoom" data-v="in" aria-label="Acercar">'+ic('plus',18)+'</button><button class="ib" data-a="rtZoom" data-v="out" aria-label="Alejar">'+ic('minus',18)+'</button><button class="ib" data-a="rtZoom" data-v="home" aria-label="Centrar">'+ic('home',18)+'</button></div>'+
+   '<p class="rt-hint">Arrastrá para moverte · pellizcá o usá + y − para el zoom</p></div>';
+}
+/* mover y hacer zoom con el dedo o el mouse */
+(()=>{const pts=new Map();let start=null,moved=false;
+  const svg=()=>$('#rtSvg'),apply=()=>{const s=svg(),v=S.rt;if(s&&v)s.setAttribute('viewBox',(v.x-v.w/2)+' '+(v.y-v.w/2)+' '+v.w+' '+v.w);};
+  const unit=()=>{const s=svg();return s?S.rt.w/s.getBoundingClientRect().width:1;};
+  document.addEventListener('pointerdown',e=>{if(!e.target.closest('#rtSvg'))return;S.rt=S.rt||{x:0,y:0,w:820};pts.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=false;
+    start={v:Object.assign({},S.rt),p:[...pts.values()].map(p=>({...p}))};},{passive:true});
+  document.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId)||!start)return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});const P=[...pts.values()],u=start.v.w/(svg()?svg().getBoundingClientRect().width:1);
+    if(P.length===1&&start.p.length===1){const dx=P[0].x-start.p[0].x,dy=P[0].y-start.p[0].y;if(Math.abs(dx)+Math.abs(dy)>6)moved=true;S.rt.x=start.v.x-dx*u;S.rt.y=start.v.y-dy*u;}
+    else if(P.length>=2&&start.p.length>=2){const d0=Math.hypot(start.p[0].x-start.p[1].x,start.p[0].y-start.p[1].y),d1=Math.hypot(P[0].x-P[1].x,P[0].y-P[1].y);if(d0>10){S.rt.w=clamp(start.v.w*d0/d1,320,1800);moved=true;}}
+    else{start={v:Object.assign({},S.rt),p:P.map(p=>({...p}))};}
+    apply();},{passive:true});
+  const end=e=>{pts.delete(e.pointerId);if(!pts.size)start=null;else start={v:Object.assign({},S.rt),p:[...pts.values()].map(p=>({...p}))};};
+  document.addEventListener('pointerup',end,{passive:true});document.addEventListener('pointercancel',end,{passive:true});
+  /* si arrastraste, no cuenta como toque en un nodo */
+  document.addEventListener('click',e=>{if(moved&&e.target.closest('#rtSvg')){e.stopPropagation();e.preventDefault();moved=false;}},true);
+  document.addEventListener('wheel',e=>{if(!e.target.closest('#rtSvg'))return;e.preventDefault();S.rt=S.rt||{x:0,y:0,w:820};S.rt.w=clamp(S.rt.w*(e.deltaY>0?1.12:.89),320,1800);apply();},{passive:false});
+  window.rtApply=apply;
+})();
+
+function treeWrap(m){
+  const v=m.view||'radial';
+  return '<div key="tree-'+v+'"><div class="seg" style="margin-bottom:10px"><button class="'+(v==='radial'?'on':'')+'" data-a="treeView" data-v="radial">'+ic('tree',16)+' Árbol</button><button class="'+(v==='lista'?'on':'')+'" data-a="treeView" data-v="lista">'+ic('list',16)+' Lista</button></div>'+
+   (v==='lista'?treeHTML(m):radialHTML(m)+(m.sel?nodeDetail(m.sel):''))+'</div>';
+}
+/* centrar suavemente en un nodo */
+function rtFocus(x,y,w){
+  S.rt=S.rt||{x:0,y:0,w:820};const a=Object.assign({},S.rt),b={x,y,w:w||Math.min(a.w,700)},t0=performance.now(),D=520;
+  const step=t=>{const p=Math.min(1,(t-t0)/D),e=1-Math.pow(1-p,3);S.rt={x:a.x+(b.x-a.x)*e,y:a.y+(b.y-a.y)*e,w:a.w+(b.w-a.w)*e};window.rtApply&&window.rtApply();if(p<1)requestAnimationFrame(step);};
+  requestAnimationFrame(step);
+}
 /* ============ Entrenar mejor ============ */
 /* Meta de hoy (sobrecarga progresiva): mira la última vez y propone un poquito más. */
 function goalFor(id){
@@ -3756,7 +3924,8 @@ function renderRest(){
 /* ============ Capas: modales ============ */
 function exDetail(id){
   const ex=exById(id);if(!ex)return '';
-  let h=techCard(ex)+'<div class="big-map" style="max-width:300px;width:100%">'+bodyMap(mapOf(ex),{labels:1,cls:'live'})+'</div><div class="chips">'+chipsMus(ex)+'</div>';
+  const ph=exPhoto(ex.id);
+  let h=(ph?'<figure class="ex-photo"><img src="'+ph+'" alt="'+esc(shortN(ex.n))+'" loading="lazy"><figcaption>'+esc(EXPH[ex.id].a||'Wikimedia Commons')+' · '+esc(EXPH[ex.id].l)+'</figcaption></figure>':'')+techCard(ex)+'<div class="big-map" style="max-width:300px;width:100%">'+bodyMap(mapOf(ex),{labels:1,cls:'live'})+'</div><div class="chips">'+chipsMus(ex)+'</div>';
   if(ex.d)h+='<p>'+esc(ex.d)+'</p>';
   if(ex.ph)h+='<div class="warn"><b>Peso por mano:</b> anotá lo que pesa UNA mancuerna, no la suma de las dos.</div>';
   h+='<p class="mut sm-t">Equipo: '+esc(ex.eq)+'. Los músculos resaltados son los principales y los claros, los secundarios.</p>';
@@ -3940,7 +4109,7 @@ function modalBody(m,l2){
     case 'cmd':return cmdHTML(m);
     case 'tools':return sheet('Herramientas',toolsHTML(m));
     case 'rimport':return sheet('Rutina compartida',rimportHTML(m));
-    case 'tree':return sheet('Árbol de habilidades',treeHTML(m));
+    case 'tree':return sheet('Árbol de habilidades',treeWrap(m));
     case 'skplan':return sheet('Tu camino',skPlanHTML(skillPlan(m.id)),{l2:true});
     case 'excreate':return sheet('Ejercicio propio',exCreateHTML(m.d),{l2:true});
     case 'confirm':return sheet(m.title,'<p>'+esc(m.msg)+'</p><div class="g2"><button class="btn" data-a="close" data-v="m2">Cancelar</button><button class="btn pri" data-a="'+m.act+'" data-v="'+esc(m.arg||'')+'">'+esc(m.ok||'Confirmar')+'</button></div>',{l2:true});
@@ -4006,6 +4175,7 @@ function viewEntrenar(){
 function viewPerfil(){
   let h='<h1 class="pg">Perfil</h1>';
   if(!S.pf)S.pf=Object.assign({sex:'m',age:'',height:'',weight:'',activity:2,goal:'recomp',nick:'',sport:''},db.profile||{});
+  h+='<div class="card"><div class="hd"><div><h3>Color de la app</h3><span class="mut sm-t">Elegí el que más te guste</span></div></div><div class="acc-row">'+ACCENTS.map(([k,n,a,b])=>'<button class="acc-sw'+((db.settings.accent||'aurora')===k?' on':'')+'" data-a="accent" data-v="'+k+'" style="--a:'+a+';--b:'+b+'" aria-pressed="'+((db.settings.accent||'aurora')===k)+'"><i></i>'+n+'</button>').join('')+'</div></div>';
   h+=pushCard();
   return h+'<div class="card"><div class="hd"><div><h3>Deportes y semana</h3><span class="mut sm-t">Lo usan tus rutinas, la recuperación y las calorías</span></div></div><div class="mbody">'+(db.profile?weekEditor():'')+'</div></div><div class="card"><div class="mbody">'+profileHTML(S.pf)+'</div></div><div class="card row"><div class="grow"><b>Tema</b><br><span class="mut sm-t">'+(effTheme()==='dark'?'Oscuro':'Claro')+'</span></div><button class="btn sm" data-a="theme">'+ic(effTheme()==='dark'?'sun':'moon',16)+' Cambiar</button></div>';
 }
@@ -4344,11 +4514,14 @@ const ACTIONS={
     if(!items.length)return toast('La rutina no trae ejercicios válidos');
     db.routines.push({id:uid(),name:o.n,days:[],since:today(),items,rest:Math.min(600,Math.max(30,+o.r||90))});
     S.modal=null;goTab('rutinas');save();render();confetti(30);toast('Rutina agregada: elegí qué días hacerla en Editar');},
+  accent(v){db.settings.accent=v;save();applyTheme();render();},
   todayGo(){const pl=todayPlan(S.todaySeed||0);startSession(null,null,pl);},
   todayAlt(){S.todaySeed=(S.todaySeed||0)+1;render();},
   sumShare(){if(S.modal&&S.modal.t==='summary')pngShare(summarySVG(S.modal),'swole-entreno.png','Mi entreno en Swole');},
-  treeOpen(){S.modal={t:'tree',sel:null};render();},
-  treeSel(v){S.modal.sel=S.modal.sel===v?null:v;renderModal();const d=document.getElementById('tdDet');if(d)d.scrollIntoView({block:'nearest',behavior:'smooth'});},
+  treeOpen(){S.rt={x:0,y:0,w:820};S.modal={t:'tree',sel:null,view:'radial'};render();},
+  treeView(v){S.modal.view=v;renderModal();},
+  rtZoom(v){S.rt=S.rt||{x:0,y:0,w:820};if(v==='home')rtFocus(0,0,820);else rtFocus(S.rt.x,S.rt.y,clamp(S.rt.w*(v==='in'?.72:1.38),320,1800));},
+  treeSel(v){S.modal.sel=S.modal.sel===v?null:v;renderModal();if(S.modal.view!=='lista'&&S.modal.sel){const p=rtLayout().find(q=>q.n.id===v);if(p)rtFocus(p.x*.85,p.y*.85+60);}const d=document.getElementById('tdDet');if(d)d.scrollIntoView({block:'nearest',behavior:'smooth'});},
   skGoal(v){S.m2={t:'skplan',id:v};render();},
   skStart(v){const p=skillPlan(v);if(!p)return;db.settings.skillGoal={id:v,since:today()};S.m2=null;S.modal=null;save();startSession(null,null,{name:'Camino a '+shortN(p.tg.n),items:p.items,rest:150});},
   skSave(v){const p=skillPlan(v);if(!p)return;

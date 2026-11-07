@@ -59,3 +59,47 @@ Todas vienen de Wikimedia Commons, con licencia libre. Se recortaron y achicaron
 - img/salud.jpg: FriskisSvettisOutdoor.jpg. Jmyreen. CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:FriskisSvettisOutdoor.jpg
 - img/cali.jpg: Front lever - Serhii Solodkyi 73379.jpg. Fenix1000. CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Front_lever_-_Serhii_Solodkyi_73379.jpg
 
+
+## Fotos e ilustraciones de ejercicios (`img/ex/`)
+
+De Wikimedia Commons, con licencia libre; achicadas a 420 px. Las CC BY-SA mantienen esa licencia. Varias ilustraciones de línea son de Everkinetic.
+
+- img/ex/bench.jpg: Bench Press- Almog Dayan.JPG. Al dayan. CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:Bench_Press-_Almog_Dayan.JPG
+- img/ex/incbench.jpg: Bench-press-2.png. Everkinetic. CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:Bench-press-2.png
+- img/ex/dbpress.jpg: Personal training dumbbell chest press.jpg. PTPioneer. CC BY 2.0. https://commons.wikimedia.org/wiki/File:Personal_training_dumbbell_chest_press.jpg
+- img/ex/dbfly.jpg: Dumbbell-flys-2.png. Everkinetic. CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:Dumbbell-flys-2.png
+- img/ex/cablefly.jpg: Chest flies with cable machine - cable crossover flies.jpg. Nenad Stojkovic. CC BY 2.0. https://commons.wikimedia.org/wiki/File:Chest_flies_with_cable_machine_-_cable_crossover_flies.jpg
+- img/ex/dips.jpg: Dips.jpg. soh32's. CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:Dips.jpg
+- img/ex/pullup.jpg: Girl doing pull-ups - 48441668177.jpg. PTPioneer. CC BY 2.0. https://commons.wikimedia.org/wiki/File:Girl_doing_pull-ups_-_48441668177.jpg
+- img/ex/latpull.jpg: PulldownMachineExercise.JPG. No machine-readable author provided. GeorgeStepane. CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:PulldownMachineExercise.JPG
+- img/ex/row.jpg: Barbell-rear-delt-row-1.png. Everkinetic. CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:Barbell-rear-delt-row-1.png
+- img/ex/dbrow.jpg: Landmine Bent-Over Rows.jpg. Eric Astrauskas, www.PTinTO.com. CC BY 2.0. https://commons.wikimedia.org/wiki/File:Landmine_Bent-Over_Rows.jpg
+- img/ex/cablerow.jpg: Cable-seated-rows-1.png. Everkinetic. CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:Cable-seated-rows-1.png
+- img/ex/deadlift.jpg: Fit young man doing deadlift exercise in gym.jpg. Nenad Stojkovic. CC BY 2.0. https://commons.wikimedia.org/wiki/File:Fit_young_man_doing_deadlift_exercise_in_gym.jpg
+- img/ex/shrug.jpg: Barbell-shrugs-1.png. Everkineteic. CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:Barbell-shrugs-1.png
+- img/ex/ohp.jpg: Military press ez-bar 25022008.jpg. Richardkiwi. CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Military_press_ez-bar_25022008.jpg
+- img/ex/lateral.jpg: DumbbellLateralRaise.JPG. No machine-readable author provided. GeorgeStepane. CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:DumbbellLateralRaise.JPG
+- img/ex/dbcurl.jpg: Dumbbell bicep curls.jpg. PTPioneer. CC BY 2.0. https://commons.wikimedia.org/wiki/File:Dumbbell_bicep_curls.jpg
+- img/ex/pushdown.jpg: CableMachinePushdown.JPG. No machine-readable author provided. GeorgeStepane. CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:CableMachinePushdown.JPG
+- img/ex/skull.jpg: DumbbellTricepsExtension.JPG. No machine-readable author provided. GeorgeStepane. CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:DumbbellTricepsExtension.JPG
+- img/ex/wrist.jpg: Exercise Wrist Curls.png. BruceBlaus. CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Exercise_Wrist_Curls.png
+- img/ex/squat.jpg: Woman doing squat workout in gym with barbell, back view.jpg. Nenad Stojkovic. CC BY 2.0. https://commons.wikimedia.org/wiki/File:Woman_doing_squat_workout_in_gym_with_barbell,_back_view.jpg
+- img/ex/frontsquat.jpg: Front-squat-to-bench-2-858x1024.png. Everkinetic. CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:Front-squat-to-bench-2-858x1024.png
+- img/ex/legpress.jpg: Leg press machine loaded with plates.jpg. Teemeah. CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Leg_press_machine_loaded_with_plates.jpg
+- img/ex/legcurl.jpg: LyingLegCurlMachineExercise.JPG. No machine-readable author provided. GeorgeStepane. CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:LyingLegCurlMachineExercise.JPG
+- img/ex/rdl.jpg: Romanian-deadlift-2.png. Everkinetic. CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:Romanian-deadlift-2.png
+- img/ex/lunge.jpg: Sakshi Malik fitness (lunge).jpg. Yashjoshi2102. CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Sakshi_Malik_fitness_(lunge).jpg
+- img/ex/crunch.jpg: Stability ball ab crunch exercise.jpg. PTPioneer. CC BY 2.0. https://commons.wikimedia.org/wiki/File:Stability_ball_ab_crunch_exercise.jpg
+- img/ex/plank.jpg: Plank.jpg. Jaykayfit. CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:Plank.jpg
+- img/ex/austrow.jpg: Inverted row.jpg. Colossus Fitness. CC BY 3.0. https://commons.wikimedia.org/wiki/File:Inverted_row.jpg
+- img/ex/oapull.jpg: Noah Wheeler BFL Climbing Combine.jpg. Bifty. CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Noah_Wheeler_BFL_Climbing_Combine.jpg
+- img/ex/lsit.jpg: West Point male gymnast L-sit.jpg. Tommy Gilligan/West Point Public Affairs. Public domain. https://commons.wikimedia.org/wiki/File:West_Point_male_gymnast_L-sit.jpg
+- img/ex/wallhs.jpg: Handstand (142522319).jpeg. Sascha Kohlmann. CC BY-SA 3.0. https://commons.wikimedia.org/wiki/File:Handstand_(142522319).jpeg
+- img/ex/freehs.jpg: Handstand in garden (autumn).png. Yogazilla. CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Handstand_in_garden_(autumn).png
+- img/ex/hspu.jpg: USMC-102406-M-0058D-001085.jpg. autor en la página. Public domain. https://commons.wikimedia.org/wiki/File:USMC-102406-M-0058D-001085.jpg
+- img/ex/fullbl.jpg: 2019-06-29 1st FIG Artistic Gymnastics JWCH Men's Apparatus finals Still rings (Martin Rulsch) 383.jpg. Martin Rulsch, Wikimedia Commons. CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:2019-06-29_1st_FIG_Artistic_Gymnastics_JWCH_Men%27s_Apparatus_finals_Still_rings_(Martin_Rulsch)_383.jpg
+- img/ex/fullpl.jpg: Planche.jpg. Jonathanfv. CC BY 3.0. https://commons.wikimedia.org/wiki/File:Planche.jpg
+- img/ex/boxjump.jpg: Skateboarder jumping over a cardboard box at Skatepark des Ursulines in Brussels, Belgium (DSCF4497-cropped).jpg. Trougnouf. CC BY 4.0. https://commons.wikimedia.org/wiki/File:Skateboarder_jumping_over_a_cardboard_box_at_Skatepark_des_Ursulines_in_Brussels,_Belgium_(DSCF4497-cropped).jpg
+- img/ex/kbswing.jpg: Kettlebell swing with arms fully extended.jpg. Taco fleur. CC BY-SA 4.0. https://commons.wikimedia.org/wiki/File:Kettlebell_swing_with_arms_fully_extended.jpg
+- img/ex/farmer.jpg: Farmers Walk.jpg. stu_spivack. CC BY-SA 2.0. https://commons.wikimedia.org/wiki/File:Farmers_Walk.jpg
+- img/ex/medslam.jpg: USMC-110726-M-AV740-340.jpg. Staff Sgt. Clinton Firstbrook. Public domain. https://commons.wikimedia.org/wiki/File:USMC-110726-M-AV740-340.jpg
