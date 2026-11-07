@@ -7,7 +7,7 @@
 <title>Swole</title>
 <meta name="description" content="Registrá tus entrenamientos, mirá tu nivel de fuerza y controlá nutrición, agua y creatina.">
 <meta name="theme-color" content="#F4F4F1" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0B0C0E" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#171A26" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/logo.svg" type="image/svg+xml">
 <link rel="alternate icon" href="icons/icon-192.png" type="image/png">
@@ -882,6 +882,60 @@ h1,h2,h3,.pg,.onb-t{text-wrap:balance}
 .fd-ic{width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:9px;background:var(--raise);color:var(--acc)}
 .soc-mini{display:block;width:100%;text-align:left}.soc-pos{font:800 34px var(--f-d);letter-spacing:-.03em}
 .mbody{grid-template-columns:minmax(0,1fr)}
+/* ===== Estética v4: pizarra con color ambiente (menos negro, más moderno) ===== */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#171A26;--surf:#202434;--raise:#2A2F42;--line:#363C54;--text:#EEF0F7;--mut:#9CA3B8;
+    --acc:#8F82FF;--acc-ink:#FFFFFF;--hot:#FF6B8A;--body:#262A3A;--muscle:#3A4058;
+    --shadow:0 1px 0 rgba(255,255,255,.05) inset,0 12px 32px rgba(5,6,15,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#171A26;--surf:#202434;--raise:#2A2F42;--line:#363C54;--text:#EEF0F7;--mut:#9CA3B8;
+  --acc:#8F82FF;--acc-ink:#FFFFFF;--hot:#FF6B8A;--body:#262A3A;--muscle:#3A4058;
+  --shadow:0 1px 0 rgba(255,255,255,.05) inset,0 12px 32px rgba(5,6,15,.35);
+}
+/* luz ambiente: violeta arriba, azul petróleo abajo, el color de tu rango mezclado (quieta, sin manchas que se muevan) */
+.bgfx{background:
+  radial-gradient(70% 50% at 15% -5%,color-mix(in srgb,var(--acc) 34%,transparent),transparent 70%),
+  radial-gradient(60% 45% at 95% 10%,color-mix(in srgb,var(--tier,var(--acc)) 24%,transparent),transparent 70%),
+  radial-gradient(70% 50% at 80% 105%,color-mix(in srgb,#2BB5C8 20%,transparent),transparent 70%)}
+:root[data-theme="light"] .bgfx{background:
+  radial-gradient(70% 50% at 15% -5%,color-mix(in srgb,var(--acc) 12%,transparent),transparent 70%),
+  radial-gradient(70% 50% at 85% 105%,color-mix(in srgb,#2BB5C8 10%,transparent),transparent 70%)}
+/* tarjetas con profundidad: borde con brillo arriba y un velo de luz */
+.card,.qtile,.lvl-hero,.gen-cta,.ex,.hero{
+  background:linear-gradient(180deg,color-mix(in srgb,var(--text) 4%,transparent),transparent 60%),var(--surf);
+  border:1px solid var(--line);
+  box-shadow:inset 0 1px 0 color-mix(in srgb,#fff 6%,transparent),0 10px 30px rgba(5,6,15,.25)}
+:root[data-theme="light"] .card,:root[data-theme="light"] .qtile,:root[data-theme="light"] .lvl-hero,:root[data-theme="light"] .gen-cta{box-shadow:0 1px 2px rgba(20,22,40,.05),0 8px 24px rgba(20,22,40,.06)}
+/* el rango general con más presencia: degradé del color de tu rango */
+.lvl-hero{background:
+  radial-gradient(90% 120% at 0% 0%,color-mix(in srgb,var(--c,var(--acc)) 26%,transparent),transparent 65%),
+  linear-gradient(180deg,color-mix(in srgb,var(--text) 4%,transparent),transparent 60%),var(--surf);
+  border-color:color-mix(in srgb,var(--c,var(--acc)) 30%,var(--line))}
+.lvl-hero::before{display:none}
+.lh-badge .badge{filter:drop-shadow(0 8px 16px rgba(0,0,0,.35)) drop-shadow(0 0 18px color-mix(in srgb,var(--c,var(--acc)) 35%,transparent))}
+/* accesos: ícono con el acento */
+.qi{background:color-mix(in srgb,var(--acc) 16%,var(--raise));border-color:color-mix(in srgb,var(--acc) 28%,var(--line));color:color-mix(in srgb,var(--acc) 70%,var(--text))}
+.qtile:hover .qi{background:color-mix(in srgb,var(--acc) 26%,var(--raise))}
+/* botón principal con un degradé sutil */
+.btn.pri,.fab{background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 92%,#fff),color-mix(in srgb,var(--acc) 80%,#5B8CFF));color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 8px 22px color-mix(in srgb,var(--acc) 30%,transparent)}
+.nav .fab,.nav .fab.on{color:#fff}
+.btn{background:var(--raise)}
+/* menú y encabezado de vidrio */
+.nav{background:color-mix(in srgb,var(--surf) 78%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3)}
+.top{background:color-mix(in srgb,var(--bg) 55%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.nav-ind{background:color-mix(in srgb,var(--acc) 18%,var(--raise))!important;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 35%,transparent)!important}
+.nav button.on{color:var(--text)}.nav button.on .ic{color:var(--acc)}
+@media (min-width:900px){
+  .nav{background:color-mix(in srgb,var(--surf) 60%,transparent)}
+  .nav button.on{background:color-mix(in srgb,var(--acc) 14%,var(--raise));box-shadow:inset 3px 0 0 var(--acc)}
+  .nav .fab{background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 92%,#fff),color-mix(in srgb,var(--acc) 80%,#5B8CFF));color:#fff;border:0}
+  .nav .fab .ic{color:#fff}
+}
+.msheet{background:linear-gradient(180deg,color-mix(in srgb,var(--text) 4%,transparent),transparent 30%),var(--surf)}
+.chip.on,.opt button.on,.seg button.on{background:color-mix(in srgb,var(--acc) 22%,var(--raise));color:var(--text);border-color:color-mix(in srgb,var(--acc) 45%,transparent)}
 </style>
 </head>
 <body>
