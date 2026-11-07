@@ -32,7 +32,7 @@ El objetivo no cambia: **entrenar y saber qué tan fuerte sos**. Todo lo de abaj
 7. **Próximo rango**: "Para Oro III te faltan 7,5 kg en sentadilla o 3 repes". Ya existe en partes; hacerlo protagonista.
 8. **Medidas y fotos de progreso**: cintura, brazo, pecho y fotos privadas, con comparador antes/después.
 
-### Tanda C: lo social (lo que más engancha)
+### Tanda C: lo social (hecha en v24)
 9. **Amigos**: agregar por código o link, ver su carta y sus rangos.
 10. **Ranking entre amigos** por ejercicio y general, con el puntaje relativo al peso corporal para que sea justo.
 11. **Temporadas mensuales**: ganás puntos por progresar (no por ser el más fuerte), así compite el que recién empieza.

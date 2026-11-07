@@ -862,6 +862,26 @@ h1,h2,h3,.pg,.onb-t{text-wrap:balance}
 .cmp-l,.cmp-r{position:absolute;top:10px;font-size:11.5px;font-weight:700;color:#fff;background:rgba(0,0,0,.55);padding:3px 8px;border-radius:7px}
 .cmp-l{left:10px}.cmp-r{right:10px}
 .cmp input[type=range]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;margin:0}
+
+/* amigos */
+.soc-hero{display:grid;justify-items:center;text-align:center;gap:6px;padding:10px 0 14px}.soc-hero .ic{color:var(--acc)}.soc-hero h3{font:800 22px var(--f-d)}
+.soc-code{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:14px;background:var(--raise);border:1px solid var(--line)}
+.soc-code b{display:block;font:800 26px var(--f-d);letter-spacing:.14em}
+.soc-in{flex:1;min-width:0;padding:11px 12px;border-radius:12px;background:var(--raise);border:1px solid var(--line);font:700 16px var(--f-b);letter-spacing:.12em;text-transform:uppercase;color:var(--text)}
+.soc-tabs{margin:12px 0 10px}
+.lb{display:grid;gap:6px}
+.lb-r{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:var(--raise);border:1px solid transparent;text-align:left;width:100%}
+.lb-r.me{border-color:color-mix(in srgb,var(--acc) 55%,transparent);background:color-mix(in srgb,var(--acc) 10%,var(--raise))}
+.lb-r b{display:block}.lb-r small{display:block;font-size:11.5px}
+.lb-n{width:22px;text-align:center;font:800 15px var(--f-d);color:var(--mut)}
+.lb-r.top1 .lb-n{color:#E0B000}.lb-r.top2 .lb-n{color:#AEB7C7}.lb-r.top3 .lb-n{color:#C27A3F}
+.lb-v{text-align:right;font-size:13px}.lb-v small{color:var(--mut)}
+.soc-season{display:flex;justify-content:space-between;align-items:baseline;margin:4px 0 10px}
+.feed{display:grid;gap:2px}
+.fd{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line);font-size:14px}
+.fd-ic{width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:9px;background:var(--raise);color:var(--acc)}
+.soc-mini{display:block;width:100%;text-align:left}.soc-pos{font:800 34px var(--f-d);letter-spacing:-.03em}
+.mbody{grid-template-columns:minmax(0,1fr)}
 </style>
 </head>
 <body>
@@ -1072,7 +1092,7 @@ function stamp(){
   for(const k in snap)if(!(k in cur)){db.del[k]=now;delete db.clock[k];ch=true;}
   snap=cur;return ch;
 }
-function save(){const ch=stamp();Store.save(db);if(ch){try{Sync.schedule();}catch(e){}}}
+function save(){const ch=stamp();Store.save(db);if(ch){try{Sync.schedule();Social.schedule();}catch(e){}}}
 
 /* ============ Fechas y utilidades ============ */
 const pad=n=>String(n).padStart(2,'0');
@@ -1983,7 +2003,7 @@ function checkRankUp(delay){
   if(!db.profile)return;
   const ov=overall(),L=ov?ov.L:-1,prev=db.settings.lastOvL;
   if(prev==null||L<prev){db.settings.lastOvL=L;save();return;}
-  if(L>prev){db.settings.lastOvL=L;save();setTimeout(()=>rankUpScene(prev,L),delay==null?500:delay);}
+  if(L>prev){db.settings.lastOvL=L;addEv({k:'rank',L});save();setTimeout(()=>rankUpScene(prev,L),delay==null?500:delay);}
 }
 function rankUpScene(from,to){
   const col=lvlColor(to),name=lvlName(to);
@@ -2354,6 +2374,163 @@ function photoViewHTML(m){
    '<button class="btn bad wide" data-a="photoDel" data-v="'+p.id+'">'+ic('trash',16)+' Borrar foto</button>';
 }
 
+/* ============ Amigos: ranking, temporada y novedades ============ */
+/* novedades propias (se publican a tus amigos): entrenos, récords, subidas de nivel, logros, habilidades */
+function addEv(o){o.d=o.d||today();db.settings.ev=[o].concat(db.settings.ev||[]).slice(0,40);}
+const monthKey=d=>(d||today()).slice(0,7);
+/* puntos de la temporada (mes): premian progresar, no ser el más fuerte */
+const SEASON_PTS={w:10,pr:15,up:25,rank:60,sk:40,ach:10};
+function seasonStats(){
+  const m=monthKey(),days=new Set(db.logs.filter(l=>l.date.slice(0,7)===m).map(l=>l.date));
+  const ev=(db.settings.ev||[]).filter(e=>e.d&&e.d.slice(0,7)===m);
+  const c={w:days.size,pr:0,up:0,rank:0,sk:0,ach:0};
+  ev.forEach(e=>{if(c[e.k]!=null&&e.k!=='w')c[e.k]++;});
+  const pts=Object.keys(c).reduce((s,k)=>s+c[k]*SEASON_PTS[k],0);
+  return Object.assign({m,pts},c);
+}
+const SK_IDS=()=>[].concat(...TREE.map(b=>b.ids.map(s=>s.split(':')[0])));
+function skillsMastered(){const out=[];branches().forEach(b=>b.nodes.forEach((n,i)=>{if(bestRep(n.id)>=n.t)out.push(n.id);}));return out;}
+/* lo que ven tus amigos: rangos y niveles (ya ajustados por tu peso, edad y sexo), nunca tu peso, edad ni mail */
+function publicSummary(){
+  const ov=overall(),st=cardStats(),gl=groupLevels(),lifts={};
+  rankedList().slice(0,24).forEach(x=>{const v=Math.max(-1,x.info.L+clamp(x.info.pct,0,.999));const o={v:Math.round(v*100)/100};
+    if(x.ex.st&&!x.ex.sk&&db.profile&&db.profile.weight)o.r=Math.round(x.b.e/db.profile.weight*100)/100;lifts[x.ex.id]=o;});
+  const groups={};Object.keys(gl).forEach(g=>{if(gl[g])groups[g]=Math.round(gl[g].v*100)/100;});
+  return{v:1,ovr:ov?{L:ov.L,p:Math.round(ov.pct*100)/100}:null,pctl:ov?pctFromV(ov.L+ov.pct):null,card:st,groups,lifts,sk:skillsMastered(),
+    season:seasonStats(),ev:(db.settings.ev||[]).slice(0,20),streak:streak(),sports:(db.profile&&db.profile.sports)||[],goal:db.settings.skillGoal?db.settings.skillGoal.id:null};
+}
+const Social=(()=>{
+  let pub='',timer=null;
+  const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const mkCode=()=>{let s='';const r=crypto.getRandomValues(new Uint8Array(6));r.forEach(x=>s+=A[x%A.length]);return s;};
+  const on=()=>!!(db.settings.social&&db.settings.social.code&&Sync.user());
+  const nick=()=>String((db.profile&&db.profile.nick)||'Atleta').slice(0,24);
+  const errTxt=e=>{const m=String(e&&e.message||'');return /code_not_found/.test(m)?'No encontré ese código':/own_code/.test(m)?'Ese es tu propio código':/too_many/.test(m)?'Llegaste al máximo de 100 amigos':/no_profile/.test(m)?'Primero activá amigos':!navigator.onLine?'Sin conexión: probá más tarde':'No se pudo: '+m;};
+  async function publish(force){
+    if(!on())return;
+    /* nuevas habilidades dominadas también son novedades */
+    const sk=skillsMastered(),seen=db.settings.skSeen||null;
+    if(seen){sk.filter(id=>!seen.includes(id)).forEach(id=>addEv({k:'sk',x:id}));}
+    if(!seen||sk.length!==seen.length){db.settings.skSeen=sk;save();}
+    const data=publicSummary(),body={user_id:Sync.user().id,code:db.settings.social.code,nick:nick(),data,updated_at:new Date().toISOString()};
+    const h=JSON.stringify([body.code,body.nick,data]);if(!force&&h===pub)return;
+    await Sync.req('/rest/v1/swole_public?on_conflict=user_id',{method:'POST',auth:true,headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body});
+    pub=h;
+  }
+  function schedule(){if(!on())return;clearTimeout(timer);timer=setTimeout(()=>publish().catch(()=>{}),5000);}
+  async function load(){
+    if(!on())return null;
+    try{await publish();}catch(e){}
+    const rows=await Sync.req('/rest/v1/swole_public?select=user_id,code,nick,data,updated_at',{auth:true});
+    const me=Sync.user().id;
+    S.social={at:Date.now(),me:(rows||[]).find(r=>r.user_id===me)||null,friends:(rows||[]).filter(r=>r.user_id!==me)};
+    return S.social;
+  }
+  async function enable(){
+    if(!Sync.user()){S.m2={t:'login',d:{email:'',pw:'',mode:'up',busy:false}};render();toast('Para tener amigos necesitás una cuenta (así se guardan tus datos en la nube)');return;}
+    for(let i=0;i<5;i++){
+      const code=mkCode();db.settings.social={code,since:today()};
+      try{await publish(true);save();await load();await addPending();return true;}
+      catch(e){if(e.status!==409&&!/duplicate|unique/i.test(e.message)){db.settings.social=null;throw e;}}
+    }
+    db.settings.social=null;throw new Error('No se pudo crear el código');
+  }
+  async function disable(){
+    if(Sync.user())await Sync.req('/rest/v1/swole_public?user_id=eq.'+Sync.user().id,{method:'DELETE',auth:true});
+    db.settings.social=null;pub='';S.social=null;save();
+  }
+  async function add(code){
+    code=String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+    if(code.length!==6)throw new Error('code_len');
+    await Sync.req('/rest/v1/rpc/swole_add_friend',{method:'POST',auth:true,body:{p_code:code}});
+    await load();
+  }
+  async function remove(id){await Sync.req('/rest/v1/rpc/swole_remove_friend',{method:'POST',auth:true,body:{p_friend:id}});await load();}
+  /* código que llegó por link (?amigo=XXXXXX) */
+  async function addPending(){
+    let c=null;try{c=localStorage.getItem('swole.pendFriend');}catch(e){}
+    if(!c||!on())return;
+    try{localStorage.removeItem('swole.pendFriend');}catch(e){}
+    try{await add(c);toast('¡Listo! Ya son amigos');render();}catch(e){toast(errTxt(e));}
+  }
+  return{on,publish,schedule,load,enable,disable,add,remove,addPending,errTxt,link:()=>location.origin+location.pathname+'?amigo='+(db.settings.social?db.settings.social.code:'')};
+})();
+
+/* textos */
+const evTxt=e=>{const ex=e.x?exById(e.x):null,n=ex?shortN(ex.n):'';
+  return e.k==='w'?'entrenó '+(e.n||'')
+   :e.k==='pr'?'hizo récord en '+n
+   :e.k==='up'?'subió a <b style="color:'+lvlColor(e.L)+'">'+lvlName(e.L)+'</b> en '+n
+   :e.k==='rank'?'subió a <b style="color:'+lvlColor(e.L)+'">'+lvlName(e.L)+'</b> de rango general'
+   :e.k==='sk'?'dominó '+n
+   :e.k==='ach'?'desbloqueó el logro "'+esc(e.n||'')+'"':'';};
+const evIc=k=>({w:'dumb',pr:'trophy',up:'up',rank:'crown',sk:'acro',ach:'medal'})[k]||'spark';
+const plu=(n,a,b)=>n+' '+(n===1?a:b);
+const dayAgo=d=>{const n=Math.round((parseK(today())-parseK(d))/864e5);return n<=0?'hoy':n===1?'ayer':n<7?'hace '+n+' días':shortDate(parseK(d).getTime());};
+const RANK_OPTS=[['ovr','Rango general'],['season','Temporada'],['OVR','Puntaje'],['bench','Banca'],['squat','Sentadilla'],['deadlift','Peso muerto'],['ohp','Press militar'],['pullup','Dominadas']];
+function rankRows(metric){
+  const me=S.social&&S.social.me,all=(S.social?S.social.friends:[]).concat(me?[me]:[]);
+  const val=r=>{const d=r.data||{};
+    if(metric==='ovr')return d.ovr?d.ovr.L+d.ovr.p:null;
+    if(metric==='season')return d.season&&d.season.m===monthKey()?d.season.pts:0;
+    if(metric==='OVR')return d.card&&d.card.OVR!=null?d.card.OVR:null;
+    return d.lifts&&d.lifts[metric]?d.lifts[metric].v:null;};
+  return all.map(r=>({r,v:val(r),me:me&&r.user_id===me.user_id})).filter(x=>x.v!=null).sort((a,b)=>b.v-a.v);
+}
+function friendsHTML(m){
+  const tab=m.tab||'rank';
+  if(!Sync.user())return '<div class="soc-hero">'+ic('user',28)+'<h3>Entrená con tus amigos</h3><p class="mut">Rankings justos (ajustados por peso, edad y sexo), una temporada por mes y las novedades de tus amigos.</p></div>'+
+    '<p class="mut sm-t">Para usar amigos necesitás una cuenta: así tus datos quedan guardados en la nube.</p><button class="btn pri wide" data-a="loginOpen">Crear cuenta o entrar</button>';
+  if(!Social.on())return '<div class="soc-hero">'+ic('user',28)+'<h3>Entrená con tus amigos</h3><p class="mut">Rankings justos, una temporada por mes y las novedades de tus amigos.</p></div>'+
+    '<div class="card" style="margin:0"><h4 style="margin-bottom:6px">Qué ven tus amigos</h4><p class="sm-t">Tu apodo, tus rangos y niveles, tu carta, tus habilidades, tus puntos de la temporada y tus novedades (entrenos, récords, subidas de rango).</p>'+
+    '<h4 style="margin:10px 0 6px">Qué NO ven</h4><p class="sm-t">Tu mail, tu peso, tu edad, tus medidas, tus fotos ni tus comidas. Solo te ven las personas que agregás (o que te agregan con tu código).</p></div>'+
+    '<button class="btn pri wide" style="margin-top:12px" data-a="socOn">Activar amigos</button>';
+  const sc=db.settings.social.code,sv=S.social;
+  const head='<div class="soc-code"><div><span class="mut sm-t">Tu código</span><b>'+sc+'</b></div><button class="btn sm" data-a="socShare">'+ic('share',16)+' Invitar</button></div>'+
+    '<div class="row" style="gap:8px;margin:10px 0 4px"><input class="soc-in" id="socCode" maxlength="7" placeholder="Código de un amigo" autocomplete="off" autocapitalize="characters" aria-label="Código de un amigo"><button class="btn pri" data-a="socAdd">Agregar</button></div>';
+  const tabs='<div class="seg soc-tabs">'+[['rank','Ranking'],['season','Temporada'],['feed','Novedades'],['list','Amigos']].map(([k,n])=>'<button class="'+(tab===k?'on':'')+'" data-a="socTab" data-v="'+k+'">'+n+'</button>').join('')+'</div>';
+  if(!sv)return head+tabs+'<p class="mut tc" style="padding:30px 0">Cargando…</p>';
+  const nf0=!sv.friends.length?'<div class="card empty" style="margin:0">'+ic('user',30)+'<b>Todavía no tenés amigos en Swole</b>Pasales tu código o tocá Invitar para mandarles el link.</div>':'';
+  let body='';
+  if(tab==='rank'){
+    const met=m.met||'ovr',rows=rankRows(met);
+    body='<div class="scroll-x" style="margin:4px 0 10px">'+RANK_OPTS.filter(o=>o[0]!=='season').map(([k,n])=>'<button class="chip '+(met===k?'on':'')+'" data-a="socMet" data-v="'+k+'">'+n+'</button>').join('')+'</div>'+
+     (rows.length?'<div class="lb">'+rows.map((x,i)=>{const d=x.r.data||{},L=met==='ovr'||met==='OVR'?(d.ovr?d.ovr.L:-1):Math.floor(x.v),li=d.lifts&&d.lifts[met];
+       const val=met==='OVR'?'<b>'+x.v+'</b> pts':met==='ovr'?lvlSpan(L)+(d.pctl?'<small>Top '+(100-d.pctl)+' %</small>':''):lvlSpan(Math.max(-1,Math.floor(x.v)))+(li&&li.r?'<small>'+num(li.r,2)+'× su peso</small>':'');
+       return '<button class="lb-r'+(x.me?' me':'')+'" data-a="socCard" data-v="'+x.r.user_id+'"><span class="lb-n">'+(i+1)+'</span>'+badge(L,36)+'<span class="grow"><b>'+esc(x.r.nick||'Atleta')+(x.me?' <span class="tag">vos</span>':'')+'</b></span><span class="lb-v">'+val+'</span></button>';}).join('')+'</div>'
+      :'<p class="mut sm-t">Nadie cargó este ejercicio todavía.</p>')+
+     '<p class="mut sm-t" style="margin-top:10px">Se compara el nivel, que ya está ajustado por peso, edad y sexo: así es justo entre cuerpos distintos.</p>'+nf0;
+  }else if(tab==='season'){
+    const rows=rankRows('season'),d0=new Date(),left=new Date(d0.getFullYear(),d0.getMonth()+1,0).getDate()-d0.getDate();
+    body='<div class="soc-season"><span class="lh-k">Temporada de '+MESES[d0.getMonth()]+'</span><b>'+(left?'Quedan '+left+' días':'Último día')+'</b></div>'+
+     '<div class="lb">'+rows.map((x,i)=>{const s=(x.r.data||{}).season||{};return '<button class="lb-r'+(x.me?' me':'')+(i<3&&x.v>0?' top'+(i+1):'')+'" data-a="socCard" data-v="'+x.r.user_id+'"><span class="lb-n">'+(i+1)+'</span><span class="grow"><b>'+esc(x.r.nick||'Atleta')+(x.me?' <span class="tag">vos</span>':'')+'</b><small class="mut">'+plu(s.w||0,'entreno','entrenos')+' · '+plu(s.pr||0,'récord','récords')+' · '+plu((s.up||0)+(s.rank||0),'subida','subidas')+'</small></span><span class="lb-v"><b>'+x.v+'</b> pts</span></button>';}).join('')+'</div>'+
+     '<details class="why"><summary>¿Cómo se suman puntos?</summary><div class="mut sm-t"><p>Entreno (uno por día): '+SEASON_PTS.w+' · Récord: '+SEASON_PTS.pr+' · Subir de nivel en un ejercicio: '+SEASON_PTS.up+' · Dominar una habilidad: '+SEASON_PTS.sk+' · Subir de rango general: '+SEASON_PTS.rank+' · Logro: '+SEASON_PTS.ach+'.</p><p>Gana el que más progresa en el mes, no el más fuerte: el que recién empieza puede ganarle a cualquiera. Cada mes arranca de cero.</p></div></details>'+nf0;
+  }else if(tab==='feed'){
+    const all=[];sv.friends.concat(sv.me?[sv.me]:[]).forEach(r=>((r.data||{}).ev||[]).forEach(e=>all.push({e,r,me:sv.me&&r.user_id===sv.me.user_id})));
+    all.sort((a,b)=>a.e.d<b.e.d?1:a.e.d>b.e.d?-1:0);
+    body=all.length?'<div class="feed">'+all.slice(0,50).map(x=>'<div class="fd"><span class="fd-ic">'+ic(evIc(x.e.k),16)+'</span><span class="grow"><b>'+(x.me?'Vos':esc(x.r.nick||'Atleta'))+'</b> '+evTxt(x.e)+'</span><small class="mut">'+dayAgo(x.e.d)+'</small></div>').join('')+'</div>':'<p class="mut sm-t">Todavía no hay novedades.</p>'+nf0;
+  }else{
+    body=sv.friends.length?'<div class="lb">'+sv.friends.map(r=>{const d=r.data||{};return '<div class="lb-r"><button class="row grow" style="gap:10px;text-align:left" data-a="socCard" data-v="'+r.user_id+'">'+badge(d.ovr?d.ovr.L:-1,36)+'<span class="grow"><b>'+esc(r.nick||'Atleta')+'</b><small class="mut">Actualizado '+dayAgo(String(r.updated_at).slice(0,10))+'</small></span></button><button class="ib flat" data-a="socDel" data-v="'+r.user_id+'" aria-label="Sacar a '+esc(r.nick||'')+'">'+ic('x',18)+'</button></div>';}).join('')+'</div>':nf0;
+    body+='<button class="btn line wide bad" style="margin-top:14px" data-a="socOff">Dejar de compartir</button>';
+  }
+  return head+tabs+body;
+}
+function friendCardHTML(r){
+  if(!r)return '';
+  const d=r.data||{},L=d.ovr?d.ovr.L:-1,c=d.card||{};
+  return '<div class="row" style="gap:14px">'+badge(L,72)+'<div class="grow"><h3 style="font:800 24px var(--f-d)">'+esc(r.nick||'Atleta')+'</h3><div>'+lvlSpan(L)+'</div>'+(d.pctl?'<span class="mut sm-t">Más fuerte que el '+d.pctl+' % (estimado)</span>':'')+'</div></div>'+
+   (c.OVR!=null?'<div class="attr-list" style="margin-top:14px">'+ATTRS.map(([k,n])=>'<div><span>'+n+'</span><b>'+(c[k]==null?'--':c[k])+'</b><i style="width:'+(c[k]==null?0:Math.round((c[k]-40)/59*100))+'%"></i></div>').join('')+'</div>':'')+
+   (d.groups&&Object.keys(d.groups).length?'<h4 style="margin:16px 0 8px">Por grupo muscular</h4>'+Object.keys(GROUPS).filter(g=>d.groups[g]!=null).map(g=>{const v=d.groups[g],l=Math.min(18,Math.floor(v));return '<div class="rowline"><span>'+g+'</span>'+lvlSpan(l)+'</div>';}).join(''):'')+
+   (d.sk&&d.sk.length?'<h4 style="margin:16px 0 8px">Habilidades dominadas ('+d.sk.length+')</h4><div class="chips">'+d.sk.slice(-12).map(id=>{const e=exById(id);return e?'<span class="chip">'+esc(shortN(e.n))+'</span>':'';}).join('')+'</div>':'')+
+   (d.streak?'<p class="mut sm-t" style="margin-top:12px">Racha: '+d.streak+' días</p>':'');
+}
+/* tarjeta en Inicio: tu lugar en la temporada */
+function seasonCard(){
+  if(!Social.on()||!S.social||!S.social.friends.length)return '';
+  const rows=rankRows('season'),i=rows.findIndex(x=>x.me);if(i<0)return '';
+  return '<button class="card soc-mini" data-a="socOpen" data-v="season"><span class="lh-k">Temporada de '+MESES[new Date().getMonth()]+'</span><span class="row" style="gap:10px;margin-top:6px"><b class="soc-pos">'+(i+1)+'º</b><span class="grow">de '+rows.length+' · <b>'+rows[i].v+'</b> pts'+(i>0?'<br><span class="mut sm-t">'+(rows[i-1].v-rows[i].v)+' pts para pasar a '+esc(rows[i-1].r.nick||'Atleta')+'</span>':'<br><span class="mut sm-t">Vas primero</span>')+'</span>'+ic('right',18)+'</span></button>';
+}
+
 /* ============ Entrenar mejor ============ */
 /* Meta de hoy (sobrecarga progresiva): mira la última vez y propone un poquito más. */
 function goalFor(id){
@@ -2450,7 +2627,7 @@ const qTile=q=>'<button class="qtile" data-a="'+q.a+'"'+(q.v?' data-v="'+q.v+'"'
 function viewInicio(){
   const p=db.profile||{};
   return '<div class="home"><div class="home-l"><div class="hello"><span class="mut">'+greet()+(p.nick?',':'')+'</span><h1 class="pg">'+(p.nick?esc(p.nick):'Swole')+'</h1></div>'+
-   levelHero()+skillGoalCard()+goalsCard(true)+'<div class="qgrid">'+QUICK.map(qTile).join('')+'</div></div><div class="home-r">'+todayCard()+stripTitle(viewHoy())+'</div></div>';
+   levelHero()+seasonCard()+skillGoalCard()+goalsCard(true)+'<div class="qgrid">'+QUICK.map(qTile).join('')+'</div></div><div class="home-r">'+todayCard()+stripTitle(viewHoy())+'</div></div>';
 }
 /* botón central: lo que más se usa, a un toque */
 function quickHTML(){
@@ -2595,7 +2772,7 @@ function achStats(){
 /* revisa logros nuevos; silent = marcarlos sin festejo (al abrir la app) */
 function checkAch(silent){
   const s=achStats(),fresh=[];
-  ACH.forEach(a=>{if(!db.ach[a.id]&&a.ok(s)){db.ach[a.id]=today();fresh.push(a);}});
+  ACH.forEach(a=>{if(!db.ach[a.id]&&a.ok(s)){db.ach[a.id]=today();fresh.push(a);if(!silent)addEv({k:'ach',n:a.n});}});
   if(fresh.length){save();if(!silent){S.newAch=fresh.map(a=>a.id);setTimeout(()=>{confetti();toast((fresh.length>1?fresh.length+' logros nuevos: ':'Logro nuevo: ')+fresh.map(a=>a.n).join(', '));},350);}}
   return fresh;
 }
@@ -2621,6 +2798,7 @@ function viewNiveles(){
   let h='<h1 class="pg">Nivel</h1>';
   if(!db.profile)return h+'<div class="card empty">'+emptyArt()+'<b>Completá tu perfil</b>Necesito sexo, edad y peso para calcular tus niveles.</div>';
   const r=rankedList(),ov=overall(),ml=muscleLevels();
+  h+='<button class="gen-cta soc-cta" data-a="socOpen"><span class="gen-ic">'+ic('user',22)+'</span><span class="grow"><b>Amigos</b><span>'+(Social.on()?(S.social&&S.social.friends.length?S.social.friends.length+(S.social.friends.length===1?' amigo':' amigos')+' · ranking y temporada':'Invitá a tus amigos con tu código'):'Rankings justos y una temporada por mes')+'</span></span>'+ic('right',18)+'</button>';
   h+='<button class="gen-cta mark-cta" data-a="markOpen"><span class="gen-ic">'+ic('bolt',22)+'</span><span class="grow"><b>Cargar marca</b><span>Poné tu peso y reps, y mirá tu nivel al instante</span></span>'+ic('right',18)+'</button>';
   /* rango de cada grupo muscular */
   const gl=groupLevels();
@@ -2799,6 +2977,7 @@ function finishSession(){
   const bwKg=weightNow()||70;
   entries.forEach(en=>{const ex=exById(en.ex);en.sets.forEach(s=>{if(s.w)return;sets++;if(ex&&!ex.time)vol+=((ex.bw||0)*bwKg+s.kg)*s.reps;});});
   const gTot=a.entries.filter(en=>en.goal).length,gHit=a.entries.filter(en=>en.hit).length;
+  addEv({k:'w',n:log.name,d:log.date});prs.forEach(p=>addEv({k:'pr',x:p.ex,d:log.date}));ups.forEach(u=>addEv({k:'up',x:u.ex,L:u.to,d:log.date}));
   db.active=null;save();endRest(false);S.sessOpen=false;
   S.modal={t:'summary',log,prs,ups,vol,sets,goals:{hit:gHit,tot:gTot}};render();
   checkGoals();checkRankUp(900);
@@ -3035,6 +3214,8 @@ function modalBody(m,l2){
     case 'summary':return sheet('Entrenamiento guardado',summaryHTML(m));
     case 'phcmp':return sheet('Antes y después',photoCmpHTML(m));
     case 'phview':return sheet('Foto de progreso',photoViewHTML(m),{l2:true});
+    case 'friends':return sheet('Amigos',friendsHTML(m));
+    case 'fcard':return sheet('Perfil',friendCardHTML(S.social&&S.social.friends.concat(S.social.me?[S.social.me]:[]).find(r=>r.user_id===m.id)),{l2:true});
     case 'tree':return sheet('Árbol de habilidades',treeHTML(m));
     case 'skplan':return sheet('Tu camino',skPlanHTML(skillPlan(m.id)),{l2:true});
     case 'excreate':return sheet('Ejercicio propio',exCreateHTML(m.d),{l2:true});
@@ -3307,6 +3488,7 @@ const ACTIONS={
     db.tests.push({id:uid(),date,ex:ex.id,kg,reps});save();
     const e=e1(ex,kg,reps),b=bestE1(ex.id),L=levelIdx(ex,b.e),i=lvlInfo(ex,b.e);
     d.res={L,L0,p0:i0?clamp(i0.pct,0,1):0,pct:clamp(i.pct,0,1),rec:e0>0&&e>e0+.01,e0};
+    if(L>(L0==null?-1:L0)&&L>=0)addEv({k:'up',x:ex.id,L});else if(d.res.rec)addEv({k:'pr',x:ex.id});save();
     d.step='reveal';renderModal();
     setTimeout(()=>{const bi=document.querySelector('.rv-bar i');if(bi)bi.style.width=bi.dataset.to+'%';},900);
     if(L>(L0==null?-1:L0)&&L>=0)setTimeout(()=>{confetti(L0!=null&&L0>=0?70:40);try{navigator.vibrate&&navigator.vibrate([30,60,30,60,120]);}catch(e){}},950);
@@ -3398,6 +3580,20 @@ const ACTIONS={
   photoView(v){S.m2={t:'phview',id:v};render();},
   photoDel(v){PhotoDB.del(v).then(()=>{S.m2=null;if(S.modal&&S.modal.t==='phcmp')S.modal=null;render();loadPhotos();toast('Foto borrada');});},
   photoCompare(){const ps=photoCache||[];if(ps.length<2)return;S.modal={t:'phcmp',a:ps[0].id,b:ps[ps.length-1].id,x:50};render();},
+  socOpen(v){S.modal={t:'friends',tab:v||'rank',met:'ovr'};render();if(Social.on())Social.load().then(()=>renderModal()).catch(e=>toast(Social.errTxt(e)));},
+  socTab(v){S.modal.tab=v;renderModal();},
+  socMet(v){S.modal.met=v;renderModal();},
+  socOn(){toast('Activando…');Social.enable().then(ok=>{if(ok){render();toast('Listo: invitá a tus amigos con tu código');}}).catch(e=>toast(Social.errTxt(e)));},
+  socOff(){S.m2={t:'confirm',title:'Dejar de compartir',msg:'Tus amigos dejan de ver tus rangos y novedades. Podés volver a activarlo cuando quieras (con un código nuevo).',act:'socOffGo',ok:'Dejar de compartir'};render();},
+  socOffGo(){S.m2=null;Social.disable().then(()=>{render();toast('Ya no compartís nada');}).catch(e=>toast(Social.errTxt(e)));},
+  socAdd(){const i=$('#socCode');const c=i?i.value:'';if(!c.trim())return toast('Escribí el código de tu amigo');
+    Social.add(c).then(()=>{renderModal();toast('¡Listo! Ya son amigos');confetti(30);}).catch(e=>toast(/code_len/.test(e.message)?'El código tiene 6 letras y números':Social.errTxt(e)));},
+  socDel(v){const r=S.social&&S.social.friends.find(x=>x.user_id===v);S.m2={t:'confirm',title:'Sacar amigo',msg:'Dejan de verse los dos. '+(r?r.nick:'')+' no recibe ningún aviso.',act:'socDelGo',arg:v,ok:'Sacar'};render();},
+  socDelGo(v,el){const id=el&&el.dataset.v||v;S.m2=null;Social.remove(id).then(()=>{render();toast('Listo');}).catch(e=>toast(Social.errTxt(e)));},
+  socCard(v){S.m2={t:'fcard',id:v};render();},
+  async socShare(){const url=Social.link(),txt='Sumate a Swole y comparemos quién progresa más. Mi código: '+db.settings.social.code;
+    try{if(navigator.share){await navigator.share({title:'Swole',text:txt,url});return;}}catch(e){if(e&&e.name==='AbortError')return;}
+    try{await navigator.clipboard.writeText(txt+' '+url);toast('Link copiado');}catch(e){toast('Tu código: '+db.settings.social.code);}},
   todayGo(){const pl=todayPlan(S.todaySeed||0);startSession(null,null,pl);},
   todayAlt(){S.todaySeed=(S.todaySeed||0)+1;render();},
   sumShare(){if(S.modal&&S.modal.t==='summary')pngShare(summarySVG(S.modal),'swole-entreno.png','Mi entreno en Swole');},
@@ -3773,6 +3969,7 @@ const Sync=(()=>{
     if(S.modal&&(S.modal.t==='profile'&&!S.modal.d.age||S.modal.t==='onb')&&db.profile)S.modal=null;
     render();
     toast(st.s==='ok'?'Conectado: tus datos están en la nube':'Conectado. Se sincroniza cuando haya conexión');
+    if(Social.on())Social.load().then(()=>{Social.addPending();render();}).catch(()=>{});
   }
   /* links de los emails (confirmar cuenta o recuperar contraseña) vuelven acá con la sesión en el #hash */
   async function fromLink(){
@@ -3797,7 +3994,7 @@ const Sync=(()=>{
   window.addEventListener('online',()=>schedule(300));
   document.addEventListener('visibilitychange',()=>{if(!sess)return;if(document.visibilityState==='visible')schedule(300);else if(timer)run(false);});
   setInterval(()=>{if(sess&&document.visibilityState==='visible')run(false);},120000);
-  return{run,schedule,loginGo,logout,fromLink,forget:logout,user:()=>sess&&sess.user,state:st};
+  return{run,schedule,loginGo,logout,fromLink,req,forget:logout,user:()=>sess&&sess.user,state:st};
 })();
 
 /* ============ Inicio ============ */
@@ -3810,6 +4007,10 @@ setTimeout(()=>{try{if(db.profile&&!S.modal&&!S.m2&&!S.sessOpen){const d=recapDa
 setTimeout(()=>{const s=$('#splash');if(s){s.classList.add('out');setTimeout(()=>s.remove(),600);}},matchMedia('(prefers-reduced-motion: reduce)').matches?150:1150);
 try{checkAch(true);checkRankUp();}catch(e){}
 Sync.fromLink();
+/* invitación de un amigo por link */
+try{const q=new URLSearchParams(location.search),c=q.get('amigo');if(c&&/^[A-Za-z0-9]{6}$/.test(c)){localStorage.setItem('swole.pendFriend',c.toUpperCase());history.replaceState(null,'',location.pathname+location.hash);
+  setTimeout(()=>{if(Social.on())Social.addPending();else if(db.profile)toast('Te invitaron a Swole: activá Amigos en Nivel para sumarte');},1600);}}catch(e){}
+if(Social.on())Social.load().then(()=>{if(S.tab==='inicio'&&!S.modal)render();}).catch(()=>{});
 /* si los datos se borraron de este dispositivo pero hay sesión, se recuperan de la nube */
 if(Sync.user())Sync.run(false).then(()=>{if(db.profile&&S.modal&&S.modal.t==='profile'&&!S.modal.d.age){S.modal=null;render();}});
 /* Pide al navegador que no borre los datos (Safari los borra si la web no se usa por un tiempo) */
