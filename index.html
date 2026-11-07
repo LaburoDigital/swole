@@ -1147,6 +1147,7 @@ rect.tq-eq{stroke-width:1.5}
 @keyframes phIn{from{opacity:0;transform:translateY(8px) scale(.98)}}
 @keyframes phZoom{from{transform:scale(1.08)}}
 @media (min-width:900px){.msheet:has(.rt-wrap){max-width:min(1000px,94vw)}.msheet:has(.rt-wrap) .rt-wrap{height:min(70vh,720px)}}
+.rt-fig .tq-floor,.rt-fig .tq-sh{display:none}.rt-n.lock .rt-fig{opacity:.55}.tech-fig .tq{width:130px;height:130px}
 </style>
 </head>
 <body>
@@ -3147,33 +3148,85 @@ const TECH={
   lsit:{eq:['bars'],A:{h:[57,48],n:[56,58],p:[58,90],k:[80,90],f:[100,90],e:[54,76],a:[52,92]},B:{h:[57,47],n:[56,57],p:[58,89],k:[80,88],f:[100,87],e:[54,75],a:[52,92]},
     cues:['Brazos estirados y hombros bien abajo','Piernas juntas y estiradas a 90°','Apuntá los pies','Arrancá con las rodillas encogidas'],err:'Hombros encogidos hacia las orejas'}
 };
+/* figuras que faltaban (mismo sistema: perfil, piso en y=110; c = punto fijo de una polea) */
+Object.assign(TECH,{
+  fly:{front:1,eq:['floor','cables'],A:{h:[60,26],n:[60,36],p:[60,68],k:[54,88],f:[52,110],k2:[66,88],f2:[68,110],e:[44,44],a:[30,48],e2:[76,44],a2:[90,48]},B:{h:[60,26],n:[60,36],p:[60,68],k:[54,88],f:[52,110],k2:[66,88],f2:[68,110],e:[50,52],a:[58,62],e2:[70,52],a2:[62,62]},
+    cues:['Codos apenas flexionados todo el recorrido','Juntá las manos adelante como abrazando un árbol','Apretá el pecho en el centro','Volvé lento hasta sentir el estiramiento'],err:'Doblar y estirar los codos (se vuelve un press)'},
+  shrug:{eq:['floor'],A:{h:[61,26],n:[60,36],p:[59,66],k:[60,88],f:[60,110],e:[60,51],a:[60,66],b:[61,68]},B:{h:[61,22],n:[60,31],p:[59,66],k:[60,88],f:[60,110],e:[60,46],a:[60,61],b:[61,63]},
+    cues:['Brazos estirados: solo se mueven los hombros','Subí los hombros hacia las orejas','Pausa de 1 segundo arriba','Sin girar los hombros en círculo'],err:'Doblar los codos para ayudar'},
+  pushdown:{eq:['floor'],A:{h:[63,27],n:[62,37],p:[58,66],k:[60,88],f:[60,110],e:[64,57],a:[72,44],c:[78,4]},B:{h:[63,27],n:[62,37],p:[58,66],k:[60,88],f:[60,110],e:[64,57],a:[67,76],c:[78,4]},
+    cues:['Codos pegados al cuerpo y quietos','Empujá hasta estirar del todo','Volvé controlado hasta 90°','Torso apenas inclinado y firme'],err:'Mover los codos o usar el cuerpo'},
+  skull:{eq:['bench'],A:{h:[24,76],n:[33,78],p:[70,80],k:[88,82],f:[96,110],e:[36,58],a:[37,40],b:[37,39]},B:{h:[24,76],n:[33,78],p:[70,80],k:[88,82],f:[96,110],e:[36,58],a:[24,62],b:[23,61]},
+    cues:['Brazos apuntando al techo y quietos','Bajá la barra hacia la frente doblando solo los codos','Estirá apretando el tríceps','Peso moderado: es un ejercicio de control'],err:'Abrir los codos hacia los costados'},
+  wrist:{eq:['seat'],A:{h:[48,44],n:[48,54],p:[50,84],k:[72,84],f:[72,110],e:[66,80],a:[80,84],b:[81,85]},B:{h:[48,44],n:[48,54],p:[50,84],k:[72,84],f:[72,110],e:[66,80],a:[80,74],b:[81,73]},
+    cues:['Antebrazo apoyado en el muslo','Solo se mueve la muñeca','Subí y bajá en todo el recorrido','Peso liviano y muchas repeticiones'],err:'Levantar el antebrazo del muslo'},
+  legext:{eq:['seat'],A:{h:[45,40],n:[46,50],p:[50,80],k:[72,80],f:[74,104],e:[52,66],a:[58,80]},B:{h:[45,40],n:[46,50],p:[50,80],k:[72,80],f:[96,76],e:[52,66],a:[58,80]},
+    cues:['Espalda apoyada en el respaldo','Estirá las rodillas del todo','Pausa arriba apretando el cuádriceps','Bajá lento, sin soltar'],err:'Patear rápido y dejar caer el peso'},
+  legcurl:{eq:['bench'],A:{h:[20,74],n:[29,78],p:[64,80],k:[84,80],f:[104,80],e:[30,90],a:[40,84]},B:{h:[20,74],n:[29,78],p:[64,80],k:[84,80],f:[88,58],e:[30,90],a:[40,84]},
+    cues:['Cadera pegada al banco','Llevá los talones hacia los glúteos','Pausa arriba','Bajá controlado hasta estirar'],err:'Levantar la cadera para ayudar'},
+  crunch:{eq:['floor'],A:{h:[21,103],n:[30,104],p:[60,104],k:[76,86],f:[90,108],e:[34,96],a:[24,98]},B:{h:[30,84],n:[38,91],p:[60,104],k:[76,86],f:[90,108],e:[42,82],a:[33,80]},
+    cues:['Pies apoyados y rodillas dobladas','Subí enrollando la espalda, sin tirar del cuello','Exhalá al subir','Bajá lento hasta apoyar los hombros'],err:'Tirar de la cabeza con las manos'},
+  legraise:{eq:['pullbar'],A:{h:[63,31],n:[60,38],p:[60,70],k:[60,88],f:[60,106],e:[60,25],a:[60,12]},B:{h:[63,31],n:[60,38],p:[58,70],k:[78,70],f:[96,68],e:[60,25],a:[60,12]},
+    cues:['Colgado con los hombros activos','Subí las piernas estiradas hasta 90°','Sin balancearte','Bajá lento'],err:'Usar impulso y balancearse'},
+  russian:{eq:['floor'],A:{h:[44,62],n:[48,72],p:[62,100],k:[80,86],f:[94,94],e:[60,84],a:[70,80]},B:{h:[45,62],n:[48,72],p:[62,100],k:[80,86],f:[94,94],e:[50,86],a:[42,92]},
+    cues:['Torso inclinado atrás, espalda recta','Pies apenas levantados (o apoyados para empezar)','Girá el torso de lado a lado','Las manos acompañan el giro'],err:'Mover solo los brazos sin girar el torso'},
+  flag:{eq:['pole'],A:{h:[38,44],n:[40,46],p:[76,50],k:[94,52],f:[110,52],e:[34,42],a:[30,38],e2:[34,58],a2:[30,64]},B:{h:[38,45],n:[40,47],p:[76,52],k:[94,54],f:[110,55],e:[34,42],a:[30,38],e2:[34,58],a2:[30,64]},
+    cues:['Mano de arriba tira, mano de abajo empuja','Brazos estirados','Cuerpo rígido y horizontal','Arrancá con piernas encogidas o abiertas'],err:'Doblar el brazo de abajo'},
+  jump:{eq:['box'],A:{h:[52,52],n:[48,62],p:[34,86],k:[50,96],f:[40,110],e:[40,76],a:[30,84]},B:{h:[79,20],n:[78,30],p:[76,58],k:[84,70],f:[82,82],e:[86,40],a:[92,48]},
+    cues:['Bajá un poco y usá los brazos para impulsarte','Caé suave, con las rodillas dobladas','Pararte del todo arriba','Bajá caminando, no saltando'],err:'Caer con las rodillas trabadas'},
+  nordic:{eq:['floor'],A:{h:[60,40],n:[60,50],p:[60,80],k:[60,108],f:[84,106],e:[64,58],a:[60,62]},B:{h:[13,61],n:[20,68],p:[41,89],k:[60,108],f:[84,106],e:[24,82],a:[22,94]},
+    cues:['Rodillas apoyadas y talones trabados','Bajá lo más lento que puedas','Cuerpo recto de las rodillas a la cabeza','Frená la caída con las manos'],err:'Doblar la cadera para no caer'},
+  sideplank:{eq:['bench'],A:{h:[24,84],n:[32,88],p:[60,92],k:[78,86],f:[96,82],e:[30,108],a:[44,108],e2:[44,82],a2:[56,88]},B:{h:[24,82],n:[32,86],p:[60,86],k:[78,84],f:[96,82],e:[30,108],a:[44,108],e2:[44,78],a2:[56,82]},
+    cues:['Pierna de arriba apoyada en el banco','Codo debajo del hombro','Cadera arriba, cuerpo en línea','Aguantá respirando normal'],err:'Dejar caer la cadera'},
+  pallof:{eq:['floor'],A:{h:[61,26],n:[60,36],p:[59,66],k:[60,88],f:[60,110],e:[66,52],a:[68,46],c:[4,46]},B:{h:[61,26],n:[60,36],p:[59,66],k:[60,88],f:[60,110],e:[76,46],a:[90,46],c:[4,46]},
+    cues:['Parado de costado a la polea','Llevá las manos del pecho hacia adelante','No dejes que el cuerpo gire','Abdomen apretado todo el tiempo'],err:'Rotar el torso hacia la polea'},
+  slam:{eq:['floor'],A:{h:[61,26],n:[60,36],p:[59,66],k:[60,88],f:[60,110],e:[62,18],a:[62,6],b:[62,2]},B:{h:[72,44],n:[66,52],p:[50,78],k:[66,92],f:[60,110],e:[72,70],a:[74,98],b:[74,102]},
+    cues:['Subí la pelota bien arriba','Tirala al piso con todo el cuerpo','Doblá las piernas al lanzar','Agarrala del rebote y repetí'],err:'Lanzar solo con los brazos'},
+  carry:{eq:['floor'],A:{h:[61,26],n:[60,36],p:[60,66],k:[66,88],f:[70,110],k2:[54,88],f2:[50,110],e:[60,51],a:[60,66],b:[60,68]},B:{h:[61,28],n:[60,38],p:[60,68],k:[54,88],f:[50,110],k2:[66,88],f2:[70,110],e:[60,53],a:[60,68],b:[60,70]},
+    cues:['Peso pesado en cada mano','Pecho arriba y hombros atrás','Pasos cortos y firmes','Abdomen apretado'],err:'Encorvarse o inclinarse para un lado'},
+  neck:{eq:['floor'],A:{h:[61,26],n:[60,36],p:[59,66],k:[60,88],f:[60,110],e:[72,38],a:[68,24]},B:{h:[60,26],n:[60,36],p:[59,66],k:[60,88],f:[60,110],e:[71,38],a:[67,24]},
+    cues:['Mano en la frente (o en el costado de la cabeza)','Empujá la cabeza contra la mano sin moverla','10 a 20 segundos por lado','Fuerza suave y progresiva'],err:'Hacer fuerza de golpe'}
+});
 /* qué figura usa cada ejercicio */
 function techOf(ex){
   if(!ex)return null;const id=ex.id,f=ex.sk&&ex.sk.f;
-  if(f==='fl'||f==='bl')return 'fl';if(f==='pl')return id==='pppush'?'pushup':'planche';if(f==='hs')return 'hs';if(f==='lsit')return 'lsit';
+  if(f==='fl'||f==='bl')return 'fl';if(f==='pl')return 'planche';if(id==='pppush')return 'pushup';if(f==='hs')return 'hs';if(f==='lsit')return 'lsit';
   const M={squat:'squat',frontsquat:'squat',legpress:'squat',airsquat:'squat',jumpsquat:'squat',shrimp:'pistol',pistol:'pistol',dragon:'pistol',
     deadlift:'hinge',rdl:'hinge',kbswing:'hinge',hyper:'hinge',hipthrust:'thrust',bench:'bench',incbench:'bench',dbpress:'bench',dbfly:'bench',
     ohp:'press',dbohp:'press',row:'row',dbrow:'row',cablerow:'row',facepull:'row',pullup:'pullup',latpull:'pullup',lpullup:'pullup',archerpull:'pullup',
     muscleup:'pullup',oapull:'pullup',austrow:'row',pushup:'pushup',kneepush:'pushup',diamond:'pushup',archerpush:'pushup',oapush:'pushup',
     planchepush:'planche',dips:'dip',benchdip:'dip',ringdip:'dip',lunge:'lunge',bulgarian:'lunge',curl:'curl',dbcurl:'curl',hammer:'curl',
-    lateral:'lateral',plank:'plank',calf:'calf',seatedcalf:'calf'};
-  return M[id]||null;
+    lateral:'lateral',plank:'plank',calf:'calf',seatedcalf:'calf',pppush:'pushup',
+    cablefly:'fly',dbfly:'bench',shrug:'shrug',pushdown:'pushdown',skull:'skull',wrist:'wrist',legext:'legext',legcurl:'legcurl',crunch:'crunch',legraise:'legraise',
+    russian:'russian',flag:'flag',boxjump:'jump',nordic:'nordic',copenhagen:'sideplank',pallof:'pallof',medslam:'slam',farmer:'carry',neckiso:'neck'};
+  if(M[id])return M[id];
+  /* ejercicios propios: la figura del músculo principal */
+  const BYM={pecho:'bench',dorsales:'row',trapecio:'shrug',hombros:'press',biceps:'curl',triceps:'pushdown',antebrazos:'wrist',cuadriceps:'squat',isquios:'legcurl',gluteos:'thrust',gemelos:'calf',aductores:'sideplank',lumbar:'hinge',abs:'crunch',oblicuos:'russian'};
+  return (ex.p&&BYM[ex.p[0]])||'plank';
 }
-function techSVG(k){
+function techSVG(k,stat){
   const T=TECH[k];if(!T)return '';
   const A=T.A,B=Object.assign({},A,T.B),D='2.8s',ks='keyTimes="0;.45;.55;1" calcMode="spline" keySplines=".45 0 .3 1;0 0 1 1;.45 0 .3 1"';
-  const an=(attr,a,b)=>a===b?'':'<animate attributeName="'+attr+'" values="'+a+';'+b+';'+b+';'+a+'" dur="'+D+'" repeatCount="indefinite" '+ks+'/>';
-  const bone=(p,q,cls)=>A[p]&&A[q]?'<line class="'+(cls||'')+'" x1="'+A[p][0]+'" y1="'+A[p][1]+'" x2="'+A[q][0]+'" y2="'+A[q][1]+'">'+an('x1',A[p][0],B[p][0])+an('y1',A[p][1],B[p][1])+an('x2',A[q][0],B[q][0])+an('y2',A[q][1],B[q][1])+'</line>':'';
+  const an=(attr,a,b)=>stat||a===b?'':'<animate attributeName="'+attr+'" values="'+a+';'+b+';'+b+';'+a+'" dur="'+D+'" repeatCount="indefinite" '+ks+'/>';
+  const bone=(p,q,w,cls)=>A[p]&&A[q]?'<line class="'+(cls||'')+'" stroke-width="'+w+'" x1="'+A[p][0]+'" y1="'+A[p][1]+'" x2="'+A[q][0]+'" y2="'+A[q][1]+'">'+an('x1',A[p][0],B[p][0])+an('y1',A[p][1],B[p][1])+an('x2',A[q][0],B[q][0])+an('y2',A[q][1],B[q][1])+'</line>':'';
   const dot=(p,r,cls)=>A[p]?'<circle class="'+cls+'" cx="'+A[p][0]+'" cy="'+A[p][1]+'" r="'+r+'">'+an('cx',A[p][0],B[p][0])+an('cy',A[p][1],B[p][1])+'</circle>':'';
+  const has=x=>T.eq.includes(x),fl='<line class="tq-floor" x1="4" y1="111" x2="116" y2="111"/>';
   let eq='';
-  if(T.eq.includes('floor'))eq+='<line class="tq-floor" x1="6" y1="111" x2="114" y2="111"/>';
-  if(T.eq.includes('bench'))eq+='<rect class="tq-eq" x="'+(k==='thrust'?8:16)+'" y="'+(k==='thrust'?80:83)+'" width="'+(k==='thrust'?26:62)+'" height="6" rx="2"/><line class="tq-eq" x1="'+(k==='thrust'?20:24)+'" y1="88" x2="'+(k==='thrust'?20:24)+'" y2="110"/><line class="tq-eq" x1="'+(k==='thrust'?28:70)+'" y1="88" x2="'+(k==='thrust'?28:70)+'" y2="110"/><line class="tq-floor" x1="6" y1="111" x2="114" y2="111"/>';
-  if(T.eq.includes('pullbar'))eq+='<line class="tq-eq" x1="'+(k==='fl'?24:36)+'" y1="11" x2="'+(k==='fl'?58:84)+'" y2="11"/>';
-  if(T.eq.includes('bars'))eq+='<line class="tq-eq" x1="'+(k==='lsit'?40:44)+'" y1="'+(k==='lsit'?93:63)+'" x2="'+(k==='lsit'?66:76)+'" y2="'+(k==='lsit'?93:63)+'"/><line class="tq-eq" x1="'+(k==='lsit'?46:70)+'" y1="'+(k==='lsit'?93:63)+'" x2="'+(k==='lsit'?46:70)+'" y2="111"/><line class="tq-floor" x1="6" y1="111" x2="114" y2="111"/>';
-  return '<svg class="tq" viewBox="0 0 120 120" role="img" aria-label="Animación de la técnica">'+eq+
-   '<g class="tq-b2">'+bone('p','k2')+bone('k2','f2')+bone('n','e2')+bone('e2','a2')+'</g>'+
-   '<g class="tq-b">'+bone('n','p')+bone('p','k')+bone('k','f')+bone('n','e')+bone('e','a')+'</g>'+dot('h',7,'tq-h')+
-   (A.b?dot('b',6,'tq-plate'):'')+'</svg>';
+  if(has('floor'))eq+=fl;
+  if(has('bench')){const th=k==='thrust',sp=k==='sideplank';const x=th?8:sp?82:16,w=th?26:sp?30:62;eq+='<rect class="tq-eq" x="'+x+'" y="'+(th?80:sp?84:83)+'" width="'+w+'" height="6" rx="3"/><line class="tq-eq" x1="'+(x+5)+'" y1="88" x2="'+(x+5)+'" y2="110"/><line class="tq-eq" x1="'+(x+w-5)+'" y1="88" x2="'+(x+w-5)+'" y2="110"/>'+fl;}
+  if(has('seat'))eq+='<rect class="tq-eq" x="36" y="85" width="40" height="6" rx="3"/><rect class="tq-eq" x="34" y="44" width="6" height="44" rx="3"/><line class="tq-eq" x1="56" y1="91" x2="56" y2="110"/>'+fl;
+  if(has('pullbar'))eq+='<line class="tq-eq" x1="'+(k==='fl'?24:36)+'" y1="11" x2="'+(k==='fl'?58:84)+'" y2="11"/>';
+  if(has('bars'))eq+='<line class="tq-eq" x1="'+(k==='lsit'?40:44)+'" y1="'+(k==='lsit'?93:63)+'" x2="'+(k==='lsit'?66:76)+'" y2="'+(k==='lsit'?93:63)+'"/><line class="tq-eq" x1="'+(k==='lsit'?46:70)+'" y1="'+(k==='lsit'?93:63)+'" x2="'+(k==='lsit'?46:70)+'" y2="111"/>'+fl;
+  if(has('pole'))eq+='<line class="tq-eq" x1="28" y1="6" x2="28" y2="111"/>'+fl;
+  if(has('box'))eq+='<rect class="tq-eq" x="64" y="82" width="38" height="28" rx="3"/>'+fl;
+  if(has('cables'))eq+='<line class="tq-cab" x1="8" y1="8" x2="'+A.a[0]+'" y2="'+A.a[1]+'">'+an('x2',A.a[0],B.a[0])+an('y2',A.a[1],B.a[1])+'</line><line class="tq-cab" x1="112" y1="8" x2="'+A.a2[0]+'" y2="'+A.a2[1]+'">'+an('x2',A.a2[0],B.a2[0])+an('y2',A.a2[1],B.a2[1])+'</line>';
+  const cab=A.c?'<line class="tq-cab" x1="'+A.c[0]+'" y1="'+A.c[1]+'" x2="'+A.a[0]+'" y2="'+A.a[1]+'">'+an('x2',A.a[0],B.a[0])+an('y2',A.a[1],B.a[1])+'</line><circle class="tq-eq" cx="'+A.c[0]+'" cy="'+A.c[1]+'" r="3"/>':'';
+  const shadow=A.f&&k!=='fl'&&k!=='legraise'&&k!=='pullup'&&k!=='flag'?'<ellipse class="tq-sh" cx="'+A.f[0]+'" cy="111" rx="16" ry="2.5">'+an('cx',A.f[0],B.f[0])+'</ellipse>':'';
+  const plate=A.b?(k==='slam'?'<circle class="tq-ball" cx="'+A.b[0]+'" cy="'+A.b[1]+'" r="7">'+an('cx',A.b[0],B.b[0])+an('cy',A.b[1],B.b[1])+'</circle>':dot('b',6.5,'tq-plate')+dot('b',2,'tq-hub')):'';
+  return '<svg class="tq'+(stat?' st':'')+'" viewBox="0 0 120 120" role="img" aria-label="Cómo se hace">'+eq+shadow+cab+
+   '<g class="tq-b2">'+bone('p','k2',6.5)+bone('k2','f2',5.5)+bone('n','e2',5)+bone('e2','a2',4.5)+'</g>'+
+   '<g class="tq-b">'+bone('n','p',9)+bone('p','k',7.5)+bone('k','f',6)+bone('n','e',5.5)+bone('e','a',5)+dot('k',2.2,'tq-j')+dot('e',2,'tq-j')+'</g>'+
+   dot('h',7.5,'tq-h')+plate+'</svg>';
 }
 function techCard(ex){
   const k=techOf(ex),T=k&&TECH[k];if(!T)return '';
@@ -3345,12 +3398,11 @@ function rimportHTML(m){
    '<button class="btn pri wide" style="margin-top:12px" data-a="rimportGo">Agregar a mis rutinas</button>';
 }
 
-/* fotos de ejercicios (Wikimedia Commons, créditos en TERCEROS.md) */
-const EXPH={"bench":{"a":"Al dayan","l":"CC BY-SA 3.0"},"incbench":{"a":"Everkinetic","l":"CC BY-SA 3.0"},"dbpress":{"a":"PTPioneer","l":"CC BY 2.0"},"dbfly":{"a":"Everkinetic","l":"CC BY-SA 3.0"},"cablefly":{"a":"Nenad Stojkovic","l":"CC BY 2.0"},"dips":{"a":"soh32's","l":"CC BY-SA 3.0"},"pullup":{"a":"PTPioneer","l":"CC BY 2.0"},"latpull":{"a":"No machine-readable author provided. GeorgeStepane","l":"CC BY-SA 3.0"},"row":{"a":"Everkinetic","l":"CC BY-SA 3.0"},"dbrow":{"a":"Eric Astrauskas, www.PTinTO.com","l":"CC BY 2.0"},"cablerow":{"a":"Everkinetic","l":"CC BY-SA 3.0"},"deadlift":{"a":"Nenad Stojkovic","l":"CC BY 2.0"},"shrug":{"a":"Everkineteic","l":"CC BY-SA 3.0"},"ohp":{"a":"Richardkiwi","l":"CC BY-SA 4.0"},"lateral":{"a":"No machine-readable author provided. GeorgeStepane","l":"CC BY-SA 3.0"},"dbcurl":{"a":"PTPioneer","l":"CC BY 2.0"},"pushdown":{"a":"No machine-readable author provided. GeorgeStepane","l":"CC BY-SA 3.0"},"skull":{"a":"No machine-readable author provided. GeorgeStepane","l":"CC BY-SA 3.0"},"wrist":{"a":"BruceBlaus","l":"CC BY-SA 4.0"},"squat":{"a":"Nenad Stojkovic","l":"CC BY 2.0"},"frontsquat":{"a":"Everkinetic","l":"CC BY-SA 3.0"},"legpress":{"a":"Teemeah","l":"CC BY-SA 4.0"},"legcurl":{"a":"No machine-readable author provided. GeorgeStepane","l":"CC BY-SA 3.0"},"rdl":{"a":"Everkinetic","l":"CC BY-SA 3.0"},"lunge":{"a":"Yashjoshi2102","l":"CC BY-SA 4.0"},"crunch":{"a":"PTPioneer","l":"CC BY 2.0"},"plank":{"a":"Jaykayfit","l":"CC BY-SA 3.0"},"austrow":{"a":"Colossus Fitness","l":"CC BY 3.0"},"oapull":{"a":"Bifty","l":"CC BY-SA 4.0"},"lsit":{"a":"Tommy Gilligan/West Point Public Affairs","l":"Public domain"},"wallhs":{"a":"Sascha Kohlmann","l":"CC BY-SA 3.0"},"freehs":{"a":"Yogazilla","l":"CC BY-SA 4.0"},"hspu":{"a":"autor en la página","l":"Public domain"},"fullbl":{"a":"Martin Rulsch, Wikimedia Commons","l":"CC BY-SA 4.0"},"fullpl":{"a":"Jonathanfv","l":"CC BY 3.0"},"boxjump":{"a":"Trougnouf","l":"CC BY 4.0"},"kbswing":{"a":"Taco fleur","l":"CC BY-SA 4.0"},"farmer":{"a":"stu_spivack","l":"CC BY-SA 2.0"},"medslam":{"a":"Staff Sgt. Clinton Firstbrook","l":"Public domain"}};
+
 /* ============ Árbol radial: de vos (el centro) hacia afuera ============ */
 const RT_IC={push:'dumb',pull:'up',dip:'down',legs:'muscle',lsit:'acro',hs:'up',fl:'lever',bl:'lever',pl:'planche',flag:'flag'};
 const RT_SHORT={kneepush:'De rodillas',pushup:'Flexiones',diamond:'Diamante',archerpush:'Arquero',pppush:'Pseudo planche',oapush:'A un brazo',planchepush:'En planche',austrow:'Remo invertido',pullup:'Dominadas',lpullup:'En L',archerpull:'Arquero',muscleup:'Muscle-up',oapull:'A un brazo',benchdip:'En banco',dips:'Paralelas',ringdip:'Anillas',airsquat:'Sentadilla',shrimp:'Shrimp',pistol:'Pistol',dragon:'Dragon pistol',tucklsit:'Encogido',lsit:'L-sit',vsit:'V-sit',wallhs:'En pared',freehs:'Libre',hspu:'Flexión en pared',freehspu:'Flexión libre',tuckfl:'Encogido',advfl:'Avanzado',straddlefl:'Abierto',fullfl:'Completo',tuckbl:'Encogido',straddlebl:'Abierto',fullbl:'Completo',tuckpl:'Encogida',advpl:'Avanzada',straddlepl:'Abierta',fullpl:'Completa',flag:'Bandera'};
-const exPhoto=id=>(typeof EXPH!=='undefined'&&EXPH[id])?'img/ex/'+id+'.jpg':null;
+
 function rtLayout(){
   const bs=branches(),N=bs.length,out=[];
   bs.forEach((b,bi)=>{const ang=-Math.PI/2+bi*2*Math.PI/N;
@@ -3367,10 +3419,10 @@ function radialHTML(m){
       edges+='<line class="rt-e'+(p.s.done?' done':on?' on':'')+'" x1="'+px.toFixed(1)+'" y1="'+py.toFixed(1)+'" x2="'+p.x.toFixed(1)+'" y2="'+p.y.toFixed(1)+'" style="--l:'+len.toFixed(0)+';--d:'+(i*90+p.bi*25)+'ms"/>';});
   });
   L.forEach(p=>{
-    const s=p.s,ex=p.n.ex,col=TCOL[nodeTier(ex)],ph=exPhoto(p.n.id),cls=s.done?'done':s.avail?'avail':'lock',sel=m.sel===p.n.id,id='rc'+p.bi+'_'+p.i;
+    const s=p.s,ex=p.n.ex,col=TCOL[nodeTier(ex)],cls=s.done?'done':s.avail?'avail':'lock',sel=m.sel===p.n.id,id='rc'+p.bi+'_'+p.i;
     nodes+='<g class="rt-n '+cls+(sel?' sel':'')+(goal&&goal.id===p.n.id?' goal':'')+'" data-a="treeSel" data-v="'+p.n.id+'" transform="translate('+p.x.toFixed(1)+' '+p.y.toFixed(1)+')" style="--c:'+col+';--d:'+(p.i*90+p.bi*25+120)+'ms" tabindex="0" role="button" aria-label="'+esc(shortN(ex.n))+'">'+
      '<g class="rt-in"><circle class="rt-halo" r="46"/><circle class="rt-bg" r="36"/>'+
-     (ph?'<clipPath id="'+id+'"><circle r="31"/></clipPath><image href="'+ph+'" x="-31" y="-31" width="62" height="62" preserveAspectRatio="xMidYMid slice" clip-path="url(#'+id+')" class="rt-img"/>'
+     (techOf(ex)?techSVG(techOf(ex),true).replace('<svg class="tq st"','<svg class="tq st rt-fig" x="-27" y="-29" width="54" height="54"')
         :'<g class="rt-ic" transform="translate(-13 -13) scale(1.1)">'+ic(RT_IC[p.b.f]||'acro',24).replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'')+'</g>')+
      '<circle class="rt-ring" r="36" style="stroke-dasharray:'+(C*s.pct).toFixed(1)+' '+C.toFixed(1)+'"/>'+
      (s.done?'<g class="rt-ok" transform="translate(24 -24)"><circle r="11"/><path d="M-5 0l3.5 3.5L5-4"/></g>':s.locked&&!s.best?'<g class="rt-lk" transform="translate(24 -24)"><circle r="11"/><rect x="-4.5" y="-1.5" width="9" height="7" rx="1.5"/><path d="M-2.6-1.5v-2.2a2.6 2.6 0 0 1 5.2 0v2.2"/></g>':'')+
@@ -3924,8 +3976,7 @@ function renderRest(){
 /* ============ Capas: modales ============ */
 function exDetail(id){
   const ex=exById(id);if(!ex)return '';
-  const ph=exPhoto(ex.id);
-  let h=(ph?'<figure class="ex-photo"><img src="'+ph+'" alt="'+esc(shortN(ex.n))+'" loading="lazy"><figcaption>'+esc(EXPH[ex.id].a||'Wikimedia Commons')+' · '+esc(EXPH[ex.id].l)+'</figcaption></figure>':'')+techCard(ex)+'<div class="big-map" style="max-width:300px;width:100%">'+bodyMap(mapOf(ex),{labels:1,cls:'live'})+'</div><div class="chips">'+chipsMus(ex)+'</div>';
+  let h=techCard(ex)+'<div class="big-map" style="max-width:300px;width:100%">'+bodyMap(mapOf(ex),{labels:1,cls:'live'})+'</div><div class="chips">'+chipsMus(ex)+'</div>';
   if(ex.d)h+='<p>'+esc(ex.d)+'</p>';
   if(ex.ph)h+='<div class="warn"><b>Peso por mano:</b> anotá lo que pesa UNA mancuerna, no la suma de las dos.</div>';
   h+='<p class="mut sm-t">Equipo: '+esc(ex.eq)+'. Los músculos resaltados son los principales y los claros, los secundarios.</p>';
