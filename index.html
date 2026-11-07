@@ -1175,6 +1175,20 @@ rect.tq-eq{stroke-width:1.5}
 .rt-n.lock .rt-bg{fill:color-mix(in srgb,var(--surf) 70%,#000)}
 .rt-t{stroke:#06070D}.rt-bl{stroke:#06070D;fill:color-mix(in srgb,var(--acc) 50%,#fff)}
 @media (prefers-reduced-motion:reduce){.rt-sky circle,.rt-neb,.rt-rays,.rt-c-orbit,.rt-flow,.rt-orb,.rt-spk path{animation:none!important}}
+
+/* caminos curvos y animaciones nuevas */
+.rt-e{fill:none;stroke-dasharray:1;stroke-dashoffset:1}
+.rt-flow{fill:none;stroke-dasharray:.035 .09;animation:flowP 2.2s linear infinite}
+@keyframes flowP{to{stroke-dashoffset:-.125}}
+.rt-pt{fill:#fff;filter:drop-shadow(0 0 5px var(--acc2)) drop-shadow(0 0 10px var(--acc))}
+.rt-in{animation:rtFly .9s cubic-bezier(.22,1.2,.36,1) var(--d) both}
+@keyframes rtFly{0%{transform:translate(var(--fx),var(--fy)) scale(.15);opacity:0}60%{opacity:1}100%{transform:none;opacity:1}}
+.rt-rip{fill:none;stroke:var(--acc2);stroke-width:2.5;transform-origin:0 0;animation:rip2 1.2s cubic-bezier(.22,1,.36,1) both}
+.rt-rip.b{animation-delay:.25s;stroke:var(--acc)}
+@keyframes rip2{from{transform:scale(1);opacity:.9}to{transform:scale(2.2);opacity:0}}
+.mback.same .rt-in{animation:none}
+.mback.same .rt-n.sel .rt-in{animation:rtSel .45s cubic-bezier(.34,1.45,.64,1)}
+@media (prefers-reduced-motion:reduce){.rt-in{animation:none!important}.rt-pt{display:none}}
 </style>
 </head>
 <body>
@@ -3433,7 +3447,7 @@ const RT_SHORT={kneepush:'De rodillas',pushup:'Flexiones',diamond:'Diamante',arc
 function rtLayout(){
   const bs=branches(),N=bs.length,out=[];
   bs.forEach((b,bi)=>{const ang=-Math.PI/2+bi*2*Math.PI/N;
-    b.nodes.forEach((n,i)=>{const r=185+i*108;out.push({b,bi,i,n,ang,x:Math.cos(ang)*r,y:Math.sin(ang)*r,s:nodeState(b,i)});});});
+    b.nodes.forEach((n,i)=>{const r=185+i*108,a=ang+i*0.16+Math.sin(i*1.7+bi)*0.03;out.push({b,bi,i,n,ang:a,x:Math.cos(a)*r,y:Math.sin(a)*r,s:nodeState(b,i)});});});
   return out;
 }
 function rtSky(){
@@ -3447,13 +3461,21 @@ function radialHTML(m){
   const byB={};L.forEach(p=>(byB[p.bi]=byB[p.bi]||[]).push(p));
   Object.values(byB).forEach(ps=>{
     const a=ps[0].ang;labels+='<text class="rt-bl" x="'+(Math.cos(a)*118).toFixed(1)+'" y="'+(Math.sin(a)*118+4).toFixed(1)+'" text-anchor="middle">'+esc(ps[0].b.n)+'</text>';
-    ps.forEach((p,i)=>{const px=i?ps[i-1].x:Math.cos(a)*58,py=i?ps[i-1].y:Math.sin(a)*58,on=p.s.done||p.s.avail,len=Math.hypot(p.x-px,p.y-py);
-      edges+='<line class="rt-e'+(p.s.done?' done':on?' on':'')+'" x1="'+px.toFixed(1)+'" y1="'+py.toFixed(1)+'" x2="'+p.x.toFixed(1)+'" y2="'+p.y.toFixed(1)+'" style="--l:'+len.toFixed(0)+';--d:'+(i*90+p.bi*25)+'ms"/>'+(p.s.done||p.s.avail?'<line class="rt-flow'+(p.s.done?'':' weak')+'" x1="'+px.toFixed(1)+'" y1="'+py.toFixed(1)+'" x2="'+p.x.toFixed(1)+'" y2="'+p.y.toFixed(1)+'"/>':'');});
+    let full='',done='';
+    ps.forEach((p,i)=>{const px=i?ps[i-1].x:Math.cos(a)*58,py=i?ps[i-1].y:Math.sin(a)*58,on=p.s.done||p.s.avail;
+      /* punto de control corrido hacia un costado: el camino se curva (alternando, como una onda) */
+      const mx=(px+p.x)/2,my=(py+p.y)/2,dx=p.x-px,dy=p.y-py,L=Math.hypot(dx,dy)||1,k=(i%2?-1:1)*Math.min(26,L*.22);
+      const cx=mx-dy/L*k,cy=my+dx/L*k,seg='Q'+cx.toFixed(1)+' '+cy.toFixed(1)+' '+p.x.toFixed(1)+' '+p.y.toFixed(1);
+      const d='M'+px.toFixed(1)+' '+py.toFixed(1)+seg;full+=(i?'':'M'+px.toFixed(1)+' '+py.toFixed(1))+seg;if(p.s.done)done+=(i?'':'M'+px.toFixed(1)+' '+py.toFixed(1))+seg;
+      edges+='<path class="rt-e'+(p.s.done?' done':on?' on':'')+'" d="'+d+'" pathLength="1" style="--d:'+(i*90+p.bi*25)+'ms"/>'+(on?'<path class="rt-flow'+(p.s.done?'':' weak')+'" d="'+d+'" pathLength="1"/>':'');
+    });
+    /* partículas de luz que viajan por lo que ya dominás */
+    if(done){const id='rtp'+ps[0].bi;edges+='<path id="'+id+'" d="'+done+'" fill="none" stroke="none"/>'+[0,1,2].map(j=>'<circle class="rt-pt" r="'+(j?2.6:3.6)+'"><animateMotion dur="'+(3.2+j*.4)+'s" begin="'+(-j*1.1)+'s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines=".4 0 .6 1"><mpath href="#'+id+'"/></animateMotion><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.1;.85;1" dur="'+(3.2+j*.4)+'s" begin="'+(-j*1.1)+'s" repeatCount="indefinite"/></circle>').join('');}
   });
   L.forEach(p=>{
     const s=p.s,ex=p.n.ex,col=TCOL[nodeTier(ex)],cls=s.done?'done':s.avail?'avail':'lock',sel=m.sel===p.n.id,id='rc'+p.bi+'_'+p.i;
-    nodes+='<g class="rt-n '+cls+(sel?' sel':'')+(goal&&goal.id===p.n.id?' goal':'')+'" data-a="treeSel" data-v="'+p.n.id+'" transform="translate('+p.x.toFixed(1)+' '+p.y.toFixed(1)+')" style="--c:'+col+';--d:'+(p.i*90+p.bi*25+120)+'ms" tabindex="0" role="button" aria-label="'+esc(shortN(ex.n))+'">'+
-     '<g class="rt-in"><circle class="rt-halo" r="46"/>'+(s.avail?'<circle class="rt-orb" r="45"/>':'')+(s.done?'<g class="rt-spk"><path d="M-40 -30l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/><path d="M38 26l1.5 3.5 3.5 1.5-3.5 1.5-1.5 3.5-1.5-3.5-3.5-1.5 3.5-1.5z" style="animation-delay:-1.2s"/></g>':'')+'<circle class="rt-bg" r="36"/>'+
+    nodes+='<g class="rt-n '+cls+(sel?' sel':'')+(goal&&goal.id===p.n.id?' goal':'')+'" data-a="treeSel" data-v="'+p.n.id+'" transform="translate('+p.x.toFixed(1)+' '+p.y.toFixed(1)+')" style="--c:'+col+';--d:'+(p.i*90+p.bi*25+120)+'ms;--fx:'+(-p.x).toFixed(0)+'px;--fy:'+(-p.y).toFixed(0)+'px" tabindex="0" role="button" aria-label="'+esc(shortN(ex.n))+'">'+
+     '<g class="rt-in">'+(sel?'<circle class="rt-rip" r="36"/><circle class="rt-rip b" r="36"/>':'')+'<circle class="rt-halo" r="46"/>'+(s.avail?'<circle class="rt-orb" r="45"/>':'')+(s.done?'<g class="rt-spk"><path d="M-40 -30l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/><path d="M38 26l1.5 3.5 3.5 1.5-3.5 1.5-1.5 3.5-1.5-3.5-3.5-1.5 3.5-1.5z" style="animation-delay:-1.2s"/></g>':'')+'<circle class="rt-bg" r="36"/>'+
      (techOf(ex)?techSVG(techOf(ex),true).replace('<svg class="tq st"','<svg class="tq st rt-fig" x="-27" y="-29" width="54" height="54"')
         :'<g class="rt-ic" transform="translate(-13 -13) scale(1.1)">'+ic(RT_IC[p.b.f]||'acro',24).replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'')+'</g>')+
      '<circle class="rt-ring" r="36" style="stroke-dasharray:'+(C*s.pct).toFixed(1)+' '+C.toFixed(1)+'"/>'+
@@ -3472,7 +3494,7 @@ function radialHTML(m){
 }
 /* mover y hacer zoom con el dedo o el mouse */
 (()=>{const pts=new Map();let start=null,moved=false;
-  const svg=()=>$('#rtSvg'),apply=()=>{const s=svg(),v=S.rt;if(s&&v)s.setAttribute('viewBox',(v.x-v.w/2)+' '+(v.y-v.w/2)+' '+v.w+' '+v.w);};
+  const svg=()=>$('#rtSvg'),apply=()=>{const s=svg(),v=S.rt;if(s&&v){s.setAttribute('viewBox',(v.x-v.w/2)+' '+(v.y-v.w/2)+' '+v.w+' '+v.w);const k=s.querySelector('.rt-sky');if(k)k.setAttribute('transform','translate('+(v.x*.4).toFixed(1)+' '+(v.y*.4).toFixed(1)+')');}};
   const unit=()=>{const s=svg();return s?S.rt.w/s.getBoundingClientRect().width:1;};
   document.addEventListener('pointerdown',e=>{if(!e.target.closest('#rtSvg'))return;S.rt=S.rt||{x:0,y:0,w:820};pts.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=false;
     start={v:Object.assign({},S.rt),p:[...pts.values()].map(p=>({...p}))};},{passive:true});
