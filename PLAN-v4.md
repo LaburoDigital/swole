@@ -48,8 +48,8 @@ El objetivo no cambia: **entrenar y saber qué tan fuerte sos**. Todo lo de abaj
 ### Tanda E: confianza y comodidad
 16. **Importar de Hevy / Strong (CSV)** (hecho en v27): traés todo tu historial en un toque. Es la mejor forma de que alguien se cambie a Swole.
 17. **Recuperar contraseña por email** que funcione de verdad (Resend con dominio propio).
-18. **Recordatorios**: "hoy te toca piernas" y "tomá creatina", con notificaciones de la app instalada.
-19. **Biblioteca de ejercicios con técnica**: dibujos propios (SVG) de cada movimiento, músculos y errores comunes.
+18. **Recordatorios** (hecho en v28): "hoy te toca piernas" y "tomá creatina", con notificaciones de la app instalada.
+19. **Biblioteca de ejercicios con técnica** (hecho en v28): dibujos propios (SVG) de cada movimiento, músculos y errores comunes.
 
 ### Fuera de alcance (por ser web/PWA)
 - Apple Health / Google Fit y relojes: necesitan una app nativa. Se puede pensar más adelante con Capacitor.

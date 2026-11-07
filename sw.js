@@ -1,6 +1,6 @@
 /* Service worker de Swole: hace que la app abra sin internet.
    Cuando cambies index.html, subí el número de VERSION para que los celulares bajen la nueva. */
-const VERSION = 'swole-v27';
+const VERSION = 'swole-v28';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/logo.svg'];
 
 self.addEventListener('install', e => {
@@ -68,4 +68,20 @@ self.addEventListener('notificationclick', e => {
       return self.clients.openWindow('./');
     })
   );
+});
+
+// Recordatorios: muestra la notificación que manda el servidor y abre la app al tocarla.
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (err) { d = { body: e.data && e.data.text() }; }
+  e.waitUntil(self.registration.showNotification(d.title || 'Swole', {
+    body: d.body || '', tag: d.tag || 'swole', icon: './icons/icon-192.png', badge: './icons/icon-192.png', data: { url: d.url || './' }
+  }));
+});
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    for (const c of list) if ('focus' in c) return c.focus();
+    return self.clients.openWindow((e.notification.data && e.notification.data.url) || './');
+  }));
 });
