@@ -38,7 +38,7 @@ El objetivo no cambia: **entrenar y saber qué tan fuerte sos**. Todo lo de abaj
 11. **Temporadas mensuales**: ganás puntos por progresar (no por ser el más fuerte), así compite el que recién empieza.
 12. **Feed simple**: "Tomi subió a Platino I", "Juan hizo récord en banca".
 
-### Tanda D: gamificación con criterio
+### Tanda D: gamificación con criterio (hecha en v27)
 13. **Misiones semanales**: "3 entrenos", "1 récord", "15 series de espalda". Dan XP y la racha.
 14. **Racha semanal** en vez de diaria: cumplir tus días planeados, sin castigar el descanso.
 15. **Periodización en el generador**:
@@ -46,7 +46,7 @@ El objetivo no cambia: **entrenar y saber qué tan fuerte sos**. Todo lo de abaj
     - semana 5 de descarga, con aviso.
 
 ### Tanda E: confianza y comodidad
-16. **Importar de Hevy / Strong (CSV)**: traés todo tu historial en un toque. Es la mejor forma de que alguien se cambie a Swole.
+16. **Importar de Hevy / Strong (CSV)** (hecho en v27): traés todo tu historial en un toque. Es la mejor forma de que alguien se cambie a Swole.
 17. **Recuperar contraseña por email** que funcione de verdad (Resend con dominio propio).
 18. **Recordatorios**: "hoy te toca piernas" y "tomá creatina", con notificaciones de la app instalada.
 19. **Biblioteca de ejercicios con técnica**: dibujos propios (SVG) de cada movimiento, músculos y errores comunes.
