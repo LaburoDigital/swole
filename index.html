@@ -1474,6 +1474,13 @@ small{line-height:1.35}
 .pod.p2 .pod-b{height:96px;background:linear-gradient(180deg,#EEF1F6,#AEB6C4)}
 .pod.p3 .pod-b{height:72px;background:linear-gradient(180deg,#F2BE8E,#C9844F)}
 .pod-msg{text-align:center;font:700 16px var(--f-b);margin:10px 0}
+/* v50: música en el entreno */
+.mus{display:flex;align-items:center;gap:10px;padding:8px 10px;margin:0 0 12px;border-radius:16px;background:var(--raise);border:1px solid var(--line)}
+.mus.on{background:linear-gradient(90deg,color-mix(in srgb,#1DB954 18%,var(--raise)),var(--raise))}
+.mus img,.mus-i{width:42px;height:42px;border-radius:10px;flex:none;object-fit:cover;display:grid;place-items:center;background:var(--surf);color:var(--acc)}
+.mus-t{min-width:0}.mus-t b{display:block;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mus-t small{display:block;color:var(--mut);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mus .ib.flat{width:36px;height:36px;flex:none}.mus-pp{width:44px;height:44px;flex:none;border-radius:50%;background:var(--text);color:var(--bg)}
+.fd-row.on{border-color:var(--acc)}
 </style>
 </head>
 <body>
@@ -2118,20 +2125,34 @@ function foodAlt(){
    '<button data-a="foodNew"><span class="fd-alt-i">'+ic('plus',18)+'</span><span class="grow"><b>Crear un alimento</b><small>Copiás los datos de la etiqueta del paquete</small></span>'+ic('right',16)+'</button></div>';
 }
 /* ============ Código de barras: la cámara lee el código y los datos vienen de Open Food Facts (base abierta y gratis) ============ */
-let barStream=null,barTimer=0;
-const barCan=()=>'BarcodeDetector' in window&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia;
-function barStop(){clearInterval(barTimer);barTimer=0;if(barStream){barStream.getTracks().forEach(t=>t.stop());barStream=null;}}
+let barStream=null,barTimer=0,barZx=null;
+/* si algún día Swole se sube a App Store / Play Store con Capacitor, usa el escáner nativo (plugin @capacitor-mlkit/barcode-scanning) */
+const barNative=()=>{const c=window.Capacitor;return c&&c.isNativePlatform&&c.isNativePlatform()&&c.Plugins&&c.Plugins.BarcodeScanner||null;};
+const barCan=()=>!!(barNative()||navigator.mediaDevices&&navigator.mediaDevices.getUserMedia);
+function barStop(){clearInterval(barTimer);barTimer=0;if(barZx){try{barZx.stop();}catch(e){}barZx=null;}if(barStream){barStream.getTracks().forEach(t=>t.stop());barStream=null;}}
+/* lector para iPhone (Safari no trae BarcodeDetector): se baja solo cuando hace falta */
+function zxLoad(){return window.ZXingBrowser?Promise.resolve(window.ZXingBrowser):new Promise((ok,bad)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js';s.onload=()=>window.ZXingBrowser?ok(window.ZXingBrowser):bad(new Error('zx'));s.onerror=bad;document.head.appendChild(s);});}
 function barHTML(d){
   const b=d.bar||{};
   if(b.busy)return '<div class="ph-wait"><span class="ph-dot"></span>Buscando el producto '+esc(b.code||'')+'…</div>';
   let h=b.err?'<div class="warn">'+esc(b.err)+'</div>':'';
   if(b.err&&b.code)h+='<button class="btn pri wide" data-a="foodNew">'+ic('plus',16)+' Cargarlo con la etiqueta</button>';
-  if(!b.manual&&barCan())h+='<div class="bar-cam"><video id="barVid" playsinline muted autoplay></video><i class="bar-line"></i></div><p class="mut sm-t tc">Apuntá al código de barras del paquete.</p><button class="btn line wide" data-a="barManual">Escribir el número</button>';
+  if(!b.manual&&barNative())h+='<div class="ph-wait"><span class="ph-dot"></span>Abriendo la cámara…</div><button class="btn line wide" data-a="barManual">Escribir el número</button>';
+  else if(!b.manual&&barCan())h+='<div class="bar-cam"><video id="barVid" playsinline muted autoplay></video><i class="bar-line"></i></div><p class="mut sm-t tc">Apuntá al código de barras del paquete.</p><button class="btn line wide" data-a="barManual">Escribir el número</button>';
   else h+='<p class="mut sm-t">'+(barCan()?'':'Tu navegador no deja leer códigos con la cámara: escribí los números que están abajo de las barras.')+'</p><div class="row" style="gap:8px"><input class="soc-in" id="barIn" inputmode="numeric" maxlength="14" placeholder="7790000000000" style="letter-spacing:.06em" value="'+esc(b.code||'')+'" aria-label="Número del código de barras"><button class="btn pri" data-a="barGo">Buscar</button></div>';
   return h+'<button class="btn line wide" data-a="foodStep" data-v="list">Volver</button><p class="mut tc" style="font-size:11.5px">Datos de Open Food Facts (base abierta, la carga la gente). Revisá que coincidan con la etiqueta.</p>';
 }
 async function barScan(){
   const d=S.m2&&S.m2.d;if(!d||d.step!=='bar'||d.bar.manual||!barCan())return;
+  const nat=barNative();
+  if(nat){try{const r=await nat.scan({formats:['EAN_13','EAN_8','UPC_A','UPC_E']}),c=r&&r.barcodes&&r.barcodes[0];if(c)barLookup(c.rawValue||c.displayValue);else{d.bar={manual:1};renderModal();}}
+    catch(e){d.bar={manual:1,err:'No pude abrir la cámara. Escribí el número del código.'};renderModal();}return;}
+  if(!('BarcodeDetector' in window)){
+    try{const ZX=await zxLoad(),v=document.getElementById('barVid');if(!v||!S.m2||S.m2.d!==d||d.step!=='bar')return;
+      const rd=new ZX.BrowserMultiFormatReader();
+      barZx=await rd.decodeFromVideoDevice(undefined,v,(res)=>{if(res&&barZx){const code=res.getText();barStop();try{navigator.vibrate&&navigator.vibrate(30);}catch(e){}barLookup(code);}});
+    }catch(e){barStop();if(S.m2&&S.m2.d===d){d.bar={manual:1,err:'No pude usar la cámara. Escribí el número del código.'};renderModal();}}
+    return;}
   try{barStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});}
   catch(e){d.bar={manual:1,err:'No pude usar la cámara. Escribí el número del código.'};renderModal();return;}
   const det=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e']});
@@ -2201,7 +2222,7 @@ function photoHTML(d){
   let h=ph.thumb?'<div class="ph-pic"><img src="'+ph.thumb+'" alt="Tu foto">'+(ph.busy?'<div class="ph-scan"><i></i><span>Mirando tu plato…</span></div>':'')+'</div>':
     (ph.busy?'<div class="ph-wait"><span class="ph-dot"></span>Preparando la foto…</div>':'');
   if(ph.busy)return h+'<p class="mut sm-t tc">Tarda unos segundos. Estoy calculando qué hay y cuánto pesa cada cosa.</p>';
-  if(ph.err)return h+'<div class="warn">'+esc(PH_ERR[ph.err]||PH_ERR.api)+'</div><button class="btn wide" data-a="foodStep" data-v="list">Buscar a mano</button>';
+  if(ph.err)return h+'<div class="warn">'+esc(PH_ERR[ph.err]||PH_ERR.api)+'</div>'+(ph.err==='login'?'<div class="g2"><button class="btn pri" data-a="loginOpen" data-v="up">Crear cuenta</button><button class="btn" data-a="loginOpen">Ya tengo cuenta</button></div>':'')+'<button class="btn wide" data-a="foodStep" data-v="list">Buscar a mano</button>';
   if(!ph.food||!ph.items||!ph.items.length)return h+'<div class="warn">No encontré comida en la foto. Probá sacándola de más cerca, con el plato entero.</div>'+photoBtn('Sacar otra')+'<button class="btn line wide" data-a="foodStep" data-v="list">Buscar a mano</button>';
   h+='<p class="mut sm-t">Revisá cada cosa: tocá la opción correcta y ajustá el tamaño. Si no es ninguna, tocá <b>Otra cosa</b>.</p>';
   ph.items.forEach((it,i)=>{
@@ -2288,6 +2309,10 @@ const weightNow=()=>db.profile?db.profile.weight:null;
 function waterGoal(){return Math.max(6,Math.round((weightNow()||70)*35/250));}
 /* ============ Iconos ============ */
 const IC={
+  music:'<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
+  pause:'<path d="M8 5v14M16 5v14"/>',
+  prev:'<path d="M18 6l-9 6 9 6zM6 6v12"/>',
+  next:'<path d="M6 6l9 6-9 6zM18 6v12"/>',
   bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
   big:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
   barcode:'<path d="M4 5v14M7 5v14M11 5v14M14 5v14M18 5v14M20 5v14"/>',
@@ -5116,6 +5141,87 @@ function entryHTML(en,i){
    '<div class="row" style="margin-top:10px"><button class="btn sm grow" data-a="addSet" data-e="'+i+'">'+ic('plus',16)+' Serie</button><button class="btn sm grow" data-a="delSet" data-e="'+i+'">'+ic('minus',16)+' Serie</button>'+
    (isBarbell(ex)?'<button class="btn sm" data-a="plates" data-e="'+i+'" aria-label="Calculadora de discos">'+ic('disc',16)+'</button>':'')+'</div></div>';
 }
+/* ============ Música: abrir tu app de música y, si conectás Spotify, manejarla desde el entreno ============
+   Spotify (2026): las apps en "modo desarrollo" solo pueden usarlo hasta 5 cuentas con Premium que el dueño agrega a mano.
+   Para activarlo, poné acá el Client ID de la app que creaste en developer.spotify.com (no es secreto). */
+const SPOTIFY_CLIENT_ID='';
+const SP_SCOPES='user-read-playback-state user-modify-playback-state user-read-currently-playing';
+const MUSIC_APPS=[['spotify','Spotify','https://open.spotify.com/'],['ytm','YouTube Music','https://music.youtube.com/'],['apple','Apple Music','https://music.apple.com/']];
+const Music=(()=>{
+  let tok=null,now=null,timer=0,busy=false;
+  try{tok=JSON.parse(localStorage.getItem('swole.sp')||'null');}catch(e){}
+  const keep=()=>{try{tok?localStorage.setItem('swole.sp',JSON.stringify(tok)):localStorage.removeItem('swole.sp');}catch(e){}};
+  const redirect=()=>location.origin+location.pathname;
+  const b64u=buf=>btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  async function connect(){
+    if(!SPOTIFY_CLIENT_ID)return toast('Spotify todavía no está activado en Swole');
+    const v=b64u(crypto.getRandomValues(new Uint8Array(48))),ch=b64u(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v))),st='sp_'+b64u(crypto.getRandomValues(new Uint8Array(12)));
+    try{sessionStorage.setItem('swole.spv',JSON.stringify({v,st}));}catch(e){}
+    location.href='https://accounts.spotify.com/authorize?'+new URLSearchParams({client_id:SPOTIFY_CLIENT_ID,response_type:'code',redirect_uri:redirect(),code_challenge_method:'S256',code_challenge:ch,scope:SP_SCOPES,state:st});
+  }
+  async function token(body){
+    const r=await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(Object.assign({client_id:SPOTIFY_CLIENT_ID},body))});
+    const j=await r.json();if(!r.ok)throw new Error(j.error_description||j.error||'token');
+    tok={a:j.access_token,r:j.refresh_token||(tok&&tok.r),exp:Date.now()+(j.expires_in-60)*1000};keep();
+  }
+  /* volviste de Spotify con ?code=...&state=sp_... */
+  async function fromLink(){
+    const q=new URLSearchParams(location.search),code=q.get('code'),st=q.get('state');
+    if(!code||!st||!st.startsWith('sp_'))return;
+    history.replaceState(null,'',location.pathname+location.hash);
+    let s=null;try{s=JSON.parse(sessionStorage.getItem('swole.spv')||'null');sessionStorage.removeItem('swole.spv');}catch(e){}
+    if(!s||s.st!==st)return toast('No se pudo conectar Spotify: probá de nuevo');
+    try{await token({grant_type:'authorization_code',code,redirect_uri:redirect(),code_verifier:s.v});toast('Spotify conectado');if(db.active){S.sessOpen=true;render();}poll();}
+    catch(e){toast(/user may not be registered|not registered/i.test(e.message)?'Tu cuenta de Spotify no está habilitada en Swole (Spotify limita a 5 cuentas)':'No se pudo conectar Spotify');}
+  }
+  async function api(path,method){
+    if(!tok)throw new Error('off');
+    if(Date.now()>tok.exp){try{await token({grant_type:'refresh_token',refresh_token:tok.r});}catch(e){tok=null;keep();throw e;}}
+    const r=await fetch('https://api.spotify.com/v1/me/player'+path,{method:method||'GET',headers:{Authorization:'Bearer '+tok.a}});
+    if(r.status===401){tok.exp=0;keep();throw new Error('401');}
+    if(r.status===204||r.status===202)return null;
+    const j=await r.json().catch(()=>null);if(!r.ok){const e=new Error(j&&j.error&&j.error.reason||String(r.status));e.status=r.status;throw e;}
+    return j;
+  }
+  async function refresh(){
+    if(!tok)return;
+    try{const j=await api('/currently-playing');const it=j&&j.item;
+      now=it?{n:it.name,a:(it.artists||[]).map(x=>x.name).join(', ')||(it.show&&it.show.name)||'',img:((it.album||it).images||[]).slice(-1)[0]?.url||'',on:!!j.is_playing}:{none:1};}
+    catch(e){now={err:1};}
+    const el=document.getElementById('musicBar');if(el)el.outerHTML=musicHTML();
+  }
+  function poll(){clearInterval(timer);if(!tok)return;refresh();timer=setInterval(()=>{if(db.active&&S.sessOpen&&document.visibilityState==='visible')refresh();},8000);}
+  async function ctl(what){
+    if(busy)return;busy=true;
+    try{
+      if(what==='toggle')await api(now&&now.on?'/pause':'/play','PUT');
+      else await api('/'+what,'POST');
+      if(now&&what==='toggle')now.on=!now.on;
+      const el=document.getElementById('musicBar');if(el)el.outerHTML=musicHTML();
+      setTimeout(refresh,450);
+    }catch(e){toast(e.status===404||/NO_ACTIVE_DEVICE/.test(e.message)?'Abrí Spotify y poné algo: después lo manejás desde acá':e.status===403?'Para manejar la música, Spotify pide Premium':'No pude hablar con Spotify');}
+    busy=false;
+  }
+  function off(){tok=null;now=null;keep();clearInterval(timer);}
+  return{connect,fromLink,refresh,poll,ctl,off,on:()=>!!tok,now:()=>now,ready:()=>!!SPOTIFY_CLIENT_ID};
+})();
+function musicHTML(){
+  const on=Music.on(),n=Music.now(),app=db.settings.musicApp||'';
+  if(on&&n&&n.n)return '<div class="mus on" id="musicBar">'+(n.img?'<img src="'+esc(n.img)+'" alt="">':'<span class="mus-i">'+ic('music',18)+'</span>')+'<span class="grow mus-t"><b>'+esc(n.n)+'</b><small>'+esc(n.a)+'</small></span>'+
+    '<button class="ib flat" data-a="musCtl" data-v="previous" aria-label="Anterior">'+ic('prev',20)+'</button><button class="ib mus-pp" data-a="musCtl" data-v="toggle" aria-label="'+(n.on?'Pausa':'Play')+'">'+ic(n.on?'pause':'play',20)+'</button><button class="ib flat" data-a="musCtl" data-v="next" aria-label="Siguiente">'+ic('next',20)+'</button></div>';
+  if(on)return '<div class="mus" id="musicBar"><span class="mus-i">'+ic('music',18)+'</span><span class="grow mus-t"><b>Spotify conectado</b><small>'+(n&&n.err?'No pude leer qué suena':'Poné algo en Spotify y lo manejás desde acá')+'</small></span><a class="btn sm" href="https://open.spotify.com/" target="_blank" rel="noopener">Abrir</a></div>';
+  const a=MUSIC_APPS.find(x=>x[0]===app);
+  return '<div class="mus" id="musicBar"><span class="mus-i">'+ic('music',18)+'</span>'+
+   (a?'<span class="grow mus-t"><b>Tu música</b><small>'+a[1]+'</small></span><a class="btn sm" href="'+a[2]+'" target="_blank" rel="noopener">Abrir</a><button class="ib flat" data-a="musPick" aria-label="Cambiar app">'+ic('edit',15)+'</button>'
+     :'<span class="grow mus-t"><b>Música</b><small>Abrí tu app sin salir del entreno</small></span><button class="btn sm" data-a="musPick">Elegir</button>')+'</div>';
+}
+function musicPickHTML(){
+  const cur=db.settings.musicApp||'';
+  return '<p class="mut sm-t">Elegí con qué escuchás música. En el entreno vas a tener un botón para abrirla al toque.</p><div class="gap">'+
+   MUSIC_APPS.map(([k,n])=>'<button class="fd-row'+(cur===k?' on':'')+'" data-a="musSet" data-v="'+k+'"><span class="grow"><b>'+n+'</b></span>'+(cur===k?ic('check',18):'')+'</button>').join('')+'</div>'+
+   (Music.ready()?'<div class="card" style="margin:14px 0 0"><h4 style="margin-bottom:4px">Manejar Spotify desde el entreno</h4><p class="mut sm-t">Ves qué suena y tenés play, pausa y siguiente sin salir de Swole. Necesita Spotify Premium.</p>'+
+     (Music.on()?'<button class="btn line wide" data-a="musOff">Desconectar Spotify</button>':'<button class="btn pri wide" data-a="musConnect">Conectar Spotify</button>')+'</div>':'');
+}
 /* modo grande: una serie a la vez, botones enormes para usar con las manos transpiradas */
 function bigCur(){const a=db.active,E=a.entries;if(S.bigE!=null&&E[S.bigE])return S.bigE;const i=E.findIndex(en=>en.sets.some(s=>!s.done));return i<0?E.length-1:i;}
 function bigHTML(){
@@ -5141,8 +5247,8 @@ function bigHTML(){
 }
 function sessHTML(){
   const a=db.active,big=!!db.settings.big&&a.entries.length;
-  if(big)return '<div class="sess"><div class="sess-in"><header class="sess-top"><button class="ib" data-a="sessMin" aria-label="Minimizar">'+ic('down')+'</button><div class="grow"><h2>'+esc(a.name)+'</h2><span class="mut sm-t" id="elapsed">'+fmtT((Date.now()-a.t0)/1000)+'</span></div><button class="ib on" data-a="bigTog" aria-label="Salir del modo grande">'+ic('big',20)+'</button><button class="btn pri sm" data-a="sessFinish">Terminar</button></header>'+bigHTML()+'</div></div>';
-  return '<div class="sess"><div class="sess-in"><header class="sess-top"><button class="ib" data-a="sessMin" aria-label="Minimizar">'+ic('down')+'</button><div class="grow"><h2>'+esc(a.name)+'</h2><span class="mut sm-t" id="elapsed">'+fmtT((Date.now()-a.t0)/1000)+'</span></div><button class="ib" data-a="bigTog" aria-label="Modo grande: una serie a la vez">'+ic('big',20)+'</button><button class="btn pri sm" data-a="sessFinish">Terminar</button></header>'+
+  if(big)return '<div class="sess"><div class="sess-in"><header class="sess-top"><button class="ib" data-a="sessMin" aria-label="Minimizar">'+ic('down')+'</button><div class="grow"><h2>'+esc(a.name)+'</h2><span class="mut sm-t" id="elapsed">'+fmtT((Date.now()-a.t0)/1000)+'</span></div><button class="ib on" data-a="bigTog" aria-label="Salir del modo grande">'+ic('big',20)+'</button><button class="btn pri sm" data-a="sessFinish">Terminar</button></header>'+musicHTML()+bigHTML()+'</div></div>';
+  return '<div class="sess"><div class="sess-in"><header class="sess-top"><button class="ib" data-a="sessMin" aria-label="Minimizar">'+ic('down')+'</button><div class="grow"><h2>'+esc(a.name)+'</h2><span class="mut sm-t" id="elapsed">'+fmtT((Date.now()-a.t0)/1000)+'</span></div><button class="ib" data-a="bigTog" aria-label="Modo grande: una serie a la vez">'+ic('big',20)+'</button><button class="btn pri sm" data-a="sessFinish">Terminar</button></header>'+musicHTML()+
    '<div class="row" style="margin:0 0 12px;gap:8px"><span class="mut sm-t" style="font-weight:700">'+ic('timer',16)+'</span><span class="mut sm-t" style="font-weight:700">Descanso</span><div class="scroll-x grow" style="padding:0">'+
    [45,60,90,120,180,240].map(s=>'<button class="chip '+(db.settings.rest===s?'on':'')+'" data-a="restSet" data-v="'+s+'" aria-pressed="'+(db.settings.rest===s)+'">'+(s<60?s+' s':fmtT(s))+'</button>').join('')+'</div></div>'+
    '<p class="mut sm-t" style="margin:-4px 0 12px">Tocá el número de una serie para marcarla como calentamiento (C): no cuenta para niveles ni récords.</p>'+
@@ -5417,6 +5523,7 @@ function modalBody(m,l2){
     case 'phview':return sheet('Foto de progreso',photoViewHTML(m),{l2:true});
     case 'friends':return sheet('Amigos',friendsHTML(m));
     case 'delacc':return sheet('Eliminar mi cuenta','<p>Se borra <b>para siempre</b>: tu cuenta, todos tus datos en la nube, tus amigos, solicitudes, torneos y recordatorios. También se borra lo que hay en este dispositivo.</p><p class="mut sm-t">No se puede deshacer. Si querés conservar algo, antes hacé una copia en Perfil → Copia de seguridad. Después podés crear una cuenta nueva con el mismo mail.</p><label class="field">Escribí <b>ELIMINAR</b> para confirmar<input id="delAccIn" type="text" autocomplete="off" autocapitalize="characters" placeholder="ELIMINAR"></label><div class="g2"><button class="btn" data-a="close" data-v="m2">Cancelar</button><button class="btn bad" data-a="delAccGo"'+(m.busy?' disabled':'')+'>'+(m.busy?'Borrando…':'Eliminar para siempre')+'</button></div>',{l2:true});
+    case 'music':return sheet('Música',musicPickHTML(),{l2:true});
     case 'notif':return sheet('Avisos',notifHTML(),{l2:true});
     case 'podium':return sheet('Podio',podiumHTML(m.id),{l2:true});
     case 'skmark':return sheet('Ya la logro',skMarkHTML(m),{l2:true});
@@ -5930,13 +6037,18 @@ const ACTIONS={
   treeView(v){S.modal.view=v;renderModal();},
   rtZoom(v){S.rt=S.rt||{x:0,y:0,w:820};if(v==='home')rtFocus(0,0,820);else rtFocus(S.rt.x,S.rt.y,clamp(S.rt.w*(v==='in'?.72:1.38),320,1800));},
   treeSel(v){S.modal.sel=S.modal.sel===v?null:v;renderModal();if(S.modal.view==='radial'&&S.modal.sel){const p=rtLayout().find(q=>q.n.id===v);if(p)rtFocus(p.x*.85,p.y*.85+60);}const d=document.getElementById('tdDet');if(d)d.scrollIntoView({block:'nearest',behavior:'smooth'});},
+  musPick(){S.m2={t:'music'};render();},
+  musSet(v){db.settings.musicApp=v;save();S.m2=null;render();const a=MUSIC_APPS.find(x=>x[0]===v);if(a)toast('Listo: '+a[1]);},
+  musConnect(){Music.connect();},
+  musOff(){Music.off();S.m2=null;render();toast('Spotify desconectado');},
+  musCtl(v){Music.ctl(v);},
   bigTog(){db.settings.big=!db.settings.big;S.bigE=null;save();render();toast(db.settings.big?'Modo grande: una serie a la vez':'Lista completa');},
   bigNav(v){const n=db.active.entries.length;S.bigE=clamp(bigCur()+(+v),0,n-1);renderSess();const s=document.querySelector('.sess');if(s)s.scrollTop=0;},
   sleepSet(v){db.settings.sleep=db.settings.sleep||{};const t=today();if(+v)db.settings.sleep[t]=+v;else delete db.settings.sleep[t];
     const ks=Object.keys(db.settings.sleep).sort();ks.slice(0,Math.max(0,ks.length-45)).forEach(k=>delete db.settings.sleep[k]);save();render();
     if(+v)toast(+v<=2?'Anotado. Hoy te bajo un poco la carga si entrenás.':+v===5?'¡Bien! Buen día para un récord.':'Anotado');},
   exRange(v){S.exR=v;renderModal();},
-  barOpen(){const d=S.m2.d;d.step='bar';d.bar={};renderModal();barScan();},
+  barOpen(){const d=S.m2.d;d.step='bar';d.bar={};renderModal();setTimeout(barScan,60);},
   barManual(){barStop();S.m2.d.bar={manual:1};renderModal();setTimeout(()=>{const i=$('#barIn');if(i)i.focus();},100);},
   barGo(){const i=$('#barIn');barLookup(i?i.value:'');},
   notifOpen(){S.m2={t:'notif'};render();if(Social.on())Social.load().then(()=>{if(S.m2&&S.m2.t==='notif')renderModal();updNotif();}).catch(()=>{});},
@@ -6391,6 +6503,7 @@ setTimeout(()=>{try{if(db.profile&&!S.modal&&!S.m2&&!S.sessOpen){const d=recapDa
 setTimeout(()=>{const s=$('#splash');if(s){s.classList.add('out');setTimeout(()=>s.remove(),600);}},matchMedia('(prefers-reduced-motion: reduce)').matches?150:1150);
 try{checkAch(true);checkRankUp();checkMissions();}catch(e){}
 Sync.fromLink();
+Music.fromLink();if(Music.on())Music.poll();
 /* rutina compartida por link */
 try{const q=new URLSearchParams(location.search),rr=q.get('rutina');if(rr){history.replaceState(null,'',location.pathname+location.hash);const o=parseRoutineLink(rr);
   if(o)setTimeout(()=>{if(db.profile){S.modal={t:'rimport',o};render();}else toast('Te pasaron una rutina: creá tu perfil y volvé a abrir el link');},1500);else toast('El link de la rutina está roto');}}catch(e){}

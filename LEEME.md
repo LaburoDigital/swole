@@ -31,8 +31,35 @@ Después, en la app: Perfil → **Entrar o crear cuenta**. En un celular nuevo, 
 
 ## Cuando cambies algo
 1. Editá `index.html`.
-2. En `sw.js`, subí la versión (`swole-v49` → `swole-v50`). Si no la subís, los celulares siguen mostrando la versión vieja.
+2. En `sw.js`, subí la versión (`swole-v50` → `swole-v51`). Si no la subís, los celulares siguen mostrando la versión vieja.
 3. Subí los cambios (en 1 o 2 minutos GitHub Pages publica la versión nueva):
    ```bash
    git add -A && git commit -m "Cambios" && git push
    ```
+
+## Subir Swole a App Store / Play Store (cuando llegue el momento)
+
+Swole es una web app (PWA). Para las tiendas se "envuelve" con **Capacitor**: es la misma app adentro de una app nativa.
+
+1. En una compu (para iPhone hace falta una **Mac con Xcode** y la cuenta de Apple Developer, US$99 por año; Google Play cobra US$25 una vez):
+   ```
+   npm init -y
+   npm i @capacitor/core @capacitor/cli @capacitor/ios @capacitor/android @capacitor-mlkit/barcode-scanning
+   npx cap init Swole uy.swole.app --web-dir=www
+   ```
+2. Copiá `index.html`, `sw.js`, `manifest.webmanifest`, `icons/` e `img/` adentro de la carpeta `www/`.
+3. `npx cap add ios` y `npx cap add android`, después `npx cap sync`.
+4. En iOS agregá en `Info.plist` el permiso de cámara: `NSCameraUsageDescription` = "Para leer el código de barras de los alimentos y sacarle foto a tu plato."
+5. **El escáner ya está preparado**: si la app corre adentro de Capacitor y existe el plugin `BarcodeScanner`, usa el escáner nativo de Google ML Kit (más rápido y anda en iPhone). Afuera de la tienda sigue usando la cámara del navegador (BarcodeDetector en Android, ZXing en iPhone).
+6. Ojo: Apple pide que la app "se sienta nativa" (no una web metida en una caja). Swole ya tiene navegación propia, modo sin internet, notificaciones y cámara, que es lo que suelen mirar.
+
+## Música (Spotify)
+
+Desde 2026 Spotify solo deja manejar la música desde apps de terceros en "modo desarrollo": **hasta 5 cuentas con Premium**, agregadas a mano por el dueño. Para activarlo:
+
+1. Entrá a developer.spotify.com con tu cuenta (Premium) → **Create app**.
+2. Redirect URI: `https://laburodigital.github.io/swole/` · API: **Web API**.
+3. En **User Management** agregá el mail de cada amigo que lo quiera usar (máximo 5 contando la tuya).
+4. Copiá el **Client ID** (no es secreto) y pegalo en `index.html`, en `const SPOTIFY_CLIENT_ID=''`.
+
+Sin eso, el entreno igual tiene el botón para abrir tu app de música (Spotify, YouTube Music o Apple Music).
