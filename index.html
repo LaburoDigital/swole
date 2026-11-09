@@ -1408,6 +1408,21 @@ small{line-height:1.35}
 @media (prefers-reduced-motion:reduce){.gt-n.avail .gt-d,.gt-ln.next{animation:none}}
 .mark-cap{display:flex;gap:8px;align-items:flex-start;margin:10px 0 0;padding:10px 12px;border-radius:12px;font-size:13.5px;background:color-mix(in srgb,var(--acc) 14%,var(--raise));color:var(--text)}
 .del-acc{display:block;margin:12px auto 0;background:none;border:0;color:var(--bad,#FF5A6A);font:600 13.5px var(--f-b);text-decoration:underline;padding:6px}
+/* v48: encimados y cortes en pantallas chicas */
+.push-at{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
+.push-at input{width:100%;min-width:0;font-size:17px}
+.w-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) auto;gap:8px;margin-top:12px}
+.w-row input{width:100%;min-width:0}
+@media (max-width:360px){.w-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.w-row .btn{grid-column:1/-1}}
+.rec-sug{flex-wrap:wrap}.rec-sug>.grow{min-width:150px}.rec-sug>.btn{max-width:100%;white-space:normal;text-align:center}
+.entry>.row{gap:4px}.entry>.row>.grow{min-width:0}.entry>.row h3{overflow-wrap:anywhere;line-height:1.15}
+.entry>.row .ib.flat{width:34px;height:34px;flex:none}
+.fd-mac .row{gap:4px}.fd-mac .row .grow{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* las filas que se deslizan de costado muestran que hay más */
+.sess .scroll-x,.rest-row .scroll-x{-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent);padding-right:24px!important}
+/* encabezado al hacer scroll en celus chicos: el título reemplaza al logo, no se encima */
+@media (max-width:440px){.top .mark{transition:opacity .2s}body.scrolled .top .mark{opacity:0!important;visibility:hidden;pointer-events:none}
+  .top-t{left:16px;max-width:calc(100% - 190px);transform:translate(0,6px)}body.scrolled .top-t{transform:none}}
 </style>
 </head>
 <body>
@@ -2125,7 +2140,7 @@ function mealsCard(n){
   let h='<div class="card meals-card"><div class="hd"><div><h3>Comidas</h3><span class="mut sm-t">'+(list.length?(left>=0?'Te quedan '+nf(left)+' kcal':'Te pasaste '+nf(-left)+' kcal'):'Anotá lo que comés y te muestro cuánto te falta')+'</span></div>'+
    '<div class="row fd-day"><button class="ib flat" data-a="foodDay" data-v="-1" aria-label="Día anterior">'+ic('left',18)+'</button><b>'+esc(dayL)+'</b><button class="ib flat" data-a="foodDay" data-v="1" aria-label="Día siguiente"'+(dk>=t?' disabled':'')+'>'+ic('right',18)+'</button></div></div>'+
    '<div class="fd-sum"><div class="fd-ring" style="--p:'+pct+'"><b>'+nf(tot.k)+'</b><span>de '+nf(n.kcal)+'</span></div><div class="grow gap" style="gap:9px">'+
-   [['Proteína',tot.p,n.prot,'pro'],['Carbohidratos',tot.c,n.carbs,''],['Grasas',tot.f,n.fat,'']].map(x=>'<div class="fd-mac '+x[3]+'"><div class="row"><span class="grow">'+x[0]+'</span><b>'+Math.round(x[1])+'</b><span class="mut"> / '+x[2]+' g</span></div><div class="bar"><i style="width:'+Math.min(100,Math.round(x[1]/Math.max(1,x[2])*100))+'%"></i></div></div>').join('')+'</div></div>'+
+   [['Proteína',tot.p,n.prot,'pro'],['Carbos',tot.c,n.carbs,''],['Grasas',tot.f,n.fat,'']].map(x=>'<div class="fd-mac '+x[3]+'"><div class="row"><span class="grow">'+x[0]+'</span><b>'+Math.round(x[1])+'</b><span class="mut"> / '+x[2]+' g</span></div><div class="bar"><i style="width:'+Math.min(100,Math.round(x[1]/Math.max(1,x[2])*100))+'%"></i></div></div>').join('')+'</div></div>'+
    (list.length&&pp>=100?'<p class="fd-ok">'+ic('check',15)+' Proteína del día completa</p>':'');
   MEALS.forEach(([k,nm])=>{
     const its=list.filter(e=>e.m===k),s=mealTot(its);
@@ -4031,7 +4046,7 @@ function pushCard(){
   return '<div class="card" id="pushCard"><div class="hd"><div><h3>Recordatorios en el celular</h3><span class="mut sm-t">Te llegan aunque Swole esté cerrada</span></div>'+
    '<button class="chip '+(on?'on':'')+'" data-a="pushTog" aria-pressed="'+on+'">'+(on?'Activados':'Activar')+'</button></div>'+
    (on?'<div class="opt" style="margin:4px 0 10px"><button class="'+(st.train!==false?'on':'')+'" data-a="pushKind" data-v="train" aria-pressed="'+(st.train!==false)+'">'+ic('dumb',16)+' Días de entreno</button><button class="'+(st.crea?'on':'')+'" data-a="pushKind" data-v="crea" aria-pressed="'+!!st.crea+'">'+ic('pill',16)+' Creatina</button></div>'+
-     '<div class="row" style="gap:8px"><div class="field grow" style="margin:0"><input id="pushAt" type="time" value="'+(st.at||'18:00')+'" aria-label="Hora del recordatorio"></div><button class="btn sm" data-a="pushAt">Guardar hora</button><button class="btn sm" data-a="pushTest">Probar</button></div>'+
+     '<div class="push-at"><label class="field" style="margin:0"><span>Hora del aviso</span><input id="pushAt" type="time" value="'+(st.at||'18:00')+'" data-i="pushAt" aria-label="Hora del recordatorio"></label><button class="btn sm" data-a="pushTest">'+ic('bolt',15)+' Probar</button></div>'+
      '<p class="mut sm-t" style="margin-top:8px">Solo te avisa los días que tenés una rutina planeada y todavía no entrenaste. Puede llegar hasta 15 minutos después de la hora.</p>'
     :'<p class="mut sm-t">'+(Push.ios()&&!Push.standalone()?'En iPhone, primero agregá Swole a la pantalla de inicio (Compartir → Agregar a inicio) y abrila desde ahí.':'Por ejemplo: "Hoy te toca entrenar: Piernas A" a la hora que elijas.')+'</p>')+'</div>';
 }
@@ -4843,8 +4858,8 @@ function viewNutri(){
   const ws=db.weights.slice().sort((a,b)=>a.date<b.date?-1:1),last=ws[ws.length-1],first=ws.length>1?ws[0]:null;
   h+='<div class="card"><div class="hd"><h3>Peso corporal</h3><span class="mut sm-t">'+(last?num(last.kg,1)+' kg':num(p.weight,1)+' kg')+(first?', '+(last.kg-first.kg>=0?'+':'')+num(last.kg-first.kg,1)+' kg total':'')+'</span></div>'+
    chart(ws.map(w=>({t:parseK(w.date).getTime(),y:w.kg})),'kg')+
-   '<div class="row" style="margin-top:12px;gap:8px"><div class="field grow" style="margin:0"><input id="wIn" type="number" inputmode="decimal" step="0.1" min="30" max="250" placeholder="Peso en kg" aria-label="Peso"></div>'+
-   '<div class="field" style="margin:0;width:150px"><input id="wDate" type="date" max="'+t+'" value="'+t+'" aria-label="Fecha del peso"></div><button class="btn pri" data-a="addW">Guardar</button></div>'+
+   '<div class="w-row"><div class="field" style="margin:0"><input id="wIn" type="number" inputmode="decimal" step="0.1" min="30" max="250" placeholder="Peso en kg" aria-label="Peso"></div>'+
+   '<div class="field" style="margin:0"><input id="wDate" type="date" max="'+t+'" value="'+t+'" aria-label="Fecha del peso"></div><button class="btn pri" data-a="addW">Guardar</button></div>'+
    (ws.length?'<div class="wlist">'+ws.slice().reverse().slice(0,S.wAll?999:6).map(w=>'<div class="rowline"><span>'+esc(longDate(w.date))+'</span><span class="row" style="gap:6px"><b>'+num(w.kg,1)+' kg</b><button class="ib flat" style="width:32px;height:32px" data-a="editW" data-v="'+w.date+'" aria-label="Corregir">'+ic('edit',15)+'</button><button class="ib flat" style="width:32px;height:32px" data-a="delW" data-v="'+w.date+'" aria-label="Borrar">'+ic('trash',15)+'</button></span></div>').join('')+'</div>'+
    (ws.length>6?'<button class="btn sm line wide" style="margin-top:8px" data-a="wAll">'+(S.wAll?'Ver menos':'Ver los '+ws.length+' registros')+'</button>':''):'')+'</div>';
   h+=measCard()+photoCard();
@@ -5897,6 +5912,7 @@ document.addEventListener('input',e=>{
   else if(i==='pho'){const d=S.m2.d,it=d.ph.items[+el.dataset.e];it.other=it.other||{};it.other.q=el.value;it.other.f=el.value.trim()?{n:el.value.trim().slice(0,40),id:'',k:it.opts[0].k,p:it.opts[0].p,c:it.opts[0].c,f:it.opts[0].f}:null;
     const s=$('#phs'+el.dataset.e);if(s)s.innerHTML=phSug(it,+el.dataset.e);const k=$('#phk'+el.dataset.e);if(k)k.textContent=phItemKcal(it)+' kcal';const t=$('#phTot');if(t)t.innerHTML=phTotHTML(d);}
   else if(i==='phg'){const d=S.m2.d,it=d.ph.items[+el.dataset.e];it.g=Math.max(0,Math.round(+el.value.replace(',','.')||0));const k=$('#phk'+el.dataset.e);if(k)k.textContent=phItemKcal(it)+' kcal';const t=$('#phTot');if(t)t.innerHTML=phTotHTML(d);}
+  else if(i==='pushAt'){clearTimeout(window.__pat);window.__pat=setTimeout(()=>{if(/^d{2}:d{2}$/.test(el.value))ACTIONS.pushAt();},700);}
   else if(i==='fq'){S.m2.d.q=el.value;const l=$('#foodList');if(l){l.innerHTML=foodList(S.m2.d);l.scrollTop=0;}}
   else if(i==='fa'){S.m2.d.qty=el.value;const p=$('#foodPrev');if(p)p.innerHTML=foodPrev(S.m2.d);}
   else if(i==='fn'){S.m2.d.nf[f]=el.value;}
