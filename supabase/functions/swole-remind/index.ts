@@ -1,4 +1,5 @@
 // Recordatorios de Swole: el cron la llama cada 15 minutos; también sirve para mandarte una notificación de prueba.
+// Además manda los avisos de amigos y torneos que encolan los triggers (swole_priv.notif).
 import webpush from 'npm:web-push@3.6.7';
 import postgres from 'https://deno.land/x/postgresjs@v3.4.5/mod.js';
 
@@ -59,6 +60,17 @@ async function send(row: any, payload: unknown) {
   }
 }
 
+async function drainQueue() {
+  const rows = await sql`update swole_priv.notif set sent = true where id in (select id from swole_priv.notif where not sent order by id limit 50 for update skip locked) returning user_id, title, body, tag`;
+  let n = 0;
+  for (const r of rows) {
+    const devs = await sql`select id, sub from public.swole_push where user_id = ${r.user_id}`;
+    for (const d of devs) if (await send(d, { title: r.title, body: r.body, tag: r.tag, url: './?go=amigos' })) n++;
+  }
+  await sql`delete from swole_priv.notif where sent and created_at < now() - interval '7 days'`;
+  return n;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
   try {
@@ -75,6 +87,11 @@ Deno.serve(async (req) => {
       return json({ ok: true, sent: n, devices: rows.length });
     }
     if (req.headers.get('x-cron') !== c.cron) return json({ error: 'forbidden' }, 403);
+    // avisos de amigos y torneos que están en la cola (también se vacía en cada vuelta del cron)
+    const queued = await drainQueue();
+    let body: any = {};
+    try { body = await req.json(); } catch { /* sin cuerpo */ }
+    if (body?.queue) return json({ ok: true, queued });
     const subs = await sql`select p.id, p.sub, p.tz, p.at, p.kinds, p.last_sent, d.data from public.swole_push p left join public.swole_data d on d.user_id = p.user_id`;
     let sent = 0, checked = 0;
     for (const s of subs) {

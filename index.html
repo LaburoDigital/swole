@@ -1423,6 +1423,57 @@ small{line-height:1.35}
 /* encabezado al hacer scroll en celus chicos: el título reemplaza al logo, no se encima */
 @media (max-width:440px){.top .mark{transition:opacity .2s}body.scrolled .top .mark{opacity:0!important;visibility:hidden;pointer-events:none}
   .top-t{left:16px;max-width:calc(100% - 190px);transform:translate(0,6px)}body.scrolled .top-t{transform:none}}
+/* v49: modo grande */
+.bigm{display:grid;gap:12px;padding-bottom:110px}
+.big-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;font:700 14px var(--f-b);color:var(--mut)}.big-nav .ib[disabled]{opacity:.3}
+.big-name{display:grid;gap:4px;text-align:left;background:none;border:0;color:var(--text);padding:0}.big-name b{font:800 30px/1.05 var(--f-d);letter-spacing:-.02em}.big-name span{color:var(--mut);font-size:14px}
+.big-goal{display:flex;gap:6px;align-items:center;font-size:15px;padding:10px 12px;border-radius:12px;background:var(--raise)}.big-goal.ok{color:var(--ok)}
+.big-set{font:800 15px var(--f-b);color:var(--acc);text-transform:uppercase;letter-spacing:.06em;text-align:center;margin-top:4px}
+.big-steps{display:grid;gap:12px}
+.big-st{display:grid;grid-template-columns:76px 1fr 76px;gap:10px;align-items:center}
+.big-st>button{height:76px;border-radius:20px;font:700 38px/1 var(--f-d);background:var(--raise);border:1px solid var(--line);color:var(--text)}
+.big-st>button:active{transform:scale(.94);background:color-mix(in srgb,var(--acc) 22%,var(--raise))}
+.big-st label{display:grid;justify-items:center;gap:2px}.big-st input{width:100%;text-align:center;font:800 46px/1.05 var(--f-d);background:none;border:0;color:var(--text);padding:0}.big-st small{color:var(--mut);font-weight:700}
+.big-done{display:flex;align-items:center;justify-content:center;gap:10px;min-height:84px;border-radius:24px;border:0;font:800 22px var(--f-d);color:#fff;background:var(--grad,var(--acc));box-shadow:0 10px 30px -10px var(--acc)}
+.big-done:active{transform:scale(.97)}
+.big-fin{display:grid;justify-items:center;gap:6px;padding:20px;color:var(--ok)}.big-fin b{font:800 20px var(--f-d);color:var(--text)}
+.big-log{display:flex;flex-wrap:wrap;gap:6px}.big-log span{display:inline-flex;gap:4px;align-items:center;padding:6px 10px;border-radius:10px;background:var(--raise);font-size:13.5px;color:var(--mut)}
+.big-rir button{min-width:52px;min-height:48px;font-size:18px}
+.sess-top .ib.on{background:color-mix(in srgb,var(--acc) 22%,var(--raise));color:var(--acc)}
+/* sueño */
+.sleep-c .sleep-i{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,#7A8CFF 20%,transparent);color:#9AA8FF}
+.sleep-c.done{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.sleep-o{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.sleep-o button{display:grid;gap:2px;justify-items:center;padding:10px 2px;border-radius:12px;background:var(--raise);border:1px solid var(--line);color:var(--text)}
+.sleep-o b{font:800 18px var(--f-d)}.sleep-o small{font-size:10.5px;color:var(--mut)}
+/* gráfico del ejercicio */
+.exr{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.pr-dot circle{fill:#E8B64C;stroke:var(--surf);stroke-width:2}.pr-dot path{fill:none;stroke:#1a1300;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ex-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.ex-stats>div{display:grid;gap:1px;padding:10px;border-radius:12px;background:var(--raise)}
+.ex-stats small{font-size:11.5px;color:var(--mut)}.ex-stats b{font:800 17px var(--f-d)}.ex-stats b.up{color:var(--ok)}.ex-stats span{font-size:11.5px;color:var(--mut);display:flex;gap:3px;align-items:center}
+/* código de barras */
+.bar-cam{position:relative;border-radius:18px;overflow:hidden;background:#000;aspect-ratio:4/3}
+.bar-cam video{width:100%;height:100%;object-fit:cover;display:block}
+.bar-line{position:absolute;left:10%;right:10%;top:50%;height:2px;background:#FF4F6A;box-shadow:0 0 12px 2px #FF4F6A;animation:barPulse 1.2s ease-in-out infinite}
+@keyframes barPulse{50%{opacity:.35}}
+/* avisos */
+.notif-b{position:relative}.notif-b.has::after{content:attr(data-n);position:absolute;top:3px;right:3px;min-width:16px;height:16px;padding:0 3px;border-radius:8px;background:#FF4F6A;color:#fff;font:800 10px/16px var(--f-b);text-align:center}
+.nt-list{display:grid;gap:8px}
+.nt{display:flex;align-items:center;gap:10px;padding:12px;border-radius:14px;background:var(--raise);flex-wrap:wrap}.nt>.grow{min-width:150px;font-size:14.5px}
+.nt-i{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--acc) 18%,transparent);color:var(--acc)}
+@media (max-width:360px){.top .tools .ib{width:38px;height:38px}}
+/* podio */
+.pod-h{display:grid;justify-items:center;gap:2px;text-align:center;margin-bottom:6px}.pod-h b{font:800 22px var(--f-d)}
+.podium{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-items:end;margin:14px 0 6px}
+.pod{display:grid;justify-items:center;gap:4px;animation:rise .6s cubic-bezier(.22,1,.36,1) both}.pod.p1{animation-delay:.25s}.pod.p3{animation-delay:.1s}
+.pod-n{font:700 14px var(--f-b);text-align:center;overflow-wrap:anywhere}.pod.me .pod-n{color:var(--acc)}.pod-s{font-size:13px;color:var(--mut)}
+.pod-b{width:100%;display:grid;place-items:center;align-content:center;gap:2px;border-radius:14px 14px 6px 6px;color:#1a1300}
+.pod-b b{font:900 30px var(--f-d)}
+.pod.p1 .pod-b{height:130px;background:linear-gradient(180deg,#FFE08A,#E8B64C)}
+.pod.p2 .pod-b{height:96px;background:linear-gradient(180deg,#EEF1F6,#AEB6C4)}
+.pod.p3 .pod-b{height:72px;background:linear-gradient(180deg,#F2BE8E,#C9844F)}
+.pod-msg{text-align:center;font:700 16px var(--f-b);margin:10px 0}
 </style>
 </head>
 <body>
@@ -1455,6 +1506,7 @@ small{line-height:1.35}
 <linearGradient id="lhpv" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#A99BFF"/><stop offset=".45" stop-color="#7A66FF"/><stop offset="1" stop-color="#4A33CF"/></linearGradient></defs><path class="lbar" d="M80 24 H50 C35 24 28 31 28 39.5 C28 48 38 50 50 50 C62 50 72 52 72 60.5 C72 69 65 76 50 76 H20" fill="none" stroke="url(#lhg)" stroke-width="12" stroke-linecap="round"/><path d="M80 24 H50 C35 24 28 31 28 39.5 C28 48 38 50 50 50 C62 50 72 52 72 60.5 C72 69 65 76 50 76 H20" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="3" stroke-linecap="round" transform="translate(-.6 -1.6)"/><g class="lpl a"><rect x="76" y="19.5" width="3.5" height="9" rx="1.2" fill="#3A2A7A"/><rect x="79.5" y="11" width="10" height="26" rx="3.5" fill="url(#lhpk)"/><rect x="80.7" y="13.5" width="1.6" height="21" rx=".8" fill="#fff" opacity=".45"/><rect x="90.5" y="15" width="6" height="18" rx="2.3076923076923075" fill="url(#lhpk)"/><rect x="91.7" y="17.5" width="1.6" height="13" rx=".8" fill="#fff" opacity=".45"/></g><g class="lpl b"><rect x="20.5" y="71.5" width="3.5" height="9" rx="1.2" fill="#3A2A7A"/><rect x="10.5" y="63" width="10" height="26" rx="3.5" fill="url(#lhpv)"/><rect x="11.7" y="65.5" width="1.6" height="21" rx=".8" fill="#fff" opacity=".45"/><rect x="3.5" y="67" width="6" height="18" rx="2.3076923076923075" fill="url(#lhpv)"/><rect x="4.7" y="69.5" width="1.6" height="13" rx=".8" fill="#fff" opacity=".45"/></g></svg><span class="wm">sw<svg class="o-plate" viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="lhoo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8A78FF"/><stop offset="1" stop-color="#FF4F93"/></linearGradient></defs><circle cx="20" cy="20" r="15" fill="none" stroke="url(#lhoo)" stroke-width="8"/><circle cx="20" cy="20" r="15" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="1.4" stroke-dasharray="18 80" transform="rotate(200 20 20)"/><circle cx="20" cy="20" r="3.2" fill="url(#lhoo)"/></svg>le</span></button>
     <span class="top-t" id="topT" aria-hidden="true"></span>
     <div class="tools">
+      <button class="ib notif-b" data-a="notifOpen" id="notifBtn" hidden aria-label="Avisos"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button>
       <button class="ib" data-a="cmdOpen" aria-label="Buscar (Ctrl+K)" title="Buscar (Ctrl+K)"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
       <button class="ib" data-a="theme" id="themeBtn" aria-label="Cambiar tema"></button>
       <span id="avatarSlot"></span>
@@ -2038,6 +2090,7 @@ function foodHTML(d){
      (d.edit?'<button class="btn bad line wide" data-a="foodDel">Borrar</button>':'<button class="btn line wide" data-a="foodStep" data-v="list">Elegir otro</button>');
   }
   if(d.step==='photo')return photoHTML(d);
+  if(d.step==='bar')return barHTML(d);
   if(d.step==='new'){const n=d.nf;
     const fld=(f,l,ph)=>'<label class="field">'+l+'<input type="text" inputmode="decimal" value="'+esc(n[f]||'')+'" data-i="fn" data-f="'+f+'" placeholder="'+ph+'"></label>';
     return '<p class="mut sm-t">Copiá los valores de la etiqueta del paquete. Queda guardado para la próxima.</p>'+
@@ -2055,7 +2108,7 @@ function foodHTML(d){
      '<button class="btn pri wide" data-a="foodQuickSave">'+(d.edit?'Guardar cambios':'Agregar')+'</button>'+
      (d.edit?'<button class="btn bad line wide" data-a="foodDel">Borrar</button>':'<button class="btn line wide" data-a="foodStep" data-v="list">Volver</button>');
   }
-  return '<div class="ph-cta">'+photoBtn('Foto del plato')+'<p class="mut sm-t tc">Desde arriba y con el plato entero: así calculo mejor la porción.</p></div>'+
+  return '<div class="ph-cta">'+photoBtn('Foto del plato')+'<button class="btn wide" data-a="barOpen">'+ic('barcode',18)+' Escanear código de barras</button>'+'<p class="mut sm-t tc">Desde arriba y con el plato entero: así calculo mejor la porción.</p></div>'+
    '<div class="field" style="margin-bottom:6px"><input id="foodQ" type="search" placeholder="Buscá: pollo, arroz, banana…" value="'+esc(d.q||'')+'" data-i="fq" autocomplete="off" aria-label="Buscar alimento"></div>'+
    '<div class="fd-list" id="foodList">'+foodList(d)+'</div>';
 }
@@ -2063,6 +2116,47 @@ function foodAlt(){
   return '<p class="fd-alt-h">¿No está en la lista?</p><div class="fd-alt">'+
    '<button data-a="foodQuick"><span class="fd-alt-i">'+ic('flame',18)+'</span><span class="grow"><b>Anotar solo las calorías</b><small>Comiste afuera y no sabés bien qué tenía</small></span>'+ic('right',16)+'</button>'+
    '<button data-a="foodNew"><span class="fd-alt-i">'+ic('plus',18)+'</span><span class="grow"><b>Crear un alimento</b><small>Copiás los datos de la etiqueta del paquete</small></span>'+ic('right',16)+'</button></div>';
+}
+/* ============ Código de barras: la cámara lee el código y los datos vienen de Open Food Facts (base abierta y gratis) ============ */
+let barStream=null,barTimer=0;
+const barCan=()=>'BarcodeDetector' in window&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia;
+function barStop(){clearInterval(barTimer);barTimer=0;if(barStream){barStream.getTracks().forEach(t=>t.stop());barStream=null;}}
+function barHTML(d){
+  const b=d.bar||{};
+  if(b.busy)return '<div class="ph-wait"><span class="ph-dot"></span>Buscando el producto '+esc(b.code||'')+'…</div>';
+  let h=b.err?'<div class="warn">'+esc(b.err)+'</div>':'';
+  if(b.err&&b.code)h+='<button class="btn pri wide" data-a="foodNew">'+ic('plus',16)+' Cargarlo con la etiqueta</button>';
+  if(!b.manual&&barCan())h+='<div class="bar-cam"><video id="barVid" playsinline muted autoplay></video><i class="bar-line"></i></div><p class="mut sm-t tc">Apuntá al código de barras del paquete.</p><button class="btn line wide" data-a="barManual">Escribir el número</button>';
+  else h+='<p class="mut sm-t">'+(barCan()?'':'Tu navegador no deja leer códigos con la cámara: escribí los números que están abajo de las barras.')+'</p><div class="row" style="gap:8px"><input class="soc-in" id="barIn" inputmode="numeric" maxlength="14" placeholder="7790000000000" style="letter-spacing:.06em" value="'+esc(b.code||'')+'" aria-label="Número del código de barras"><button class="btn pri" data-a="barGo">Buscar</button></div>';
+  return h+'<button class="btn line wide" data-a="foodStep" data-v="list">Volver</button><p class="mut tc" style="font-size:11.5px">Datos de Open Food Facts (base abierta, la carga la gente). Revisá que coincidan con la etiqueta.</p>';
+}
+async function barScan(){
+  const d=S.m2&&S.m2.d;if(!d||d.step!=='bar'||d.bar.manual||!barCan())return;
+  try{barStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});}
+  catch(e){d.bar={manual:1,err:'No pude usar la cámara. Escribí el número del código.'};renderModal();return;}
+  const det=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e']});
+  barTimer=setInterval(async()=>{
+    const dd=S.m2&&S.m2.d,v=document.getElementById('barVid');
+    if(!dd||dd.step!=='bar'||!v){barStop();return;}
+    if(v.srcObject!==barStream){v.srcObject=barStream;v.play().catch(()=>{});}
+    if(v.readyState<2)return;
+    try{const c=await det.detect(v);if(c&&c[0]&&c[0].rawValue){barStop();try{navigator.vibrate&&navigator.vibrate(30);}catch(e){}barLookup(c[0].rawValue);}}catch(e){}
+  },300);
+}
+async function barLookup(code){
+  const d=S.m2&&S.m2.d;if(!d)return;code=String(code||'').replace(/\D/g,'');
+  if(code.length<8){toast('El código tiene entre 8 y 13 números');return;}
+  const id='b'+code,have=(db.foods||[]).find(f=>f.id===id);if(have){ACTIONS.foodPick(id);return;}
+  d.bar={busy:1,code};renderModal();
+  try{
+    const r=await fetch('https://world.openfoodfacts.org/api/v2/product/'+code+'.json?fields=product_name,product_name_es,brands,nutriments,serving_quantity');
+    const j=await r.json(),p=j&&j.product,nu=p&&p.nutriments||{};
+    let k=+nu['energy-kcal_100g'];if(!k&&nu.energy_100g)k=+nu.energy_100g/4.184;
+    if(!p||j.status!==1||!(k>0)){if(S.m2&&S.m2.d===d){d.bar={code,err:'No encontré ese producto (o no tiene las calorías cargadas). Podés cargarlo vos con la etiqueta.'};d.q='';renderModal();}return;}
+    const name=String(p.product_name_es||p.product_name||'Producto').trim()+(p.brands?' · '+String(p.brands).split(',')[0].trim():'');
+    const sq=+p.serving_quantity,f={id,n:name.slice(0,40).trim(),k:r1(k),p:r1(+nu.proteins_100g||0),c:r1(+nu.carbohydrates_100g||0),f:r1(+nu.fat_100g||0),u:sq>0&&sq<2000?[{n:'Porción',g:Math.round(sq)}]:[]};
+    db.foods.push(f);save();if(S.m2&&S.m2.d===d){ACTIONS.foodPick(id);toast('Encontrado: '+f.n);}
+  }catch(e){if(S.m2&&S.m2.d===d){d.bar={code,manual:1,err:navigator.onLine===false?'Sin conexión: el código necesita internet.':'No pude buscarlo ahora. Probá de nuevo.'};renderModal();}}
 }
 /* ============ Comida desde una foto (IA en el servidor, función swole-food) ============
    La IA dice qué hay y cuántos gramos; vos elegís la opción correcta, ajustás el tamaño y se anota.
@@ -2194,6 +2288,10 @@ const weightNow=()=>db.profile?db.profile.weight:null;
 function waterGoal(){return Math.max(6,Math.round((weightNow()||70)*35/250));}
 /* ============ Iconos ============ */
 const IC={
+  bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+  big:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+  barcode:'<path d="M4 5v14M7 5v14M11 5v14M14 5v14M18 5v14M20 5v14"/>',
+  moon:'<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
   camera:'<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/>',
   food:'<path d="M7 3v7a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V3M9 12v9M17 21V3c-2.2 1-3.5 3.6-3.5 7.5V13H17"/>',
   home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
@@ -2307,6 +2405,28 @@ const lvlColor=L=>L==null||L<0?'var(--mut)':TCOL[Math.min(6,Math.floor(L/3))];
 const lvlSpan=L=>'<span class="lvl-t" style="color:'+lvlColor(L)+'">'+lvlName(L)+'</span>';
 
 /* ============ Gráfico de línea ============ */
+/* gráfico de un ejercicio: récords marcados, línea del próximo rango y cambio en el período */
+const EXR=[['1m','1 mes',30],['3m','3 meses',91],['6m','6 meses',182],['1a','1 año',365],['all','Todo',0]];
+function exChart(ex,all,unit){
+  if(!all.length)return '<p class="mut sm-t">Todavía no hay datos para graficar. Registrá una serie o cargá una marca.</p>';
+  const rg=EXR.find(r=>r[0]===(S.exR||'all'))||EXR[4],from=rg[2]?Date.now()-rg[2]*864e5:0;
+  let best=0;const pr=new Set();all.forEach((p,i)=>{if(p.y>best+1e-9){if(i)pr.add(p.t);best=p.y;}});
+  const pts=all.filter(p=>p.t>=from),P=pts.length?pts:all.slice(-1);
+  const W=320,H=170,pl=36,pr_=12,pt=12,pb=24,ys=P.map(p=>p.y);let lo=Math.min(...ys),hi=Math.max(...ys);
+  /* línea del próximo rango si queda cerca */
+  let tier=null;if(ex.st&&db.profile){const L=levelIdx(ex,best);const nx=L<0?0:Math.min(18,(Math.floor(L/3)+1)*3);if(L<18){const y=thr(ex,nx);if(y<=hi*1.35){tier={y,n:lvlName(nx),c:lvlColor(nx)};hi=Math.max(hi,y);}}}
+  if(hi-lo<1){lo-=1;hi+=1;}const m=(hi-lo)*.15;lo-=m;hi+=m;
+  const t0=P[0].t,t1=P[P.length-1].t,X=t=>pl+(t1===t0?(W-pl-pr_)/2:(t-t0)/(t1-t0)*(W-pl-pr_)),Y=y=>pt+(1-(y-lo)/(hi-lo))*(H-pt-pb);
+  const line=P.map((p,i)=>(i?'L':'M')+X(p.t).toFixed(1)+' '+Y(p.y).toFixed(1)).join(' '),area=line+' L'+X(t1).toFixed(1)+' '+(H-pb)+' L'+X(t0).toFixed(1)+' '+(H-pb)+'Z';
+  let g='';[lo+m,(lo+hi)/2,hi-m].forEach(v=>{g+='<line class="gl" x1="'+pl+'" x2="'+(W-pr_)+'" y1="'+Y(v).toFixed(1)+'" y2="'+Y(v).toFixed(1)+'"/><text x="'+(pl-5)+'" y="'+(Y(v)+3).toFixed(1)+'" text-anchor="end">'+Math.round(v)+'</text>';});
+  if(tier)g+='<line x1="'+pl+'" x2="'+(W-pr_)+'" y1="'+Y(tier.y).toFixed(1)+'" y2="'+Y(tier.y).toFixed(1)+'" stroke="'+tier.c+'" stroke-width="1.5" stroke-dasharray="5 4" opacity=".8"/><text x="'+(W-pr_)+'" y="'+(Y(tier.y)-4).toFixed(1)+'" text-anchor="end" fill="'+tier.c+'" style="font-weight:700">'+tier.n+'</text>';
+  const dots=P.map(p=>pr.has(p.t)?'<g class="pr-dot"><circle cx="'+X(p.t).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="6.5"/><path d="M'+(X(p.t)-3).toFixed(1)+' '+Y(p.y).toFixed(1)+'l2 2 4-4"/></g>':P.length<=30?'<circle cx="'+X(p.t).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="3.5"/>':'').join('');
+  const bp=all.reduce((a,b)=>b.y>a.y?b:a,all[0]),ch=P.length>1&&P[0].y?Math.round((P[P.length-1].y/P[0].y-1)*100):null,fmt=v=>unit==='kg'?num(v,1)+' kg':Math.round(v)+' '+unit;
+  return '<div class="exr">'+EXR.map(r=>'<button class="chip sm'+(rg[0]===r[0]?' on':'')+'" data-a="exRange" data-v="'+r[0]+'">'+r[1]+'</button>').join('')+'</div>'+
+   '<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Progreso en '+unit+'">'+g+(P.length>1?'<path class="ar" d="'+area+'"/>':'')+'<path class="ln" d="'+line+'"/>'+dots+
+   '<text x="'+pl+'" y="'+(H-6)+'">'+shortDate(t0)+'</text>'+(P.length>1?'<text x="'+(W-pr_)+'" y="'+(H-6)+'" text-anchor="end">'+shortDate(t1)+'</text>':'')+'</svg>'+
+   '<div class="ex-stats"><div><small>Récord</small><b>'+fmt(bp.y)+'</b><span>'+shortDate(bp.t)+'</span></div><div><small>En '+rg[1].toLowerCase()+'</small><b class="'+(ch>0?'up':'')+'">'+(ch==null?'—':(ch>0?'+':'')+ch+' %')+'</b><span>'+P.length+(P.length===1?' día':' días')+'</span></div><div><small>Récords</small><b>'+(pr.size+1)+'</b><span>'+ic('check',11)+' en el gráfico</span></div></div>';
+}
 function chart(pts,unit){
   if(!pts.length)return '<p class="mut sm-t">Todavía no hay datos para graficar.</p>';
   const W=320,H=150,pl=34,pr=12,pt=10,pb=24;
@@ -3334,6 +3454,18 @@ function publicSummary(){
   return{v:1,ovr:ov?{L:ov.L,p:Math.round(ov.pct*100)/100}:null,pctl:ov?pctFromV(ov.L+ov.pct):null,card:st,groups,lifts,sk:skillsMastered(),
     season:seasonStats(),ev:(db.settings.ev||[]).slice(0,20),streak:streak(),sports:(db.profile&&db.profile.sports)||[],goal:db.settings.skillGoal?db.settings.skillGoal.id:null};
 }
+function afterSocial(){
+  try{
+    /* ¿alguien te pasó en la temporada? */
+    const rows=rankRows('season'),i=rows.findIndex(x=>x.me),m=monthKey(),old=db.settings.seasonPos;
+    if(i>=0){if(old&&old.m===m&&i>old.i&&rows[i-1]&&rows[i-1].v>0)db.settings.seasonPass={m,by:rows[i-1].r.nick||'Un amigo',seen:0};db.settings.seasonPos={m,i};save();}
+    /* torneo terminado que no viste: podio (una vez) */
+    const me=S.social.me&&S.social.me.user_id,seen=db.settings.compSeen||[],t=today();
+    const c=(S.social.comps||[]).find(c=>c.end_day<t&&!seen.includes(c.id)&&(c.swole_comp_member||[]).some(x=>x.user_id===me&&x.joined));
+    if(c&&!S.modal&&!S.m2&&!db.active&&!S.podShown){S.podShown=1;setTimeout(()=>ACTIONS.podium(c.id),700);}
+  }catch(e){}
+  updNotif();
+}
 const addMsg=r=>r==='sent'?'Solicitud enviada: cuando la acepte, ya son amigos':r==='already'?'Ya son amigos':'¡Listo! Ya son amigos';
 const Social=(()=>{
   let pub='',timer=null;
@@ -3362,6 +3494,7 @@ const Social=(()=>{
     S.social={at:Date.now(),me:(rows||[]).find(r=>r.user_id===me)||null,friends:(rows||[]).filter(r=>r.user_id!==me),req:[],comps:[]};
     try{S.social.req=await Sync.req('/rest/v1/rpc/swole_requests',{method:'POST',auth:true,body:{}})||[];}catch(e){}
     try{await loadComps();}catch(e){}
+    afterSocial();
     return S.social;
   }
   async function enable(){
@@ -3482,6 +3615,39 @@ function friendsHTML(m){
   return head+tabs+reqBox+body;
 }
 /* torneos entre amigos */
+/* lo que tenés pendiente con amigos: solicitudes, invitaciones, torneos terminados y quién te pasó */
+function notifItems(){
+  const sv=S.social;if(!sv||!Social.on())return [];
+  const me=sv.me&&sv.me.user_id,t=today(),seen=db.settings.compSeen||[],out=[];
+  (sv.req||[]).filter(r=>r.dir==='in').forEach(r=>out.push({k:'req',id:r.user_id,i:'user',txt:'<b>'+esc(r.nick)+'</b> quiere ser tu amigo'}));
+  (sv.comps||[]).forEach(c=>{const ms=c.swole_comp_member||[],mine=ms.find(x=>x.user_id===me);if(!mine)return;
+    if(!mine.joined&&c.end_day>=t)out.push({k:'inv',id:c.id,i:'flag',txt:'Te invitaron al torneo <b>'+esc(c.name)+'</b>'});
+    else if(mine.joined&&c.end_day<t&&!seen.includes(c.id))out.push({k:'end',id:c.id,i:'trophy',txt:'Terminó el torneo <b>'+esc(c.name)+'</b>: mirá el podio'});});
+  const sp=db.settings.seasonPass;if(sp&&sp.m===monthKey()&&!sp.seen)out.push({k:'pass',i:'up',txt:'<b>'+esc(sp.by)+'</b> te pasó en la temporada. ¡A recuperar el lugar!'});
+  return out;
+}
+function notifHTML(){
+  const it=notifItems();
+  if(!Social.on())return '<div class="card empty" style="margin:0">'+ic('bell',30)+'<b>Sin avisos</b>Cuando actives Amigos, acá te avisamos de solicitudes, torneos y quién te pasó.</div>';
+  return (it.length?'<div class="nt-list">'+it.map(n=>'<div class="nt"><span class="nt-i">'+ic(n.i,17)+'</span><span class="grow">'+n.txt+'</span>'+
+    (n.k==='req'?'<button class="btn sm" data-a="socNo" data-v="'+n.id+'">No</button><button class="btn sm pri" data-a="socYes" data-v="'+n.id+'">Aceptar</button>':
+     n.k==='inv'?'<button class="btn sm pri" data-a="compYes" data-v="'+n.id+'">Sumarme</button>':
+     n.k==='end'?'<button class="btn sm pri" data-a="podium" data-v="'+n.id+'">Ver</button>':'<button class="btn sm" data-a="passSeen">Ok</button>')+'</div>').join('')+'</div>'
+    :'<div class="card empty" style="margin:0">'+ic('bell',30)+'<b>Estás al día</b>No tenés avisos nuevos.</div>')+
+   '<p class="mut sm-t" style="margin-top:12px">'+(db.settings.push&&db.settings.push.on?'Con los recordatorios activados, estos avisos también te llegan al celular aunque Swole esté cerrada.':'Activá los recordatorios en Perfil y estos avisos te llegan al celular aunque Swole esté cerrada.')+'</p>'+
+   '<button class="btn line wide" data-a="socOpen" data-v="rank">Ir a Amigos</button>';
+}
+function updNotif(){const b=document.getElementById('notifBtn');if(!b)return;const on=Social.on();b.hidden=!on;const n=on?notifItems().length:0;b.classList.toggle('has',n>0);b.setAttribute('data-n',n>9?'9+':String(n));}
+function podiumHTML(id){
+  const c=(S.social&&S.social.comps||[]).find(x=>x.id===id);if(!c)return '';
+  const me=S.social.me&&S.social.me.user_id,ms=(c.swole_comp_member||[]).filter(x=>x.joined).sort((a,b)=>b.score-a.score),met=COMP_MET[c.metric]||COMP_MET.w;
+  const pos=ms.findIndex(x=>x.user_id===me),top=[ms[1],ms[0],ms[2]];
+  return '<div class="pod-h"><b>'+esc(c.name)+'</b><span class="mut sm-t">'+met[0]+' · terminó el '+shortDate(parseK(c.end_day).getTime())+'</span></div>'+
+   '<div class="podium">'+top.map((x,k)=>{const place=[2,1,3][k];return x?'<div class="pod p'+place+(x.user_id===me?' me':'')+'"><span class="pod-n">'+esc(x.user_id===me?'Vos':x.nick)+'</span><span class="pod-s">'+nf(+x.score)+'</span><div class="pod-b">'+(place===1?ic('crown',22):'')+'<b>'+place+'</b></div></div>':'<div class="pod p'+place+' empty"></div>';}).join('')+'</div>'+
+   '<p class="pod-msg">'+(pos===0?'¡Ganaste! Nadie te paró.':pos>0&&pos<3?'Quedaste '+(pos+1)+'º: en el podio.':pos>=0?'Quedaste '+(pos+1)+'º de '+ms.length+'. El próximo es tuyo.':'')+'</p>'+
+   (ms.length>3?'<div class="trn-rows">'+ms.slice(3).map((x,i)=>'<div class="trn-r'+(x.user_id===me?' me':'')+'"><span class="lb-n">'+(i+4)+'</span><span class="grow">'+esc(x.user_id===me?'Vos':x.nick)+'</span><b>'+nf(+x.score)+'</b></div>').join('')+'</div>':'')+
+   '<div class="g2" style="margin-top:14px"><button class="btn" data-a="compNew">Revancha</button><button class="btn pri" data-a="close" data-v="m2">Listo</button></div>';
+}
 function compsHTML(sv){
   const me=sv.me&&sv.me.user_id,t=today(),cs=sv.comps||[];
   const card=c=>{
@@ -4058,6 +4224,9 @@ function coachTips(){
   const logs=db.logs.slice().sort((a,b)=>a.date<b.date?-1:1);
   if(!db.profile||logs.length<2)return out;
   const last=logs[logs.length-1],gap=Math.round((parseK(t)-parseK(last.date))/864e5);
+  /* 0. sueño: varias noches malas seguidas */
+  {const sl=db.settings.sleep||{},last=[0,1,2,3,4,5,6].map(i=>sl[addDays(t,-i)]).filter(Boolean);
+   if(last.length>=3&&last.filter(v=>v<=2).length>=3&&!hide.sleep)out.push({id:'sleep',i:'moon',tone:'warn',txt:'Dormiste mal '+last.filter(v=>v<=2).length+' de las últimas noches. El músculo crece cuando descansás: probá acostarte 30 minutos antes esta semana.'});}
   /* 1. hace mucho que no entrenás */
   if(gap>=8)out.push({id:'gap',i:'play',tone:'warn',txt:'Hace '+gap+' días que no entrenás. Volvé con una sesión corta y liviana: lo importante es retomar.',a:'todayGo',al:'Entreno de hoy'});
   /* 2. estancado: 4+ sesiones en 6 semanas y las últimas 3 no superan a las anteriores */
@@ -4604,10 +4773,17 @@ const QUICK=[
   {i:'spark',l:'Armar rutina',a:'genOpen',c:'#8F43EA'}
 ];
 const qTile=q=>'<button class="qtile" data-a="'+q.a+'"'+(q.v?' data-v="'+q.v+'"':'')+' style="--qc:'+q.c+'"><span class="qi">'+ic(q.i,22)+'</span><span>'+q.l+'</span></button>';
+const SLEEP=[[1,'Muy mal'],[2,'Mal'],[3,'Normal'],[4,'Bien'],[5,'Bárbaro']];
+function sleepCard(){
+  const t=today(),sl=(db.settings.sleep||{})[t];
+  if(!db.profile||doneOn(t).length)return '';
+  if(sl)return '<div class="card sleep-c done"><span class="sleep-i">'+ic('moon',18)+'</span><span class="grow">Dormiste <b>'+SLEEP[sl-1][1].toLowerCase()+'</b>'+(sl<=2?': si entrenás hoy, te bajo un poco la carga.':sl===5?': buen día para un récord.':'.')+'</span><button class="ib flat" data-a="sleepSet" data-v="0" aria-label="Cambiar">'+ic('edit',15)+'</button></div>';
+  return '<div class="card sleep-c"><div class="row" style="gap:10px;margin-bottom:10px"><span class="sleep-i">'+ic('moon',18)+'</span><b class="grow">¿Cómo dormiste anoche?</b></div><div class="sleep-o">'+SLEEP.map(([v,n])=>'<button data-a="sleepSet" data-v="'+v+'"><b>'+v+'</b><small>'+n+'</small></button>').join('')+'</div></div>';
+}
 function viewInicio(){
   const p=db.profile||{};
   return '<div class="home"><div class="home-l"><div class="hello"><span class="mut">'+greet()+(p.nick?',':'')+'</span><h1 class="pg">'+(p.nick?esc(p.nick):'Swole')+'</h1></div>'+
-   levelHero()+seasonCard()+missionsCard()+skillGoalCard()+goalsCard(true)+'<div class="qgrid">'+QUICK.map(qTile).join('')+'</div></div><div class="home-r">'+todayCard()+coachCard()+stripTitle(viewHoy())+'</div></div>';
+   levelHero()+seasonCard()+missionsCard()+skillGoalCard()+goalsCard(true)+'<div class="qgrid">'+QUICK.map(qTile).join('')+'</div></div><div class="home-r">'+sleepCard()+todayCard()+coachCard()+stripTitle(viewHoy())+'</div></div>';
 }
 /* botón central: lo que más se usa, a un toque */
 function quickHTML(){
@@ -4899,6 +5075,11 @@ function startSession(rid,dk,adhoc){
   const its=(r?r.items:[]).map(it=>bw&&bw.deload?Object.assign({},it,{sets:Math.max(2,Math.round(it.sets*.6))}):it);
   db.active={id:uid(),date:dk||today(),routineId:r&&!adhoc?r.id:null,name:r?r.name+(bw&&bw.deload?' · descarga':''):'Entrenamiento libre',t0:Date.now(),note:'',entries:its.map(it=>mkEntry(it.ex,it.sets,it.reps,it.warm))};
   if(r&&r.pl&&!adhoc)plApply(r,db.active);
+  /* si dormiste mal: un poco menos de peso y una serie menos; si dormiste bárbaro, a buscar récord */
+  const sl=(db.settings.sleep||{})[db.active.date];
+  if(sl&&sl<=2&&!(bw&&bw.deload)&&r){db.active.tired=1;db.active.entries.forEach(en=>{en.goal=null;const eff=en.sets.filter(s=>!s.w);if(eff.length>2)en.sets.splice(en.sets.lastIndexOf(eff[eff.length-1]),1);en.sets.forEach(s=>{if(+s.kg)s.kg=Math.round(+s.kg*.9/2.5)*2.5;});});
+    setTimeout(()=>toast('Dormiste mal: hoy bajé un 10 % el peso y una serie por ejercicio. Venir ya suma.'),400);}
+  else if(sl===5)setTimeout(()=>toast('Dormiste bárbaro: buen día para ir por un récord'),400);
   /* semana de descarga: ~90 % del peso y sin meta de subir */
   if(bw&&bw.deload){db.active.deload=1;db.active.entries.forEach(en=>{en.goal=null;en.sets.forEach(s=>{if(+s.kg)s.kg=Math.round(+s.kg*.9/2.5)*2.5;});});setTimeout(()=>toast('Semana de descarga: menos series y un poco menos de peso para recuperar'),400);}
   save();S.sessOpen=true;render();
@@ -4935,9 +5116,33 @@ function entryHTML(en,i){
    '<div class="row" style="margin-top:10px"><button class="btn sm grow" data-a="addSet" data-e="'+i+'">'+ic('plus',16)+' Serie</button><button class="btn sm grow" data-a="delSet" data-e="'+i+'">'+ic('minus',16)+' Serie</button>'+
    (isBarbell(ex)?'<button class="btn sm" data-a="plates" data-e="'+i+'" aria-label="Calculadora de discos">'+ic('disc',16)+'</button>':'')+'</div></div>';
 }
+/* modo grande: una serie a la vez, botones enormes para usar con las manos transpiradas */
+function bigCur(){const a=db.active,E=a.entries;if(S.bigE!=null&&E[S.bigE])return S.bigE;const i=E.findIndex(en=>en.sets.some(s=>!s.done));return i<0?E.length-1:i;}
+function bigHTML(){
+  const a=db.active,E=a.entries;if(!E.length)return '';
+  const ci=bigCur(),en=E[ci],ex=exById(en.ex);if(!ex)return '';
+  if(en.goal===undefined)en.goal=goalFor(en.ex);
+  const j=en.sets.findIndex(s=>!s.done),inc=kgStep(ex),allDone=E.every(x=>x.sets.every(s=>s.done)),ls=lastSets(en.ex);
+  const eff=en.sets.filter(s=>!s.w).length,num_=j<0?0:en.sets.slice(0,j+1).filter(s=>!s.w).length;
+  let h='<div class="bigm"><div class="big-nav"><button class="ib" data-a="bigNav" data-v="-1" aria-label="Ejercicio anterior"'+(ci?'':' disabled')+'>'+ic('left',22)+'</button><span>Ejercicio '+(ci+1)+' de '+E.length+'</span><button class="ib" data-a="bigNav" data-v="1" aria-label="Ejercicio siguiente"'+(ci<E.length-1?'':' disabled')+'>'+ic('right',22)+'</button></div>'+
+   '<button class="big-name" data-a="exInfo" data-v="'+ex.id+'"><b>'+esc(ex.n)+'</b><span>'+(ls?'Última vez: '+ls.slice(0,3).map(s=>setTxt(ex,s)).join(', '):esc(ex.eq))+'</span></button>'+
+   (en.goal&&!en.hit?'<p class="big-goal">'+ic('target',15)+' Meta: <b>'+goalTxt(ex,en.goal)+'</b></p>':en.hit?'<p class="big-goal ok">'+ic('check',15)+' ¡Meta cumplida!</p>':'');
+  if(j>=0){const s=en.sets[j];
+    h+='<p class="big-set">'+(s.w?'Calentamiento':'Serie '+num_+' de '+eff)+'</p><div class="big-steps">'+
+     (ex.time?'':'<div class="big-st"><button data-a="stepKg" data-e="'+ci+'" data-s="'+j+'" data-v="-'+inc+'" aria-label="Menos peso">−</button><label><input class="num" type="number" inputmode="decimal" step="0.5" min="0" value="'+esc(s.kg)+'" data-i="set" data-e="'+ci+'" data-s="'+j+'" data-f="kg" aria-label="Peso"><small>'+kgLbl(ex)+'</small></label><button data-a="stepKg" data-e="'+ci+'" data-s="'+j+'" data-v="'+inc+'" aria-label="Más peso">+</button></div>')+
+     '<div class="big-st"><button data-a="stepRep" data-e="'+ci+'" data-s="'+j+'" data-v="-'+(ex.time?5:1)+'" aria-label="Menos">−</button><label><input class="num" type="number" inputmode="numeric" min="0" value="'+esc(s.reps)+'" data-i="set" data-e="'+ci+'" data-s="'+j+'" data-f="reps" aria-label="'+(ex.time?'Segundos':'Repeticiones')+'"><small>'+(ex.time?'segundos':'reps')+'</small></label><button data-a="stepRep" data-e="'+ci+'" data-s="'+j+'" data-v="'+(ex.time?5:1)+'" aria-label="Más">+</button></div></div>'+
+     '<button class="big-done" data-a="setDone" data-e="'+ci+'" data-s="'+j+'">'+ic('check',30)+' Serie hecha</button>';
+  }else h+='<div class="big-fin">'+ic('check',34)+'<b>Listo este ejercicio</b></div>'+(allDone?'<button class="big-done" data-a="sessFinish">'+ic('trophy',26)+' Terminar entrenamiento</button>':ci<E.length-1?'<button class="big-done" data-a="bigNav" data-v="1">Siguiente ejercicio '+ic('right',24)+'</button>':'');
+  const pj=j<0?en.sets.length-1:j-1;
+  if(pj>=0&&S.rirAsk===ci+':'+pj&&en.sets[pj].done&&!en.sets[pj].w)h+='<div class="rir big-rir"><span>¿Cuántas más podías?</span>'+[0,1,2,3].map(v=>'<button data-a="rirSet" data-e="'+ci+'" data-s="'+pj+'" data-v="'+v+'">'+(v===3?'3+':v)+'</button>').join('')+'</div>';
+  const dn=en.sets.filter(s=>s.done);
+  if(dn.length)h+='<div class="big-log">'+dn.map(s=>'<span>'+ic('check',13)+' '+setTxt(ex,s)+'</span>').join('')+'</div>';
+  return h+'<button class="btn line wide" style="margin-top:14px" data-a="bigTog">'+ic('list',16)+' Ver la lista completa</button></div>';
+}
 function sessHTML(){
-  const a=db.active;
-  return '<div class="sess"><div class="sess-in"><header class="sess-top"><button class="ib" data-a="sessMin" aria-label="Minimizar">'+ic('down')+'</button><div class="grow"><h2>'+esc(a.name)+'</h2><span class="mut sm-t" id="elapsed">'+fmtT((Date.now()-a.t0)/1000)+'</span></div><button class="btn pri sm" data-a="sessFinish">Terminar</button></header>'+
+  const a=db.active,big=!!db.settings.big&&a.entries.length;
+  if(big)return '<div class="sess"><div class="sess-in"><header class="sess-top"><button class="ib" data-a="sessMin" aria-label="Minimizar">'+ic('down')+'</button><div class="grow"><h2>'+esc(a.name)+'</h2><span class="mut sm-t" id="elapsed">'+fmtT((Date.now()-a.t0)/1000)+'</span></div><button class="ib on" data-a="bigTog" aria-label="Salir del modo grande">'+ic('big',20)+'</button><button class="btn pri sm" data-a="sessFinish">Terminar</button></header>'+bigHTML()+'</div></div>';
+  return '<div class="sess"><div class="sess-in"><header class="sess-top"><button class="ib" data-a="sessMin" aria-label="Minimizar">'+ic('down')+'</button><div class="grow"><h2>'+esc(a.name)+'</h2><span class="mut sm-t" id="elapsed">'+fmtT((Date.now()-a.t0)/1000)+'</span></div><button class="ib" data-a="bigTog" aria-label="Modo grande: una serie a la vez">'+ic('big',20)+'</button><button class="btn pri sm" data-a="sessFinish">Terminar</button></header>'+
    '<div class="row" style="margin:0 0 12px;gap:8px"><span class="mut sm-t" style="font-weight:700">'+ic('timer',16)+'</span><span class="mut sm-t" style="font-weight:700">Descanso</span><div class="scroll-x grow" style="padding:0">'+
    [45,60,90,120,180,240].map(s=>'<button class="chip '+(db.settings.rest===s?'on':'')+'" data-a="restSet" data-v="'+s+'" aria-pressed="'+(db.settings.rest===s)+'">'+(s<60?s+' s':fmtT(s))+'</button>').join('')+'</div></div>'+
    '<p class="mut sm-t" style="margin:-4px 0 12px">Tocá el número de una serie para marcarla como calentamiento (C): no cuenta para niveles ni récords.</p>'+
@@ -5049,7 +5254,7 @@ function exDetail(id){
     }else h+='<div><h4 style="margin-bottom:8px">1RM estimado para cada rango (según tu perfil)</h4><div class="ladder">'+TIERS.map((t,k)=>'<div style="color:'+TCOL[k]+'">'+t+'<b>'+Math.round(thr(ex,k===6?18:k*3))+'</b></div>').join('')+'</div></div>';
   }else if(!hasRank(ex))h+='<p class="mut sm-t">Este ejercicio no tiene escala de rangos, pero igual podés registrarlo y ver su progreso.</p>';
   const pts=e1Points(id);
-  if(hasRank(ex)||ex.time)h+='<div><h4 style="margin-bottom:8px">Progreso ('+(ex.sk||ex.time?'mejor serie':'1RM estimado')+')</h4>'+chart(pts,ex.sk||ex.time?(ex.time?'segundos':'repeticiones'):'kg')+'</div>';
+  if(hasRank(ex)||ex.time)h+='<div><h4 style="margin-bottom:8px">Progreso ('+(ex.sk||ex.time?'mejor serie':'1RM estimado')+')</h4>'+exChart(ex,pts,ex.sk||ex.time?(ex.time?'s':'reps'):'kg')+'</div>';
   /* historial: todas las veces que lo hiciste */
   const hist=allSess().filter(l=>l.entries.some(en=>en.ex===id)).sort((a,b)=>a.date<b.date?1:-1);
   if(hist.length)h+='<div><h4 style="margin-bottom:6px">Historial ('+hist.length+(hist.length===1?' vez':' veces')+')</h4><div class="hist">'+hist.slice(0,30).map(l=>{const en=l.entries.find(x=>x.ex===id);
@@ -5212,6 +5417,8 @@ function modalBody(m,l2){
     case 'phview':return sheet('Foto de progreso',photoViewHTML(m),{l2:true});
     case 'friends':return sheet('Amigos',friendsHTML(m));
     case 'delacc':return sheet('Eliminar mi cuenta','<p>Se borra <b>para siempre</b>: tu cuenta, todos tus datos en la nube, tus amigos, solicitudes, torneos y recordatorios. También se borra lo que hay en este dispositivo.</p><p class="mut sm-t">No se puede deshacer. Si querés conservar algo, antes hacé una copia en Perfil → Copia de seguridad. Después podés crear una cuenta nueva con el mismo mail.</p><label class="field">Escribí <b>ELIMINAR</b> para confirmar<input id="delAccIn" type="text" autocomplete="off" autocapitalize="characters" placeholder="ELIMINAR"></label><div class="g2"><button class="btn" data-a="close" data-v="m2">Cancelar</button><button class="btn bad" data-a="delAccGo"'+(m.busy?' disabled':'')+'>'+(m.busy?'Borrando…':'Eliminar para siempre')+'</button></div>',{l2:true});
+    case 'notif':return sheet('Avisos',notifHTML(),{l2:true});
+    case 'podium':return sheet('Podio',podiumHTML(m.id),{l2:true});
     case 'skmark':return sheet('Ya la logro',skMarkHTML(m),{l2:true});
     case 'comp':return sheet('Nuevo torneo',compNewHTML(m),{l2:true});
     case 'fcard':return sheet('Perfil',friendCardHTML(S.social&&S.social.friends.concat(S.social.me?[S.social.me]:[]).find(r=>r.user_id===m.id)),{l2:true});
@@ -5231,7 +5438,7 @@ function modalBody(m,l2){
      '<p class="mut sm-t tc" style="margin-top:10px">FUE es tu fuerza en los básicos con barra; el resto, tu mejor ejercicio de cada zona. Suben a medida que subís de rango.</p></div></div>';
     case 'recap':return recapHTML(m);
     case 'quick':return sheet('¿Qué hacemos?',quickHTML());
-    case 'food':return sheet(m.d.step==='photo'?'Tu plato':m.d.step==='new'?'Alimento propio':m.d.step==='quick'?'Anotar calorías':m.d.edit?'Editar':'Agregar a '+MEAL_N[m.d.m].toLowerCase(),foodHTML(m.d),{l2:true});
+    case 'food':return sheet(m.d.step==='photo'?'Tu plato':m.d.step==='bar'?'Código de barras':m.d.step==='new'?'Alimento propio':m.d.step==='quick'?'Anotar calorías':m.d.edit?'Editar':'Agregar a '+MEAL_N[m.d.m].toLowerCase(),foodHTML(m.d),{l2:true});
     case 'onb':return onbHTML(m);
     case 'plates':return sheet('Calculadora de discos',platesHTML(m.d),{l2:true});
     case 'gen':return sheet('Armame una rutina',genHTML(m.d),{l2:true});
@@ -5516,7 +5723,7 @@ const ACTIONS={
   /* comidas */
   foodOpen(v){S.m2={t:'food',d:{m:MEAL_N[v]?v:mealNow(),q:'',step:'list',date:S.tab==='nutri'&&S.fd?S.fd:today()}};render();setTimeout(()=>{const i=document.getElementById('foodQ');if(i&&matchMedia('(pointer:fine)').matches)i.focus();},300);},
   foodPick(v){const d=S.m2.d,f=foodById(v);if(!f)return;d.sel=v;d.step='amt';d.unit=f.u.length?0:-1;d.qty=f.u.length?1:100;renderModal();},
-  foodStep(v){const d=S.m2.d;d.step=v;delete d.edit;renderModal();},
+  foodStep(v){if(v!=='bar')barStop();const d=S.m2.d;d.step=v;delete d.edit;renderModal();},
   foodUnit(v){const d=S.m2.d,g=foodGrams(d);d.unit=+v;d.qty=+v<0?Math.round(g)||100:1;renderModal();},
   foodQty(v){const d=S.m2.d,q=+String(d.qty).replace(',','.')||0,st=d.unit<0?(q>=100?25:10):(q<1||(q===1&&+v<0)?.5:1);d.qty=Math.max(0,Math.round((q+st*(+v))*100)/100);renderModal();},
   foodMeal(v){S.m2.d.m=v;renderModal();},
@@ -5620,6 +5827,7 @@ const ACTIONS={
       /* la primera vez: el peso de esta serie pasa a las que siguen */
       const j=+el.dataset.s;en.sets.forEach((x,k)=>{if(k>j&&!x.done&&!x.w&&(x.kg===''||x.kg==null)&&s.kg!=='')x.kg=s.kg;});
       if(!s.w&&!ex.time)S.rirAsk=ei+':'+j;
+      if(db.settings.big&&en.sets.every(x=>x.done))S.bigE=null;
       if(!s.w&&!en.hit&&hitGoal(en.goal,s)){en.hit=1;setTimeout(()=>{toast('¡Meta cumplida en '+(ex?ex.n:'')+'!');confetti(24);},150);}
       if(en.ss&&nx){endRest(false);const nxe=exById(nx.ex);toast('Superserie: ahora '+(nxe?nxe.n:'el siguiente'));}
       else startRest(restFor(ex));
@@ -5722,6 +5930,19 @@ const ACTIONS={
   treeView(v){S.modal.view=v;renderModal();},
   rtZoom(v){S.rt=S.rt||{x:0,y:0,w:820};if(v==='home')rtFocus(0,0,820);else rtFocus(S.rt.x,S.rt.y,clamp(S.rt.w*(v==='in'?.72:1.38),320,1800));},
   treeSel(v){S.modal.sel=S.modal.sel===v?null:v;renderModal();if(S.modal.view==='radial'&&S.modal.sel){const p=rtLayout().find(q=>q.n.id===v);if(p)rtFocus(p.x*.85,p.y*.85+60);}const d=document.getElementById('tdDet');if(d)d.scrollIntoView({block:'nearest',behavior:'smooth'});},
+  bigTog(){db.settings.big=!db.settings.big;S.bigE=null;save();render();toast(db.settings.big?'Modo grande: una serie a la vez':'Lista completa');},
+  bigNav(v){const n=db.active.entries.length;S.bigE=clamp(bigCur()+(+v),0,n-1);renderSess();const s=document.querySelector('.sess');if(s)s.scrollTop=0;},
+  sleepSet(v){db.settings.sleep=db.settings.sleep||{};const t=today();if(+v)db.settings.sleep[t]=+v;else delete db.settings.sleep[t];
+    const ks=Object.keys(db.settings.sleep).sort();ks.slice(0,Math.max(0,ks.length-45)).forEach(k=>delete db.settings.sleep[k]);save();render();
+    if(+v)toast(+v<=2?'Anotado. Hoy te bajo un poco la carga si entrenás.':+v===5?'¡Bien! Buen día para un récord.':'Anotado');},
+  exRange(v){S.exR=v;renderModal();},
+  barOpen(){const d=S.m2.d;d.step='bar';d.bar={};renderModal();barScan();},
+  barManual(){barStop();S.m2.d.bar={manual:1};renderModal();setTimeout(()=>{const i=$('#barIn');if(i)i.focus();},100);},
+  barGo(){const i=$('#barIn');barLookup(i?i.value:'');},
+  notifOpen(){S.m2={t:'notif'};render();if(Social.on())Social.load().then(()=>{if(S.m2&&S.m2.t==='notif')renderModal();updNotif();}).catch(()=>{});},
+  passSeen(){if(db.settings.seasonPass)db.settings.seasonPass.seen=1;save();renderModal();updNotif();},
+  podium(v){const c=(S.social&&S.social.comps||[]).find(x=>x.id===v);if(!c)return;db.settings.compSeen=(db.settings.compSeen||[]).concat(v).slice(-60);save();
+    S.m2={t:'podium',id:v};render();updNotif();const me=S.social.me&&S.social.me.user_id,ms=(c.swole_comp_member||[]).filter(x=>x.joined).sort((a,b)=>b.score-a.score);if(ms.slice(0,3).some(x=>x.user_id===me))setTimeout(()=>confetti(60),350);},
   skMark(v){const f=findNode(v);if(!f)return;const n=f.b.nodes[f.i];S.m2={t:'skmark',id:v,n:Math.max(n.t,bestRep(v))};render();},
   skMarkStep(v){const i=$('#skMarkN'),m=S.m2;m.n=Math.max(1,(parseInt(i&&i.value,10)||m.n)+(+v));renderModal();},
   skMarkSave(){const i=$('#skMarkN'),m=S.m2,n=Math.round(+String(i?i.value:m.n).replace(',','.'));if(!(n>0))return toast('Poné cuánto hacés');
@@ -6173,6 +6394,13 @@ Sync.fromLink();
 /* rutina compartida por link */
 try{const q=new URLSearchParams(location.search),rr=q.get('rutina');if(rr){history.replaceState(null,'',location.pathname+location.hash);const o=parseRoutineLink(rr);
   if(o)setTimeout(()=>{if(db.profile){S.modal={t:'rimport',o};render();}else toast('Te pasaron una rutina: creá tu perfil y volvé a abrir el link');},1500);else toast('El link de la rutina está roto');}}catch(e){}
+/* accesos directos del ícono y toques en notificaciones */
+function goAction(g){
+  if(!db.profile)return;
+  if(g==='entreno')ACTIONS.quickTrain();else if(g==='comida')ACTIONS.foodOpen();else if(g==='marca')ACTIONS.markOpen();else if(g==='amigos')ACTIONS.socOpen(S.social&&notifItems().length?'list':'rank');
+}
+try{const q=new URLSearchParams(location.search),g=q.get('go');if(g){history.replaceState(null,'',location.pathname+location.hash);setTimeout(()=>goAction(g),900);}}catch(e){}
+if(navigator.serviceWorker)navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.go)goAction(e.data.go);});
 /* invitación de un amigo por link */
 try{const q=new URLSearchParams(location.search),c=q.get('amigo');if(c&&/^[A-Za-z0-9]{6}$/.test(c)){localStorage.setItem('swole.pendFriend',c.toUpperCase());history.replaceState(null,'',location.pathname+location.hash);
   setTimeout(()=>{if(Social.on())Social.addPending();else if(db.profile)toast('Te invitaron a Swole: activá Amigos en Nivel para sumarte');},1600);}}catch(e){}

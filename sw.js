@@ -1,6 +1,6 @@
 /* Service worker de Swole: hace que la app abra sin internet.
    Cuando cambies index.html, subí el número de VERSION para que los celulares bajen la nueva. */
-const VERSION = 'swole-v48';
+const VERSION = 'swole-v49';
 // Las fotos van en su propia caja, que NO se borra con cada versión (antes se bajaban de nuevo en cada actualización).
 const IMG = 'swole-img-1';
 const PICS = 'basquet cali ciclismo combate dep fuerza futbol grasa hip hockey natacion rugby running salud tenis voley'.split(' ').map(k => './img/' + k + '.jpg');
@@ -76,7 +76,8 @@ self.addEventListener('notificationclick', e => {
   e.notification.close();
   e.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-      for (const c of list) if ('focus' in c) return c.focus();
+      const url = (e.notification.data && e.notification.data.url) || './';
+    for (const c of list) if ('focus' in c) { const m = /[?&]go=([a-z]+)/.exec(url); if (m) c.postMessage({ go: m[1] }); return c.focus(); }
       return self.clients.openWindow('./');
     })
   );
@@ -94,6 +95,6 @@ self.addEventListener('notificationclick', e => {
   e.notification.close();
   e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
     for (const c of list) if ('focus' in c) return c.focus();
-    return self.clients.openWindow((e.notification.data && e.notification.data.url) || './');
+    return self.clients.openWindow(url);
   }));
 });
