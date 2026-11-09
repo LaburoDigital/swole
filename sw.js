@@ -1,16 +1,22 @@
 /* Service worker de Swole: hace que la app abra sin internet.
    Cuando cambies index.html, subí el número de VERSION para que los celulares bajen la nueva. */
-const VERSION = 'swole-v40';
+const VERSION = 'swole-v41';
+// Las fotos van en su propia caja, que NO se borra con cada versión (antes se bajaban de nuevo en cada actualización).
+const IMG = 'swole-img-1';
+const PICS = 'basquet cali ciclismo combate dep fuerza futbol grasa hip hockey natacion rugby running salud tenis voley'.split(' ').map(k => './img/' + k + '.jpg');
 const CORE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/logo.svg'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
+  e.waitUntil(Promise.all([
+    caches.open(VERSION).then(c => c.addAll(CORE)),
+    caches.open(IMG).then(c => c.addAll(PICS)).catch(() => {})
+  ]).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k !== VERSION && k !== IMG).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -39,6 +45,12 @@ self.addEventListener('fetch', e => {
       net.then(res => { clearTimeout(t); if (!done) { done = true; resolve(res); } })
         .catch(() => { clearTimeout(t); fallback().then(hit => { if (!hit && !done) { done = true; resolve(Response.error()); } }); });
     }));
+    return;
+  }
+
+  // Fotos: de la caja de fotos al instante; si falta, se baja y se guarda.
+  if (url.origin === self.location.origin && url.pathname.includes('/img/')) {
+    e.respondWith(caches.open(IMG).then(c => c.match(req, { ignoreSearch: true }).then(hit => hit || fetch(req).then(res => { if (res.ok) c.put(req, res.clone()); return res; }))));
     return;
   }
 

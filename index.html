@@ -1287,6 +1287,18 @@ rect.tq-eq{stroke-width:1.5}
 @media (max-width:360px){.ladder{grid-template-columns:repeat(4,minmax(0,1fr))}.cams{gap:8px}.cam{height:100px;padding:10px}.cam b{font-size:14px}.jt-block .btn,.g2 .btn{font-size:13.5px;padding:10px 8px}}
 .btn{overflow-wrap:anywhere}
 .hd>.btn,.hd>.chip,.hd>button.btn{flex:none;white-space:nowrap}
+/* v41: semana de entreno, cuenta en la bienvenida */
+.wdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.wdb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:58px;min-width:0;border-radius:14px;background:var(--raise);border:1.5px solid var(--line);color:var(--text);font:700 13px var(--f-b);padding:6px 0;transition:transform .15s,background .2s}
+.wdb small{font-size:9.5px;color:var(--mut);font-weight:600;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.wdb.has{border-style:dashed}
+.wdb.on{background:var(--grad,var(--acc));border-color:transparent;color:#fff;box-shadow:0 6px 16px color-mix(in srgb,var(--acc) 35%,transparent)}
+.wdb.on small{color:rgba(255,255,255,.88)}.wdb:active{transform:scale(.94)}
+.wq{padding:12px;border-radius:14px;background:var(--raise);border:1.5px solid var(--line);display:grid;gap:10px;font-size:14px;line-height:1.35}
+.wq.need{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 22%,transparent)}
+.wq .seg{background:var(--surf)}.wq .seg button.on{background:var(--acc);color:#fff}
+.onb-cloud{width:120px;height:120px;border-radius:36px;display:grid;place-items:center;margin:0 auto;color:#fff;background:var(--grad,var(--acc));box-shadow:0 18px 40px color-mix(in srgb,var(--acc) 40%,transparent);animation:stIn .5s cubic-bezier(.22,1,.36,1)}
+.login-sw{margin-top:2px;color:var(--mut)}.lnk{color:var(--acc);font-weight:800;padding:4px 2px}
 </style>
 </head>
 <body>
@@ -1995,7 +2007,8 @@ function dayPanel(dk){
 
 /* ============ Mi semana: deportes, prácticas, partidos y gym ============
    profile.sports = ['rugby', ...]
-   profile.week[dow] = {act:'prac:rugby' | 'match:rugby' | '', gym:'' | 'solo' | 'antes' | 'despues'} */
+   profile.week[dow] = {act:'prac:rugby' | 'match:rugby' | '', gym:'' | 'solo' | 'ask' | 'antes' | 'despues'}
+   ('ask' = entrena ese día pero falta decir si antes o después del deporte) · profile.trains = 1 ya entrena / 0 todavía no */
 const ACT_T={prac:'Práctica',match:'Partido'};
 function dayInfo(dow){
   const w=(db.profile&&db.profile.week||{})[dow]||{},a=w.act?w.act.split(':'):null;
@@ -2004,19 +2017,32 @@ function dayInfo(dow){
 const actName=di=>di.type?ACT_T[di.type]+' de '+(SPORTS[di.sport]?SPORTS[di.sport].n.toLowerCase():''):'';
 function weekGymDays(){return [1,2,3,4,5,6,0].filter(d=>dayInfo(d).gym);}
 function weekEditor(){
-  const p=db.profile||{},sp=p.sports||[];
-  let h='<div class="field"><span>Tus deportes</span><div class="ptiles">'+Object.keys(SPORTS).map(k=>photoTile(k,SPORTS[k].n,SPORTS[k].i,sp.includes(k),'sportTog',k)).join('')+'</div></div>';
-  h+='<div class="field"><span>Tu semana</span><p class="mut sm-t" style="font-weight:500">Para cada día: qué tenés y si vas al gym. Si el gym cae un día con deporte, elegí si va antes o después.</p></div><div class="week">';
-  [1,2,3,4,5,6,0].forEach(d=>{
-    const di=dayInfo(d),acts=[['','Nada']].concat(...sp.map(k=>[['prac:'+k,'Práctica '+SPORTS[k].n.toLowerCase()],['match:'+k,'Partido '+SPORTS[k].n.toLowerCase()]]));
-    const cur=di.type?di.type+':'+di.sport:'';
-    const gyms=di.type?[['','Sin gym'],['antes','Gym antes'],['despues','Gym después']]:[['','Sin gym'],['solo','Gym']];
-    h+='<div class="wday'+(di.type==='match'?' match':di.type?' prac':'')+'"><b>'+DIAS3[d]+'</b><div class="wcol">'+
-     (sp.length?'<div class="chips">'+acts.map(a=>'<button class="chip sm '+(cur===a[0]?'on':'')+'" data-a="weekAct" data-v="'+d+'|'+a[0]+'">'+a[1]+'</button>').join('')+'</div>':'')+
-     '<div class="chips">'+gyms.map(g=>'<button class="chip sm'+(g[0]?' gym':'')+' '+(di.gym===g[0]?'on':'')+'" data-a="weekGym" data-v="'+d+'|'+g[0]+'">'+(g[0]?ic('dumb',13)+' ':'')+g[1]+'</button>').join('')+'</div></div></div>';
-  });
-  return h+'</div>';
+  const p=db.profile||{},sp=p.sports||[],gd=weekGymDays(),tr=p.trains!=null?+p.trains:(gd.length?1:null);
+  let h='<div class="field"><span>¿Hacés algún deporte?</span><div class="ptiles">'+Object.keys(SPORTS).map(k=>photoTile(k,SPORTS[k].n,SPORTS[k].i,sp.includes(k),'sportTog',k)).join('')+'</div></div>';
+  if(sp.length){
+    h+='<div class="field"><span>¿Cuándo practicás o jugás?</span></div><div class="week">';
+    [1,2,3,4,5,6,0].forEach(d=>{
+      const di=dayInfo(d),acts=[['','Nada']].concat(...sp.map(k=>[['prac:'+k,'Práctica '+SPORTS[k].n.toLowerCase()],['match:'+k,'Partido '+SPORTS[k].n.toLowerCase()]]));
+      const cur=di.type?di.type+':'+di.sport:'';
+      h+='<div class="wday'+(di.type==='match'?' match':di.type?' prac':'')+'"><b>'+DIAS3[d]+'</b><div class="wcol"><div class="chips">'+acts.map(a=>'<button class="chip sm '+(cur===a[0]?'on':'')+'" data-a="weekAct" data-v="'+d+'|'+a[0]+'">'+a[1]+'</button>').join('')+'</div></div></div>';
+    });
+    h+='</div>';
+  }
+  h+='<div class="field"><span>¿Ya entrenás?</span><div class="seg"><button class="'+(tr===1?'on':'')+'" data-a="weekTrains" data-v="1">Sí, ya entreno</button><button class="'+(tr===0?'on':'')+'" data-a="weekTrains" data-v="0">Todavía no</button></div></div>';
+  if(tr!=null){
+    h+='<div class="field"><span>'+(tr?'¿Qué días entrenás?':'¿Qué días querés entrenar?')+'</span><p class="mut sm-t" style="font-weight:500">'+
+     (tr?'Marcá los días que ya entrenás. Tus rutinas se arman sobre esos días.':'Elegí los días que te quedan cómodos. Para arrancar, 3 días con uno de descanso entre medio va perfecto.')+'</p>'+
+     '<div class="wdays">'+[1,2,3,4,5,6,0].map(d=>{const di=dayInfo(d);return '<button class="wdb'+(di.gym?' on':'')+(di.type?' has':'')+'" data-a="weekDay" data-v="'+d+'" aria-pressed="'+!!di.gym+'"><b>'+DIAS3[d]+'</b>'+(di.type?'<small>'+(di.type==='match'?'Partido':'Práctica')+'</small>':'')+'</button>';}).join('')+'</div></div>';
+    const qs=gd.filter(d=>dayInfo(d).type);
+    if(qs.length)h+='<div class="gap" style="margin-bottom:12px">'+qs.map(d=>{const di=dayInfo(d);
+      return '<div class="wq'+(di.gym==='ask'?' need':'')+'"><span>El <b>'+DIAS[d]+'</b> tenés '+esc(actName(di).toLowerCase())+'. ¿Entrenás antes o después?</span><div class="seg">'+
+       [['antes','Antes'],['despues','Después']].map(g=>'<button class="'+(di.gym===g[0]?'on':'')+'" data-a="weekGym" data-v="'+d+'|'+g[0]+'">'+g[1]+'</button>').join('')+'</div></div>';}).join('')+'</div>';
+  }
+  return h;
 }
+/* días de entreno que caen con deporte y todavía no dijiste si van antes o después */
+const weekPend=()=>weekGymDays().filter(x=>dayInfo(x).gym==='ask');
+const weekPendMsg=()=>{const p=weekPend();return p.length?'Decime si el '+DIAS[p[0]]+' entrenás antes o después de '+(dayInfo(p[0]).type==='match'?'jugar':'la práctica'):'';};
 
 /* ============ Nutrición con actividad real ============ */
 /* sesiones por semana: gym según lo que registrás (o tu semana) + prácticas + partidos (cuentan más) */
@@ -2236,6 +2262,8 @@ function genPlan(d){
 }
 /* fotos libres de Wikimedia Commons (créditos en TERCEROS.md) */
 const PHOTOS=Object.fromEntries('rugby futbol basquet tenis natacion running combate hockey voley ciclismo hip fuerza dep grasa salud cali'.split(' ').map(k=>[k,{u:'img/'+k+'.jpg'}]));PHOTOS.pl={u:'img/fuerza.jpg'};
+let photosWarm=0;function warmPhotos(){if(photosWarm)return;photosWarm=1;window.__ph=[...new Set(Object.values(PHOTOS).map(p=>p.u))].map(u=>{const i=new Image();i.decoding='async';i.src=u;return i;});}
+setTimeout(warmPhotos,1200);
 /* fichas grandes con foto del deporte u objetivo */
 function photoTile(k,label,icon,on,act,v,extra){
   const ph=PHOTOS[k];
@@ -2252,11 +2280,11 @@ function genHTML(d){
   const opt=(f,obj)=>'<div class="opt">'+Object.keys(obj).map(k=>{const o=obj[k],on=d[f]===k;
     return '<button class="'+(on?'on':'')+'" data-a="genSet" data-f="'+f+'" data-v="'+k+'" aria-pressed="'+on+'">'+(o.i?ic(o.i,18):'')+esc(o.n||o)+'</button>';}).join('')+'</div>';
   const nav=(back,next,lbl)=>'<div class="g2">'+(back?'<button class="btn" data-a="genStep" data-v="'+back+'">Atrás</button>':'<span></span>')+'<button class="btn pri" data-a="genStep" data-v="'+next+'">'+(lbl||'Siguiente')+'</button></div>';
-  if(d.step===1){d.sports=(db.profile&&db.profile.sports||[]).slice();return st+'<h4>Tus deportes y tu semana</h4><p class="mut sm-t">Marcá prácticas, partidos y qué días vas al gym. Se guarda en tu perfil.</p>'+weekEditor()+nav(0,2);}
+  if(d.step===1){d.sports=(db.profile&&db.profile.sports||[]).slice();return st+'<h4>Tus deportes y tu semana</h4><p class="mut sm-t">Tus deportes y qué días entrenás. Se guarda en tu perfil.</p>'+weekEditor()+nav(0,2);}
   if(d.step===2)return st+'<h4>¿Qué querés lograr?</h4><p class="mut sm-t">Podés combinar varios: por ejemplo, ganar músculo y calistenia.</p><div class="ptiles">'+
     Object.keys(GEN_GOALS).map(k=>photoTile(k,GEN_GOALS[k].n,GEN_GOALS[k].i,d.goals.includes(k),'genGoal',k)).join('')+'</div>'+nav(1,3);
   if(d.step===3){const wk=weekGymDays(),onlyCali=d.goals.length===1&&d.goals[0]==='cali';
-    return st+(wk.length?'<h4>Tus días de gym</h4><p class="mut sm-t">Según tu semana: '+wk.map(x=>DIAS3[x]+(dayInfo(x).gym==='antes'?' (antes del deporte)':dayInfo(x).gym==='despues'?' (después del deporte)':'')).join(', ')+'.</p>'
+    return st+(wk.length?'<h4>Tus días de entrenamiento</h4><p class="mut sm-t">Según tu semana: '+wk.map(x=>DIAS3[x]+(dayInfo(x).gym==='antes'?' (antes del deporte)':dayInfo(x).gym==='despues'?' (después del deporte)':'')).join(', ')+'.</p>'
      :'<h4>¿Cuántos días por semana vas a entrenar?</h4><div class="opt">'+[2,3,4,5,6].map(n=>'<button class="'+(+d.days===n?'on':'')+'" data-a="genSet" data-f="days" data-v="'+n+'">'+n+' días</button>').join('')+'</div>')+
     '<h4>¿Cuánto tiempo tenés por sesión?</h4><div class="opt">'+[30,45,60,75,90].map(n=>'<button class="'+(+d.min===n?'on':'')+'" data-a="genSet" data-f="min" data-v="'+n+'">'+n+' min</button>').join('')+'</div>'+
     (onlyCali?'':'<h4>¿Con qué entrenás?</h4>'+opt('eq',GEN_EQ))+'<h4>¿Qué nivel tenés?</h4>'+opt('lvl',GEN_LVL)+nav(2,4,'Armar mi rutina');}
@@ -2475,7 +2503,7 @@ function recoveryCard(){
   const r=recovery(),fills={};Object.keys(r.st).forEach(k=>fills[k]=REC_COL[r.st[k]]);
   const pick=r.ready.slice(0,2);
   let sug,act='';
-  if(dT.type==='match'){sug='Hoy tenés <b>'+actName(dT).toLowerCase()+'</b>: nada de gym pesado. ¡Suerte!';}
+  if(dT.type==='match'){sug='Hoy tenés <b>'+actName(dT).toLowerCase()+'</b>: nada de entrenar pesado. ¡Suerte!';}
   else if(dM.type==='match'){sug='Mañana tenés <b>'+actName(dM).toLowerCase()+'</b>: si entrenás hoy, que sea torso y liviano.';}
   else if(pick.length){
     const ms=[].concat(...pick.map(g=>GROUPS[g]));
@@ -2915,7 +2943,7 @@ function rankRows(metric){
 function friendsHTML(m){
   const tab=m.tab||'rank';
   if(!Sync.user())return '<div class="soc-hero">'+ic('user',28)+'<h3>Entrená con tus amigos</h3><p class="mut">Rankings justos (ajustados por peso, edad y sexo), una temporada por mes y las novedades de tus amigos.</p></div>'+
-    '<p class="mut sm-t">Para usar amigos necesitás una cuenta: así tus datos quedan guardados en la nube.</p><button class="btn pri wide" data-a="loginOpen">Crear cuenta o entrar</button>';
+    '<p class="mut sm-t">Para usar amigos necesitás una cuenta: así tus datos quedan guardados en la nube.</p><div class="g2"><button class="btn pri" data-a="loginOpen" data-v="up">Crear cuenta</button><button class="btn line" data-a="loginOpen">Ya tengo cuenta</button></div>';
   if(!Social.on())return '<div class="soc-hero">'+ic('user',28)+'<h3>Entrená con tus amigos</h3><p class="mut">Rankings justos, una temporada por mes y las novedades de tus amigos.</p></div>'+
     '<div class="card" style="margin:0"><h4 style="margin-bottom:6px">Qué ven tus amigos</h4><p class="sm-t">Tu apodo, tus rangos y niveles, tu carta, tus habilidades, tus puntos de la temporada y tus novedades (entrenos, récords, subidas de rango).</p>'+
     '<h4 style="margin:10px 0 6px">Qué NO ven</h4><p class="sm-t">Tu mail, tu peso, tu edad, tus medidas, tus fotos ni tus comidas. Solo te ven las personas que agregás (o que te agregan con tu código).</p></div>'+
@@ -3945,7 +3973,7 @@ function recapHTML(m){
   const I={};Object.keys(d.m).forEach(k=>I[k]=Math.min(1,d.m[k]/10));
   const range=parseK(d.from).getDate()+' al '+parseK(d.to).getDate()+' de '+MESES[parseK(d.to).getMonth()];
   const slides=[
-    ()=>'<p class="rc-k">Tu semana · '+range+'</p><div class="rc-big" data-n="'+d.n+'">'+d.n+'</div><p class="rc-l">'+(d.n===1?'entreno':'entrenos')+'</p><p class="rc-s">'+d.min+' minutos en el gym</p>',
+    ()=>'<p class="rc-k">Tu semana · '+range+'</p><div class="rc-big" data-n="'+d.n+'">'+d.n+'</div><p class="rc-l">'+(d.n===1?'entreno':'entrenos')+'</p><p class="rc-s">'+d.min+' minutos entrenando</p>',
     ()=>'<p class="rc-k">Movida total</p><div class="rc-big" data-fmt="1" data-n="'+Math.round(d.vol)+'">'+nf(d.vol)+'</div><p class="rc-l">kilos movidos</p><p class="rc-s">en '+d.sets+' series efectivas</p>',
     ()=>'<p class="rc-k">Récords</p>'+(d.prs.length?'<div class="rc-big" data-n="'+d.prs.length+'">'+d.prs.length+'</div><p class="rc-l">'+(d.prs.length===1?'récord personal':'récords personales')+'</p><div class="rc-list">'+d.prs.slice(0,4).map((ex,k)=>'<span style="animation-delay:'+(400+k*120)+'ms">'+ic('trophy',16)+' '+esc(ex.n)+'</span>').join('')+'</div>':'<div class="rc-big">0</div><p class="rc-l">récords esta vez</p><p class="rc-s">La semana que viene es tuya.</p>'),
     ()=>'<p class="rc-k">Lo que más laburaste</p><div class="rc-map">'+bodyMap(I,{cls:'live'})+'</div><p class="rc-l" style="font-size:30px">'+(d.top?MUSC[d.top]:'—')+'</p>',
@@ -4010,7 +4038,7 @@ const ONB_SLIDES=[
   {t:'Cada músculo tiene su rango',p:'De Bronce a Élite. Con pesas o con calistenia, cada uno con su escala.'},
   {t:'Tu carta de atleta',p:'Sumá puntaje, desbloqueá logros y compartí tu carta.'}
 ];
-const ONB_N=ONB_SLIDES.length+6; /* 3 diapositivas + apodo + cuerpo + medidas + objetivo + el final */
+const ONB_N=ONB_SLIDES.length+7; /* 3 diapositivas + apodo + cuerpo + medidas + objetivo + semana + cuenta + el final */
 function onbHTML(m){
   const s=m.step||0,d=m.d;
   const bars='<div class="onb-bars">'+Array.from({length:ONB_N},(_,k)=>'<i class="'+(k<=s?'on':'')+'"></i>').join('')+'</div>';
@@ -4035,14 +4063,17 @@ function onbHTML(m){
       '<div class="g2"><label class="onb-lbl">Altura<input class="onb-in" type="number" inputmode="numeric" min="120" max="230" placeholder="cm" value="'+esc(d.height||'')+'" data-i="onb" data-f="height"></label>'+
       '<label class="onb-lbl">Peso<input class="onb-in" type="number" inputmode="decimal" step="0.1" min="30" max="250" placeholder="kg" value="'+esc(d.weight||'')+'" data-i="onb" data-f="weight"></label></div>';
     else if(q===3){d.goals=d.goals||[];body='<h2 class="onb-t left">¿Qué querés lograr?</h2><p class="onb-p left">Podés elegir varios. Con esto armo tus rutinas y tus calorías.</p><div class="ptiles">'+Object.keys(GEN_GOALS).map(k=>photoTile(k,GEN_GOALS[k].n,GEN_GOALS[k].i,d.goals.includes(k),'onbGoal',k)).join('')+'</div>';btn='Siguiente';}
-    else if(q===4){body='<h2 class="onb-t left">Tu semana</h2><p class="onb-p left">Marcá tus deportes y qué días practicás, jugás o vas al gym. Lo podés cambiar cuando quieras en Perfil.</p>'+weekEditor();btn='Listo';}
+    else if(q===4){body='<h2 class="onb-t left">Tu semana</h2><p class="onb-p left">Así tus rutinas caen en los días justos. Lo podés cambiar cuando quieras en Perfil.</p>'+weekEditor();}
+    else if(q===5){const u=Sync.user();
+      body='<div class="onb-art"><div class="onb-cloud">'+ic(u?'check':'cloud',54)+'</div></div><h2 class="onb-t">'+(u?'Tu cuenta está lista':'Guardá tu progreso')+'</h2><p class="onb-p">'+(u?'Todo lo que hagas se guarda en la nube como <b>'+esc(u.email||'')+'</b>.':'Con una cuenta gratis tus entrenos quedan en la nube y usás Swole en el celu y la compu. Si no, todo queda solo en este dispositivo.')+'</p>';
+      if(u)btn='Siguiente';else{btn='Crear cuenta';alt='<button class="btn line wide" data-a="onbNext">Ahora no</button>';}}
     else{
       body='<div class="onb-art"><div class="onb-final">'+badge(0,120)+'</div></div><h2 class="onb-t">¡Bienvenid'+(d.sex==='f'?'a':'o')+', '+esc(d.nick||'atleta')+'!</h2><p class="onb-p">Todos arrancan en Bronce. Cargá tu primera marca y descubrí tu nivel real.</p>';
       btn='Cargar mi primera marca';alt='<button class="btn line wide" data-a="onbDone">Ir al inicio</button>';
     }
   }
   return '<div class="mback onb"><div class="onb-in-wrap">'+bars+back+'<div class="onb-c" key="'+s+'">'+body+'</div>'+
-   '<div class="onb-foot"><button class="btn pri wide big-btn" data-a="'+(s===ONB_N-1?'onbFirst':'onbNext')+'">'+btn+' '+ic('right',18)+'</button>'+alt+'</div></div></div>';
+   '<div class="onb-foot"><button class="btn pri wide big-btn" data-a="'+(s===ONB_N-1?'onbFirst':s===ONB_SLIDES.length+5&&!Sync.user()?'onbAcct':'onbNext')+'">'+btn+' '+ic('right',18)+'</button>'+alt+'</div></div></div>';
 }
 /* carta de muestra para la bienvenida (sin datos del usuario) */
 function demoCard(){
@@ -4216,7 +4247,7 @@ function viewNutri(){
   const n=nutri(p),t=today();
   h+='<div class="card"><div class="hd"><h3>Tu objetivo</h3></div><div class="seg">'+Object.keys(GOALS).map(k=>'<button class="'+(p.goal===k?'on':'')+'" data-a="goal" data-v="'+k+'">'+GOALS[k]+'</button>').join('')+'</div>'+
    '<div class="field" style="margin-top:12px"><span>Actividad física</span><select data-a="act" aria-label="Actividad física"><option value="auto"'+(n.af.auto?' selected':'')+'>Automática: según lo que entrenás y tus deportes</option>'+ACT.map((a,i)=>'<option value="'+i+'"'+(!n.af.auto&&p.activity===i?' selected':'')+'>'+a.l+'</option>').join('')+'</select></div>'+
-   (n.af.auto?(()=>{const wl=weeklyLoad();return '<p class="mut sm-t" style="margin-top:6px">Esta semana cuento '+num(wl.gym,1)+' de gym, '+wl.prac+' práctica'+(wl.prac===1?'':'s')+' y '+wl.match+' partido'+(wl.match===1?'':'s')+'.</p>';})():'')+
+   (n.af.auto?(()=>{const wl=weeklyLoad();return '<p class="mut sm-t" style="margin-top:6px">Esta semana cuento '+num(wl.gym,1)+' de entreno, '+wl.prac+' práctica'+(wl.prac===1?'':'s')+' y '+wl.match+' partido'+(wl.match===1?'':'s')+'.</p>';})():'')+
    '<div class="div"></div><div class="big-n">'+nf(n.kcal)+'<span class="mut" style="font:700 18px var(--f-b);letter-spacing:0"> kcal al día</span></div>'+
    '<p class="mut sm-t" style="margin:6px 0 16px">Mantenimiento estimado: '+nf(n.tdee)+' kcal</p>'+
    (n.ad?'<div class="goal'+(n.ad.kcal?'':' hit')+'" style="margin:0 0 14px"><span class="grow"><span class="mut sm-t">Ajuste por tu peso ('+n.ad.trend.days+' días, '+n.ad.trend.n+' registros)</span><br><b>'+(n.ad.kcal>0?'+':'')+n.ad.kcal+' kcal</b> <span class="mut sm-t">· vas '+(n.ad.trend.perWeek>=0?'+':'')+num(n.ad.trend.perWeek,2)+' kg/sem, la meta es '+(n.ad.target>=0?'+':'')+num(n.ad.target,2)+'</span></span>'+ic('weight',22)+'</div>'
@@ -4451,7 +4482,7 @@ function profileHTML(d){
 }
 function accountHTML(){
   const u=Sync.user(),st=Sync.state;
-  if(!u)return '<div><h4 style="margin-bottom:4px">Cuenta y sincronización</h4><p class="mut sm-t" style="margin-bottom:10px">Entrá con tu email para guardar todo en la nube y usar Swole en el celular y la compu a la vez.</p><button class="btn wide" data-a="loginOpen">'+ic('cloud',18)+' Entrar o crear cuenta</button></div>';
+  if(!u)return '<div><h4 style="margin-bottom:4px">Cuenta y sincronización</h4><p class="mut sm-t" style="margin-bottom:10px">Entrá con tu email para guardar todo en la nube y usar Swole en el celular y la compu a la vez.</p><div class="g2"><button class="btn pri" data-a="loginOpen" data-v="up">'+ic('cloud',16)+' Crear cuenta</button><button class="btn line" data-a="loginOpen">Ya tengo cuenta</button></div></div>';
   const txt={busy:'Sincronizando…',ok:'Sincronizado '+agoTxt(st.at),off:'Sin conexión: se sincroniza cuando vuelva internet',err:'No se pudo sincronizar'+(st.msg?': '+st.msg:''),idle:'Esperando para sincronizar'}[st.s]||'';
   const col=st.s==='ok'?'var(--ok)':st.s==='err'?'var(--bad)':'var(--mut)';
   return '<div><h4 style="margin-bottom:4px">Cuenta y sincronización</h4><p class="sm-t" style="margin-bottom:2px">Conectado como <b>'+esc(u.email||'')+'</b></p><p class="sm-t" id="syncTxt" style="color:'+col+';margin-bottom:10px">'+esc(txt)+'</p>'+
@@ -4469,12 +4500,12 @@ function loginHTML(d){
   if(d.mode==='newpw')return '<p class="mut sm-t">Elegí tu contraseña nueva para <b>'+esc(d.email)+'</b>.</p>'+pw('Contraseña nueva','pw','new-password')+
    '<button class="btn pri wide" data-a="loginGo"'+dis+'>'+(d.busy?'Guardando…':'Guardar contraseña')+'</button>';
   const up=d.mode==='up';
-  return '<div class="seg"><button class="'+(up?'':'on')+'" data-a="loginMode" data-v="in">Entrar</button><button class="'+(up?'on':'')+'" data-a="loginMode" data-v="up">Crear cuenta</button></div>'+
-   '<p class="mut sm-t">'+(up?'Guardá todo en la nube y usá Swole en el celular y la compu a la vez.':'Lo que ya tenés en este dispositivo se une con lo de la nube.')+'</p>'+
+  return '<p class="mut sm-t">'+(up?'Guardá todo en la nube y usá Swole en el celular y la compu a la vez.':'Lo que ya tenés en este dispositivo se une con lo de la nube.')+'</p>'+
    em+pw('Contraseña','pw',up?'new-password':'current-password')+
    '<button class="btn pri wide" data-a="loginGo"'+dis+'>'+(d.busy?(up?'Creando…':'Entrando…'):(up?'Crear cuenta':'Entrar'))+'</button>'+
    (d.unconf&&!up?'<div class="warn">Tu cuenta todavía no está confirmada. Buscá el email de Swole (fijate en spam) o pedí otro.</div><button class="btn wide" data-a="loginResend">Reenviar email de confirmación</button>':'')+
-   (up?'':'<button class="btn line wide" data-a="loginMode" data-v="forgot">Me olvidé la contraseña</button>');
+   (up?'':'<button class="btn line wide" data-a="loginMode" data-v="forgot">Me olvidé la contraseña</button>')+
+   '<p class="tc sm-t login-sw">'+(up?'¿Ya tenés cuenta? <button class="lnk" data-a="loginMode" data-v="in">Entrar</button>':'¿Primera vez? <button class="lnk" data-a="loginMode" data-v="up">Crear cuenta</button>')+'</p>';
 }
 function routineHTML(d){
   const days=[1,2,3,4,5,6,0];
@@ -4889,12 +4920,14 @@ const ACTIONS={
     if(q===2&&!(+d.height>=120&&+d.height<=230))return toast('Poné una altura entre 120 y 230 cm');
     if(q===2&&!(+d.weight>=30&&+d.weight<=250))return toast('Poné un peso entre 30 y 250 kg');
     if(q===3&&!(d.goals||[]).length)return toast('Elegí al menos un objetivo');
+    if(q===4&&weekPend().length)return toast(weekPendMsg());
     if(q===3&&!db.profile){const g=d.goals,goal=g.includes('grasa')?(g.some(x=>x==='hip'||x==='fuerza')?'recomp':'cut'):(g.includes('hip')||g.includes('fuerza'))?'bulk':'recomp';
       db.profile={sex:d.sex,age:Math.round(+d.age),height:Math.round(+d.height),weight:+d.weight,goal,nick:String(d.nick).trim().slice(0,20),sports:[],week:{},activity:'auto'};setWeight(+d.weight);db.settings.welcomed=1;db.settings.gen={goals:g.slice(),eq:'gym',lvl:'beg'};save();}
     else if(q===3&&db.profile){db.settings.gen=Object.assign({},db.settings.gen||{eq:'gym',lvl:'beg'},{goals:d.goals.slice()});save();}
     m.step++;renderModal();const i=document.querySelector('#modal .onb-in');if(i)setTimeout(()=>i.focus(),350);
   },
-  onbBack(){const m=S.modal;if(m.step>0&&!(db.profile&&m.step>=ONB_SLIDES.length+5)){m.step--;renderModal();}},
+  onbBack(){const m=S.modal;if(m.step>0&&!(db.profile&&m.step>=ONB_SLIDES.length+6)){m.step--;renderModal();}},
+  onbAcct(){ACTIONS.loginOpen('up');},
   onbGoal(v){const g=S.modal.d.goals=S.modal.d.goals||[],i=g.indexOf(v);if(i>=0)g.splice(i,1);else g.push(v);renderModal();},
   onbSet(v,el){S.modal.d[el.dataset.f]=v;renderModal();},
   onbDone(){S.modal=null;goTab('inicio');render();checkAch();},
@@ -4907,7 +4940,9 @@ const ACTIONS={
   },
   goalDel(v){db.goals=(db.goals||[]).filter(g=>g.id!==v);save();render();},
   sportTog(v){const p=db.profile;if(!p)return;p.sports=p.sports||[];const i=p.sports.indexOf(v);if(i>=0){p.sports.splice(i,1);Object.keys(p.week||{}).forEach(d=>{if((p.week[d].act||'').endsWith(':'+v))p.week[d].act='';});}else p.sports.push(v);save();render();},
-  weekAct(v){const[d,a]=v.split('|'),p=db.profile;p.week=p.week||{};const w=p.week[d]=p.week[d]||{};w.act=a;if(a&&w.gym==='solo')w.gym='despues';if(!a&&(w.gym==='antes'||w.gym==='despues'))w.gym='solo';save();render();},
+  weekAct(v){const[d,a]=v.split('|'),p=db.profile;p.week=p.week||{};const w=p.week[d]=p.week[d]||{};w.act=a;if(a&&w.gym==='solo')w.gym='ask';if(!a&&w.gym&&w.gym!=='solo')w.gym='solo';save();render();},
+  weekTrains(v){const p=db.profile;if(!p)return;p.trains=+v;save();render();},
+  weekDay(v){const p=db.profile;if(!p)return;p.week=p.week||{};const w=p.week[v]=p.week[v]||{};w.gym=w.gym?'':(w.act?'ask':'solo');save();render();},
   weekGym(v){const[d,g]=v.split('|'),p=db.profile;p.week=p.week||{};const w=p.week[d]=p.week[d]||{};w.gym=g;save();render();},
   onbSport(v){const d=S.modal.d;d.sports=d.sports||[];if(!v)d.sports=[];else{const i=d.sports.indexOf(v);if(i>=0)d.sports.splice(i,1);else d.sports.push(v);}renderModal();},
   delLog(v){S.m2={t:'confirm',title:'Borrar entrenamiento',msg:'Se elimina este entrenamiento y sus series. Tus niveles pueden cambiar.',act:'delLogGo',arg:v,ok:'Borrar'};render();},
@@ -5060,7 +5095,7 @@ const ACTIONS={
     if(v!=='pl'&&g.includes('pl')){S.m2.d.goals=g=[];}
     const i=g.indexOf(v);if(i>=0){if(g.length>1)g.splice(i,1);else toast('Elegí al menos un objetivo');}else g.push(v);renderModal();},
   genSet(v,el){const d=S.m2.d;d[el.dataset.f]=el.dataset.f==='days'?+v:v;renderModal();},
-  genStep(v){const d=S.m2.d,n=+v;if(n===4){if(d.step===4)d.seed=(d.seed||0)+1;d.plan=genPlan(d);}d.step=n;renderModal();const s=document.querySelector('#modal2 .msheet');if(s)s.scrollTop=0;},
+  genStep(v){const d=S.m2.d,n=+v;if(d.step===1&&n===2&&weekPend().length)return toast(weekPendMsg());if(n===4){if(d.step===4)d.seed=(d.seed||0)+1;d.plan=genPlan(d);}d.step=n;renderModal();const s=document.querySelector('#modal2 .msheet');if(s)s.scrollTop=0;},
   genSave(){
     const d=S.m2.d;if(!d.plan||!d.plan.length)return;
     if(d.replace){const old=db.routines.filter(r=>r.gen).map(r=>r.id);db.routines=db.routines.filter(r=>!r.gen);Object.keys(db.plan).forEach(k=>{db.plan[k]=db.plan[k].filter(x=>!old.includes(x));if(!db.plan[k].length)delete db.plan[k];});}
@@ -5141,8 +5176,8 @@ const ACTIONS={
   welNext(){const m=S.modal;if(m.step<WEL.length-1){m.step++;renderModal();}else{db.settings.welcomed=1;save();openProfile();}},
   /* entrar con tu cuenta: el login se abre encima; si lo cerrás, volvés a la bienvenida donde estabas */
   welLogin(){if(!S.modal||S.modal.t!=='onb')ACTIONS.startOnb();ACTIONS.loginOpen();},
-  startOnb(){S.modal={t:'onb',step:db.settings.welcomed?ONB_SLIDES.length:0,d:{sex:'m',goal:'recomp',sports:[],nick:''}};render();},
-  loginOpen(){S.m2={t:'login',d:{email:(Sync.user()||{}).email||'',pw:'',mode:'in',busy:false}};render();},
+  startOnb(){warmPhotos();S.modal={t:'onb',step:db.settings.welcomed?ONB_SLIDES.length:0,d:{sex:'m',goal:'recomp',sports:[],nick:''}};render();},
+  loginOpen(v){S.m2={t:'login',d:{email:(Sync.user()||{}).email||'',pw:'',mode:v==='up'?'up':'in',busy:false}};render();},
   loginMode(v){const d=S.m2.d;d.mode=v;d.pw='';renderModal();const i=document.querySelector('#modal2 input');if(i)i.focus();},
   loginGo(){Sync.loginGo();},
   loginResend(){const d=S.m2.d;d.mode='resend';Sync.loginGo().then(()=>{if(S.m2&&S.m2.d===d&&d.mode==='resend'){d.mode='in';renderModal();}});},
