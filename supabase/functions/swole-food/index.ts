@@ -8,7 +8,8 @@ import postgres from 'https://deno.land/x/postgresjs@v3.4.5/mod.js';
 const sql = postgres(Deno.env.get('SUPABASE_DB_URL')!, { prepare: false, max: 2 });
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type', 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
-const DAILY = 20;
+const DAILY = 20;       // fotos por usuario por día
+const GLOBAL_DAILY = 40; // fotos en total por día (tope de gasto mientras se prueba)
 
 const OPTION = {
   type: 'object', additionalProperties: false,
@@ -85,6 +86,8 @@ Deno.serve(async (req) => {
   const [row] = await sql`insert into swole_priv.food_use (user_id, day, n) values (${uid}, ${day}, 1)
     on conflict (user_id, day) do update set n = swole_priv.food_use.n + 1 returning n`;
   if (row.n > DAILY) return json({ error: 'limit', limit: DAILY });
+  const [tot] = await sql`select coalesce(sum(n), 0)::int as n from swole_priv.food_use where day = ${day}`;
+  if (tot.n > GLOBAL_DAILY) return json({ error: 'busy' });
 
   const client = new Anthropic({ apiKey: key });
   try {
@@ -104,6 +107,9 @@ Deno.serve(async (req) => {
         ],
       }],
     } as any);
+    // anoto los tokens usados para saber cuánto cuesta cada foto
+    const u = r.usage || {};
+    await sql`update swole_priv.food_use set tin = tin + ${(u.input_tokens || 0) + (u.cache_read_input_tokens || 0) + (u.cache_creation_input_tokens || 0)}, tout = tout + ${u.output_tokens || 0} where user_id = ${uid} and day = ${day}`.catch(() => {});
     if (r.stop_reason === 'refusal') return json({ error: 'refusal' });
     if (r.stop_reason === 'max_tokens') return json({ error: 'api', msg: 'respuesta incompleta' });
     const txt = (r.content || []).find((b: any) => b.type === 'text');
