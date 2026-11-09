@@ -1407,6 +1407,7 @@ small{line-height:1.35}
 .msheet.full .gt-det .td-det,.gt-det .td-det{position:static;left:auto;right:auto;bottom:auto;max-height:none;box-shadow:none;margin:6px 0 4px;background:var(--raise)}
 @media (prefers-reduced-motion:reduce){.gt-n.avail .gt-d,.gt-ln.next{animation:none}}
 .mark-cap{display:flex;gap:8px;align-items:flex-start;margin:10px 0 0;padding:10px 12px;border-radius:12px;font-size:13.5px;background:color-mix(in srgb,var(--acc) 14%,var(--raise));color:var(--text)}
+.del-acc{display:block;margin:12px auto 0;background:none;border:0;color:var(--bad,#FF5A6A);font:600 13.5px var(--f-b);text-decoration:underline;padding:6px}
 </style>
 </head>
 <body>
@@ -1477,7 +1478,7 @@ E('incbench','Press inclinado','Barra',['pecho'],['hombros','triceps'],'Banco a 
 E('dbpress','Press con mancuernas','Mancuernas',['pecho'],['triceps','hombros'],'Empujá las mancuernas hacia arriba juntándolas sin chocarlas.',[.12,.85],{ph:1}),
 E('dbfly','Aperturas con mancuernas','Mancuernas',['pecho'],['hombros'],'Abrí los brazos con codos semiflexionados y volvé apretando el pecho.',[.04,.38],{ph:1}),
 E('cablefly','Cruces en polea','Polea',['pecho'],['hombros'],'Juntá las manos al frente con los codos levemente flexionados.',[.08,.55],{ph:1}),
-E('pushup','Flexiones','Peso corporal',['pecho'],['triceps','hombros','abs'],'Cuerpo en línea recta. Bajá el pecho al piso y empujá.',null,{sk:{f:'push',b:3,t:30}}),
+E('pushup','Flexiones','Peso corporal',['pecho'],['triceps','hombros','abs'],'Cuerpo en línea recta. Bajá el pecho al piso y empujá.',null,{sk:{f:'push',b:2.2,u:11.1,t:30}}),
 E('dips','Fondos en paralelas','Peso corporal',['triceps','pecho'],['hombros'],'Bajá hasta que el codo llegue a 90° y subí sin balancearte.',[1.03,2.20],{bw:1}),
 E('pullup','Dominadas','Barra fija',['dorsales'],['biceps','trapecio','antebrazos'],'Colgate y llevá el mentón sobre la barra tirando con la espalda.',[1.03,2.0],{bw:1}),
 E('latpull','Jalón al pecho','Polea',['dorsales'],['biceps','trapecio'],'Tirá la barra hacia la parte alta del pecho con el torso firme.',[.35,1.50]),
@@ -1513,55 +1514,55 @@ E('plank','Plancha (segundos)','Peso corporal',['abs','oblicuos'],['lumbar','hom
 E('russian','Giro ruso','Peso corporal',['oblicuos'],['abs'],'Sentado con el torso inclinado, girá de lado a lado.',null,{bw:.3}),
 E('hyper','Hiperextensiones','Banco romano',['lumbar','gluteos'],['isquios'],'Bajá el torso con la espalda recta y subí hasta alinear el cuerpo.'),
 /* ---- Calistenia: progresiones. sk = {f: familia, b: nivel donde empieza la variante, t: reps o segundos para llegar a la siguiente} ---- */
-E('kneepush','Flexiones de rodillas','Peso corporal',['pecho'],['triceps','hombros'],'Rodillas apoyadas, cuerpo recto de rodillas a cabeza. La base para llegar a la flexión completa.',null,{sk:{f:'push',b:0,t:20}}),
-E('diamond','Flexiones diamante','Peso corporal',['triceps','pecho'],['hombros'],'Manos juntas formando un rombo debajo del pecho. Codos pegados al cuerpo.',null,{sk:{f:'push',b:5,t:20}}),
-E('archerpush','Flexiones arquero','Peso corporal',['pecho'],['triceps','hombros'],'Manos bien abiertas: bajás hacia un lado con ese brazo flexionado y el otro estirado.',null,{sk:{f:'push',b:7,t:12}}),
-E('pppush','Flexiones pseudo planche','Peso corporal',['hombros','pecho'],['triceps','abs'],'Manos a la altura de la cintura, dedos hacia atrás y el cuerpo inclinado hacia adelante.',null,{sk:{f:'push',b:9,t:15}}),
-E('oapush','Flexión a un brazo','Peso corporal',['pecho','triceps'],['hombros','oblicuos'],'Piernas abiertas, una mano en la espalda. Bajá sin rotar la cadera.',null,{sk:{f:'push',b:12,t:10}}),
-E('planchepush','Flexión en planche','Peso corporal',['hombros','pecho'],['triceps','abs'],'Sin apoyar los pies: flexión completa sostenido en planche.',null,{sk:{f:'push',b:17,t:5}}),
-E('austrow','Remo australiano','Barra fija',['dorsales'],['biceps','trapecio'],'Debajo de una barra baja, cuerpo recto, tirá del pecho hacia la barra.',null,{sk:{f:'pull',b:0,t:20}}),
-E('lpullup','Dominadas en L','Barra fija',['dorsales','abs'],['biceps'],'Dominada con las piernas rectas a 90° todo el recorrido.',null,{sk:{f:'pull',b:6,t:12}}),
-E('archerpull','Dominada arquero','Barra fija',['dorsales'],['biceps','hombros'],'Agarre muy abierto: subís hacia una mano con el otro brazo casi recto.',null,{sk:{f:'pull',b:8,t:10}}),
-E('muscleup','Muscle-up','Barra fija',['dorsales','triceps'],['pecho','biceps','hombros'],'Dominada explosiva que termina pasando el pecho por encima de la barra en un fondo.',null,{sk:{f:'pull',b:9,t:10}}),
-E('oapull','Dominada a un brazo','Barra fija',['dorsales','biceps'],['antebrazos','abs'],'Colgado de una mano, subí hasta pasar el mentón.',null,{sk:{f:'pull',b:15,t:5}}),
-E('benchdip','Fondos en banco','Peso corporal',['triceps'],['pecho','hombros'],'Manos en un banco detrás tuyo, bajá doblando los codos a 90°.',null,{sk:{f:'dip',b:0,t:25}}),
-E('ringdip','Fondos en anillas','Anillas',['triceps','pecho'],['hombros','abs'],'Como el fondo en paralelas pero en anillas: hay que estabilizar todo el recorrido.',null,{sk:{f:'dip',b:6,t:40}}),
-E('airsquat','Sentadilla sin peso','Peso corporal',['cuadriceps','gluteos'],['isquios'],'Bajá hasta romper el paralelo con el pecho arriba.',null,{sk:{f:'legs',b:0,t:40}}),
-E('shrimp','Sentadilla shrimp','Peso corporal',['cuadriceps','gluteos'],['isquios','abs'],'Sobre una pierna, agarrás el pie de atrás y bajás hasta tocar la rodilla al piso.',null,{sk:{f:'legs',b:5,t:10}}),
-E('pistol','Pistol squat','Peso corporal',['cuadriceps','gluteos'],['abs','gemelos'],'Sentadilla completa a una pierna con la otra estirada adelante.',null,{sk:{f:'legs',b:8,t:15}}),
-E('dragon','Dragon pistol','Peso corporal',['cuadriceps','gluteos'],['abs','aductores'],'Pistol con la pierna libre cruzada por detrás de la de apoyo.',null,{sk:{f:'legs',b:13,t:8}}),
-E('tucklsit','L-sit encogido (segundos)','Paralelas',['abs'],['triceps','hombros'],'Sostenete con los brazos rectos y las rodillas al pecho.',null,{time:1,sk:{f:'lsit',b:3,t:20}}),
-E('lsit','L-sit (segundos)','Paralelas',['abs','oblicuos'],['triceps','hombros','cuadriceps'],'Brazos rectos y piernas estiradas a 90° del torso.',null,{time:1,sk:{f:'lsit',b:6,t:30}}),
-E('vsit','V-sit (segundos)','Paralelas',['abs'],['hombros','triceps'],'Como el L-sit pero con las piernas subiendo hacia la cara.',null,{time:1,sk:{f:'lsit',b:12,t:15}}),
-E('wallhs','Vertical contra la pared (segundos)','Peso corporal',['hombros'],['triceps','trapecio','abs'],'Parado de manos con el pecho mirando a la pared.',null,{time:1,sk:{f:'hs',b:3,t:60}}),
-E('freehs','Vertical libre (segundos)','Peso corporal',['hombros'],['triceps','trapecio','abs','antebrazos'],'Parado de manos sin apoyo, cuerpo alineado.',null,{time:1,sk:{f:'hs',b:8,t:30}}),
-E('hspu','Flexión de vertical en pared','Peso corporal',['hombros','triceps'],['trapecio'],'Parado de manos contra la pared, bajá la cabeza al piso y empujá.',null,{sk:{f:'hs',b:9,t:12}}),
-E('freehspu','Flexión de vertical libre','Peso corporal',['hombros','triceps'],['trapecio','abs'],'Flexión completa en vertical sin pared.',null,{sk:{f:'hs',b:15,t:8}}),
-E('tuckfl','Front lever encogido (segundos)','Barra fija',['dorsales'],['abs','biceps'],'Colgado, cuerpo horizontal boca arriba con las rodillas al pecho.',null,{time:1,sk:{f:'fl',b:6,t:20}}),
-E('advfl','Front lever avanzado (segundos)','Barra fija',['dorsales'],['abs','biceps','lumbar'],'Como el encogido pero con la espalda plana.',null,{time:1,sk:{f:'fl',b:8,t:15}}),
-E('straddlefl','Front lever abierto (segundos)','Barra fija',['dorsales','abs'],['biceps','lumbar'],'Piernas estiradas y abiertas, cuerpo horizontal.',null,{time:1,sk:{f:'fl',b:12,t:10}}),
-E('fullfl','Front lever completo (segundos)','Barra fija',['dorsales','abs'],['biceps','lumbar','gluteos'],'Cuerpo totalmente recto y horizontal colgado de la barra.',null,{time:1,sk:{f:'fl',b:14,t:10}}),
-E('tuckbl','Back lever encogido (segundos)','Barra fija',['dorsales','pecho'],['biceps','hombros'],'Horizontal boca abajo con las rodillas al pecho.',null,{time:1,sk:{f:'bl',b:4,t:20}}),
-E('straddlebl','Back lever abierto (segundos)','Barra fija',['dorsales','pecho'],['biceps','hombros','lumbar'],'Piernas abiertas y estiradas, cuerpo horizontal boca abajo.',null,{time:1,sk:{f:'bl',b:9,t:15}}),
-E('fullbl','Back lever completo (segundos)','Barra fija',['dorsales','pecho'],['biceps','hombros','gluteos'],'Cuerpo recto y horizontal boca abajo.',null,{time:1,sk:{f:'bl',b:11,t:30}}),
-E('tuckpl','Planche encogida (segundos)','Paralelas',['hombros'],['pecho','triceps','abs'],'Brazos rectos, cuerpo en el aire con las rodillas al pecho.',null,{time:1,sk:{f:'pl',b:7,t:20}}),
-E('advpl','Planche avanzada (segundos)','Paralelas',['hombros'],['pecho','triceps','abs'],'Como la encogida pero con la espalda plana.',null,{time:1,sk:{f:'pl',b:10,t:15}}),
-E('straddlepl','Planche abierta (segundos)','Paralelas',['hombros','pecho'],['triceps','abs','gluteos'],'Piernas abiertas y estiradas, cuerpo horizontal sobre las manos.',null,{time:1,sk:{f:'pl',b:14,t:10}}),
-E('fullpl','Planche completa (segundos)','Paralelas',['hombros','pecho'],['triceps','abs','gluteos'],'Cuerpo totalmente recto y horizontal sobre las manos. Nivel élite.',null,{time:1,sk:{f:'pl',b:17,t:5}}),
-E('pikepush','Flexiones en pica','Peso corporal',['hombros'],['triceps','trapecio'],'Cadera bien arriba, cuerpo en V invertida: bajás la cabeza hacia el piso entre las manos. La base para la vertical.',null,{sk:{f:'hs',b:2,t:15}}),
-E('crow','Cuervo (segundos)','Peso corporal',['hombros','abs'],['triceps','antebrazos'],'Manos en el piso, rodillas apoyadas arriba de los codos y los pies en el aire.',null,{time:1,sk:{f:'pl',b:3,t:30}}),
-E('pllean','Planche lean (segundos)','Peso corporal',['hombros'],['pecho','abs','antebrazos'],'En plancha de flexión con los brazos rectos, llevá los hombros bien adelante de las manos.',null,{time:1,sk:{f:'pl',b:5,t:30}}),
-E('onelegfl','Front lever a una pierna (segundos)','Barra fija',['dorsales','abs'],['biceps','lumbar'],'Cuerpo horizontal boca arriba con una pierna estirada y la otra encogida.',null,{time:1,sk:{f:'fl',b:10,t:12}}),
-E('skincat','Skin the cat','Barra fija',['dorsales','hombros'],['pecho','biceps','abs'],'Colgado, pasás las piernas entre los brazos y girás hasta quedar colgado de espaldas. Volvés despacio.',null,{sk:{f:'bl',b:2,t:5}}),
-E('advbl','Back lever avanzado (segundos)','Barra fija',['dorsales','pecho'],['biceps','hombros','lumbar'],'Horizontal boca abajo con la espalda plana y las rodillas dobladas a 90°.',null,{time:1,sk:{f:'bl',b:6,t:15}}),
-E('onelegl','L-sit a una pierna (segundos)','Paralelas',['abs'],['triceps','hombros','cuadriceps'],'Como el L-sit pero con una pierna estirada y la otra doblada.',null,{time:1,sk:{f:'lsit',b:5,t:20}}),
-E('russiandip','Fondos rusos','Paralelas',['triceps','pecho'],['hombros','abs'],'Bajás en el fondo hasta apoyar los antebrazos en las barras y volvés a subir a brazos rectos.',null,{sk:{f:'dip',b:8,t:10}}),
-E('impdip','Fondo imposible','Paralelas',['triceps'],['pecho','hombros','abs'],'Bajás hasta apoyar los antebrazos y subís a brazos rectos sin que los codos se separen de la barra.',null,{sk:{f:'dip',b:12,t:5}}),
-E('boxpistol','Pistol a un cajón','Cajón',['cuadriceps','gluteos'],['abs'],'Pistol bajando hasta sentarte en un cajón o banco bajo y volviendo a subir con una pierna.',null,{sk:{f:'legs',b:6,t:12}}),
-E('vflag','Bandera vertical (segundos)','Barra vertical',['oblicuos','dorsales'],['hombros','abs'],'Agarrado del poste, el cuerpo queda casi vertical con los pies arriba. El primer paso hacia la bandera.',null,{time:1,sk:{f:'flag',b:8,t:15}}),
-E('tuckflag','Bandera encogida (segundos)','Barra vertical',['oblicuos','dorsales'],['hombros','abs'],'Cuerpo horizontal de costado con las rodillas al pecho.',null,{time:1,sk:{f:'flag',b:10,t:10}}),
-E('straddleflag','Bandera abierta (segundos)','Barra vertical',['oblicuos','dorsales'],['hombros','abs'],'Horizontal de costado con las piernas estiradas y abiertas.',null,{time:1,sk:{f:'flag',b:13,t:10}}),
-E('flag','Bandera humana (segundos)','Barra vertical',['oblicuos','dorsales'],['hombros','abs'],'Agarrado de un poste, cuerpo horizontal de costado.',null,{time:1,sk:{f:'flag',b:15,t:10}}),
+E('kneepush','Flexiones de rodillas','Peso corporal',['pecho'],['triceps','hombros'],'Rodillas apoyadas, cuerpo recto de rodillas a cabeza. La base para llegar a la flexión completa.',null,{sk:{f:'push',b:0.2,u:3.7,t:20}}),
+E('diamond','Flexiones diamante','Peso corporal',['triceps','pecho'],['hombros'],'Manos juntas formando un rombo debajo del pecho. Codos pegados al cuerpo.',null,{sk:{f:'push',b:5.1,u:12.2,t:20}}),
+E('archerpush','Flexiones arquero','Peso corporal',['pecho'],['triceps','hombros'],'Manos bien abiertas: bajás hacia un lado con ese brazo flexionado y el otro estirado.',null,{sk:{f:'push',b:11.1,u:15.2,t:12}}),
+E('pppush','Flexiones pseudo planche','Peso corporal',['hombros','pecho'],['triceps','abs'],'Manos a la altura de la cintura, dedos hacia atrás y el cuerpo inclinado hacia adelante.',null,{sk:{f:'push',b:14.7,u:16.7,t:15}}),
+E('oapush','Flexión a un brazo','Peso corporal',['pecho','triceps'],['hombros','oblicuos'],'Piernas abiertas, una mano en la espalda. Bajá sin rotar la cadera.',null,{sk:{f:'push',b:15.7,u:16.9,t:10}}),
+E('planchepush','Flexión en planche','Peso corporal',['hombros','pecho'],['triceps','abs'],'Sin apoyar los pies: flexión completa sostenido en planche.',null,{sk:{f:'push',b:18,u:18,t:5}}),
+E('austrow','Remo australiano','Barra fija',['dorsales'],['biceps','trapecio'],'Debajo de una barra baja, cuerpo recto, tirá del pecho hacia la barra.',null,{sk:{f:'pull',b:1.4,u:8.9,t:20}}),
+E('lpullup','Dominadas en L','Barra fija',['dorsales','abs'],['biceps'],'Dominada con las piernas rectas a 90° todo el recorrido.',null,{sk:{f:'pull',b:12.2,u:15.7,t:12}}),
+E('archerpull','Dominada arquero','Barra fija',['dorsales'],['biceps','hombros'],'Agarre muy abierto: subís hacia una mano con el otro brazo casi recto.',null,{sk:{f:'pull',b:15.2,u:16.7,t:10}}),
+E('muscleup','Muscle-up','Barra fija',['dorsales','triceps'],['pecho','biceps','hombros'],'Dominada explosiva que termina pasando el pecho por encima de la barra en un fondo.',null,{sk:{f:'pull',b:15.7,u:17.3,t:10}}),
+E('oapull','Dominada a un brazo','Barra fija',['dorsales','biceps'],['antebrazos','abs'],'Colgado de una mano, subí hasta pasar el mentón.',null,{sk:{f:'pull',b:17.8,u:18,t:5}}),
+E('benchdip','Fondos en banco','Peso corporal',['triceps'],['pecho','hombros'],'Manos en un banco detrás tuyo, bajá doblando los codos a 90°.',null,{sk:{f:'dip',b:0.6,u:5.7,t:25}}),
+E('ringdip','Fondos en anillas','Anillas',['triceps','pecho'],['hombros','abs'],'Como el fondo en paralelas pero en anillas: hay que estabilizar todo el recorrido.',null,{sk:{f:'dip',b:13.2,u:16.9,t:40}}),
+E('airsquat','Sentadilla sin peso','Peso corporal',['cuadriceps','gluteos'],['isquios'],'Bajá hasta romper el paralelo con el pecho arriba.',null,{sk:{f:'legs',b:0.1,u:4.4,t:40}}),
+E('shrimp','Sentadilla shrimp','Peso corporal',['cuadriceps','gluteos'],['isquios','abs'],'Sobre una pierna, agarrás el pie de atrás y bajás hasta tocar la rodilla al piso.',null,{sk:{f:'legs',b:8.9,u:14.2,t:10}}),
+E('pistol','Pistol squat','Peso corporal',['cuadriceps','gluteos'],['abs','gemelos'],'Sentadilla completa a una pierna con la otra estirada adelante.',null,{sk:{f:'legs',b:13.2,u:15.9,t:15}}),
+E('dragon','Dragon pistol','Peso corporal',['cuadriceps','gluteos'],['abs','aductores'],'Pistol con la pierna libre cruzada por detrás de la de apoyo.',null,{sk:{f:'legs',b:16.9,u:17.8,t:8}}),
+E('tucklsit','L-sit encogido (segundos)','Paralelas',['abs'],['triceps','hombros'],'Sostenete con los brazos rectos y las rodillas al pecho.',null,{time:1,sk:{f:'lsit',b:5.7,u:8.9,t:20}}),
+E('lsit','L-sit (segundos)','Paralelas',['abs','oblicuos'],['triceps','hombros','cuadriceps'],'Brazos rectos y piernas estiradas a 90° del torso.',null,{time:1,sk:{f:'lsit',b:13.2,u:15.9,t:30}}),
+E('vsit','V-sit (segundos)','Paralelas',['abs'],['hombros','triceps'],'Como el L-sit pero con las piernas subiendo hacia la cara.',null,{time:1,sk:{f:'lsit',b:16.9,u:17.8,t:15}}),
+E('wallhs','Vertical contra la pared (segundos)','Peso corporal',['hombros'],['triceps','trapecio','abs'],'Parado de manos con el pecho mirando a la pared.',null,{time:1,sk:{f:'hs',b:8.2,u:13.2,t:60}}),
+E('freehs','Vertical libre (segundos)','Peso corporal',['hombros'],['triceps','trapecio','abs','antebrazos'],'Parado de manos sin apoyo, cuerpo alineado.',null,{time:1,sk:{f:'hs',b:14.7,u:16.9,t:30}}),
+E('hspu','Flexión de vertical en pared','Peso corporal',['hombros','triceps'],['trapecio'],'Parado de manos contra la pared, bajá la cabeza al piso y empujá.',null,{sk:{f:'hs',b:15.4,u:16.7,t:12}}),
+E('freehspu','Flexión de vertical libre','Peso corporal',['hombros','triceps'],['trapecio','abs'],'Flexión completa en vertical sin pared.',null,{sk:{f:'hs',b:17.8,u:18,t:8}}),
+E('tuckfl','Front lever encogido (segundos)','Barra fija',['dorsales'],['abs','biceps'],'Colgado, cuerpo horizontal boca arriba con las rodillas al pecho.',null,{time:1,sk:{f:'fl',b:12.2,u:14.7,t:20}}),
+E('advfl','Front lever avanzado (segundos)','Barra fija',['dorsales'],['abs','biceps','lumbar'],'Como el encogido pero con la espalda plana.',null,{time:1,sk:{f:'fl',b:14.7,u:16.2,t:15}}),
+E('straddlefl','Front lever abierto (segundos)','Barra fija',['dorsales','abs'],['biceps','lumbar'],'Piernas estiradas y abiertas, cuerpo horizontal.',null,{time:1,sk:{f:'fl',b:16.9,u:17.6,t:10}}),
+E('fullfl','Front lever completo (segundos)','Barra fija',['dorsales','abs'],['biceps','lumbar','gluteos'],'Cuerpo totalmente recto y horizontal colgado de la barra.',null,{time:1,sk:{f:'fl',b:17.6,u:18,t:10}}),
+E('tuckbl','Back lever encogido (segundos)','Barra fija',['dorsales','pecho'],['biceps','hombros'],'Horizontal boca abajo con las rodillas al pecho.',null,{time:1,sk:{f:'bl',b:11.1,u:13.6,t:20}}),
+E('straddlebl','Back lever abierto (segundos)','Barra fija',['dorsales','pecho'],['biceps','hombros','lumbar'],'Piernas abiertas y estiradas, cuerpo horizontal boca abajo.',null,{time:1,sk:{f:'bl',b:15.9,u:16.9,t:15}}),
+E('fullbl','Back lever completo (segundos)','Barra fija',['dorsales','pecho'],['biceps','hombros','gluteos'],'Cuerpo recto y horizontal boca abajo.',null,{time:1,sk:{f:'bl',b:16.9,u:17.8,t:30}}),
+E('tuckpl','Planche encogida (segundos)','Paralelas',['hombros'],['pecho','triceps','abs'],'Brazos rectos, cuerpo en el aire con las rodillas al pecho.',null,{time:1,sk:{f:'pl',b:15.2,u:16.4,t:20}}),
+E('advpl','Planche avanzada (segundos)','Paralelas',['hombros'],['pecho','triceps','abs'],'Como la encogida pero con la espalda plana.',null,{time:1,sk:{f:'pl',b:16.7,u:17.6,t:15}}),
+E('straddlepl','Planche abierta (segundos)','Paralelas',['hombros','pecho'],['triceps','abs','gluteos'],'Piernas abiertas y estiradas, cuerpo horizontal sobre las manos.',null,{time:1,sk:{f:'pl',b:17.9,u:18,t:10}}),
+E('fullpl','Planche completa (segundos)','Paralelas',['hombros','pecho'],['triceps','abs','gluteos'],'Cuerpo totalmente recto y horizontal sobre las manos. Nivel élite.',null,{time:1,sk:{f:'pl',b:18,u:18,t:5}}),
+E('pikepush','Flexiones en pica','Peso corporal',['hombros'],['triceps','trapecio'],'Cadera bien arriba, cuerpo en V invertida: bajás la cabeza hacia el piso entre las manos. La base para la vertical.',null,{sk:{f:'hs',b:3.7,u:8.9,t:15}}),
+E('crow','Cuervo (segundos)','Peso corporal',['hombros','abs'],['triceps','antebrazos'],'Manos en el piso, rodillas apoyadas arriba de los codos y los pies en el aire.',null,{time:1,sk:{f:'pl',b:7.3,u:11.1,t:30}}),
+E('pllean','Planche lean (segundos)','Peso corporal',['hombros'],['pecho','abs','antebrazos'],'En plancha de flexión con los brazos rectos, llevá los hombros bien adelante de las manos.',null,{time:1,sk:{f:'pl',b:8.2,u:11.1,t:30}}),
+E('onelegfl','Front lever a una pierna (segundos)','Barra fija',['dorsales','abs'],['biceps','lumbar'],'Cuerpo horizontal boca arriba con una pierna estirada y la otra encogida.',null,{time:1,sk:{f:'fl',b:15.9,u:16.9,t:12}}),
+E('skincat','Skin the cat','Barra fija',['dorsales','hombros'],['pecho','biceps','abs'],'Colgado, pasás las piernas entre los brazos y girás hasta quedar colgado de espaldas. Volvés despacio.',null,{sk:{f:'bl',b:8.9,u:12.2,t:5}}),
+E('advbl','Back lever avanzado (segundos)','Barra fija',['dorsales','pecho'],['biceps','hombros','lumbar'],'Horizontal boca abajo con la espalda plana y las rodillas dobladas a 90°.',null,{time:1,sk:{f:'bl',b:13.6,u:15.7,t:15}}),
+E('onelegl','L-sit a una pierna (segundos)','Paralelas',['abs'],['triceps','hombros','cuadriceps'],'Como el L-sit pero con una pierna estirada y la otra doblada.',null,{time:1,sk:{f:'lsit',b:10,u:13.2,t:20}}),
+E('russiandip','Fondos rusos','Paralelas',['triceps','pecho'],['hombros','abs'],'Bajás en el fondo hasta apoyar los antebrazos en las barras y volvés a subir a brazos rectos.',null,{sk:{f:'dip',b:15.2,u:16.7,t:10}}),
+E('impdip','Fondo imposible','Paralelas',['triceps'],['pecho','hombros','abs'],'Bajás hasta apoyar los antebrazos y subís a brazos rectos sin que los codos se separen de la barra.',null,{sk:{f:'dip',b:17.3,u:18,t:5}}),
+E('boxpistol','Pistol a un cajón','Cajón',['cuadriceps','gluteos'],['abs'],'Pistol bajando hasta sentarte en un cajón o banco bajo y volviendo a subir con una pierna.',null,{sk:{f:'legs',b:11.1,u:14.2,t:12}}),
+E('vflag','Bandera vertical (segundos)','Barra vertical',['oblicuos','dorsales'],['hombros','abs'],'Agarrado del poste, el cuerpo queda casi vertical con los pies arriba. El primer paso hacia la bandera.',null,{time:1,sk:{f:'flag',b:15.7,u:16.4,t:15}}),
+E('tuckflag','Bandera encogida (segundos)','Barra vertical',['oblicuos','dorsales'],['hombros','abs'],'Cuerpo horizontal de costado con las rodillas al pecho.',null,{time:1,sk:{f:'flag',b:16.2,u:16.9,t:10}}),
+E('straddleflag','Bandera abierta (segundos)','Barra vertical',['oblicuos','dorsales'],['hombros','abs'],'Horizontal de costado con las piernas estiradas y abiertas.',null,{time:1,sk:{f:'flag',b:17.1,u:17.7,t:10}}),
+E('flag','Bandera humana (segundos)','Barra vertical',['oblicuos','dorsales'],['hombros','abs'],'Agarrado de un poste, cuerpo horizontal de costado.',null,{time:1,sk:{f:'flag',b:17.8,u:18,t:10}}),
 /* ---- Deporte: potencia, prevención y estabilidad ---- */
 E('boxjump','Saltos al cajón','Cajón',['cuadriceps','gluteos'],['gemelos','isquios'],'Saltá con los dos pies y caé suave arriba del cajón. Bajá caminando.',null,{sport:1}),
 E('jumpsquat','Sentadilla con salto','Peso corporal',['cuadriceps','gluteos'],['gemelos'],'Sentadilla y salto explosivo. Caé amortiguando con las rodillas.',null,{sport:1}),
@@ -1593,7 +1594,7 @@ E('sprint','Sprint 20 m','Peso corporal',['isquios','cuadriceps'],['gluteos','ge
 ];
 /* largo de cada variante de calistenia: hasta dónde empieza la siguiente de su familia */
 (()=>{const fam={};EX.forEach(e=>{if(e.sk)(fam[e.sk.f]=fam[e.sk.f]||[]).push(e);});
-  Object.values(fam).forEach(l=>{l.sort((a,b)=>a.sk.b-b.sk.b);l.forEach((e,i)=>{e.sk.g=Math.min(4,i<l.length-1?l[i+1].sk.b-e.sk.b:Math.max(1,18-e.sk.b));});});})();
+  Object.values(fam).forEach(l=>{l.sort((a,b)=>a.sk.b-b.sk.b);l.forEach((e,i)=>{e.sk.g=e.sk.u!=null?Math.max(.5,e.sk.u-e.sk.b):Math.min(4,i<l.length-1?l[i+1].sk.b-e.sk.b:Math.max(1,18-e.sk.b));});});})();
 const SKFAM={push:'Flexiones',pull:'Dominadas y muscle-up',dip:'Fondos',legs:'Piernas a una pierna',lsit:'L-sit',hs:'Vertical',fl:'Front lever',bl:'Back lever',pl:'Planche',flag:'Bandera humana'};
 const TPL=[
 {name:'Empuje: pecho, hombros y tríceps',items:[['bench',4,8],['dbohp',3,10],['incbench',3,10],['lateral',3,15],['pushdown',3,12]]},
@@ -1688,7 +1689,7 @@ function e1(ex,kg,reps){
   if(ex.sk){const bw=db.profile&&db.profile.weight||75;return Math.max(0,(+reps||0)*(1+Math.max(0,+kg||0)/bw));} /* calistenia: reps, y el lastre suma */
   const bw=db.profile?db.profile.weight:70;
   const load=(ex.bw||0)*bw+(+kg||0);
-  const r=Math.min(+reps||0,ex.bw?30:15);
+  const r=Math.min(+reps||0,ex.bw?45:15);
   return r>0?load*(1+r/30):0;
 }
 /* La fuerza no crece igual que el peso corporal: crece aprox. con el peso elevado a 2/3 (escala alométrica,
@@ -1696,22 +1697,52 @@ function e1(ex,kg,reps){
    un poco más por kilo de cuerpo y a 95 kg un poco menos, así todos se miden parejo.
    En ejercicios con el propio cuerpo (dominadas, fondos) la parte del cuerpo sigue siendo lineal: la movés entera. */
 const allo=w=>75*Math.pow(w/75,2/3);
-function stdFor(ex){
+const ANCH={bench:[.70,.93,1.22,1.53,1.87],squat:[.94,1.26,1.64,2.09,2.56],deadlift:[1.11,1.48,1.92,2.42,2.96],ohp:[.41,.57,.77,1.0,1.25],
+  curl:[.27,.41,.57,.78,1.0],row:[.60,.82,1.09,1.41,1.74],
+  /* dominadas 1/7/13/21/28 reps y fondos 4/10/20/31/42 reps, pasadas a carga total con Epley */
+  pullup:[1.03,1.23,1.43,1.70,1.93],dips:[1.13,1.33,1.67,2.03,2.40]};
+const LV_T=[[0,2],[3,25],[6,50],[9,68],[12,80],[15,92],[16,95],[17,98],[18,99.5]],LV_P=[5,20,50,80,95];
+const pGen=p=>p+8*Math.sin(Math.PI*p/100);
+function pToL(p){if(p<=LV_T[0][1])return p/LV_T[0][1]-1;for(let i=1;i<LV_T.length;i++)if(p<=LV_T[i][1]){const a=LV_T[i-1],b=LV_T[i];return a[0]+(b[0]-a[0])*(p-a[1])/(b[1]-a[1]);}return 18;}
+function LToP(L){if(L<=0)return LV_T[0][1];for(let i=1;i<LV_T.length;i++)if(L<=LV_T[i][0]){const a=LV_T[i-1],b=LV_T[i];return a[1]+(b[1]-a[1])*(L-a[0])/(b[0]-a[0]);}return 99.5;}
+function pUngen(q){let lo=0,hi=100;for(let k=0;k<30;k++){const m=(lo+hi)/2;if(pGen(m)<q)lo=m;else hi=m;}return (lo+hi)/2;}
+/* las 5 marcas de referencia para tu peso, edad y sexo */
+function anchors(ex){
+  const p=db.profile,b=ex.bw||0,sf=sexF(p.sex,ex.reg)*ageF(p.age),W=p.weight,Wa=allo(W),f=x=>b*W+(x-b)*sf*Wa;
+  const hiR=ex.st[1]*.92,r=ANCH[ex.id]||[.37,.50,.65,.82,1].map(k=>b?b+(hiR-b)*k:hiR*k);
+  return r.map(f);
+}
+/* percentil real (entre quienes entrenan) de una marca */
+function pctOf(ex,e){
+  const A=anchors(ex);
+  if(e<A[0])return Math.max(0,5*Math.pow(e/A[0],2));
+  for(let i=1;i<5;i++)if(e<=A[i])return LV_P[i-1]+(LV_P[i]-LV_P[i-1])*(e-A[i-1])/(A[i]-A[i-1]);
+  return Math.min(99.9,95+4.9*Math.min(1,(e-A[4])/(A[4]*.25)));
+}
+/* la marca que hace falta para un percentil */
+function eOfPct(ex,p){
+  const A=anchors(ex);
+  if(p<=5)return A[0]*Math.sqrt(Math.max(0,p)/5);
+  for(let i=1;i<5;i++)if(p<=LV_P[i])return A[i-1]+(A[i]-A[i-1])*(p-LV_P[i-1])/(LV_P[i]-LV_P[i-1]);
+  return A[4]*(1+.25*Math.min(1,(p-95)/4.9));
+}
+function thr(ex,L){return eOfPct(ex,pUngen(LToP(L)));}
+function stdFor(ex){return{lo:thr(ex,0),hi:thr(ex,18)};}
+function stdForOld(ex){
   const p=db.profile,b=ex.bw||0,sf=sexF(p.sex,ex.reg)*ageF(p.age),W=p.weight,Wa=allo(W);
   const f=x=>b*W+(x-b)*sf*Wa;
   return{lo:f(b?ex.st[0]:ex.st[0]*1.6),hi:f(b?ex.st[1]:ex.st[1]*.95)};
 }
 /* nivel con decimales (puede ser negativo si todavía no llegás a Bronce 1) */
 function levelVal(ex,e){
-  if(ex.sk){const s=ex.sk;if(!(e>=1))return -1;if(ex.time&&e<3)return s.b-1+e/3*.99;return Math.min(18,s.b+s.g*Math.min(1,e/s.t));}
-  const s=stdFor(ex);if(e<s.lo)return -1;
-  return Math.min(18,18*(e-s.lo)/(s.hi-s.lo));
+  if(ex.sk){const s=ex.sk;if(!(e>=1))return -1;if(ex.time&&e<3)return Math.max(0,s.b-1+e/3*.99);return Math.min(18,s.b+s.g*Math.min(1,e/s.t));}
+  return Math.min(18,pToL(pGen(pctOf(ex,e))));
 }
 function levelIdx(ex,e){
   if(!hasRank(ex)||!db.profile)return null;
   const v=levelVal(ex,e);return v<0?-1:Math.min(18,Math.floor(v));
 }
-function thr(ex,L){const s=stdFor(ex);return s.lo+(s.hi-s.lo)*L/18;}
+
 function lvlName(L){if(L==null||L<0)return 'Sin rango';if(L>=18)return 'Élite';return TIERS[Math.floor(L/3)]+' '+['I','II','III'][L%3];}
 function lvlInfo(ex,e){
   const v=levelVal(ex,e),L=v<0?-1:Math.min(18,Math.floor(v));
@@ -3141,9 +3172,7 @@ function skillGoalCard(){
 /* percentil a partir de un nivel con decimales (misma tabla que pctStronger) */
 function pctFromV(v){
   if(v<0)return 3;
-  const T=[[0,5],[3,25],[6,50],[9,68],[12,80],[15,90],[18,97]];
-  for(let i=1;i<T.length;i++)if(v<=T[i][0]){const a=T[i-1],b=T[i];return Math.round(a[1]+(b[1]-a[1])*(v-a[0])/(b[0]-a[0]));}
-  return 97;
+  return Math.min(99,Math.max(1,Math.round(LToP(v))));
 }
 const whoTxt=()=>{const p=db.profile||{};return (p.sex==='f'?'mujeres':p.sex==='m'?'hombres':'personas')+' que entrenan, con tu edad y tu peso';};
 const pctLine=p=>p==null?'':'<span class="pctl">Más fuerte que el <b>'+p+' %</b></span>';
@@ -4498,10 +4527,7 @@ const restFor=ex=>ex&&(BIG.includes(ex.id)||ex.st&&isBarbell(ex))?Math.max(db.se
 function pctStronger(ex,e){
   if(!ex||!ex.st||!db.profile)return null;
   const v=levelVal(ex,e);
-  if(v<0){const s=stdFor(ex);return Math.max(1,Math.round(5*e/s.lo));}
-  const T=[[0,5],[3,25],[6,50],[9,68],[12,80],[15,90],[18,97]];
-  for(let i=1;i<T.length;i++)if(v<=T[i][0]){const a=T[i-1],b=T[i];return Math.round(a[1]+(b[1]-a[1])*(v-a[0])/(b[0]-a[0]));}
-  return 97;
+  return Math.min(99,Math.max(1,Math.round(pGen(pctOf(ex,e)))));
 }
 const pctTxt=p=>p==null?'':'<p class="pct">Más fuerte que el <b>'+p+' %</b> de la gente que entrena <span class="mut">(estimado)</span></p>';
 
@@ -5037,7 +5063,7 @@ function accountHTML(){
   const txt={busy:'Sincronizando…',ok:'Sincronizado '+agoTxt(st.at),off:'Sin conexión: se sincroniza cuando vuelva internet',err:'No se pudo sincronizar'+(st.msg?': '+st.msg:''),idle:'Esperando para sincronizar'}[st.s]||'';
   const col=st.s==='ok'?'var(--ok)':st.s==='err'?'var(--bad)':'var(--mut)';
   return '<div><h4 style="margin-bottom:4px">Cuenta y sincronización</h4><p class="sm-t" style="margin-bottom:2px">Conectado como <b>'+esc(u.email||'')+'</b></p><p class="sm-t" id="syncTxt" style="color:'+col+';margin-bottom:10px">'+esc(txt)+'</p>'+
-   '<div class="g2"><button class="btn sm" data-a="syncNow">'+ic('cloud',16)+' Sincronizar</button><button class="btn sm" data-a="logoutAsk">Cerrar sesión</button></div></div>';
+   '<div class="g2"><button class="btn sm" data-a="syncNow">'+ic('cloud',16)+' Sincronizar</button><button class="btn sm" data-a="logoutAsk">Cerrar sesión</button></div><button class="del-acc" data-a="delAccAsk">Eliminar mi cuenta</button></div>';
 }
 function agoTxt(t){if(!t)return '';const s=Math.round((Date.now()-t)/1000);if(s<60)return 'recién';if(s<3600)return 'hace '+Math.round(s/60)+' min';if(s<86400)return 'hace '+Math.round(s/3600)+' h';return 'el '+shortDate(t);}
 const LOGIN_T={in:'Entrar',up:'Crear cuenta',forgot:'Recuperar contraseña',newpw:'Contraseña nueva',sent:'Revisá tu email'};
@@ -5170,6 +5196,7 @@ function modalBody(m,l2){
     case 'phcmp':return sheet('Antes y después',photoCmpHTML(m));
     case 'phview':return sheet('Foto de progreso',photoViewHTML(m),{l2:true});
     case 'friends':return sheet('Amigos',friendsHTML(m));
+    case 'delacc':return sheet('Eliminar mi cuenta','<p>Se borra <b>para siempre</b>: tu cuenta, todos tus datos en la nube, tus amigos, solicitudes, torneos y recordatorios. También se borra lo que hay en este dispositivo.</p><p class="mut sm-t">No se puede deshacer. Si querés conservar algo, antes hacé una copia en Perfil → Copia de seguridad. Después podés crear una cuenta nueva con el mismo mail.</p><label class="field">Escribí <b>ELIMINAR</b> para confirmar<input id="delAccIn" type="text" autocomplete="off" autocapitalize="characters" placeholder="ELIMINAR"></label><div class="g2"><button class="btn" data-a="close" data-v="m2">Cancelar</button><button class="btn bad" data-a="delAccGo"'+(m.busy?' disabled':'')+'>'+(m.busy?'Borrando…':'Eliminar para siempre')+'</button></div>',{l2:true});
     case 'skmark':return sheet('Ya la logro',skMarkHTML(m),{l2:true});
     case 'comp':return sheet('Nuevo torneo',compNewHTML(m),{l2:true});
     case 'fcard':return sheet('Perfil',friendCardHTML(S.social&&S.social.friends.concat(S.social.me?[S.social.me]:[]).find(r=>r.user_id===m.id)),{l2:true});
@@ -5797,6 +5824,10 @@ const ACTIONS={
       if(!db.profile)ACTIONS.startOnb();
     }catch(e){toast('Ese texto no parece un archivo de Swole');}
   },
+  delAccAsk(){S.m2={t:'delacc',busy:false};render();},
+  delAccGo(){const i=$('#delAccIn'),v=(i?i.value:'').trim().toUpperCase();if(v!=='ELIMINAR')return toast('Escribí ELIMINAR para confirmar');
+    S.m2.busy=true;renderModal();Sync.req('/rest/v1/rpc/swole_delete_me',{method:'POST',auth:true,body:{p_confirm:'ELIMINAR'}}).then(()=>{Sync.forget();Store.wipe();db=normalize(null);snap=syncKeys(db);S.m2=null;S.modal=null;S.social=null;goTab('inicio');endRest(false);toast('Tu cuenta y tus datos se borraron para siempre');ACTIONS.startOnb();})
+      .catch(e=>{if(S.m2)S.m2.busy=false;renderModal();toast(!navigator.onLine?'Sin conexión: probá de nuevo con internet':'No se pudo borrar: '+e.message);});},
   wipeAsk(){S.m2={t:'confirm',title:'Borrar todos los datos',msg:Sync.user()?'Se borran tus datos de este dispositivo y se cierra la sesión. Tu copia en la nube no se toca: si volvés a entrar, se recupera.':'Se borran tu perfil, rutinas, entrenamientos y registros de este dispositivo. No se puede deshacer.',act:'wipeGo',ok:'Borrar todo'};render();},
   wipeGo(){Sync.forget();Store.wipe();db=normalize(null);snap=syncKeys(db);S.m2=null;S.modal=null;goTab('inicio');endRest(false);ACTIONS.startOnb();},
   welNext(){const m=S.modal;if(m.step<WEL.length-1){m.step++;renderModal();}else{db.settings.welcomed=1;save();openProfile();}},
