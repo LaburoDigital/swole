@@ -1325,6 +1325,26 @@ rect.tq-eq{stroke-width:1.5}
 .fd-prev b{font:800 19px var(--f-d)}.fd-prev span{font-size:11px;color:var(--mut)}
 .fd-prev .pro{background:color-mix(in srgb,var(--acc) 18%,var(--raise))}.fd-prev .pro b{color:var(--acc)}
 .fd-meals{flex-wrap:wrap}
+/* v43: comida desde foto */
+.ph-cta{display:grid;gap:6px;margin-bottom:10px}
+.ph-btn{cursor:pointer;background:var(--grad,var(--acc));color:#fff;border:0}
+.ph-cta .ph-btn{padding:14px;font-size:15.5px}
+.ph-pic{position:relative;border-radius:16px;overflow:hidden;max-height:220px;background:var(--raise)}
+.ph-pic img{display:block;width:100%;max-height:220px;object-fit:cover}
+.ph-scan{position:absolute;inset:0;display:grid;place-items:end center;padding:12px;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.6));color:#fff;font-weight:700;font-size:14px}
+.ph-scan i{position:absolute;left:0;right:0;height:3px;top:0;background:var(--acc);box-shadow:0 0 18px 4px var(--acc);animation:phScan 1.6s ease-in-out infinite alternate}
+@keyframes phScan{to{top:calc(100% - 3px)}}
+.ph-wait{display:flex;gap:10px;align-items:center;justify-content:center;padding:30px;color:var(--mut)}
+.ph-dot{width:12px;height:12px;border-radius:50%;background:var(--acc);animation:stIn .8s infinite alternate}
+.ph-it{display:grid;gap:9px;padding:12px;border-radius:16px;background:var(--raise);border:1px solid var(--line)}
+.ph-it.off{opacity:.5}.ph-it.off b{text-decoration:line-through}
+.ph-it>.row b{min-width:0;overflow-wrap:anywhere;font-size:15px}.ph-k{font-weight:800;color:var(--acc);flex:none}
+.ph-it .chips{flex-wrap:wrap}
+.ph-in{width:100%;padding:10px 12px;border-radius:12px;border:1.5px solid var(--acc);background:var(--surf);color:var(--text);font:600 15px var(--f-b)}
+.ph-size{display:grid;gap:7px}.ph-size .seg button{display:grid;gap:1px;line-height:1.15;padding:7px 4px}.ph-size .seg small{font-size:11px;opacity:.75;font-weight:600}
+.ph-size .fd-amt input{font-size:18px;padding:6px}
+.ph-tot{padding:12px;border-radius:14px;text-align:center;background:color-mix(in srgb,var(--acc) 16%,var(--raise));font-size:15px}
+.ph-tip{display:flex;gap:6px;align-items:flex-start;font-size:13px;padding:10px;border-radius:12px;background:var(--raise);color:var(--text)}
 </style>
 </head>
 <body>
@@ -1895,6 +1915,7 @@ function foodHTML(d){
      '<button class="btn pri wide" data-a="foodSave">'+(d.edit?'Guardar cambios':'Agregar')+'</button>'+
      (d.edit?'<button class="btn bad line wide" data-a="foodDel">Borrar</button>':'<button class="btn line wide" data-a="foodStep" data-v="list">Elegir otro</button>');
   }
+  if(d.step==='photo')return photoHTML(d);
   if(d.step==='new'){const n=d.nf;
     const fld=(f,l,ph)=>'<label class="field">'+l+'<input type="text" inputmode="decimal" value="'+esc(n[f]||'')+'" data-i="fn" data-f="'+f+'" placeholder="'+ph+'"></label>';
     return '<p class="mut sm-t">Copiá los valores de la etiqueta del paquete. Queda guardado para la próxima.</p>'+
@@ -1912,10 +1933,79 @@ function foodHTML(d){
      '<button class="btn pri wide" data-a="foodQuickSave">'+(d.edit?'Guardar cambios':'Agregar')+'</button>'+
      (d.edit?'<button class="btn bad line wide" data-a="foodDel">Borrar</button>':'<button class="btn line wide" data-a="foodStep" data-v="list">Volver</button>');
   }
-  return '<div class="field" style="margin-bottom:6px"><input id="foodQ" type="search" placeholder="Buscá: pollo, arroz, banana…" value="'+esc(d.q||'')+'" data-i="fq" autocomplete="off" aria-label="Buscar alimento"></div>'+
+  return '<div class="ph-cta">'+photoBtn('Foto del plato')+'<p class="mut sm-t">Sacala desde arriba, con el plato entero (y un tenedor al lado si podés): así calculo mejor el tamaño.</p></div>'+
+   '<div class="field" style="margin-bottom:6px"><input id="foodQ" type="search" placeholder="Buscá: pollo, arroz, banana…" value="'+esc(d.q||'')+'" data-i="fq" autocomplete="off" aria-label="Buscar alimento"></div>'+
    '<div class="g2" style="margin-bottom:4px"><button class="btn sm" data-a="foodQuick">'+ic('flame',15)+' Solo calorías</button><button class="btn sm" data-a="foodNew">'+ic('plus',15)+' Alimento propio</button></div>'+
    '<div class="fd-list" id="foodList">'+foodList(d)+'</div>';
 }
+/* ============ Comida desde una foto (IA en el servidor, función swole-food) ============
+   La IA dice qué hay y cuántos gramos; vos elegís la opción correcta, ajustás el tamaño y se anota.
+   La foto se achica en el celu y no se guarda en ningún lado. */
+function shrinkB64(file,max){
+  return new Promise((ok,bad)=>{const u=URL.createObjectURL(file),im=new Image();
+    im.onload=()=>{const s=Math.min(1,(max||1024)/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);
+      c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);const d=c.toDataURL('image/jpeg',.82);ok({b64:d.split(',')[1],thumb:d});};
+    im.onerror=()=>{URL.revokeObjectURL(u);bad(new Error('img'));};im.src=u;});
+}
+const PH_ERR={nokey:'La foto con IA todavía no está activada en el servidor. Mientras tanto, buscá el alimento o usá "Solo calorías".',
+  limit:'Llegaste a las 20 fotos de hoy. Mañana se renueva; mientras tanto, buscalo a mano.',login:'Para analizar fotos necesitás una cuenta (así nadie abusa del servicio). Creala gratis en Perfil.',
+  refusal:'No pude analizar esa foto. Probá con otra o buscalo a mano.',busy:'El servicio está con mucha demanda. Probá de nuevo en un rato.',bad:'No pude leer la foto. Probá con otra.',
+  net:'Sin conexión. La foto necesita internet.',api:'Algo falló al analizar la foto. Probá de nuevo.'};
+function phOptOf(o){const m=o.match_id&&foodById(o.match_id);return m?{n:m.n,id:m.id,k:m.k,p:m.p,c:m.c,f:m.f}:{n:o.name,id:'',k:+o.kcal_100||0,p:+o.prot_100||0,c:+o.carb_100||0,f:+o.fat_100||0};}
+async function foodPhotoGo(file){
+  const d=S.m2&&S.m2.d;if(!d||!file)return;
+  d.step='photo';d.ph={busy:true};renderModal();
+  if(!Sync.user()){d.ph={err:'login'};renderModal();return;}
+  let pic;try{pic=await shrinkB64(file,1024);}catch(e){d.ph={err:'bad'};renderModal();return;}
+  d.ph.thumb=pic.thumb;renderModal();
+  let r;
+  try{r=await Sync.req('/functions/v1/swole-food',{method:'POST',auth:true,body:{img:pic.b64,foods:allFoods().map(f=>[f.id,f.n]),hint:d.ph.hint||''}});}
+  catch(e){r={error:e.status===401?'login':navigator.onLine===false?'net':'api'};}
+  if(!S.m2||S.m2.d!==d)return; /* cerraste la hoja mientras esperaba */
+  if(!r||r.error){d.ph={thumb:pic.thumb,err:(r&&r.error)||'api'};renderModal();return;}
+  const items=(r.items||[]).filter(it=>it.options&&it.options.length).map(it=>{const g=Math.max(1,Math.round(+it.grams||100));
+    return{opts:it.options.slice(0,3).map(phOptOf),sel:0,g,g0:g,lo:Math.max(1,Math.round(+it.grams_low||g*.75)),hi:Math.max(g,Math.round(+it.grams_high||g*1.3)),other:null,on:true};});
+  d.ph={thumb:pic.thumb,items,scale:r.scale||'',tip:r.tip||'',food:r.is_food!==false,left:r.left};
+  renderModal();
+}
+const phCur=it=>it.other&&it.other.f?it.other.f:it.opts[it.sel];
+function phItemKcal(it){const o=phCur(it);return Math.round(o.k*it.g/100);}
+function phTotHTML(d){const its=d.ph.items.filter(x=>x.on),k=its.reduce((s,x)=>s+phItemKcal(x),0),p=its.reduce((s,x)=>s+phCur(x).p*x.g/100,0);
+  return '<b>'+nf(k)+' kcal</b> · '+num(p,1)+' g de proteína';}
+function phSug(it,i){const q=String(it.other&&it.other.q||'').trim();if(!q)return '';
+  const l=foodSearch(q).slice(0,4);
+  return l.map(f=>'<button class="chip sm" data-a="phPick" data-v="'+i+'|'+f.id+'">'+esc(f.n)+'</button>').join('')+
+   (l.length?'':'<span class="mut sm-t">No lo tengo en la lista: lo anoto como "'+esc(q)+'" con los valores de '+esc(it.opts[0].n.toLowerCase())+'.</span>');}
+function photoHTML(d){
+  const ph=d.ph||{};
+  let h=ph.thumb?'<div class="ph-pic"><img src="'+ph.thumb+'" alt="Tu foto">'+(ph.busy?'<div class="ph-scan"><i></i><span>Mirando tu plato…</span></div>':'')+'</div>':
+    (ph.busy?'<div class="ph-wait"><span class="ph-dot"></span>Preparando la foto…</div>':'');
+  if(ph.busy)return h+'<p class="mut sm-t tc">Tarda unos segundos. Estoy calculando qué hay y cuánto pesa cada cosa.</p>';
+  if(ph.err)return h+'<div class="warn">'+esc(PH_ERR[ph.err]||PH_ERR.api)+'</div><button class="btn wide" data-a="foodStep" data-v="list">Buscar a mano</button>';
+  if(!ph.food||!ph.items||!ph.items.length)return h+'<div class="warn">No encontré comida en la foto. Probá sacándola de más cerca, con el plato entero.</div>'+photoBtn('Sacar otra')+'<button class="btn line wide" data-a="foodStep" data-v="list">Buscar a mano</button>';
+  h+='<p class="mut sm-t">Revisá cada cosa: tocá la opción correcta y ajustá el tamaño. Si no es ninguna, tocá <b>Otra cosa</b>.</p>';
+  ph.items.forEach((it,i)=>{
+    const o=phCur(it),nm=it.other&&it.other.f?it.other.f.n:o.n;
+    h+='<div class="ph-it'+(it.on?'':' off')+'"><div class="row"><b class="grow">'+esc(nm)+'</b><span class="ph-k" id="phk'+i+'">'+(it.on?phItemKcal(it)+' kcal':'')+'</span><button class="ib flat" data-a="phOn" data-v="'+i+'" aria-label="'+(it.on?'Sacar':'Volver a poner')+'">'+ic(it.on?'x':'plus',16)+'</button></div>';
+    if(it.on){
+      h+='<div class="chips">'+it.opts.map((x,j)=>'<button class="chip sm '+(!it.other&&it.sel===j?'on':'')+'" data-a="phOpt" data-v="'+i+'|'+j+'">'+esc(x.n)+'</button>').join('')+
+       '<button class="chip sm '+(it.other?'on':'')+'" data-a="phOther" data-v="'+i+'">'+ic('edit',12)+' Otra cosa</button></div>';
+      if(it.other)h+='<input class="ph-in" type="text" maxlength="40" placeholder="¿Qué era? Ej: tarta de jamón y queso" value="'+esc(it.other.q||'')+'" data-i="pho" data-e="'+i+'"><div class="chips" id="phs'+i+'">'+phSug(it,i)+'</div>';
+      h+='<div class="ph-size"><span class="mut sm-t">Tamaño</span><div class="seg">'+[['lo','Más chico',it.lo],['mid','Así',it.g0],['hi','Más grande',it.hi]].map(s=>'<button class="'+(it.g===s[2]?'on':'')+'" data-a="phSize" data-v="'+i+'|'+s[0]+'">'+s[1]+'<small>'+s[2]+' g</small></button>').join('')+'</div>'+
+       '<div class="fd-amt"><button class="ib" data-a="phStep" data-v="'+i+'|-1" aria-label="Menos">'+ic('minus',16)+'</button><input class="num" type="text" inputmode="numeric" value="'+it.g+'" data-i="phg" data-e="'+i+'" aria-label="Gramos"><span class="mut">g</span><button class="ib" data-a="phStep" data-v="'+i+'|1" aria-label="Más">'+ic('plus',16)+'</button></div></div>';
+    }
+    h+='</div>';
+  });
+  h+='<div class="ph-tot" id="phTot">'+phTotHTML(d)+'</div>'+
+   (ph.scale?'<p class="mut sm-t">'+ic('spark',13)+' Tamaño calculado con: '+esc(ph.scale)+'</p>':'')+
+   (ph.tip?'<p class="ph-tip">'+ic('bolt',14)+' '+esc(ph.tip)+'</p>':'')+
+   '<div class="field"><span>Comida</span>'+mealChips(d)+'</div>'+
+   '<button class="btn pri wide" data-a="phSave">Agregar todo</button>'+photoBtn('Sacar otra foto')+
+   '<p class="mut tc" style="font-size:11.5px">Es una estimación: la IA puede errarle al tamaño. Por eso revisalo vos.'+(ph.left!=null?' Te quedan '+ph.left+' fotos hoy.':'')+'</p>';
+  return h;
+}
+const photoBtn=l=>'<label class="btn wide ph-btn">'+ic('camera',18)+' '+esc(l)+'<input type="file" accept="image/*" data-i="foodPhoto" hidden></label>';
+
 /* tarjeta del día en Nutrición */
 function mealsCard(n){
   const dk=S.fd||today(),t=today(),list=mealsOn(dk),tot=mealTot(list);
@@ -1978,6 +2068,7 @@ const weightNow=()=>db.profile?db.profile.weight:null;
 function waterGoal(){return Math.max(6,Math.round((weightNow()||70)*35/250));}
 /* ============ Iconos ============ */
 const IC={
+  camera:'<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/>',
   food:'<path d="M7 3v7a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V3M9 12v9M17 21V3c-2.2 1-3.5 3.6-3.5 7.5V13H17"/>',
   home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
   dumb:'<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>',
@@ -4874,7 +4965,7 @@ function modalBody(m,l2){
      '<p class="mut sm-t tc" style="margin-top:10px">FUE es tu fuerza en los básicos con barra; el resto, tu mejor ejercicio de cada zona. Suben a medida que subís de rango.</p></div></div>';
     case 'recap':return recapHTML(m);
     case 'quick':return sheet('¿Qué hacemos?',quickHTML());
-    case 'food':return sheet(m.d.step==='new'?'Alimento propio':m.d.step==='quick'?'Solo calorías':m.d.edit?'Editar':'Agregar a '+MEAL_N[m.d.m].toLowerCase(),foodHTML(m.d),{l2:true});
+    case 'food':return sheet(m.d.step==='photo'?'Tu plato':m.d.step==='new'?'Alimento propio':m.d.step==='quick'?'Solo calorías':m.d.edit?'Editar':'Agregar a '+MEAL_N[m.d.m].toLowerCase(),foodHTML(m.d),{l2:true});
     case 'onb':return onbHTML(m);
     case 'plates':return sheet('Calculadora de discos',platesHTML(m.d),{l2:true});
     case 'gen':return sheet('Armame una rutina',genHTML(m.d),{l2:true});
@@ -5187,6 +5278,15 @@ const ACTIONS={
     const e={id:d.edit||uid(),date:d.date,m:d.m,n:String(d.qk.n||'').trim().slice(0,40)||MEAL_N[d.m],g:0,k,p,c:0,f:0};
     if(d.edit){const i=db.meals.findIndex(x=>x.id===d.edit);if(i>=0)db.meals[i]=e;}else db.meals.push(e);
     save();S.m2=null;render();toast('Anotado: '+k+' kcal');},
+  phOpt(v){const[i,j]=v.split('|').map(Number),it=S.m2.d.ph.items[i];it.sel=j;it.other=null;renderModal();},
+  phOther(v){const it=S.m2.d.ph.items[+v];it.other=it.other?null:{q:'',f:null};renderModal();if(it.other)setTimeout(()=>{const x=document.querySelector('#modal2 [data-i=pho][data-e="'+v+'"]');if(x)x.focus();},50);},
+  phPick(v){const[i,id]=v.split('|'),it=S.m2.d.ph.items[+i],f=foodById(id);if(!f)return;it.other={q:f.n,f:{n:f.n,id:f.id,k:f.k,p:f.p,c:f.c,f:f.f}};renderModal();},
+  phSize(v){const[i,s]=v.split('|'),it=S.m2.d.ph.items[+i];it.g=s==='lo'?it.lo:s==='hi'?it.hi:it.g0;renderModal();},
+  phStep(v){const[i,s]=v.split('|').map(Number),it=S.m2.d.ph.items[i],st=it.g>=200?20:10;it.g=Math.max(0,Math.round((it.g+s*st)/st)*st);renderModal();},
+  phOn(v){const it=S.m2.d.ph.items[+v];it.on=!it.on;renderModal();},
+  phSave(){const d=S.m2.d,its=d.ph.items.filter(x=>x.on&&x.g>0);if(!its.length)return toast('No quedó nada para agregar');
+    its.forEach(it=>{const o=phCur(it),v=foodCalc(o,it.g);const e=Object.assign({id:uid(),date:d.date,m:d.m,n:o.n,g:it.g,ai:1},v);if(o.id)e.fid=o.id;db.meals.push(e);});
+    save();const k=its.reduce((s,x)=>s+phItemKcal(x),0);S.m2=null;render();toast('Anotado: '+nf(k)+' kcal en '+MEAL_N[d.m].toLowerCase());},
   foodDay(v){const t=today(),n=addDays(S.fd||t,+v);S.fd=n>t?t:n;render();},
   foodRepeat(){const dk=S.fd||today(),prev=mealsOn(addDays(dk,-1));prev.forEach(e=>db.meals.push(Object.assign({},e,{id:uid(),date:dk})));save();render();toast('Copié '+prev.length+(prev.length===1?' comida':' comidas'));},
   quickTrain(){const t=today(),pl=plannedFor(t).filter(r=>!doneOn(t).some(l=>l.routineId===r.id));if(pl.length===1)startSession(pl[0].id);else{S.modal={t:'quick'};render();}},
@@ -5512,6 +5612,10 @@ document.addEventListener('input',e=>{
   else if(i==='mq'){S.m2.d.q=el.value;const l=$('#markList');if(l)l.innerHTML=markList(S.m2.d);}
   else if(i==='mk'){S.m2.d[f]=el.value;const p=$('#markPrev');if(p)p.innerHTML=markPrev(S.m2.d);}
   else if(i==='onb'){S.modal.d[f]=el.value;}
+  else if(i==='foodPhoto'){const file=el.files&&el.files[0];el.value='';if(file)foodPhotoGo(file);}
+  else if(i==='pho'){const d=S.m2.d,it=d.ph.items[+el.dataset.e];it.other=it.other||{};it.other.q=el.value;it.other.f=el.value.trim()?{n:el.value.trim().slice(0,40),id:'',k:it.opts[0].k,p:it.opts[0].p,c:it.opts[0].c,f:it.opts[0].f}:null;
+    const s=$('#phs'+el.dataset.e);if(s)s.innerHTML=phSug(it,+el.dataset.e);const k=$('#phk'+el.dataset.e);if(k)k.textContent=phItemKcal(it)+' kcal';const t=$('#phTot');if(t)t.innerHTML=phTotHTML(d);}
+  else if(i==='phg'){const d=S.m2.d,it=d.ph.items[+el.dataset.e];it.g=Math.max(0,Math.round(+el.value.replace(',','.')||0));const k=$('#phk'+el.dataset.e);if(k)k.textContent=phItemKcal(it)+' kcal';const t=$('#phTot');if(t)t.innerHTML=phTotHTML(d);}
   else if(i==='fq'){S.m2.d.q=el.value;const l=$('#foodList');if(l){l.innerHTML=foodList(S.m2.d);l.scrollTop=0;}}
   else if(i==='fa'){S.m2.d.qty=el.value;const p=$('#foodPrev');if(p)p.innerHTML=foodPrev(S.m2.d);}
   else if(i==='fn'){S.m2.d.nf[f]=el.value;}
