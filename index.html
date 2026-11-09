@@ -1345,6 +1345,37 @@ rect.tq-eq{stroke-width:1.5}
 .ph-size .fd-amt input{font-size:18px;padding:6px}
 .ph-tot{padding:12px;border-radius:14px;text-align:center;background:color-mix(in srgb,var(--acc) 16%,var(--raise));font-size:15px}
 .ph-tip{display:flex;gap:6px;align-items:flex-start;font-size:13px;padding:10px;border-radius:12px;background:var(--raise);color:var(--text)}
+/* v44: mantener apretado no selecciona texto; textos más prolijos; amigos y torneos */
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea,[contenteditable],.sel-ok{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+img,svg{-webkit-user-drag:none}
+p,small,.sm-t,.mut,li,summary{text-wrap:pretty}
+.sm-t{line-height:1.45}
+small{line-height:1.35}
+.fd-alt{margin-bottom:6px}.fd-alt-h{margin:14px 2px 6px;font:700 13px var(--f-b);color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.fd-alt{display:grid;gap:8px}
+.fd-alt button{display:flex;align-items:center;gap:12px;width:100%;padding:12px;border-radius:14px;background:var(--raise);border:1px solid var(--line);color:var(--text);text-align:left}
+.fd-alt b{display:block;font-size:15px}.fd-alt small{display:block;color:var(--mut);font-size:12.5px;margin-top:2px}
+.fd-alt-i{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--acc) 18%,transparent);color:var(--acc)}
+.soc-tabs button{position:relative}.soc-tabs .soc-dot{position:absolute;top:3px;right:3px}
+.soc-dot{display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#FF4F6A;color:#fff;font:800 11px var(--f-b);vertical-align:1px}
+.soc-alert{display:flex;align-items:center;gap:12px;width:100%;padding:12px;margin-bottom:12px;border-radius:14px;text-align:left;color:var(--text);background:color-mix(in srgb,var(--acc) 18%,var(--raise));border:1px solid color-mix(in srgb,var(--acc) 40%,transparent)}
+.soc-alert small{display:block;color:var(--mut);font-size:12.5px}
+.soc-h{margin:16px 2px 8px;font:800 15px var(--f-d)}
+.soc-req{gap:8px;flex-wrap:wrap}.soc-req .grow{min-width:120px}
+.lb-r small{display:block}
+.trn{padding:14px;border-radius:16px;background:var(--raise);border:1px solid var(--line);margin-bottom:10px}
+.trn.fin{opacity:.85}
+.trn b{font-size:15.5px}.trn small{display:block}
+.trn-ic{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--acc) 18%,transparent);color:var(--acc)}
+.trn-win{display:flex;gap:6px;align-items:center;margin:10px 0 0;font-size:14px;color:var(--gold,#E8B64C)}
+.trn-rows{display:grid;gap:4px;margin-top:10px}
+.trn-r{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:10px;background:var(--surf)}
+.trn-r.me{outline:1.5px solid var(--acc)}
+.trn-r .lb-n{width:20px}
+.trn-x{margin-top:8px;font-size:13px;color:var(--mut);background:none;border:0;padding:4px 0;text-decoration:underline}
+.td-det .btn{white-space:nowrap;padding-left:12px;padding-right:12px}
+.msheet.full .tb .td-det,.tb .td-det{position:static;left:auto;right:auto;bottom:auto;max-height:none;box-shadow:none;margin:12px 0 4px;background:var(--raise)}
 </style>
 </head>
 <body>
@@ -1486,6 +1517,19 @@ E('tuckpl','Planche encogida (segundos)','Paralelas',['hombros'],['pecho','trice
 E('advpl','Planche avanzada (segundos)','Paralelas',['hombros'],['pecho','triceps','abs'],'Como la encogida pero con la espalda plana.',null,{time:1,sk:{f:'pl',b:11,t:15}}),
 E('straddlepl','Planche abierta (segundos)','Paralelas',['hombros','pecho'],['triceps','abs','gluteos'],'Piernas abiertas y estiradas, cuerpo horizontal sobre las manos.',null,{time:1,sk:{f:'pl',b:15,t:10}}),
 E('fullpl','Planche completa (segundos)','Paralelas',['hombros','pecho'],['triceps','abs','gluteos'],'Cuerpo totalmente recto y horizontal sobre las manos. Nivel élite.',null,{time:1,sk:{f:'pl',b:18,t:5}}),
+E('pikepush','Flexiones en pica','Peso corporal',['hombros'],['triceps','trapecio'],'Cadera bien arriba, cuerpo en V invertida: bajás la cabeza hacia el piso entre las manos. La base para la vertical.',null,{sk:{f:'hs',b:1,t:15}}),
+E('crow','Cuervo (segundos)','Peso corporal',['hombros','abs'],['triceps','antebrazos'],'Manos en el piso, rodillas apoyadas arriba de los codos y los pies en el aire.',null,{time:1,sk:{f:'pl',b:4,t:30}}),
+E('pllean','Planche lean (segundos)','Peso corporal',['hombros'],['pecho','abs','antebrazos'],'En plancha de flexión con los brazos rectos, llevá los hombros bien adelante de las manos.',null,{time:1,sk:{f:'pl',b:6,t:30}}),
+E('onelegfl','Front lever a una pierna (segundos)','Barra fija',['dorsales','abs'],['biceps','lumbar'],'Cuerpo horizontal boca arriba con una pierna estirada y la otra encogida.',null,{time:1,sk:{f:'fl',b:10,t:12}}),
+E('skincat','Skin the cat','Barra fija',['dorsales','hombros'],['pecho','biceps','abs'],'Colgado, pasás las piernas entre los brazos y girás hasta quedar colgado de espaldas. Volvés despacio.',null,{sk:{f:'bl',b:1,t:5}}),
+E('advbl','Back lever avanzado (segundos)','Barra fija',['dorsales','pecho'],['biceps','hombros','lumbar'],'Horizontal boca abajo con la espalda plana y las rodillas dobladas a 90°.',null,{time:1,sk:{f:'bl',b:6,t:15}}),
+E('onelegl','L-sit a una pierna (segundos)','Paralelas',['abs'],['triceps','hombros','cuadriceps'],'Como el L-sit pero con una pierna estirada y la otra doblada.',null,{time:1,sk:{f:'lsit',b:4,t:20}}),
+E('russiandip','Fondos rusos','Paralelas',['triceps','pecho'],['hombros','abs'],'Bajás en el fondo hasta apoyar los antebrazos en las barras y volvés a subir a brazos rectos.',null,{sk:{f:'dip',b:10,t:10}}),
+E('impdip','Fondo imposible','Paralelas',['triceps'],['pecho','hombros','abs'],'Bajás hasta apoyar los antebrazos y subís a brazos rectos sin que los codos se separen de la barra.',null,{sk:{f:'dip',b:15,t:5}}),
+E('boxpistol','Pistol a un cajón','Cajón',['cuadriceps','gluteos'],['abs'],'Pistol bajando hasta sentarte en un cajón o banco bajo y volviendo a subir con una pierna.',null,{sk:{f:'legs',b:7,t:12}}),
+E('vflag','Bandera vertical (segundos)','Barra vertical',['oblicuos','dorsales'],['hombros','abs'],'Agarrado del poste, el cuerpo queda casi vertical con los pies arriba. El primer paso hacia la bandera.',null,{time:1,sk:{f:'flag',b:8,t:15}}),
+E('tuckflag','Bandera encogida (segundos)','Barra vertical',['oblicuos','dorsales'],['hombros','abs'],'Cuerpo horizontal de costado con las rodillas al pecho.',null,{time:1,sk:{f:'flag',b:10,t:10}}),
+E('straddleflag','Bandera abierta (segundos)','Barra vertical',['oblicuos','dorsales'],['hombros','abs'],'Horizontal de costado con las piernas estiradas y abiertas.',null,{time:1,sk:{f:'flag',b:12,t:10}}),
 E('flag','Bandera humana (segundos)','Barra vertical',['oblicuos','dorsales'],['hombros','abs'],'Agarrado de un poste, cuerpo horizontal de costado.',null,{time:1,sk:{f:'flag',b:14,t:10}}),
 /* ---- Deporte: potencia, prevención y estabilidad ---- */
 E('boxjump','Saltos al cajón','Cajón',['cuadriceps','gluteos'],['gemelos','isquios'],'Saltá con los dos pies y caé suave arriba del cajón. Bajá caminando.',null,{sport:1}),
@@ -1893,9 +1937,9 @@ function foodRow(f,act){
 function foodList(d){
   const q=String(d.q||'').trim();
   if(!q){const fr=foodFreq();
-    return (fr.length?'<p class="fd-sec">Lo que más comés</p>'+fr.map(f=>foodRow(f)).join(''):'')+'<p class="fd-sec">Todos</p>'+allFoods().slice().sort((a,b)=>a.n.localeCompare(b.n,'es')).map(f=>foodRow(f)).join('');}
+    return (fr.length?'<p class="fd-sec">Lo que más comés</p>'+fr.map(f=>foodRow(f)).join(''):'')+foodAlt()+'<p class="fd-sec">Todos</p>'+allFoods().slice().sort((a,b)=>a.n.localeCompare(b.n,'es')).map(f=>foodRow(f)).join('');}
   const l=foodSearch(q);
-  return l.length?l.slice(0,40).map(f=>foodRow(f)).join(''):'<div class="empty" style="padding:18px 8px">No lo tengo en la lista.<br><button class="btn sm pri" style="margin-top:10px" data-a="foodNew">'+ic('plus',14)+' Crear "'+esc(q)+'"</button></div>';
+  return (l.length?l.slice(0,40).map(f=>foodRow(f)).join(''):'<p class="mut tc" style="padding:14px 8px 0">No encontré "'+esc(q)+'".</p>')+foodAlt();
 }
 function foodPrev(d){
   const f=foodById(d.sel);if(!f)return '';
@@ -1933,10 +1977,14 @@ function foodHTML(d){
      '<button class="btn pri wide" data-a="foodQuickSave">'+(d.edit?'Guardar cambios':'Agregar')+'</button>'+
      (d.edit?'<button class="btn bad line wide" data-a="foodDel">Borrar</button>':'<button class="btn line wide" data-a="foodStep" data-v="list">Volver</button>');
   }
-  return '<div class="ph-cta">'+photoBtn('Foto del plato')+'<p class="mut sm-t">Sacala desde arriba, con el plato entero (y un tenedor al lado si podés): así calculo mejor el tamaño.</p></div>'+
+  return '<div class="ph-cta">'+photoBtn('Foto del plato')+'<p class="mut sm-t tc">Desde arriba y con el plato entero: así calculo mejor la porción.</p></div>'+
    '<div class="field" style="margin-bottom:6px"><input id="foodQ" type="search" placeholder="Buscá: pollo, arroz, banana…" value="'+esc(d.q||'')+'" data-i="fq" autocomplete="off" aria-label="Buscar alimento"></div>'+
-   '<div class="g2" style="margin-bottom:4px"><button class="btn sm" data-a="foodQuick">'+ic('flame',15)+' Solo calorías</button><button class="btn sm" data-a="foodNew">'+ic('plus',15)+' Alimento propio</button></div>'+
    '<div class="fd-list" id="foodList">'+foodList(d)+'</div>';
+}
+function foodAlt(){
+  return '<p class="fd-alt-h">¿No está en la lista?</p><div class="fd-alt">'+
+   '<button data-a="foodQuick"><span class="fd-alt-i">'+ic('flame',18)+'</span><span class="grow"><b>Anotar solo las calorías</b><small>Comiste afuera y no sabés bien qué tenía</small></span>'+ic('right',16)+'</button>'+
+   '<button data-a="foodNew"><span class="fd-alt-i">'+ic('plus',18)+'</span><span class="grow"><b>Crear un alimento</b><small>Copiás los datos de la etiqueta del paquete</small></span>'+ic('right',16)+'</button></div>';
 }
 /* ============ Comida desde una foto (IA en el servidor, función swole-food) ============
    La IA dice qué hay y cuántos gramos; vos elegís la opción correcta, ajustás el tamaño y se anota.
@@ -1947,7 +1995,7 @@ function shrinkB64(file,max){
       c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);const d=c.toDataURL('image/jpeg',.82);ok({b64:d.split(',')[1],thumb:d});};
     im.onerror=()=>{URL.revokeObjectURL(u);bad(new Error('img'));};im.src=u;});
 }
-const PH_ERR={nokey:'La foto con IA todavía no está activada en el servidor. Mientras tanto, buscá el alimento o usá "Solo calorías".',
+const PH_ERR={nokey:'La foto con IA todavía no está activada en el servidor. Mientras tanto, buscá el alimento o anotá solo las calorías.',
   limit:'Llegaste a las 20 fotos de hoy. Mañana se renueva; mientras tanto, buscalo a mano.',login:'Para analizar fotos necesitás una cuenta (así nadie abusa del servicio). Creala gratis en Perfil.',
   refusal:'No pude analizar esa foto. Probá con otra o buscalo a mano.',busy:'El servicio está con mucha demanda. Probá de nuevo en un rato.',bad:'No pude leer la foto. Probá con otra.',
   net:'Sin conexión. La foto necesita internet.',api:'Algo falló al analizar la foto. Probá de nuevo.'};
@@ -2938,17 +2986,17 @@ function summarySVG(m){
 const TREE=[
   {f:'push',n:'Empuje',ids:['kneepush','pushup','diamond','archerpush','pppush','oapush','planchepush']},
   {f:'pull',n:'Tirón',ids:['austrow','pullup:10','lpullup','archerpull','muscleup','oapull']},
-  {f:'dip',n:'Fondos',ids:['benchdip','dips:15','ringdip']},
-  {f:'legs',n:'Piernas',ids:['airsquat','shrimp','pistol','dragon']},
-  {f:'lsit',n:'L-sit',ids:['tucklsit','lsit','vsit']},
-  {f:'hs',n:'Vertical',ids:['wallhs','freehs','hspu','freehspu']},
-  {f:'fl',n:'Front lever',ids:['tuckfl','advfl','straddlefl','fullfl']},
-  {f:'bl',n:'Back lever',ids:['tuckbl','straddlebl','fullbl']},
-  {f:'pl',n:'Planche',ids:['tuckpl','advpl','straddlepl','fullpl']},
-  {f:'flag',n:'Bandera',ids:['flag']}
+  {f:'dip',n:'Fondos',ids:['benchdip','dips:15','ringdip','russiandip','impdip']},
+  {f:'legs',n:'Piernas',ids:['airsquat','shrimp','boxpistol','pistol','dragon']},
+  {f:'lsit',n:'L-sit',ids:['tucklsit','onelegl','lsit','vsit']},
+  {f:'hs',n:'Vertical',ids:['pikepush','wallhs','freehs','hspu','freehspu']},
+  {f:'fl',n:'Front lever',ids:['tuckfl','advfl','onelegfl','straddlefl','fullfl']},
+  {f:'bl',n:'Back lever',ids:['skincat','tuckbl','advbl','straddlebl','fullbl']},
+  {f:'pl',n:'Planche',ids:['crow','pllean','tuckpl','advpl','straddlepl','fullpl']},
+  {f:'flag',n:'Bandera',ids:['vflag','tuckflag','straddleflag','flag']}
 ];
 /* requisitos de otras ramas (la fuerza base que hace falta antes) */
-const XREQ={muscleup:[['dips',10]],lpullup:[['tucklsit',15]],tuckfl:[['pullup',8]],tuckbl:[['pullup',6],['dips',8]],tuckpl:[['pppush',10],['dips',15]],freehs:[['wallhs',45]],flag:[['pullup',12],['wallhs',45]],ringdip:[['dips',12]]};
+const XREQ={muscleup:[['dips',10]],lpullup:[['tucklsit',15]],tuckfl:[['pullup',8]],skincat:[['pullup',5]],tuckbl:[['pullup',6],['dips',8]],tuckpl:[['pppush',10],['dips',15]],freehs:[['wallhs',45]],vflag:[['pullup',10],['wallhs',30]],ringdip:[['dips',12]]};
 const shortN=n=>n.replace(/ \(segundos\)/,'');
 function bestRep(id){let b=0;allSess().forEach(l=>l.entries.forEach(en=>{if(en.ex===id)en.sets.forEach(s=>{if(!s.w&&+s.reps>b)b=+s.reps;});}));return b;}
 function treeNode(s){const [id,t]=s.split(':'),ex=exById(id);return ex?{id,ex,t:+t||(ex.sk?ex.sk.t:10),time:!!ex.time}:null;}
@@ -2973,11 +3021,19 @@ function treeHTML(m){
       return (i?'<i class="tb-ln'+(s.done||s.avail?' on':'')+'"></i>':'')+
        '<button class="tn '+cls+(m.sel===s.n.id?' sel':'')+(goal&&goal.id===s.n.id?' goal':'')+'" style="--c:'+col+';--p:'+Math.round(s.pct*100)+'" data-a="treeSel" data-v="'+s.n.id+'" aria-pressed="'+(m.sel===s.n.id)+'">'+
        '<span class="tn-c">'+(s.done?ic('check',18):!s.best&&s.locked?ic('lock',15):'<small>'+(s.best?Math.round(s.pct*100)+'%':'0%')+'</small>')+'</span><span class="tn-l">'+esc(shortN(s.n.ex.n))+'</span></button>';
-    }).join('')+'</div></div>';
+    }).join('')+'</div>'+(m.sel&&b.nodes.some(n=>n.id===m.sel)?nodeDetail(m.sel):'')+'</div>';
   }).join('');
   return '<div class="tree-top"><div><b style="font:800 30px var(--f-d)">'+dn+'</b><span class="mut"> de '+tot+' habilidades dominadas</span></div><div class="bar" style="margin-top:8px"><i style="width:'+Math.round(dn/tot*100)+'%;background:var(--acc)"></i></div>'+
    '<p class="mut sm-t" style="margin-top:8px">Cada rama va de lo más fácil a lo más difícil. Dominás una cuando llegás a su meta. Tocá cualquiera para ver qué te falta.</p></div>'+
-   rows+(m.sel?nodeDetail(m.sel):'');
+   rows;
+}
+/* marcar a mano que ya hacés una habilidad: se guarda como marca y se desbloquea lo que sigue */
+function skMarkHTML(m){
+  const f=findNode(m.id);if(!f)return '';const n=f.b.nodes[f.i],u=n.time?'segundos':'repeticiones';
+  return '<p>¿Cuánto hacés de <b>'+esc(shortN(n.ex.n))+'</b> seguido, con buena técnica?</p>'+
+   '<div class="fd-amt" style="margin:12px 0"><button class="ib" data-a="skMarkStep" data-v="-1" aria-label="Menos">'+ic('minus',18)+'</button><input class="num" id="skMarkN" type="text" inputmode="numeric" value="'+m.n+'" aria-label="'+u+'"><span class="mut">'+(n.time?'s':'reps')+'</span><button class="ib" data-a="skMarkStep" data-v="1" aria-label="Más">'+ic('plus',18)+'</button></div>'+
+   '<p class="mut sm-t">La meta para dominarla es '+n.t+' '+u+'. Si llegás, queda dominada y se desbloquea la siguiente de la rama.</p>'+
+   '<button class="btn pri wide" data-a="skMarkSave">Guardar</button>';
 }
 function nodeDetail(id){
   const f=findNode(id);if(!f)return '';
@@ -2988,8 +3044,9 @@ function nodeDetail(id){
    '<div class="bar" style="margin:10px 0 4px"><i style="width:'+Math.round(s.pct*100)+'%;background:'+TCOL[nodeTier(ex)]+'"></i></div>'+
    '<p class="sm-t" style="margin-top:8px">'+esc(ex.d)+'</p>'+
    (req.length?'<div class="reqs"><span class="mut sm-t" style="font-weight:600">Antes necesitás</span>'+req.map(r=>{const e=exById(r.id),ru=e&&e.time?' s':' reps';return '<div class="rq'+(r.ok?' ok':'')+'">'+ic(r.ok?'check':'lock',14)+'<span class="grow">'+esc(shortN(e?e.n:r.id))+' · '+r.t+ru+'</span><span class="mut sm-t">'+(r.best?r.best+ru:'—')+'</span></div>';}).join('')+'</div>':'')+
-   '<div class="row" style="gap:8px;margin-top:12px">'+(s.done?'<span class="tag" style="color:var(--ok)">'+ic('check',14)+' Dominada</span><span class="grow"></span>':'<button class="btn pri grow" data-a="skGoal" data-v="'+id+'">'+ic('target',16)+' Quiero lograrla</button>')+
-   '<button class="btn" data-a="exInfo" data-v="'+id+'">Ver ejercicio</button></div></div>';
+   '<div class="row" style="gap:8px;margin-top:12px">'+(s.done?'<span class="tag" style="color:var(--ok)">'+ic('check',14)+' Dominada</span><span class="grow"></span>':'<button class="btn pri grow" data-a="skMark" data-v="'+id+'">'+ic('check',16)+' Ya la logro</button>')+
+   (s.done?'':'<button class="btn" data-a="skGoal" data-v="'+id+'">'+ic('target',16)+' Plan</button>')+
+   '<button class="btn" data-a="exInfo" data-v="'+id+'">Ver</button></div></div>';
 }
 /* fuerza que ayuda a cada habilidad (si entrenás sin equipo, se cambia por su versión con peso corporal) */
 const SK_ACC={push:['dips','plank'],pull:['row','legraise'],dip:['pushup','plank'],legs:['bulgarian','calf'],lsit:['legraise','plank'],hs:['ohp','plank'],fl:['row','legraise'],bl:['dips','plank'],pl:['dips','plank'],flag:['legraise','ohp']};
@@ -3183,6 +3240,13 @@ function seasonStats(){
   const pts=Object.keys(c).reduce((s,k)=>s+c[k]*SEASON_PTS[k],0)+ev.filter(e=>e.k==='mis').reduce((s,e)=>s+(+e.p||0),0);
   return Object.assign({m,pts},c);
 }
+const COMP_MET={w:['Entrenos','días entrenados'],sets:['Series','series hechas'],pts:['Puntos','puntos']};
+function compScore(c){
+  const a=c.start_day,b=c.end_day,logs=db.logs.filter(l=>l.date>=a&&l.date<=b),days=new Set(logs.map(l=>l.date)).size;
+  if(c.metric==='w')return days;
+  if(c.metric==='sets')return logs.reduce((s,l)=>s+l.entries.reduce((t,en)=>t+en.sets.filter(x=>!x.w).length,0),0);
+  return (db.settings.ev||[]).filter(e=>e.d&&e.d>=a&&e.d<=b).reduce((p,e)=>p+(e.k==='mis'?(+e.p||0):e.k!=='w'&&SEASON_PTS[e.k]?SEASON_PTS[e.k]:0),days*SEASON_PTS.w);
+}
 const SK_IDS=()=>[].concat(...TREE.map(b=>b.ids.map(s=>s.split(':')[0])));
 function skillsMastered(){const out=[];branches().forEach(b=>b.nodes.forEach((n,i)=>{if(bestRep(n.id)>=n.t)out.push(n.id);}));return out;}
 /* lo que ven tus amigos: rangos y niveles (ya ajustados por tu peso, edad y sexo), nunca tu peso, edad ni mail */
@@ -3194,13 +3258,14 @@ function publicSummary(){
   return{v:1,ovr:ov?{L:ov.L,p:Math.round(ov.pct*100)/100}:null,pctl:ov?pctFromV(ov.L+ov.pct):null,card:st,groups,lifts,sk:skillsMastered(),
     season:seasonStats(),ev:(db.settings.ev||[]).slice(0,20),streak:streak(),sports:(db.profile&&db.profile.sports)||[],goal:db.settings.skillGoal?db.settings.skillGoal.id:null};
 }
+const addMsg=r=>r==='sent'?'Solicitud enviada: cuando la acepte, ya son amigos':r==='already'?'Ya son amigos':'¡Listo! Ya son amigos';
 const Social=(()=>{
   let pub='',timer=null;
   const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   const mkCode=()=>{let s='';const r=crypto.getRandomValues(new Uint8Array(6));r.forEach(x=>s+=A[x%A.length]);return s;};
   const on=()=>!!(db.settings.social&&db.settings.social.code&&Sync.user());
   const nick=()=>String((db.profile&&db.profile.nick)||'Atleta').slice(0,24);
-  const errTxt=e=>{const m=String(e&&e.message||'');return /code_not_found/.test(m)?'No encontré ese código':/own_code/.test(m)?'Ese es tu propio código':/too_many/.test(m)?'Llegaste al máximo de 100 amigos':/no_profile/.test(m)?'Primero activá amigos':!navigator.onLine?'Sin conexión: probá más tarde':'No se pudo: '+m;};
+  const errTxt=e=>{const m=String(e&&e.message||'');return /too_many_req/.test(m)?'Tenés demasiadas solicitudes sin responder':/too_many_comps/.test(m)?'Ya tenés 5 torneos activos':/no_members/.test(m)?'Elegí al menos un amigo':/no_request/.test(m)?'Esa solicitud ya no existe':/code_not_found/.test(m)?'No encontré ese código':/own_code/.test(m)?'Ese es tu propio código':/too_many/.test(m)?'Llegaste al máximo de 100 amigos':/no_profile/.test(m)?'Primero activá amigos':!navigator.onLine?'Sin conexión: probá más tarde':'No se pudo: '+m;};
   async function publish(force){
     if(!on())return;
     /* nuevas habilidades dominadas también son novedades */
@@ -3218,7 +3283,9 @@ const Social=(()=>{
     try{await publish();}catch(e){}
     const rows=await Sync.req('/rest/v1/swole_public?select=user_id,code,nick,data,updated_at',{auth:true});
     const me=Sync.user().id;
-    S.social={at:Date.now(),me:(rows||[]).find(r=>r.user_id===me)||null,friends:(rows||[]).filter(r=>r.user_id!==me)};
+    S.social={at:Date.now(),me:(rows||[]).find(r=>r.user_id===me)||null,friends:(rows||[]).filter(r=>r.user_id!==me),req:[],comps:[]};
+    try{S.social.req=await Sync.req('/rest/v1/rpc/swole_requests',{method:'POST',auth:true,body:{}})||[];}catch(e){}
+    try{await loadComps();}catch(e){}
     return S.social;
   }
   async function enable(){
@@ -3237,18 +3304,39 @@ const Social=(()=>{
   async function add(code){
     code=String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
     if(code.length!==6)throw new Error('code_len');
-    await Sync.req('/rest/v1/rpc/swole_add_friend',{method:'POST',auth:true,body:{p_code:code}});
+    const r=await Sync.req('/rest/v1/rpc/swole_add_friend',{method:'POST',auth:true,body:{p_code:code}});
+    await load();return r;
+  }
+  /* torneos: cada uno sube su propio puntaje, calculado en su celu */
+  async function loadComps(){
+    const me=Sync.user().id,t=today();
+    const rows=await Sync.req('/rest/v1/swole_comp?select=*,swole_comp_member(*)&end_day=gte.'+addDays(t,-30)+'&order=end_day.desc',{auth:true})||[];
+    for(const c of rows){
+      const m=(c.swole_comp_member||[]).find(x=>x.user_id===me);if(!m||!m.joined||t>addDays(c.end_day,1))continue;
+      const sc=compScore(c);if(+m.score===sc&&m.nick===nick())continue;
+      try{await Sync.req('/rest/v1/swole_comp_member?comp_id=eq.'+c.id+'&user_id=eq.'+me,{method:'PATCH',auth:true,headers:{Prefer:'return=minimal'},body:{score:sc,nick:nick(),updated_at:new Date().toISOString()}});m.score=sc;m.nick=nick();}catch(e){}
+    }
+    if(S.social)S.social.comps=rows;return rows;
+  }
+  async function answer(from,ok){await Sync.req('/rest/v1/rpc/swole_answer_request',{method:'POST',auth:true,body:{p_from:from,p_ok:!!ok}});await load();}
+  async function cancel(to){await Sync.req('/rest/v1/rpc/swole_cancel_request',{method:'POST',auth:true,body:{p_to:to}});await load();}
+  async function compCreate(name,metric,days,members){await Sync.req('/rest/v1/rpc/swole_comp_create',{method:'POST',auth:true,body:{p_name:name,p_metric:metric,p_days:days,p_members:members}});await load();}
+  async function compJoin(id,ok){
+    const me=Sync.user().id,q='/rest/v1/swole_comp_member?comp_id=eq.'+id+'&user_id=eq.'+me;
+    if(ok)await Sync.req(q,{method:'PATCH',auth:true,headers:{Prefer:'return=minimal'},body:{joined:true,nick:nick()}});
+    else await Sync.req(q,{method:'DELETE',auth:true});
     await load();
   }
+  async function compDel(id){await Sync.req('/rest/v1/swole_comp?id=eq.'+id,{method:'DELETE',auth:true});await load();}
   async function remove(id){await Sync.req('/rest/v1/rpc/swole_remove_friend',{method:'POST',auth:true,body:{p_friend:id}});await load();}
   /* código que llegó por link (?amigo=XXXXXX) */
   async function addPending(){
     let c=null;try{c=localStorage.getItem('swole.pendFriend');}catch(e){}
     if(!c||!on())return;
     try{localStorage.removeItem('swole.pendFriend');}catch(e){}
-    try{await add(c);toast('¡Listo! Ya son amigos');render();}catch(e){toast(errTxt(e));}
+    try{const r=await add(c);toast(addMsg(r));render();}catch(e){toast(errTxt(e));}
   }
-  return{on,publish,schedule,load,enable,disable,add,remove,addPending,errTxt,link:()=>location.origin+location.pathname+'?amigo='+(db.settings.social?db.settings.social.code:'')};
+  return{on,publish,schedule,load,enable,disable,add,remove,addPending,errTxt,answer,cancel,compCreate,compJoin,compDel,link:()=>location.origin+location.pathname+'?amigo='+(db.settings.social?db.settings.social.code:'')};
 })();
 
 /* textos */
@@ -3284,8 +3372,11 @@ function friendsHTML(m){
   const sc=db.settings.social.code,sv=S.social;
   const head='<div class="soc-code"><div><span class="mut sm-t">Tu código</span><b>'+sc+'</b></div><button class="btn sm" data-a="socShare">'+ic('share',16)+' Invitar</button></div>'+
     '<div class="row" style="gap:8px;margin:10px 0 4px"><input class="soc-in" id="socCode" maxlength="7" placeholder="Código de un amigo" autocomplete="off" autocapitalize="characters" aria-label="Código de un amigo"><button class="btn pri" data-a="socAdd">Agregar</button></div>';
-  const tabs='<div class="seg soc-tabs">'+[['rank','Ranking'],['season','Temporada'],['feed','Novedades'],['list','Amigos']].map(([k,n])=>'<button class="'+(tab===k?'on':'')+'" data-a="socTab" data-v="'+k+'">'+n+'</button>').join('')+'</div>';
+  const rin=sv?(sv.req||[]).filter(r=>r.dir==='in'):[],cinv=sv?(sv.comps||[]).filter(c=>{const me=(c.swole_comp_member||[]).find(x=>sv.me&&x.user_id===sv.me.user_id);return me&&!me.joined&&c.end_day>=today();}):[];
+  const dot=n=>n?' <span class="soc-dot">'+n+'</span>':'';
+  const tabs='<div class="seg soc-tabs">'+[['rank','Ranking',0],['comp','Torneos',cinv.length],['feed','Novedades',0],['list','Amigos',rin.length]].map(([k,n,c])=>'<button class="'+(tab===k?'on':'')+'" data-a="socTab" data-v="'+k+'">'+n+dot(c)+'</button>').join('')+'</div>';
   if(!sv)return head+tabs+'<p class="mut tc" style="padding:30px 0">Cargando…</p>';
+  const reqBox=rin.length&&tab!=='list'?'<button class="soc-alert" data-a="socTab" data-v="list">'+ic('user',18)+'<span class="grow"><b>'+(rin.length===1?esc(rin[0].nick)+' quiere ser tu amigo':rin.length+' solicitudes de amistad')+'</b><small>Tocá para responder</small></span>'+ic('right',16)+'</button>':'';
   const nf0=!sv.friends.length?'<div class="card empty" style="margin:0">'+ic('user',30)+'<b>Todavía no tenés amigos en Swole</b>Pasales tu código o tocá Invitar para mandarles el link.</div>':'';
   let body='';
   if(tab==='rank'){
@@ -3296,9 +3387,9 @@ function friendsHTML(m){
        return '<button class="lb-r'+(x.me?' me':'')+'" data-a="socCard" data-v="'+x.r.user_id+'"><span class="lb-n">'+(i+1)+'</span>'+badge(L,36)+'<span class="grow"><b>'+esc(x.r.nick||'Atleta')+(x.me?' <span class="tag">vos</span>':'')+'</b></span><span class="lb-v">'+val+'</span></button>';}).join('')+'</div>'
       :'<p class="mut sm-t">Nadie cargó este ejercicio todavía.</p>')+
      '<p class="mut sm-t" style="margin-top:10px">Se compara el nivel, que ya está ajustado por peso, edad y sexo: así es justo entre cuerpos distintos.</p>'+nf0;
-  }else if(tab==='season'){
+  }else if(tab==='comp'){
     const rows=rankRows('season'),d0=new Date(),left=new Date(d0.getFullYear(),d0.getMonth()+1,0).getDate()-d0.getDate();
-    body='<div class="soc-season"><span class="lh-k">Temporada de '+MESES[d0.getMonth()]+'</span><b>'+(left?'Quedan '+left+' días':'Último día')+'</b></div>'+
+    body=compsHTML(sv)+'<h4 class="soc-h">Temporada del mes</h4><p class="mut sm-t" style="margin:-4px 0 10px">Un torneo con todos tus amigos que arranca de cero cada mes.</p><div class="soc-season"><span class="lh-k">Temporada de '+MESES[d0.getMonth()]+'</span><b>'+(left?'Quedan '+left+' días':'Último día')+'</b></div>'+
      '<div class="lb">'+rows.map((x,i)=>{const s=(x.r.data||{}).season||{};return '<button class="lb-r'+(x.me?' me':'')+(i<3&&x.v>0?' top'+(i+1):'')+'" data-a="socCard" data-v="'+x.r.user_id+'"><span class="lb-n">'+(i+1)+'</span><span class="grow"><b>'+esc(x.r.nick||'Atleta')+(x.me?' <span class="tag">vos</span>':'')+'</b><small class="mut">'+plu(s.w||0,'entreno','entrenos')+' · '+plu(s.pr||0,'récord','récords')+' · '+plu((s.up||0)+(s.rank||0),'subida','subidas')+'</small></span><span class="lb-v"><b>'+x.v+'</b> pts</span></button>';}).join('')+'</div>'+
      '<details class="why"><summary>¿Cómo se suman puntos?</summary><div class="mut sm-t"><p>Entreno (uno por día): '+SEASON_PTS.w+' · Misiones semanales: 20 a 40 cada una · Récord: '+SEASON_PTS.pr+' · Subir de nivel en un ejercicio: '+SEASON_PTS.up+' · Dominar una habilidad: '+SEASON_PTS.sk+' · Subir de rango general: '+SEASON_PTS.rank+' · Logro: '+SEASON_PTS.ach+'.</p><p>Gana el que más progresa en el mes, no el más fuerte: el que recién empieza puede ganarle a cualquiera. Cada mes arranca de cero.</p></div></details>'+nf0;
   }else if(tab==='feed'){
@@ -3306,10 +3397,42 @@ function friendsHTML(m){
     all.sort((a,b)=>a.e.d<b.e.d?1:a.e.d>b.e.d?-1:0);
     body=all.length?'<div class="feed">'+all.slice(0,50).map(x=>'<div class="fd"><span class="fd-ic">'+ic(evIc(x.e.k),16)+'</span><span class="grow"><b>'+(x.me?'Vos':esc(x.r.nick||'Atleta'))+'</b> '+evTxt(x.e)+'</span><small class="mut">'+dayAgo(x.e.d)+'</small></div>').join('')+'</div>':'<p class="mut sm-t">Todavía no hay novedades.</p>'+nf0;
   }else{
-    body=sv.friends.length?'<div class="lb">'+sv.friends.map(r=>{const d=r.data||{};return '<div class="lb-r"><button class="row grow" style="gap:10px;text-align:left" data-a="socCard" data-v="'+r.user_id+'">'+badge(d.ovr?d.ovr.L:-1,36)+'<span class="grow"><b>'+esc(r.nick||'Atleta')+'</b><small class="mut">Actualizado '+dayAgo(String(r.updated_at).slice(0,10))+'</small></span></button><button class="ib flat" data-a="socDel" data-v="'+r.user_id+'" aria-label="Sacar a '+esc(r.nick||'')+'">'+ic('x',18)+'</button></div>';}).join('')+'</div>':nf0;
+    const rout=(sv.req||[]).filter(r=>r.dir==='out');
+    body=(rin.length?'<h4 class="soc-h">Solicitudes</h4><div class="lb">'+rin.map(r=>'<div class="lb-r soc-req"><span class="grow"><b>'+esc(r.nick)+'</b><small class="mut">Quiere ser tu amigo</small></span><button class="btn sm" data-a="socNo" data-v="'+r.user_id+'">Rechazar</button><button class="btn sm pri" data-a="socYes" data-v="'+r.user_id+'">Aceptar</button></div>').join('')+'</div>':'')+
+     (sv.friends.length?'<h4 class="soc-h">Tus amigos ('+sv.friends.length+')</h4><div class="lb">'+sv.friends.map(r=>{const d=r.data||{};return '<div class="lb-r"><button class="row grow" style="gap:10px;text-align:left;min-width:0" data-a="socCard" data-v="'+r.user_id+'">'+badge(d.ovr?d.ovr.L:-1,36)+'<span class="grow"><b>'+esc(r.nick||'Atleta')+'</b><small class="mut">Activo '+dayAgo(String(r.updated_at).slice(0,10))+'</small></span></button><button class="btn sm line" data-a="socDel" data-v="'+r.user_id+'">Eliminar</button></div>';}).join('')+'</div>':nf0)+
+     (rout.length?'<h4 class="soc-h">Enviadas</h4><div class="lb">'+rout.map(r=>'<div class="lb-r"><span class="grow"><b>'+esc(r.nick)+'</b><small class="mut">Esperando que acepte</small></span><button class="btn sm line" data-a="socCancel" data-v="'+r.user_id+'">Cancelar</button></div>').join('')+'</div>':'');
     body+='<button class="btn line wide bad" style="margin-top:14px" data-a="socOff">Dejar de compartir</button>';
   }
-  return head+tabs+body;
+  return head+tabs+reqBox+body;
+}
+/* torneos entre amigos */
+function compsHTML(sv){
+  const me=sv.me&&sv.me.user_id,t=today(),cs=sv.comps||[];
+  const card=c=>{
+    const ms=c.swole_comp_member||[],mine=ms.find(x=>x.user_id===me)||{},fin=c.end_day<t,left=Math.round((parseK(c.end_day)-parseK(t))/864e5)+1,met=COMP_MET[c.metric]||COMP_MET.w;
+    const on=ms.filter(x=>x.joined).sort((a,b)=>b.score-a.score),wait=ms.filter(x=>!x.joined&&x.user_id!==me);
+    const inv=!mine.joined&&!fin;
+    return '<div class="trn'+(fin?' fin':'')+'"><div class="row" style="gap:10px"><span class="trn-ic">'+ic(fin?'trophy':'flag',18)+'</span><span class="grow"><b>'+esc(c.name)+'</b><small class="mut">'+met[0]+' · '+(fin?'Terminó':left===1?'Último día':'Quedan '+left+' días')+'</small></span></div>'+
+     (fin&&on.length?'<p class="trn-win">'+ic('crown',15)+(on[0].user_id===me?' <b>¡Ganaste!</b> Con ':' Ganó <b>'+esc(on[0].nick)+'</b> con ')+nf(+on[0].score)+' '+met[1]+'</p>':'')+
+     '<div class="trn-rows">'+on.map((x,i)=>'<div class="trn-r'+(x.user_id===me?' me':'')+'"><span class="lb-n">'+(i+1)+'</span><span class="grow">'+esc(x.user_id===me?'Vos':x.nick)+'</span><b>'+nf(+x.score)+'</b></div>').join('')+
+     (wait.length?'<p class="mut sm-t" style="margin:6px 0 0">Invitados: '+wait.map(x=>esc(x.nick)).join(', ')+'</p>':'')+'</div>'+
+     (inv?'<div class="g2" style="margin-top:10px"><button class="btn sm" data-a="compNo" data-v="'+c.id+'">No, gracias</button><button class="btn sm pri" data-a="compYes" data-v="'+c.id+'">Sumarme</button></div>':
+      c.owner===me?'<button class="trn-x" data-a="compDel" data-v="'+c.id+'">Borrar torneo</button>':'<button class="trn-x" data-a="compLeave" data-v="'+c.id+'">Salir</button>')+'</div>';};
+  const act=cs.filter(c=>c.end_day>=t),old=cs.filter(c=>c.end_day<t);
+  return '<button class="btn pri wide" data-a="compNew" style="margin-bottom:12px">'+ic('plus',16)+' Crear torneo</button>'+
+   (act.length?act.map(card).join(''):'<p class="mut sm-t" style="margin:0 0 6px">Armá un torneo con los amigos que quieras: quién entrena más días, quién hace más series o quién suma más puntos en una semana o un mes.</p>')+
+   (old.length?'<h4 class="soc-h">Terminados</h4>'+old.map(card).join(''):'');
+}
+function compNewHTML(m){
+  const fr=(S.social&&S.social.friends)||[];
+  if(!fr.length)return '<p>Primero agregá amigos: el torneo es entre ustedes.</p><button class="btn wide" data-a="close" data-v="m2">Volver</button>';
+  return '<label class="field">Nombre<input id="cmpName" type="text" maxlength="40" value="'+esc(m.name||'')+'" placeholder="Ej: Semana de piernas"></label>'+
+   '<div class="field"><span>¿Qué cuenta?</span><div class="seg">'+Object.keys(COMP_MET).map(k=>'<button class="'+(m.metric===k?'on':'')+'" data-a="compSet" data-v="metric|'+k+'">'+COMP_MET[k][0]+'</button>').join('')+'</div>'+
+   '<small class="mut sm-t">'+(m.metric==='w'?'Gana el que entrena más días distintos.':m.metric==='sets'?'Gana el que hace más series (sin contar el calentamiento).':'Entrenos, récords, subidas de nivel y misiones: premia progresar, no ser el más fuerte.')+'</small></div>'+
+   '<div class="field"><span>Duración</span><div class="seg">'+[[7,'1 semana'],[14,'2 semanas'],[30,'1 mes']].map(([d,n])=>'<button class="'+(m.days===d?'on':'')+'" data-a="compSet" data-v="days|'+d+'">'+n+'</button>').join('')+'</div></div>'+
+   '<div class="field"><span>¿Con quién?</span><div class="chips" style="flex-wrap:wrap">'+fr.map(r=>'<button class="chip '+(m.mem.includes(r.user_id)?'on':'')+'" data-a="compMem" data-v="'+r.user_id+'">'+(m.mem.includes(r.user_id)?ic('check',13)+' ':'')+esc(r.nick||'Atleta')+'</button>').join('')+'</div></div>'+
+   '<p class="mut sm-t">Arranca hoy. A tus amigos les llega la invitación en Amigos → Torneos.</p>'+
+   '<button class="btn pri wide" data-a="compSave">Crear torneo</button>';
 }
 function friendCardHTML(r){
   if(!r)return '';
@@ -3638,6 +3761,33 @@ function csvHTML(m){
 /* poses de perfil (mirando a la derecha) en un cuadro de 120×120; el piso está en y=110.
    h cabeza, n cuello/hombro, p cadera, k rodilla, f pie, e codo, a mano; k2/f2 y e2/a2 = la otra pierna/brazo (más tenue); b = barra */
 const TECH={
+  invrow:{eq:['lowbar'],A:{h:[30,66],n:[40,63],p:[72,86],k:[88,97],f:[104,108],e:[38,55],a:[36,46]},B:{h:[29,53],n:[39,52],p:[71,79],k:[88,94],e:[52,53]}},
+  flfull:{eq:['pullbar'],A:{h:[32,36],n:[42,34],p:[76,35],k:[94,36],f:[110,37],e:[41,23],a:[40,12]},B:{p:[76,36],k:[94,37],f:[110,39]}},
+  /* variantes de habilidades: cada una con su postura (encogida, avanzada, abierta...) */
+  fltuck:{eq:['pullbar'],A:{h:[32,36],n:[42,34],p:[72,36],k:[58,23],f:[74,25],e:[41,23],a:[40,12]},B:{p:[72,37],k:[58,24],f:[74,26]}},
+  fladv:{eq:['pullbar'],A:{h:[32,36],n:[42,34],p:[76,35],k:[78,20],f:[94,21],e:[41,23],a:[40,12]},B:{p:[76,36],k:[78,21],f:[94,22]}},
+  flone:{eq:['pullbar'],A:{h:[32,36],n:[42,34],p:[76,35],k:[94,35],f:[110,35],k2:[78,21],f2:[94,22],e:[41,23],a:[40,12]},B:{p:[76,36],k:[94,37],f:[110,38]}},
+  flstr:{eq:['pullbar'],A:{h:[32,36],n:[42,34],p:[76,35],k:[94,36],f:[110,37],k2:[92,29],f2:[107,24],e:[41,23],a:[40,12]},B:{p:[76,36],k:[94,37],f:[110,39]}},
+  skincat:{eq:['pullbar'],A:{h:[60,30],n:[60,40],p:[60,70],k:[56,86],f:[66,98],e:[60,26],a:[60,12]},B:{h:[40,44],n:[48,40],p:[74,44],k:[58,56],f:[74,60],e:[54,26],a:[60,12]}},
+  bltuck:{eq:['pullbar'],A:{h:[30,40],n:[40,37],p:[70,39],k:[56,51],f:[72,53],e:[46,24],a:[48,12]},B:{p:[70,40],k:[56,52],f:[72,54]}},
+  bladv:{eq:['pullbar'],A:{h:[30,40],n:[40,37],p:[76,38],k:[76,53],f:[92,53],e:[46,24],a:[48,12]},B:{p:[76,39],k:[76,54],f:[92,54]}},
+  blstr:{eq:['pullbar'],A:{h:[30,40],n:[40,37],p:[76,38],k:[94,38],f:[110,38],k2:[92,45],f2:[106,50],e:[46,24],a:[48,12]},B:{p:[76,39],k:[94,39],f:[110,40]}},
+  blfull:{eq:['pullbar'],A:{h:[30,40],n:[40,37],p:[76,38],k:[94,38],f:[110,38],e:[46,24],a:[48,12]},B:{p:[76,39],k:[94,40],f:[110,41]}},
+  crow:{eq:['floor'],A:{h:[28,98],n:[38,92],p:[60,78],k:[47,92],f:[66,96],e:[44,100],a:[42,110]},B:{h:[27,99],p:[60,77],k:[47,91],f:[66,95]}},
+  pllean:{eq:['floor'],A:{h:[22,82],n:[31,86],p:[66,96],k:[84,102],f:[102,108],e:[37,98],a:[42,110]},B:{h:[18,81],n:[27,85],e:[35,97]}},
+  pltuck:{eq:['floor'],A:{h:[34,90],n:[44,92],p:[70,90],k:[56,100],f:[72,102],e:[43,101],a:[42,110]},B:{p:[70,91],k:[56,101],f:[72,103]}},
+  pladv:{eq:['floor'],A:{h:[34,90],n:[44,92],p:[76,91],k:[78,104],f:[94,104],e:[43,101],a:[42,110]},B:{p:[76,92],k:[78,105],f:[94,105]}},
+  plstr:{eq:['floor'],A:{h:[37,88],n:[46,92],p:[78,92],k:[94,92],f:[110,92],k2:[92,99],f2:[106,104],e:[43,101],a:[40,110]},B:{p:[78,93],k:[94,93],f:[110,94]}},
+  lsittuck:{eq:['bars'],A:{h:[57,48],n:[56,58],p:[58,90],k:[72,79],f:[77,92],e:[54,76],a:[52,92]},B:{h:[57,47],n:[56,57],p:[58,89],k:[72,78],f:[77,91]}},
+  lsitone:{eq:['bars'],A:{h:[57,48],n:[56,58],p:[58,90],k:[80,90],f:[100,90],k2:[72,96],f2:[70,108],e:[54,76],a:[52,92]},B:{h:[57,47],n:[56,57],p:[58,89],k:[80,88],f:[100,87]}},
+  vsit:{eq:['bars'],A:{h:[55,50],n:[56,60],p:[60,92],k:[75,73],f:[88,55],e:[54,77],a:[52,92]},B:{h:[55,49],k:[75,72],f:[88,53]}},
+  pike:{eq:['floor'],A:{h:[38,92],n:[43,85],p:[72,52],k:[88,80],f:[102,108],e:[39,97],a:[36,110]},B:{h:[44,103],n:[49,95],p:[74,58],e:[30,101]}},
+  wallhs:{eq:['floor','wall'],A:{h:[61,96],n:[60,86],p:[60,56],k:[60,36],f:[60,16],e:[60,98],a:[60,110]},B:{p:[61,56],k:[62,36],f:[63,16]}},
+  hspu:{eq:['floor','wall'],A:{h:[61,96],n:[60,86],p:[60,56],k:[60,36],f:[60,16],e:[60,98],a:[60,110]},B:{h:[61,103],n:[60,95],p:[60,65],k:[60,45],f:[60,25],e:[48,101]}},
+  freehspu:{eq:['floor'],A:{h:[61,96],n:[60,86],p:[60,56],k:[60,36],f:[60,16],e:[60,98],a:[60,110]},B:{h:[61,103],n:[60,95],p:[60,65],k:[60,45],f:[60,25],e:[48,101]}},
+  vflag:{eq:['pole'],A:{h:[36,54],n:[40,46],p:[58,22],k:[68,10],f:[78,3],e:[34,42],a:[30,38],e2:[34,58],a2:[30,64]},B:{p:[59,23],k:[70,11],f:[80,5]}},
+  flagtuck:{eq:['pole'],A:{h:[38,44],n:[40,46],p:[74,50],k:[62,36],f:[77,34],e:[34,42],a:[30,38],e2:[34,58],a2:[30,64]},B:{p:[74,51],k:[62,37],f:[77,35]}},
+  flagstr:{eq:['pole'],A:{h:[38,44],n:[40,46],p:[76,50],k:[94,53],f:[110,56],k2:[92,44],f2:[106,37],e:[34,42],a:[30,38],e2:[34,58],a2:[30,64]},B:{p:[76,51],k:[94,54],f:[110,58]}},
   squat:{eq:['floor'],A:{h:[61,26],n:[60,36],p:[58,66],k:[60,88],f:[60,110],e:[50,42],a:[56,34],b:[58,34]},B:{h:[69,50],n:[65,59],p:[46,86],k:[74,90],f:[60,110],e:[55,64],a:[61,57],b:[63,57]},
     cues:['Pies al ancho de hombros, puntas un poco afuera','Bajá sentándote atrás y abajo, con el pecho arriba','Las rodillas siguen la línea de los pies','Bajá al menos hasta que la cadera quede a la altura de las rodillas'],err:'Que las rodillas se vayan hacia adentro o que se levanten los talones'},
   pistol:{eq:['floor'],A:{h:[61,26],n:[60,36],p:[58,66],k:[60,88],f:[60,110],k2:[66,86],f2:[72,106],e:[70,46],a:[82,48]},B:{h:[70,52],n:[65,60],p:[48,88],k:[72,92],f:[60,110],k2:[76,88],f2:[100,86],e:[80,62],a:[94,62]},
@@ -3727,6 +3877,10 @@ Object.assign(TECH,{
 /* qué figura usa cada ejercicio */
 function techOf(ex){
   if(!ex)return null;const id=ex.id,f=ex.sk&&ex.sk.f;
+  const SKX={tuckfl:'fltuck',advfl:'fladv',onelegfl:'flone',straddlefl:'flstr',fullfl:'flfull',austrow:'invrow',airsquat:'airsq',skincat:'skincat',tuckbl:'bltuck',advbl:'bladv',straddlebl:'blstr',fullbl:'blfull',
+    crow:'crow',pllean:'pllean',tuckpl:'pltuck',advpl:'pladv',straddlepl:'plstr',fullpl:'planche',tucklsit:'lsittuck',onelegl:'lsitone',lsit:'lsit',vsit:'vsit',
+    pikepush:'pike',wallhs:'wallhs',freehs:'hs',hspu:'hspu',freehspu:'freehspu',vflag:'vflag',tuckflag:'flagtuck',straddleflag:'flagstr',flag:'flag',russiandip:'dip',impdip:'dip',boxpistol:'pistol'};
+  if(SKX[id])return SKX[id];
   if(f==='fl'||f==='bl')return 'fl';if(f==='pl')return 'planche';if(id==='pppush')return 'pushup';if(f==='hs')return 'hs';if(f==='lsit')return 'lsit';
   const M={squat:'squat',frontsquat:'squat',legpress:'squat',airsquat:'squat',jumpsquat:'squat',shrimp:'pistol',pistol:'pistol',dragon:'pistol',
     deadlift:'hinge',rdl:'hinge',kbswing:'hinge',hyper:'hinge',hipthrust:'thrust',bench:'bench',incbench:'bench',dbpress:'bench',dbfly:'bench',
@@ -3741,6 +3895,8 @@ function techOf(ex){
   const BYM={pecho:'bench',dorsales:'row',trapecio:'shrug',hombros:'press',biceps:'curl',triceps:'pushdown',antebrazos:'wrist',cuadriceps:'squat',isquios:'legcurl',gluteos:'thrust',gemelos:'calf',aductores:'sideplank',lumbar:'hinge',abs:'crunch',oblicuos:'russian'};
   return (ex.p&&BYM[ex.p[0]])||'plank';
 }
+/* sentadilla sin peso: la misma postura pero sin la barra */
+if(TECH.squat&&!TECH.airsq){const nb=o=>{const c=Object.assign({},o);delete c.b;return c;};TECH.airsq={eq:TECH.squat.eq,A:Object.assign(nb(TECH.squat.A),{e:[70,42],a:[82,40]}),B:Object.assign(nb(TECH.squat.B||{}),{e:[78,62],a:[92,60]})};}
 function techSVG(k,stat){
   const T=TECH[k];if(!T)return '';
   const A=T.A,B=Object.assign({},A,T.B),D='2.8s',ks='keyTimes="0;.45;.55;1" calcMode="spline" keySplines=".45 0 .3 1;0 0 1 1;.45 0 .3 1"';
@@ -3752,13 +3908,16 @@ function techSVG(k,stat){
   if(has('floor'))eq+=fl;
   if(has('bench')){const th=k==='thrust',sp=k==='sideplank';const x=th?8:sp?82:16,w=th?26:sp?30:62;eq+='<rect class="tq-eq" x="'+x+'" y="'+(th?80:sp?84:83)+'" width="'+w+'" height="6" rx="3"/><line class="tq-eq" x1="'+(x+5)+'" y1="88" x2="'+(x+5)+'" y2="110"/><line class="tq-eq" x1="'+(x+w-5)+'" y1="88" x2="'+(x+w-5)+'" y2="110"/>'+fl;}
   if(has('seat'))eq+='<rect class="tq-eq" x="36" y="85" width="40" height="6" rx="3"/><rect class="tq-eq" x="34" y="44" width="6" height="44" rx="3"/><line class="tq-eq" x1="56" y1="91" x2="56" y2="110"/>'+fl;
-  if(has('pullbar'))eq+='<line class="tq-eq" x1="'+(k==='fl'?24:36)+'" y1="11" x2="'+(k==='fl'?58:84)+'" y2="11"/>';
-  if(has('bars'))eq+='<line class="tq-eq" x1="'+(k==='lsit'?40:44)+'" y1="'+(k==='lsit'?93:63)+'" x2="'+(k==='lsit'?66:76)+'" y2="'+(k==='lsit'?93:63)+'"/><line class="tq-eq" x1="'+(k==='lsit'?46:70)+'" y1="'+(k==='lsit'?93:63)+'" x2="'+(k==='lsit'?46:70)+'" y2="111"/>'+fl;
+  const lv=/^(fl|bl|skincat)/.test(k),ls=/^(lsit|vsit)/.test(k);
+  if(has('pullbar'))eq+='<line class="tq-eq" x1="'+(lv?24:36)+'" y1="11" x2="'+(lv?62:84)+'" y2="11"/>';
+  if(has('lowbar'))eq+='<line class="tq-eq" x1="20" y1="46" x2="54" y2="46"/><line class="tq-eq" x1="24" y1="46" x2="24" y2="111"/>'+fl;
+  if(has('wall'))eq+='<line class="tq-eq" x1="70" y1="4" x2="70" y2="111"/>';
+  if(has('bars'))eq+='<line class="tq-eq" x1="'+(ls?40:44)+'" y1="'+(ls?93:63)+'" x2="'+(ls?66:76)+'" y2="'+(ls?93:63)+'"/><line class="tq-eq" x1="'+(ls?46:70)+'" y1="'+(ls?93:63)+'" x2="'+(ls?46:70)+'" y2="111"/>'+fl;
   if(has('pole'))eq+='<line class="tq-eq" x1="28" y1="6" x2="28" y2="111"/>'+fl;
   if(has('box'))eq+='<rect class="tq-eq" x="64" y="82" width="38" height="28" rx="3"/>'+fl;
   if(has('cables'))eq+='<line class="tq-cab" x1="8" y1="8" x2="'+A.a[0]+'" y2="'+A.a[1]+'">'+an('x2',A.a[0],B.a[0])+an('y2',A.a[1],B.a[1])+'</line><line class="tq-cab" x1="112" y1="8" x2="'+A.a2[0]+'" y2="'+A.a2[1]+'">'+an('x2',A.a2[0],B.a2[0])+an('y2',A.a2[1],B.a2[1])+'</line>';
   const cab=A.c?'<line class="tq-cab" x1="'+A.c[0]+'" y1="'+A.c[1]+'" x2="'+A.a[0]+'" y2="'+A.a[1]+'">'+an('x2',A.a[0],B.a[0])+an('y2',A.a[1],B.a[1])+'</line><circle class="tq-eq" cx="'+A.c[0]+'" cy="'+A.c[1]+'" r="3"/>':'';
-  const shadow=A.f&&k!=='fl'&&k!=='legraise'&&k!=='pullup'&&k!=='flag'?'<ellipse class="tq-sh" cx="'+A.f[0]+'" cy="111" rx="16" ry="2.5">'+an('cx',A.f[0],B.f[0])+'</ellipse>':'';
+  const shadow=A.f&&!lv&&!/^(legraise|pullup|flag|vflag)/.test(k)?'<ellipse class="tq-sh" cx="'+A.f[0]+'" cy="111" rx="16" ry="2.5">'+an('cx',A.f[0],B.f[0])+'</ellipse>':'';
   const plate=A.b?(k==='slam'?'<circle class="tq-ball" cx="'+A.b[0]+'" cy="'+A.b[1]+'" r="7">'+an('cx',A.b[0],B.b[0])+an('cy',A.b[1],B.b[1])+'</circle>':dot('b',6.5,'tq-plate')+dot('b',2,'tq-hub')):'';
   return '<svg class="tq'+(stat?' st':'')+'" viewBox="0 0 120 120" role="img" aria-label="Cómo se hace">'+eq+shadow+cab+
    '<g class="tq-b2">'+bone('p','k2',6.5)+bone('k2','f2',5.5)+bone('n','e2',5)+bone('e2','a2',4.5)+'</g>'+
@@ -3938,12 +4097,13 @@ function rimportHTML(m){
 
 /* ============ Árbol radial: de vos (el centro) hacia afuera ============ */
 const RT_IC={push:'dumb',pull:'up',dip:'down',legs:'muscle',lsit:'acro',hs:'up',fl:'lever',bl:'lever',pl:'planche',flag:'flag'};
-const RT_SHORT={kneepush:'De rodillas',pushup:'Flexiones',diamond:'Diamante',archerpush:'Arquero',pppush:'Pseudo planche',oapush:'A un brazo',planchepush:'En planche',austrow:'Remo invertido',pullup:'Dominadas',lpullup:'En L',archerpull:'Arquero',muscleup:'Muscle-up',oapull:'A un brazo',benchdip:'En banco',dips:'Paralelas',ringdip:'Anillas',airsquat:'Sentadilla',shrimp:'Shrimp',pistol:'Pistol',dragon:'Dragon pistol',tucklsit:'Encogido',lsit:'L-sit',vsit:'V-sit',wallhs:'En pared',freehs:'Libre',hspu:'Flexión en pared',freehspu:'Flexión libre',tuckfl:'Encogido',advfl:'Avanzado',straddlefl:'Abierto',fullfl:'Completo',tuckbl:'Encogido',straddlebl:'Abierto',fullbl:'Completo',tuckpl:'Encogida',advpl:'Avanzada',straddlepl:'Abierta',fullpl:'Completa',flag:'Bandera'};
+const RT_SHORT={kneepush:'De rodillas',pushup:'Flexiones',diamond:'Diamante',archerpush:'Arquero',pppush:'Pseudo planche',oapush:'A un brazo',planchepush:'En planche',austrow:'Remo invertido',pullup:'Dominadas',lpullup:'En L',archerpull:'Arquero',muscleup:'Muscle-up',oapull:'A un brazo',benchdip:'En banco',dips:'Paralelas',ringdip:'Anillas',airsquat:'Sentadilla',shrimp:'Shrimp',pistol:'Pistol',dragon:'Dragon pistol',tucklsit:'Encogido',lsit:'L-sit',vsit:'V-sit',wallhs:'En pared',freehs:'Libre',hspu:'Flexión en pared',freehspu:'Flexión libre',tuckfl:'Encogido',advfl:'Avanzado',straddlefl:'Abierto',fullfl:'Completo',tuckbl:'Encogido',straddlebl:'Abierto',fullbl:'Completo',tuckpl:'Encogida',advpl:'Avanzada',straddlepl:'Abierta',fullpl:'Completa',flag:'Completa',
+  pikepush:'Pica',crow:'Cuervo',pllean:'Lean',onelegfl:'Una pierna',skincat:'Skin the cat',advbl:'Avanzado',onelegl:'Una pierna',russiandip:'Rusos',impdip:'Imposible',boxpistol:'Al cajón',vflag:'Vertical',tuckflag:'Encogida',straddleflag:'Abierta'};
 
 function rtLayout(){
   const bs=branches(),N=bs.length,out=[];
   bs.forEach((b,bi)=>{const ang=-Math.PI/2+bi*2*Math.PI/N;
-    b.nodes.forEach((n,i)=>{const r=185+i*108,a=ang+i*0.16+Math.sin(i*1.7+bi)*0.03;out.push({b,bi,i,n,ang:a,x:Math.cos(a)*r,y:Math.sin(a)*r,s:nodeState(b,i)});});});
+    b.nodes.forEach((n,i)=>{const r=150+i*94,a=ang+i*0.16+Math.sin(i*1.7+bi)*0.03;out.push({b,bi,i,n,ang:a,x:Math.cos(a)*r,y:Math.sin(a)*r,s:nodeState(b,i)});});});
   return out;
 }
 const RT_HUE={push:'#A78BFF',pull:'#4FA8FF',dip:'#2FE0C8',legs:'#7BE35A',lsit:'#FFD36B',hs:'#FF9F43',fl:'#FF5FA2',bl:'#D77BFF',pl:'#FF6B6B',flag:'#5AE0FF'};
@@ -3994,8 +4154,12 @@ function radialHTML(m){
 /* mover y hacer zoom: el árbol es un lienzo fijo y se mueve con transform (va por la placa de video, no se redibuja) */
 (()=>{const pts=new Map();let start=null,moved=false,vel=null,last=null,raf=0,idle=0;
   const wrap=()=>$('#rtWrap'),svg=()=>$('#rtSvg'),sky=()=>$('#rtSky');
-  const st=()=>(S.rt=S.rt||{x:0,y:0,w:820});
-  const apply=()=>{const w=wrap(),s=svg();if(!w||!s)return;const v=st(),W=w.clientWidth,Hh=w.clientHeight,k=W/v.w;
+  const st=()=>(S.rt=S.rt||{x:0,y:0,w:1600,fit:1});
+  /* al abrir: que entre el árbol entero (el radio llega a ~900 con los nombres de las ramas) */
+  const fitW=()=>{const w=wrap();if(!w||!w.clientHeight)return 1600;const W=w.clientWidth,H=w.clientHeight;
+    /* entra el árbol entero, salvo en pantallas angostas: ahí no achico tanto que los círculos queden ilegibles */
+    return Math.round(Math.min(1600*Math.max(1,W/H),Math.max(1000,W*2.7)));};
+  const apply=()=>{const w=wrap(),s=svg();if(!w||!s)return;const v=st();if(v.fit){v.w=fitW();v.x=0;v.y=0;delete v.fit;}const W=w.clientWidth,Hh=w.clientHeight,k=W/v.w;
     s.style.transform='translate3d('+(W/2-(v.x+1000)*k).toFixed(2)+'px,'+(Hh/2-(v.y+1000)*k).toFixed(2)+'px,0) scale('+k.toFixed(4)+')';
     const y=sky();if(y)y.style.transform='translate3d('+(W/2-(v.x*.55+1000)*k).toFixed(2)+'px,'+(Hh/2-(v.y*.55+1000)*k).toFixed(2)+'px,0) scale('+k.toFixed(4)+')';
     /* mientras se mueve, capa aparte; al quedarse quieto se vuelve a dibujar nítido */
@@ -4003,7 +4167,7 @@ function radialHTML(m){
   const unit=()=>{const w=wrap();return w?st().w/w.clientWidth:1;};
   const center=()=>{const r=wrap().getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2,W:r.width};};
   /* zoom alrededor de un punto de la pantalla */
-  const zoomAt=(cx,cy,nw)=>{const v=st(),c=center(),u0=v.w/c.W,wx=v.x+(cx-c.x)*u0,wy=v.y+(cy-c.y)*u0;v.w=clamp(nw,320,1900);const u1=v.w/c.W;v.x=wx-(cx-c.x)*u1;v.y=wy-(cy-c.y)*u1;};
+  const zoomAt=(cx,cy,nw)=>{const v=st(),c=center(),u0=v.w/c.W,wx=v.x+(cx-c.x)*u0,wy=v.y+(cy-c.y)*u0;v.w=clamp(nw,320,Math.max(1900,fitW()));const u1=v.w/c.W;v.x=wx-(cx-c.x)*u1;v.y=wy-(cy-c.y)*u1;};
   document.addEventListener('pointerdown',e=>{if(!e.target.closest('#rtWrap')||e.target.closest('.rt-ctrl'))return;cancelAnimationFrame(raf);vel=null;
     pts.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=false;last={x:e.clientX,y:e.clientY,t:performance.now()};
     start={v:Object.assign({},st()),p:[...pts.values()].map(p=>({...p}))};},{passive:true});
@@ -4948,6 +5112,8 @@ function modalBody(m,l2){
     case 'phcmp':return sheet('Antes y después',photoCmpHTML(m));
     case 'phview':return sheet('Foto de progreso',photoViewHTML(m),{l2:true});
     case 'friends':return sheet('Amigos',friendsHTML(m));
+    case 'skmark':return sheet('Ya la logro',skMarkHTML(m),{l2:true});
+    case 'comp':return sheet('Nuevo torneo',compNewHTML(m),{l2:true});
     case 'fcard':return sheet('Perfil',friendCardHTML(S.social&&S.social.friends.concat(S.social.me?[S.social.me]:[]).find(r=>r.user_id===m.id)),{l2:true});
     case 'cmd':return cmdHTML(m);
     case 'tools':return sheet('Herramientas',toolsHTML(m));
@@ -4965,7 +5131,7 @@ function modalBody(m,l2){
      '<p class="mut sm-t tc" style="margin-top:10px">FUE es tu fuerza en los básicos con barra; el resto, tu mejor ejercicio de cada zona. Suben a medida que subís de rango.</p></div></div>';
     case 'recap':return recapHTML(m);
     case 'quick':return sheet('¿Qué hacemos?',quickHTML());
-    case 'food':return sheet(m.d.step==='photo'?'Tu plato':m.d.step==='new'?'Alimento propio':m.d.step==='quick'?'Solo calorías':m.d.edit?'Editar':'Agregar a '+MEAL_N[m.d.m].toLowerCase(),foodHTML(m.d),{l2:true});
+    case 'food':return sheet(m.d.step==='photo'?'Tu plato':m.d.step==='new'?'Alimento propio':m.d.step==='quick'?'Anotar calorías':m.d.edit?'Editar':'Agregar a '+MEAL_N[m.d.m].toLowerCase(),foodHTML(m.d),{l2:true});
     case 'onb':return onbHTML(m);
     case 'plates':return sheet('Calculadora de discos',platesHTML(m.d),{l2:true});
     case 'gen':return sheet('Armame una rutina',genHTML(m.d),{l2:true});
@@ -5376,14 +5542,28 @@ const ACTIONS={
   photoView(v){S.m2={t:'phview',id:v};render();},
   photoDel(v){PhotoDB.del(v).then(()=>{S.m2=null;if(S.modal&&S.modal.t==='phcmp')S.modal=null;render();loadPhotos();toast('Foto borrada');});},
   photoCompare(){const ps=photoCache||[];if(ps.length<2)return;S.modal={t:'phcmp',a:ps[0].id,b:ps[ps.length-1].id,x:50};render();},
-  socOpen(v){S.modal={t:'friends',tab:v||'rank',met:'ovr'};render();if(Social.on())Social.load().then(()=>renderModal()).catch(e=>toast(Social.errTxt(e)));},
-  socTab(v){S.modal.tab=v;renderModal();},
+  socOpen(v){S.modal={t:'friends',tab:v==='season'?'comp':v||'rank',met:'ovr'};render();if(Social.on())Social.load().then(()=>renderModal()).catch(e=>toast(Social.errTxt(e)));},
+  socTab(v){S.modal.tab=v==='season'?'comp':v;renderModal();},
+  socYes(v){Social.answer(v,true).then(()=>{renderModal();toast('¡Listo! Ya son amigos');confetti(30);}).catch(e=>toast(Social.errTxt(e)));},
+  socNo(v){Social.answer(v,false).then(()=>{renderModal();toast('Solicitud rechazada');}).catch(e=>toast(Social.errTxt(e)));},
+  socCancel(v){Social.cancel(v).then(()=>{renderModal();toast('Solicitud cancelada');}).catch(e=>toast(Social.errTxt(e)));},
+  compNew(){S.m2={t:'comp',name:'',metric:'w',days:7,mem:[]};render();},
+  compSet(v){const[k,x]=v.split('|');const n=$('#cmpName');if(n)S.m2.name=n.value;S.m2[k]=k==='days'?+x:x;renderModal();},
+  compMem(v){const n=$('#cmpName');if(n)S.m2.name=n.value;const a=S.m2.mem,i=a.indexOf(v);if(i<0)a.push(v);else a.splice(i,1);renderModal();},
+  compSave(){const m=S.m2,n=$('#cmpName'),name=(n?n.value:m.name).trim()||(COMP_MET[m.metric][0]+' en '+(m.days===7?'1 semana':m.days===14?'2 semanas':'1 mes'));
+    if(!m.mem.length)return toast('Elegí al menos un amigo');
+    toast('Creando…');Social.compCreate(name,m.metric,m.days,m.mem).then(()=>{S.m2=null;if(S.modal&&S.modal.t==='friends')S.modal.tab='comp';render();toast('Torneo creado: ya les llegó la invitación');}).catch(e=>toast(Social.errTxt(e)));},
+  compYes(v){Social.compJoin(v,true).then(()=>{renderModal();toast('¡Adentro! Que gane el mejor');}).catch(e=>toast(Social.errTxt(e)));},
+  compNo(v){Social.compJoin(v,false).then(()=>{renderModal();toast('Listo');}).catch(e=>toast(Social.errTxt(e)));},
+  compLeave(v){S.m2={t:'confirm',title:'Salir del torneo',msg:'Dejás de aparecer en la tabla de este torneo.',act:'compNo',arg:v,ok:'Salir'};render();},
+  compDel(v){S.m2={t:'confirm',title:'Borrar torneo',msg:'Se borra para todos los que están adentro.',act:'compDelGo',arg:v,ok:'Borrar'};render();},
+  compDelGo(v,el){const id=el&&el.dataset.v||v;S.m2=null;Social.compDel(id).then(()=>{render();toast('Torneo borrado');}).catch(e=>toast(Social.errTxt(e)));},
   socMet(v){S.modal.met=v;renderModal();},
   socOn(){toast('Activando…');Social.enable().then(ok=>{if(ok){render();toast('Listo: invitá a tus amigos con tu código');}}).catch(e=>toast(Social.errTxt(e)));},
   socOff(){S.m2={t:'confirm',title:'Dejar de compartir',msg:'Tus amigos dejan de ver tus rangos y novedades. Podés volver a activarlo cuando quieras (con un código nuevo).',act:'socOffGo',ok:'Dejar de compartir'};render();},
   socOffGo(){S.m2=null;Social.disable().then(()=>{render();toast('Ya no compartís nada');}).catch(e=>toast(Social.errTxt(e)));},
   socAdd(){const i=$('#socCode');const c=i?i.value:'';if(!c.trim())return toast('Escribí el código de tu amigo');
-    Social.add(c).then(()=>{renderModal();toast('¡Listo! Ya son amigos');confetti(30);}).catch(e=>toast(/code_len/.test(e.message)?'El código tiene 6 letras y números':Social.errTxt(e)));},
+    Social.add(c).then(r=>{if(i)i.value='';renderModal();toast(addMsg(r));if(r==='friends')confetti(30);}).catch(e=>toast(/code_len/.test(e.message)?'El código tiene 6 letras y números':Social.errTxt(e)));},
   socDel(v){const r=S.social&&S.social.friends.find(x=>x.user_id===v);S.m2={t:'confirm',title:'Sacar amigo',msg:'Dejan de verse los dos. '+(r?r.nick:'')+' no recibe ningún aviso.',act:'socDelGo',arg:v,ok:'Sacar'};render();},
   socDelGo(v,el){const id=el&&el.dataset.v||v;S.m2=null;Social.remove(id).then(()=>{render();toast('Listo');}).catch(e=>toast(Social.errTxt(e)));},
   socCard(v){S.m2={t:'fcard',id:v};render();},
@@ -5436,10 +5616,18 @@ const ACTIONS={
   todayGo(){const pl=todayPlan(S.todaySeed||0);startSession(null,null,pl);},
   todayAlt(){S.todaySeed=(S.todaySeed||0)+1;render();},
   sumShare(){if(S.modal&&S.modal.t==='summary')pngShare(summarySVG(S.modal),'swole-entreno.png','Mi entreno en Swole');},
-  treeOpen(){S.rt={x:0,y:0,w:820};S.modal={t:'tree',sel:null,view:'radial'};render();},
+  treeOpen(){S.rt={x:0,y:0,w:1600,fit:1};S.modal={t:'tree',sel:null,view:'radial'};render();},
   treeView(v){S.modal.view=v;renderModal();},
   rtZoom(v){S.rt=S.rt||{x:0,y:0,w:820};if(v==='home')rtFocus(0,0,820);else rtFocus(S.rt.x,S.rt.y,clamp(S.rt.w*(v==='in'?.72:1.38),320,1800));},
   treeSel(v){S.modal.sel=S.modal.sel===v?null:v;renderModal();if(S.modal.view!=='lista'&&S.modal.sel){const p=rtLayout().find(q=>q.n.id===v);if(p)rtFocus(p.x*.85,p.y*.85+60);}const d=document.getElementById('tdDet');if(d)d.scrollIntoView({block:'nearest',behavior:'smooth'});},
+  skMark(v){const f=findNode(v);if(!f)return;const n=f.b.nodes[f.i];S.m2={t:'skmark',id:v,n:Math.max(n.t,bestRep(v))};render();},
+  skMarkStep(v){const i=$('#skMarkN'),m=S.m2;m.n=Math.max(1,(parseInt(i&&i.value,10)||m.n)+(+v));renderModal();},
+  skMarkSave(){const i=$('#skMarkN'),m=S.m2,n=Math.round(+String(i?i.value:m.n).replace(',','.'));if(!(n>0))return toast('Poné cuánto hacés');
+    const f=findNode(m.id);if(!f)return;const node=f.b.nodes[f.i],was=nodeDone(f.b,f.i);
+    db.tests.push({id:uid(),date:today(),ex:m.id,kg:0,reps:n});save();S.m2=null;render();checkMissions();Social.schedule();
+    const now=nodeDone(f.b,f.i),nx=f.b.nodes[f.i+1];
+    if(now&&!was){confetti(40);toast('¡Dominada!'+(nx?' Se desbloqueó '+shortN(nx.ex.n):' Terminaste la rama'));if(nx&&S.modal&&S.modal.t==='tree'){S.modal.sel=nx.id;renderModal();}}
+    else toast(now?'Guardado':'Guardado: te faltan '+(node.t-n)+(node.time?' s':' reps')+' para dominarla');},
   skGoal(v){S.m2={t:'skplan',id:v};render();},
   skStart(v){const p=skillPlan(v);if(!p)return;db.settings.skillGoal={id:v,since:today()};S.m2=null;S.modal=null;save();startSession(null,null,{name:'Camino a '+shortN(p.tg.n),items:p.items,rest:150});},
   skSave(v){const p=skillPlan(v);if(!p)return;
