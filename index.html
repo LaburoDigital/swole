@@ -1481,6 +1481,31 @@ small{line-height:1.35}
 .mus-t{min-width:0}.mus-t b{display:block;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mus-t small{display:block;color:var(--mut);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mus .ib.flat{width:36px;height:36px;flex:none}.mus-pp{width:44px;height:44px;flex:none;border-radius:50%;background:var(--text);color:var(--bg)}
 .fd-row.on{border-color:var(--acc)}
+/* v51: feed social */
+.av{display:inline-grid;place-items:center;border-radius:50%;color:#fff;font:800 16px var(--f-d);flex:none}
+.auto-post{display:flex;align-items:center;gap:10px;margin:2px 2px 12px;font-size:14px;color:var(--mut)}.auto-post input{width:20px;height:20px;accent-color:var(--acc)}
+.feed-p{display:grid;gap:12px;margin-bottom:8px}
+.post{padding:14px;border-radius:18px;background:var(--raise);border:1px solid var(--line);display:grid;gap:10px}
+.post-h{display:flex;align-items:center;gap:10px}.post-h small{display:block;color:var(--mut);font-size:12px}.post-h b{font-size:15px}
+.post-t{font:800 18px var(--f-d);margin:0}
+.post-s{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13.5px;color:var(--mut)}.post-s span{display:inline-flex;align-items:center;gap:4px}
+.post-pr{display:flex;flex-wrap:wrap;gap:6px}.post-pr span{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:10px;font:700 12.5px var(--f-b);color:#E8B64C;background:color-mix(in srgb,#E8B64C 14%,transparent)}
+.post-pr span.up{color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}
+.post-ex{display:grid;gap:4px;font-size:13.5px}.post-ex>div{display:flex;justify-content:space-between;gap:10px}.post-ex>div>span:first-child{font-weight:600}
+.post-a{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding-top:10px}
+.post-a>button,.fire{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:12px;background:var(--surf);border:1px solid var(--line);color:var(--mut);font:700 14px var(--f-b)}
+.fire.on{color:#FF7A3D;border-color:color-mix(in srgb,#FF7A3D 50%,transparent);background:color-mix(in srgb,#FF7A3D 14%,var(--surf))}
+.fire.on svg{fill:#FF7A3D;animation:fireBump .35s cubic-bezier(.22,1.6,.36,1)}
+@keyframes fireBump{40%{transform:scale(1.35) rotate(-8deg)}}
+.fire.sm{padding:6px 9px}
+.post-lk{font-size:12.5px;color:var(--mut);display:inline-flex;gap:4px;align-items:center;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmts{display:grid;gap:6px}.cm{font-size:14px;line-height:1.35;position:relative;padding-right:22px}.cm-x{position:absolute;right:0;top:0;background:none;border:0;color:var(--mut);padding:2px}
+.cm-more{background:none;border:0;color:var(--mut);font-size:13px;text-align:left;padding:0}
+.cm-in{display:flex;gap:8px;align-items:center}.cm-in input{flex:1;min-width:0;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surf);color:var(--text);font:500 14.5px var(--f-b)}
+.sum-post{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--acc) 12%,var(--raise));font-size:13.5px;margin-bottom:12px}
+.ffc-r{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}.ffc-r small{display:block;color:var(--mut);font-size:12px}.ffc-r .grow{min-width:0;font-size:14px}
+.onb-plan{display:grid;gap:8px;margin:14px 0 4px;text-align:left}.onb-plan>div{display:grid;gap:2px;padding:12px 14px;border-radius:14px;background:var(--raise);border:1px solid var(--line)}.onb-plan b{font:800 16px var(--f-d)}.onb-plan span{color:var(--mut);font-size:13px}
+.onb-skip{display:block;margin:6px auto 0;background:none;border:0;color:var(--mut);font:600 14px var(--f-b);padding:8px}
 </style>
 </head>
 <body>
@@ -2309,6 +2334,8 @@ const weightNow=()=>db.profile?db.profile.weight:null;
 function waterGoal(){return Math.max(6,Math.round((weightNow()||70)*35/250));}
 /* ============ Iconos ============ */
 const IC={
+  chat:'<path d="M5 18l-2 3V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H8z"/>',
+  send:'<path d="M4 12l16-8-6 16-2-7z"/>',
   music:'<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
   pause:'<path d="M8 5v14M16 5v14"/>',
   prev:'<path d="M18 6l-9 6 9 6zM6 6v12"/>',
@@ -3519,6 +3546,8 @@ const Social=(()=>{
     S.social={at:Date.now(),me:(rows||[]).find(r=>r.user_id===me)||null,friends:(rows||[]).filter(r=>r.user_id!==me),req:[],comps:[]};
     try{S.social.req=await Sync.req('/rest/v1/rpc/swole_requests',{method:'POST',auth:true,body:{}})||[];}catch(e){}
     try{await loadComps();}catch(e){}
+    try{await flush();}catch(e){}
+    try{await loadPosts();}catch(e){}
     afterSocial();
     return S.social;
   }
@@ -3562,6 +3591,49 @@ const Social=(()=>{
     await load();
   }
   async function compDel(id){await Sync.req('/rest/v1/swole_comp?id=eq.'+id,{method:'DELETE',auth:true});await load();}
+  /* entreno → post (cola por si no hay internet) */
+  function share(log,x){
+    if(!on()||db.settings.autoPost===false)return false;
+    const exs=log.entries.map(en=>{const ex=exById(en.ex);if(!ex)return null;const ss=en.sets.filter(s=>!s.w);if(!ss.length)return null;
+      const b=ss.reduce((a,s)=>e1(ex,s.kg,s.reps)>e1(ex,a.kg,a.reps)?s:a,ss[0]);return{n:shortN(ex.n),s:ss.length,b:setTxt(ex,b)};}).filter(Boolean);
+    const data={v:1,n:String(log.name||'Entrenamiento').slice(0,40),dur:log.dur,sets:x.sets,vol:Math.round(x.vol),
+      prs:x.prs.map(p=>{const e=exById(p.ex);return e?shortN(e.n):'';}).filter(Boolean).slice(0,6),
+      ups:x.ups.map(u=>{const e=exById(u.ex);return e?{n:shortN(e.n),L:u.to}:null;}).filter(Boolean).slice(0,4),ex:exs.slice(0,6),more:Math.max(0,exs.length-6)};
+    db.settings.postQ=(db.settings.postQ||[]).concat({log_id:String(log.id),day:log.date,data}).slice(-20);save();flush().catch(()=>{});return true;
+  }
+  async function flush(){
+    const q=db.settings.postQ||[];if(!q.length||!on())return;
+    for(const p of q.slice()){
+      await Sync.req('/rest/v1/swole_post?on_conflict=user_id,log_id',{method:'POST',auth:true,headers:{Prefer:'resolution=ignore-duplicates,return=minimal'},body:Object.assign({user_id:Sync.user().id},p)});
+      db.settings.postQ=(db.settings.postQ||[]).filter(x=>x.log_id!==p.log_id);save();
+    }
+  }
+  async function unshare(logId){
+    db.settings.postQ=(db.settings.postQ||[]).filter(x=>x.log_id!==String(logId));save();
+    await Sync.req('/rest/v1/swole_post?user_id=eq.'+Sync.user().id+'&log_id=eq.'+encodeURIComponent(logId),{method:'DELETE',auth:true});
+    if(S.social&&S.social.posts)S.social.posts=S.social.posts.filter(p=>!(p.user_id===Sync.user().id&&p.log_id===String(logId)));
+  }
+  async function loadPosts(){
+    const r=await Sync.req('/rest/v1/swole_post?select=id,user_id,log_id,nick,day,data,created_at,swole_like(user_id),swole_comment(id,user_id,nick,body,created_at)&order=created_at.desc&limit=40',{auth:true})||[];
+    r.forEach(p=>{p.likes=(p.swole_like||[]).map(x=>x.user_id);p.cmts=(p.swole_comment||[]).sort((a,b)=>a.created_at<b.created_at?-1:1);delete p.swole_like;delete p.swole_comment;});
+    if(S.social)S.social.posts=r;return r;
+  }
+  async function fire(id){
+    const p=(S.social.posts||[]).find(x=>x.id===id),me=Sync.user().id;if(!p)return;
+    const had=p.likes.includes(me);p.likes=had?p.likes.filter(x=>x!==me):p.likes.concat(me);
+    try{if(had)await Sync.req('/rest/v1/swole_like?post_id=eq.'+id+'&user_id=eq.'+me,{method:'DELETE',auth:true});
+      else await Sync.req('/rest/v1/swole_like',{method:'POST',auth:true,headers:{Prefer:'resolution=ignore-duplicates,return=minimal'},body:{post_id:id,user_id:me}});}
+    catch(e){p.likes=had?p.likes.concat(me):p.likes.filter(x=>x!==me);throw e;}
+  }
+  async function comment(id,body){
+    const p=(S.social.posts||[]).find(x=>x.id===id);if(!p)return;
+    const r=await Sync.req('/rest/v1/swole_comment',{method:'POST',auth:true,headers:{Prefer:'return=representation'},body:{post_id:id,user_id:Sync.user().id,body}});
+    if(r&&r[0])p.cmts.push(r[0]);
+  }
+  async function uncomment(pid,cid){
+    await Sync.req('/rest/v1/swole_comment?id=eq.'+cid,{method:'DELETE',auth:true});
+    const p=(S.social.posts||[]).find(x=>x.id===pid);if(p)p.cmts=p.cmts.filter(c=>c.id!==cid);
+  }
   async function remove(id){await Sync.req('/rest/v1/rpc/swole_remove_friend',{method:'POST',auth:true,body:{p_friend:id}});await load();}
   /* código que llegó por link (?amigo=XXXXXX) */
   async function addPending(){
@@ -3570,7 +3642,7 @@ const Social=(()=>{
     try{localStorage.removeItem('swole.pendFriend');}catch(e){}
     try{const r=await add(c);toast(addMsg(r));render();}catch(e){toast(errTxt(e));}
   }
-  return{on,publish,schedule,load,enable,disable,add,remove,addPending,errTxt,answer,cancel,compCreate,compJoin,compDel,link:()=>location.origin+location.pathname+'?amigo='+(db.settings.social?db.settings.social.code:'')};
+  return{on,publish,schedule,load,enable,disable,add,remove,addPending,errTxt,answer,cancel,compCreate,compJoin,compDel,share,unshare,loadPosts,fire,comment,uncomment,link:()=>location.origin+location.pathname+'?amigo='+(db.settings.social?db.settings.social.code:'')};
 })();
 
 /* textos */
@@ -3627,6 +3699,8 @@ function friendsHTML(m){
      '<div class="lb">'+rows.map((x,i)=>{const s=(x.r.data||{}).season||{};return '<button class="lb-r'+(x.me?' me':'')+(i<3&&x.v>0?' top'+(i+1):'')+'" data-a="socCard" data-v="'+x.r.user_id+'"><span class="lb-n">'+(i+1)+'</span><span class="grow"><b>'+esc(x.r.nick||'Atleta')+(x.me?' <span class="tag">vos</span>':'')+'</b><small class="mut">'+plu(s.w||0,'entreno','entrenos')+' · '+plu(s.pr||0,'récord','récords')+' · '+plu((s.up||0)+(s.rank||0),'subida','subidas')+'</small></span><span class="lb-v"><b>'+x.v+'</b> pts</span></button>';}).join('')+'</div>'+
      '<details class="why"><summary>¿Cómo se suman puntos?</summary><div class="mut sm-t"><p>Entreno (uno por día): '+SEASON_PTS.w+' · Misiones semanales: 20 a 40 cada una · Récord: '+SEASON_PTS.pr+' · Subir de nivel en un ejercicio: '+SEASON_PTS.up+' · Dominar una habilidad: '+SEASON_PTS.sk+' · Subir de rango general: '+SEASON_PTS.rank+' · Logro: '+SEASON_PTS.ach+'.</p><p>Gana el que más progresa en el mes, no el más fuerte: el que recién empieza puede ganarle a cualquiera. Cada mes arranca de cero.</p></div></details>'+nf0;
   }else if(tab==='feed'){
+    body=feedHTML(sv)+nf0;
+  }else if(tab==='feedOld'){
     const all=[];sv.friends.concat(sv.me?[sv.me]:[]).forEach(r=>((r.data||{}).ev||[]).forEach(e=>all.push({e,r,me:sv.me&&r.user_id===sv.me.user_id})));
     all.sort((a,b)=>a.e.d<b.e.d?1:a.e.d>b.e.d?-1:0);
     body=all.length?'<div class="feed">'+all.slice(0,50).map(x=>'<div class="fd"><span class="fd-ic">'+ic(evIc(x.e.k),16)+'</span><span class="grow"><b>'+(x.me?'Vos':esc(x.r.nick||'Atleta'))+'</b> '+evTxt(x.e)+'</span><small class="mut">'+dayAgo(x.e.d)+'</small></div>').join('')+'</div>':'<p class="mut sm-t">Todavía no hay novedades.</p>'+nf0;
@@ -3672,6 +3746,42 @@ function podiumHTML(id){
    '<p class="pod-msg">'+(pos===0?'¡Ganaste! Nadie te paró.':pos>0&&pos<3?'Quedaste '+(pos+1)+'º: en el podio.':pos>=0?'Quedaste '+(pos+1)+'º de '+ms.length+'. El próximo es tuyo.':'')+'</p>'+
    (ms.length>3?'<div class="trn-rows">'+ms.slice(3).map((x,i)=>'<div class="trn-r'+(x.user_id===me?' me':'')+'"><span class="lb-n">'+(i+4)+'</span><span class="grow">'+esc(x.user_id===me?'Vos':x.nick)+'</span><b>'+nf(+x.score)+'</b></div>').join('')+'</div>':'')+
    '<div class="g2" style="margin-top:14px"><button class="btn" data-a="compNew">Revancha</button><button class="btn pri" data-a="close" data-v="m2">Listo</button></div>';
+}
+/* el feed: entrenos de tus amigos (y los tuyos) con fuego y comentarios, más otras novedades */
+const AV_COL=['#7A66FF','#FF4F93','#1F9E95','#E8A23C','#4FA8FF','#7BE35A','#D77BFF','#FF6B6B'];
+const avatar=(nick,uid,sz)=>'<span class="av" style="width:'+(sz||38)+'px;height:'+(sz||38)+'px;background:'+AV_COL[hashStr(String(uid||nick))%AV_COL.length]+'">'+esc(String(nick||'A').trim().charAt(0).toUpperCase())+'</span>';
+function postHTML(p,full){
+  const me=Sync.user()&&Sync.user().id,mine=p.user_id===me,d=p.data||{},liked=p.likes.includes(me),open=S.cOpen===p.id;
+  const ago=agoTxt(new Date(p.created_at).getTime());
+  const likers=p.likes.map(u=>u===me?'vos':((S.social.friends.find(f=>f.user_id===u)||{}).nick||'')).filter(Boolean);
+  const cm=open?p.cmts:p.cmts.slice(-2);
+  return '<article class="post" id="post-'+p.id+'"><header class="post-h">'+avatar(mine?'Vos':p.nick,p.user_id)+'<span class="grow"><b>'+esc(mine?'Vos':p.nick)+'</b><small>'+ago+'</small></span>'+(mine?'<button class="ib flat" data-a="postDel" data-v="'+p.id+'" aria-label="Borrar publicación">'+ic('trash',16)+'</button>':'')+'</header>'+
+   '<h4 class="post-t">'+esc(d.n||'Entrenamiento')+'</h4>'+
+   '<div class="post-s"><span>'+ic('timer',14)+' '+(d.dur||0)+' min</span><span>'+(d.sets||0)+' series</span>'+(d.vol?'<span>'+nf(d.vol)+' kg</span>':'')+'</div>'+
+   ((d.prs||[]).length||(d.ups||[]).length?'<div class="post-pr">'+(d.ups||[]).map(u=>'<span class="up" style="--c:'+lvlColor(u.L)+'">'+ic('up',13)+' '+esc(u.n)+': '+lvlName(u.L)+'</span>').join('')+(d.prs||[]).map(n=>'<span>'+ic('trophy',13)+' Récord en '+esc(n)+'</span>').join('')+'</div>':'')+
+   ((d.ex||[]).length?'<div class="post-ex">'+d.ex.slice(0,full?6:4).map(e=>'<div><span>'+esc(e.n)+'</span><span class="mut">'+e.s+' × · '+esc(e.b)+'</span></div>').join('')+((d.ex.length>4&&!full)||d.more?'<small class="mut">y '+((d.ex.length>4&&!full?d.ex.length-4:0)+(d.more||0))+' más</small>':'')+'</div>':'')+
+   '<div class="post-a"><button class="fire'+(liked?' on':'')+'" data-a="postFire" data-v="'+p.id+'" aria-pressed="'+liked+'" aria-label="Dar fuego">'+ic('flame',18)+'<b>'+(p.likes.length||'')+'</b></button>'+
+   '<button data-a="postCmt" data-v="'+p.id+'" aria-label="Comentar">'+ic('chat',18)+'<b>'+(p.cmts.length||'')+'</b></button>'+
+   (likers.length?'<span class="post-lk">'+ic('flame',12)+' '+esc(likers.slice(0,3).join(', '))+(likers.length>3?' y '+(likers.length-3)+' más':'')+'</span>':'')+'</div>'+
+   (cm.length?'<div class="cmts">'+(p.cmts.length>cm.length?'<button class="cm-more" data-a="postCmt" data-v="'+p.id+'">Ver los '+p.cmts.length+' comentarios</button>':'')+cm.map(c=>'<div class="cm"><b>'+esc(c.user_id===me?'Vos':c.nick)+'</b> <span class="sel-ok">'+esc(c.body)+'</span>'+(c.user_id===me||mine?'<button class="cm-x" data-a="cmtDel" data-v="'+p.id+'|'+c.id+'" aria-label="Borrar comentario">'+ic('x',12)+'</button>':'')+'</div>').join('')+'</div>':'')+
+   (open?'<div class="cm-in"><input id="cmt-'+p.id+'" maxlength="200" placeholder="Escribí algo (¡bien ahí!, ¿cuánto levantaste?…)" data-i="cmt" data-e="'+p.id+'" autocomplete="off"><button class="ib" data-a="cmtSend" data-v="'+p.id+'" aria-label="Enviar">'+ic('send',18)+'</button></div>':'')+
+   '</article>';
+}
+function feedHTML(sv){
+  const posts=sv.posts||[];
+  const evs=[];sv.friends.concat(sv.me?[sv.me]:[]).forEach(r=>((r.data||{}).ev||[]).forEach(e=>{if(e.k!=='w'&&e.k!=='pr')evs.push({e,r,me:sv.me&&r.user_id===sv.me.user_id});}));
+  evs.sort((a,b)=>a.e.d<b.e.d?1:a.e.d>b.e.d?-1:0);
+  return '<label class="auto-post"><input type="checkbox" data-a="autoPost"'+(db.settings.autoPost!==false?' checked':'')+'><span>Publicar mis entrenos para mis amigos</span></label>'+
+   (posts.length?'<div class="feed-p">'+posts.map(p=>postHTML(p)).join('')+'</div>':'<div class="card empty" style="margin:0 0 12px">'+ic('flame',30)+'<b>Todavía no hay entrenos</b>Cuando vos o tus amigos terminen un entreno, aparece acá para darle fuego.</div>')+
+   (evs.length?'<h4 class="soc-h">Más novedades</h4><div class="feed">'+evs.slice(0,25).map(x=>'<div class="fd"><span class="fd-ic">'+ic(evIc(x.e.k),16)+'</span><span class="grow"><b>'+(x.me?'Vos':esc(x.r.nick||'Atleta'))+'</b> '+evTxt(x.e)+'</span><small class="mut">'+dayAgo(x.e.d)+'</small></div>').join('')+'</div>':'');
+}
+/* en Inicio: lo último de tus amigos */
+function friendsFeedCard(){
+  if(!Social.on()||!S.social||!S.social.posts)return '';
+  const me=Sync.user().id,ps=S.social.posts.filter(p=>p.user_id!==me&&Date.now()-new Date(p.created_at).getTime()<3*864e5);
+  if(!ps.length)return '';
+  return '<div class="card ffc"><div class="hd"><div><h3>Tus amigos entrenaron</h3><span class="mut sm-t">Dales fuego para que no aflojen</span></div><button class="btn sm" data-a="socOpen" data-v="feed">Ver todo</button></div>'+
+   ps.slice(0,2).map(p=>{const d=p.data||{},liked=p.likes.includes(me);return '<div class="ffc-r">'+avatar(p.nick,p.user_id,34)+'<span class="grow"><b>'+esc(p.nick)+'</b> · '+esc(d.n||'Entreno')+'<small>'+agoTxt(new Date(p.created_at).getTime())+((d.prs||[]).length?' · '+ic('trophy',11)+' '+d.prs.length+(d.prs.length===1?' récord':' récords'):'')+'</small></span><button class="fire sm'+(liked?' on':'')+'" data-a="postFire" data-v="'+p.id+'" aria-label="Dar fuego">'+ic('flame',17)+'<b>'+(p.likes.length||'')+'</b></button></div>';}).join('')+'</div>';
 }
 function compsHTML(sv){
   const me=sv.me&&sv.me.user_id,t=today(),cs=sv.comps||[];
@@ -4801,14 +4911,14 @@ const qTile=q=>'<button class="qtile" data-a="'+q.a+'"'+(q.v?' data-v="'+q.v+'"'
 const SLEEP=[[1,'Muy mal'],[2,'Mal'],[3,'Normal'],[4,'Bien'],[5,'Bárbaro']];
 function sleepCard(){
   const t=today(),sl=(db.settings.sleep||{})[t];
-  if(!db.profile||doneOn(t).length)return '';
+  if(!db.profile||doneOn(t).length||!db.logs.length)return '';
   if(sl)return '<div class="card sleep-c done"><span class="sleep-i">'+ic('moon',18)+'</span><span class="grow">Dormiste <b>'+SLEEP[sl-1][1].toLowerCase()+'</b>'+(sl<=2?': si entrenás hoy, te bajo un poco la carga.':sl===5?': buen día para un récord.':'.')+'</span><button class="ib flat" data-a="sleepSet" data-v="0" aria-label="Cambiar">'+ic('edit',15)+'</button></div>';
   return '<div class="card sleep-c"><div class="row" style="gap:10px;margin-bottom:10px"><span class="sleep-i">'+ic('moon',18)+'</span><b class="grow">¿Cómo dormiste anoche?</b></div><div class="sleep-o">'+SLEEP.map(([v,n])=>'<button data-a="sleepSet" data-v="'+v+'"><b>'+v+'</b><small>'+n+'</small></button>').join('')+'</div></div>';
 }
 function viewInicio(){
   const p=db.profile||{};
   return '<div class="home"><div class="home-l"><div class="hello"><span class="mut">'+greet()+(p.nick?',':'')+'</span><h1 class="pg">'+(p.nick?esc(p.nick):'Swole')+'</h1></div>'+
-   levelHero()+seasonCard()+missionsCard()+skillGoalCard()+goalsCard(true)+'<div class="qgrid">'+QUICK.map(qTile).join('')+'</div></div><div class="home-r">'+sleepCard()+todayCard()+coachCard()+stripTitle(viewHoy())+'</div></div>';
+   (db.logs.length<3?todayCard():'')+levelHero()+seasonCard()+missionsCard()+skillGoalCard()+goalsCard(true)+'<div class="qgrid">'+QUICK.map(qTile).join('')+'</div></div><div class="home-r">'+sleepCard()+(db.logs.length<3?'':todayCard())+friendsFeedCard()+coachCard()+stripTitle(viewHoy())+'</div></div>';
 }
 /* botón central: lo que más se usa, a un toque */
 function quickHTML(){
@@ -4827,10 +4937,9 @@ function avatarHTML(){
 /* ============ Bienvenida paso a paso ============ */
 const ONB_SLIDES=[
   {t:'Entrená. Medí. Subí.',p:'Swole es tu app para entrenar y saber, de verdad, qué tan fuerte sos.'},
-  {t:'Cada músculo tiene su rango',p:'De Bronce a Élite. Con pesas o con calistenia, cada uno con su escala.'},
   {t:'Tu carta de atleta',p:'Sumá puntaje, desbloqueá logros y compartí tu carta.'}
 ];
-const ONB_N=ONB_SLIDES.length+7; /* 3 diapositivas + apodo + cuerpo + medidas + objetivo + semana + cuenta + el final */
+const ONB_N=ONB_SLIDES.length+7; /* 2 diapositivas + apodo + cuerpo + medidas + objetivo + semana + cuenta + el final */
 function onbHTML(m){
   const s=m.step||0,d=m.d;
   const bars='<div class="onb-bars">'+Array.from({length:ONB_N},(_,k)=>'<i class="'+(k<=s?'on':'')+'"></i>').join('')+'</div>';
@@ -4840,7 +4949,6 @@ function onbHTML(m){
     const w=ONB_SLIDES[s];
     const demo={pecho:8,hombros:10,biceps:6,triceps:7,abs:4,oblicuos:3,cuadriceps:12,gemelos:5,dorsales:13,trapecio:9,lumbar:7,gluteos:11,isquios:9,antebrazos:5,aductores:6};
     const art=s===0?rankStairs()
-      :s===1?'<div class="onb-body">'+bodyMap(null,{levels:demo,cls:'live'})+'</div>'
       :'<div class="onb-card"><div class="carta">'+demoCard()+'<i class="holo"></i><i class="glare"></i></div></div>';
     body='<div class="onb-art">'+art+'</div><h2 class="onb-t">'+w.t+'</h2><p class="onb-p">'+w.p+'</p>';
     alt='<button class="btn line wide" data-a="welLogin">Ya uso Swole: entrar con mi cuenta</button>';
@@ -4860,12 +4968,29 @@ function onbHTML(m){
       body='<div class="onb-art"><div class="onb-cloud">'+ic(u?'check':'cloud',54)+'</div></div><h2 class="onb-t">'+(u?'Tu cuenta está lista':'Guardá tu progreso')+'</h2><p class="onb-p">'+(u?'Todo lo que hagas se guarda en la nube como <b>'+esc(u.email||'')+'</b>.':'Con una cuenta gratis tus entrenos quedan en la nube y usás Swole en el celu y la compu. Si no, todo queda solo en este dispositivo.')+'</p>';
       if(u)btn='Siguiente';else{btn='Crear cuenta';alt='<button class="btn line wide" data-a="onbNext">Ahora no</button>';}}
     else{
-      body='<div class="onb-art"><div class="onb-final">'+badge(0,120)+'</div></div><h2 class="onb-t">¡Bienvenid'+(d.sex==='f'?'a':'o')+', '+esc(d.nick||'atleta')+'!</h2><p class="onb-p">Todos arrancan en Bronce. Cargá tu primera marca y descubrí tu nivel real.</p>';
-      btn='Cargar mi primera marca';alt='<button class="btn line wide" data-a="onbDone">Ir al inicio</button>';
+      if(!m.planned){m.planned=1;autoPlan();}
+      const gr=db.routines.filter(x=>x.gen),dw=new Date().getDay(),tr=gr.find(x=>(x.days||[]).includes(dw));
+      body='<div class="onb-art"><div class="onb-final">'+badge(0,110)+'</div></div><h2 class="onb-t">¡Bienvenid'+(d.sex==='f'?'a':'o')+', '+esc(d.nick||'atleta')+'!</h2>'+
+       (gr.length?'<p class="onb-p">Te armé tu plan con lo que me contaste:</p><div class="onb-plan">'+gr.map(x=>'<div><b>'+esc(x.name)+'</b><span>'+(x.days||[]).map(k=>DIAS3[k]).join(' · ')+(x.min?' · ~'+x.min+' min':'')+'</span></div>').join('')+'</div>'
+        :'<p class="onb-p">Todos arrancan en Bronce. Cargá tu primera marca y descubrí tu nivel real.</p>');
+      m.rid=tr?tr.id:null;
+      if(tr){btn='Empezar el entreno de hoy';alt='<button class="btn line wide" data-a="onbFirst">Cargar mi primera marca</button><button class="onb-skip" data-a="onbDone">Ir al inicio</button>';}
+      else if(gr.length){btn='Ver mi plan';alt='<button class="btn line wide" data-a="onbFirst">Cargar mi primera marca</button>';}
+      else{btn='Cargar mi primera marca';alt='<button class="btn line wide" data-a="onbDone">Ir al inicio</button>';}
     }
   }
   return '<div class="mback onb"><div class="onb-in-wrap">'+bars+back+'<div class="onb-c" key="'+s+'">'+body+'</div>'+
-   '<div class="onb-foot"><button class="btn pri wide big-btn" data-a="'+(s===ONB_N-1?'onbFirst':s===ONB_SLIDES.length+5&&!Sync.user()?'onbAcct':'onbNext')+'">'+btn+' '+ic('right',18)+'</button>'+alt+'</div></div></div>';
+   '<div class="onb-foot"><button class="btn pri wide big-btn" data-a="'+(s===ONB_N-1?(m.rid?'onbStart':db.routines.some(x=>x.gen)?'onbPlan':'onbFirst'):s===ONB_SLIDES.length+5&&!Sync.user()?'onbAcct':'onbNext')+'">'+btn+' '+ic('right',18)+'</button>'+alt+'</div></div></div>';
+}
+/* al terminar la bienvenida: si no tiene rutinas, se las armo con lo que contestó (objetivos, días, si ya entrena) */
+function autoPlan(){
+  try{if(db.routines.length||!db.profile)return;
+    const g=db.settings.gen||{},goals=(g.goals&&g.goals.length?g.goals:['hip']),only=goals.length===1&&goals[0]==='cali';
+    const d={goals:goals.slice(),eq:only?'home':'gym',lvl:db.profile.trains?'int':'beg',days:3,min:g.min||60,seed:0};
+    const plan=genPlan(d);if(!plan||!plan.length)return;
+    db.settings.gen=Object.assign({},g,{goals:d.goals,eq:d.eq,lvl:d.lvl,min:d.min});
+    plan.forEach(r=>{const o={id:uid(),name:r.name,days:r.days,since:today(),items:r.items,rest:r.rest,note:r.note,gen:1,min:r.min};if(r.pl)o.pl=1;db.routines.push(o);});save();
+  }catch(e){console.warn(e);}
 }
 /* carta de muestra para la bienvenida (sin datos del usuario) */
 function demoCard(){
@@ -5280,7 +5405,8 @@ function finishSession(){
   const gTot=a.entries.filter(en=>en.goal).length,gHit=a.entries.filter(en=>en.hit).length;
   addEv({k:'w',n:log.name,d:log.date});prs.forEach(p=>addEv({k:'pr',x:p.ex,d:log.date}));ups.forEach(u=>addEv({k:'up',x:u.ex,L:u.to,d:log.date}));
   db.active=null;save();endRest(false);S.sessOpen=false;
-  S.modal={t:'summary',log,prs,ups,vol,sets,goals:{hit:gHit,tot:gTot}};render();
+  const posted=Social.share(log,{vol,sets,prs,ups});
+  S.modal={t:'summary',log,prs,ups,vol,sets,goals:{hit:gHit,tot:gTot},posted};render();
   checkGoals();checkRankUp(900);checkMissions();
   if(ups.length||prs.length)setTimeout(()=>confetti(ups.length?70:36),250);
   checkAch();
@@ -5423,7 +5549,7 @@ function routineHTML(d){
    '<button class="btn pri wide" data-a="rSave">Guardar rutina</button>'+(d.id?'<button class="btn bad wide line" data-a="rDelAsk">Eliminar rutina</button>':'');
 }
 function summaryHTML(m){
-  return '<div class="g3"><div class="stat"><b>'+m.log.dur+'</b><span>minutos</span></div><div class="stat"><b>'+m.sets+'</b><span>series</span></div><div class="stat"><b>'+nf(m.vol)+'</b><span>kg movidos</span></div></div>'+
+  return (m.posted?'<div class="sum-post">'+ic('user',16)+'<span class="grow">Tus amigos lo ven en Novedades y te pueden dar fuego.</span><button class="btn sm line" data-a="postUndo" data-v="'+esc(m.log.id)+'">No publicar</button></div>':'')+'<div class="g3"><div class="stat"><b>'+m.log.dur+'</b><span>minutos</span></div><div class="stat"><b>'+m.sets+'</b><span>series</span></div><div class="stat"><b>'+nf(m.vol)+'</b><span>kg movidos</span></div></div>'+
    (m.ups.length?m.ups.map(u=>{const ex=exById(u.ex);return '<div class="card row pop" style="margin:0">'+badge(u.to,64)+'<div class="grow"><span class="mut sm-t">¡Subiste de nivel!</span><div style="font:800 20px var(--f-d)">'+esc(ex.n)+'</div><span class="sm-t">'+lvlName(u.from)+' a '+lvlSpan(u.to)+'</span></div></div>';}).join(''):'')+
    (m.prs.length?'<div class="card" style="margin:0"><h4 style="margin-bottom:6px">Récords personales</h4>'+m.prs.map(p=>{const ex=exById(p.ex);if(!ex)return '';return '<div class="rowline"><span>'+esc(ex.n)+'</span><span class="mut">'+(ex.time||ex.sk?'Mejor: '+Math.round(p.e)+unitOf(ex):ex.st?'1RM est. '+num(p.e,1)+' kg':'Mejor serie superada')+'</span></div>';}).join('')+'</div>':'')+
    (m.goals&&m.goals.tot?'<div class="goal'+(m.goals.hit?' hit':'')+'"><span class="grow"><span class="mut sm-t">Sobrecarga progresiva</span><br><b>'+m.goals.hit+' de '+m.goals.tot+' metas cumplidas</b></span>'+ic(m.goals.hit===m.goals.tot?'trophy':'bolt',22)+'</div>':'')+
@@ -5889,6 +6015,8 @@ const ACTIONS={
   onbGoal(v){const g=S.modal.d.goals=S.modal.d.goals||[],i=g.indexOf(v);if(i>=0)g.splice(i,1);else g.push(v);renderModal();},
   onbSet(v,el){S.modal.d[el.dataset.f]=v;renderModal();},
   onbDone(){S.modal=null;goTab('inicio');render();checkAch();},
+  onbStart(){const id=S.modal&&S.modal.rid;S.modal=null;goTab('inicio');render();if(id)startSession(id);},
+  onbPlan(){S.modal=null;goTab('rutinas');S.rtab='rut';render();},
   onbFirst(){S.modal=null;goTab('niveles');render();ACTIONS.markOpen();},
   goalAdd(v,el){
     const act=(db.goals||[]).filter(g=>!g.done);if(act.length>=3)return toast('Ya tenés 3 objetivos: quitá uno para sumar otro');
@@ -6037,6 +6165,16 @@ const ACTIONS={
   treeView(v){S.modal.view=v;renderModal();},
   rtZoom(v){S.rt=S.rt||{x:0,y:0,w:820};if(v==='home')rtFocus(0,0,820);else rtFocus(S.rt.x,S.rt.y,clamp(S.rt.w*(v==='in'?.72:1.38),320,1800));},
   treeSel(v){S.modal.sel=S.modal.sel===v?null:v;renderModal();if(S.modal.view==='radial'&&S.modal.sel){const p=rtLayout().find(q=>q.n.id===v);if(p)rtFocus(p.x*.85,p.y*.85+60);}const d=document.getElementById('tdDet');if(d)d.scrollIntoView({block:'nearest',behavior:'smooth'});},
+  postFire(v){const rr=()=>{if(S.modal&&S.modal.t==='friends')renderModal();else render();};const p=(S.social&&S.social.posts||[]).find(x=>x.id===v);const was=p&&p.likes.includes(Sync.user().id);
+    Social.fire(v).then(()=>{rr();if(!was)try{navigator.vibrate&&navigator.vibrate(15);}catch(e){}}).catch(e=>{rr();toast(Social.errTxt(e));});rr();},
+  postCmt(v){S.cOpen=S.cOpen===v?null:v;renderModal();if(S.cOpen)setTimeout(()=>{const i=document.getElementById('cmt-'+v);if(i){i.focus();i.scrollIntoView({block:'center'});}},80);},
+  cmtSend(v){const i=document.getElementById('cmt-'+v),t=(i?i.value:'').trim();if(!t)return;if(i)i.value='';
+    Social.comment(v,t.slice(0,200)).then(()=>{renderModal();const n=document.getElementById('cmt-'+v);if(n)n.focus();}).catch(e=>toast(Social.errTxt(e)));},
+  cmtDel(v){const[p,c]=v.split('|');Social.uncomment(p,c).then(()=>renderModal()).catch(e=>toast(Social.errTxt(e)));},
+  postDel(v){S.m2={t:'confirm',title:'Borrar publicación',msg:'Tus amigos dejan de verla (se borran el fuego y los comentarios). El entreno sigue guardado en tu historial.',act:'postDelGo',arg:v,ok:'Borrar'};render();},
+  postDelGo(v,el){const id=el&&el.dataset.v||v;S.m2=null;const p=(S.social.posts||[]).find(x=>x.id===id);if(!p)return render();Social.unshare(p.log_id).then(()=>{render();toast('Publicación borrada');}).catch(e=>toast(Social.errTxt(e)));},
+  postUndo(v){Social.unshare(v).then(()=>{if(S.modal&&S.modal.t==='summary')S.modal.posted=false;renderModal();toast('No se publicó');}).catch(e=>toast(Social.errTxt(e)));},
+  autoPost(v,el){db.settings.autoPost=!!(el&&el.checked);save();toast(db.settings.autoPost?'Tus próximos entrenos se publican para tus amigos':'Tus entrenos ya no se publican');},
   musPick(){S.m2={t:'music'};render();},
   musSet(v){db.settings.musicApp=v;save();S.m2=null;render();const a=MUSIC_APPS.find(x=>x[0]===v);if(a)toast('Listo: '+a[1]);},
   musConnect(){Music.connect();},
@@ -6503,14 +6641,15 @@ setTimeout(()=>{try{if(db.profile&&!S.modal&&!S.m2&&!S.sessOpen){const d=recapDa
 setTimeout(()=>{const s=$('#splash');if(s){s.classList.add('out');setTimeout(()=>s.remove(),600);}},matchMedia('(prefers-reduced-motion: reduce)').matches?150:1150);
 try{checkAch(true);checkRankUp();checkMissions();}catch(e){}
 Sync.fromLink();
-Music.fromLink();if(Music.on())Music.poll();
+Music.fromLink();
+document.addEventListener('keydown',e=>{const t=e.target;if(e.key==='Enter'&&t&&t.dataset&&t.dataset.i==='cmt'){e.preventDefault();ACTIONS.cmtSend(t.dataset.e);}});if(Music.on())Music.poll();
 /* rutina compartida por link */
 try{const q=new URLSearchParams(location.search),rr=q.get('rutina');if(rr){history.replaceState(null,'',location.pathname+location.hash);const o=parseRoutineLink(rr);
   if(o)setTimeout(()=>{if(db.profile){S.modal={t:'rimport',o};render();}else toast('Te pasaron una rutina: creá tu perfil y volvé a abrir el link');},1500);else toast('El link de la rutina está roto');}}catch(e){}
 /* accesos directos del ícono y toques en notificaciones */
 function goAction(g){
   if(!db.profile)return;
-  if(g==='entreno')ACTIONS.quickTrain();else if(g==='comida')ACTIONS.foodOpen();else if(g==='marca')ACTIONS.markOpen();else if(g==='amigos')ACTIONS.socOpen(S.social&&notifItems().length?'list':'rank');
+  if(g==='entreno')ACTIONS.quickTrain();else if(g==='comida')ACTIONS.foodOpen();else if(g==='marca')ACTIONS.markOpen();else if(g==='amigos')ACTIONS.socOpen(S.social&&notifItems().length?'list':'feed');
 }
 try{const q=new URLSearchParams(location.search),g=q.get('go');if(g){history.replaceState(null,'',location.pathname+location.hash);setTimeout(()=>goAction(g),900);}}catch(e){}
 if(navigator.serviceWorker)navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.go)goAction(e.data.go);});
