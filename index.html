@@ -1530,6 +1530,16 @@ small{line-height:1.35}
 .vid-cmp small{color:var(--mut);font-size:12px}
 .pick.top{z-index:96}.gen-it{gap:6px}.gen-it>span:first-child{flex:1;min-width:0}.gen-it .ib.flat{width:30px;height:30px;flex:none}
 .gen-way{margin:14px 0 4px;display:grid;gap:8px}
+/* v54: teclado, marca, controles más grandes en el entreno */
+.toast{bottom:calc(150px + env(safe-area-inset-bottom,0px) + var(--kb,0px))}
+#markList{min-height:50vh;align-content:start}
+.stepr button{min-height:42px}.rir button{min-width:44px;min-height:40px}
+.set{grid-template-columns:34px 1fr 1fr 46px}
+.entry>.row .ib.flat{width:40px;height:40px}
+.chip.sm{min-height:34px}
+.mback,.pick{padding-bottom:var(--kb,0px)}
+.mark-date{display:flex;align-items:center;gap:8px;margin-top:12px;color:var(--mut);font-size:13.5px;font-weight:600}
+.mark-date input{background:var(--raise);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:15px;font-weight:500;color:var(--text);min-height:44px;max-width:172px}
 </style>
 </head>
 <body>
@@ -1731,7 +1741,7 @@ const Store=(()=>{
   const K='swole.v1';let mem=null;
   return{
     load(){try{const r=localStorage.getItem(K);if(r)return JSON.parse(r);}catch(e){}return mem?JSON.parse(mem):null;},
-    save(d){const s=JSON.stringify(d);mem=s;try{localStorage.setItem(K,s);}catch(e){}},
+    save(d){const s=JSON.stringify(d);mem=s;try{localStorage.setItem(K,s);this.full=0;}catch(e){if(!this.full){this.full=1;setTimeout(()=>{try{toast('No se pudo guardar en este celu (sin espacio). Bajá una copia desde Perfil para no perder nada.');}catch(x){}},60);}}},
     wipe(){mem=null;try{localStorage.removeItem(K);}catch(e){}}
   };
 })();
@@ -1776,6 +1786,9 @@ function stamp(){
   snap=cur;return ch;
 }
 function save(){const ch=stamp();Store.save(db);if(ch){try{Sync.schedule();Social.schedule();}catch(e){}}}
+/* al escribir en el entreno se junta y se guarda medio segundo después (antes se grababa toda la base por cada tecla y el teclado se trababa) */
+let saveT=0;const saveSoon=()=>{clearTimeout(saveT);saveT=setTimeout(()=>{saveT=0;save();},500);},saveNow=()=>{if(saveT){clearTimeout(saveT);saveT=0;save();}};
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveNow();});window.addEventListener('pagehide',saveNow);
 
 /* ============ Fechas y utilidades ============ */
 const pad=n=>String(n).padStart(2,'0');
@@ -1866,7 +1879,7 @@ function levelIdx(ex,e){
   const v=levelVal(ex,e);return v<0?-1:Math.min(18,Math.floor(v));
 }
 
-function lvlName(L){if(L==null||L<0)return 'Sin rango';if(L>=18)return 'Élite';return TIERS[Math.floor(L/3)]+' '+['I','II','III'][L%3];}
+function lvlName(L){if(L==null||L<0)return 'Sin rango';L=Math.floor(L);if(L>=18)return 'Élite';return TIERS[Math.floor(L/3)]+' '+['I','II','III'][L%3];}
 function lvlInfo(ex,e){
   const v=levelVal(ex,e),L=v<0?-1:Math.min(18,Math.floor(v));
   if(L<0){if(ex.sk)return{L,pct:0,next:0};const s=stdFor(ex);return{L,pct:e/s.lo,next:0};}
@@ -2530,7 +2543,7 @@ S.crM=new Date(S.crM.getFullYear(),S.crM.getMonth(),1);
 const TABS=[{id:'inicio',i:'home',l:'Inicio'},{id:'entrenar',i:'dumb',l:'Entrenar'},{id:'niveles',i:'rank',l:'Nivel'},{id:'nutri',i:'flame',l:'Nutrición'}];
 const ETABS=[{id:'rutinas',l:'Rutinas'},{id:'cal',l:'Calendario'}];
 /* las secciones viejas (hoy, rutinas, cal) ahora viven dentro de Entrenar */
-function goTab(v){if(v==='hoy')v='inicio';if(['rutinas','cal'].includes(v)){S.tab='entrenar';S.etab=v;}else S.tab=v;if(S.tab!=='perfil')S.pf=null;}
+function goTab(v){const t0=S.tab;if(v==='hoy')v='inicio';if(['rutinas','cal'].includes(v)){S.tab='entrenar';S.etab=v;}else S.tab=v;if(S.tab!=='perfil')S.pf=null;/* pestaña nueva: al cerrarse la ventana abierta no vuelve al scroll de la pestaña anterior */if(S.tab!==t0)S.lockY=0;}
 let toastT=null;
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2800);}
 function effTheme(){const t=document.documentElement.dataset.theme;if(t)return t;return window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}
@@ -2620,10 +2633,10 @@ function viewRutinas(){
 const GROUP_TABS=()=>['Todos'].concat(Object.keys(GROUPS),'Calistenia','Deporte');
 function groupChips(){return GROUP_TABS().map(g=>'<button class="chip '+((S.grp||'Todos')===g?'on':'')+'" data-a="grp" data-v="'+g+'">'+g+'</button>').join('');}
 function filterEx(q,g){
-  q=(q||'').toLowerCase().trim();
+  q=fnorm(q).trim();
   const CAL_EQ=['Peso corporal','Barra fija','Paralelas','Anillas','Barra vertical'];
   const inG=e=>!g||g==='Todos'||(g==='Calistenia'?!!e.sk||CAL_EQ.includes(e.eq)&&!e.sport:g==='Deporte'?!!e.sport:groupOf(e)===g);
-  return allEx().filter(e=>!e.hidden&&inG(e)&&(!q||String(e.n).toLowerCase().includes(q)||String(e.eq).toLowerCase().includes(q)||e.p.concat(e.s).some(k=>(MUSC[k]||'').toLowerCase().includes(q))));
+  return allEx().filter(e=>!e.hidden&&inG(e)&&(!q||fnorm(e.n).includes(q)||fnorm(e.eq).includes(q)||e.p.concat(e.s).some(k=>fnorm(MUSC[k]).includes(q))));
 }
 function exResults(){const l=filterEx(S.q,S.grp);return l.length?l.map(e=>exRow(e)).join(''):'<div class="empty">Ningún ejercicio coincide con la búsqueda.</div>';}
 
@@ -3729,14 +3742,14 @@ function friendsHTML(m){
     const met=m.met||'ovr',rows=rankRows(met);
     body='<div class="scroll-x" style="margin:4px 0 10px">'+RANK_OPTS.filter(o=>o[0]!=='season').map(([k,n])=>'<button class="chip '+(met===k?'on':'')+'" data-a="socMet" data-v="'+k+'">'+n+'</button>').join('')+'</div>'+
      (rows.length?'<div class="lb">'+rows.map((x,i)=>{const d=x.r.data||{},L=met==='ovr'||met==='OVR'?(d.ovr?d.ovr.L:-1):Math.floor(x.v),li=d.lifts&&d.lifts[met];
-       const val=met==='OVR'?'<b>'+x.v+'</b> pts':met==='ovr'?lvlSpan(L)+(d.pctl?'<small>Top '+(100-d.pctl)+' %</small>':''):lvlSpan(Math.max(-1,Math.floor(x.v)))+(li&&li.r?'<small>'+num(li.r,2)+'× su peso</small>':'');
+       const val=met==='OVR'?'<b>'+(+x.v||0)+'</b> pts':met==='ovr'?lvlSpan(L)+(d.pctl?'<small>Top '+(100-d.pctl)+' %</small>':''):lvlSpan(Math.max(-1,Math.floor(x.v)))+(li&&li.r?'<small>'+num(li.r,2)+'× su peso</small>':'');
        return '<button class="lb-r'+(x.me?' me':'')+'" data-a="socCard" data-v="'+x.r.user_id+'"><span class="lb-n">'+(i+1)+'</span>'+badge(L,36)+'<span class="grow"><b>'+esc(x.r.nick||'Atleta')+(x.me?' <span class="tag">vos</span>':'')+'</b></span><span class="lb-v">'+val+'</span></button>';}).join('')+'</div>'
       :'<p class="mut sm-t">Nadie cargó este ejercicio todavía.</p>')+
      '<p class="mut sm-t" style="margin-top:10px">Se compara el nivel, que ya está ajustado por peso, edad y sexo: así es justo entre cuerpos distintos.</p>'+nf0;
   }else if(tab==='comp'){
     const rows=rankRows('season'),d0=new Date(),left=new Date(d0.getFullYear(),d0.getMonth()+1,0).getDate()-d0.getDate();
     body=compsHTML(sv)+'<h4 class="soc-h">Temporada del mes</h4><p class="mut sm-t" style="margin:-4px 0 10px">Un torneo con todos tus amigos que arranca de cero cada mes.</p><div class="soc-season"><span class="lh-k">Temporada de '+MESES[d0.getMonth()]+'</span><b>'+(left?'Quedan '+left+' días':'Último día')+'</b></div>'+
-     '<div class="lb">'+rows.map((x,i)=>{const s=(x.r.data||{}).season||{};return '<button class="lb-r'+(x.me?' me':'')+(i<3&&x.v>0?' top'+(i+1):'')+'" data-a="socCard" data-v="'+x.r.user_id+'"><span class="lb-n">'+(i+1)+'</span><span class="grow"><b>'+esc(x.r.nick||'Atleta')+(x.me?' <span class="tag">vos</span>':'')+'</b><small class="mut">'+plu(s.w||0,'entreno','entrenos')+' · '+plu(s.pr||0,'récord','récords')+' · '+plu((s.up||0)+(s.rank||0),'subida','subidas')+'</small></span><span class="lb-v"><b>'+x.v+'</b> pts</span></button>';}).join('')+'</div>'+
+     '<div class="lb">'+rows.map((x,i)=>{const s=(x.r.data||{}).season||{};return '<button class="lb-r'+(x.me?' me':'')+(i<3&&x.v>0?' top'+(i+1):'')+'" data-a="socCard" data-v="'+x.r.user_id+'"><span class="lb-n">'+(i+1)+'</span><span class="grow"><b>'+esc(x.r.nick||'Atleta')+(x.me?' <span class="tag">vos</span>':'')+'</b><small class="mut">'+plu(+s.w||0,'entreno','entrenos')+' · '+plu(+s.pr||0,'récord','récords')+' · '+plu((+s.up||0)+(+s.rank||0),'subida','subidas')+'</small></span><span class="lb-v"><b>'+(+x.v||0)+'</b> pts</span></button>';}).join('')+'</div>'+
      '<details class="why"><summary>¿Cómo se suman puntos?</summary><div class="mut sm-t"><p>Entreno (uno por día): '+SEASON_PTS.w+' · Misiones semanales: 20 a 40 cada una · Récord: '+SEASON_PTS.pr+' · Subir de nivel en un ejercicio: '+SEASON_PTS.up+' · Dominar una habilidad: '+SEASON_PTS.sk+' · Subir de rango general: '+SEASON_PTS.rank+' · Logro: '+SEASON_PTS.ach+'.</p><p>Gana el que más progresa en el mes, no el más fuerte: el que recién empieza puede ganarle a cualquiera. Cada mes arranca de cero.</p></div></details>'+nf0;
   }else if(tab==='feed'){
     body=feedHTML(sv)+nf0;
@@ -3797,9 +3810,9 @@ function postHTML(p,full){
   const cm=open?p.cmts:p.cmts.slice(-2);
   return '<article class="post" id="post-'+p.id+'"><header class="post-h">'+avatar(mine?'Vos':p.nick,p.user_id)+'<span class="grow"><b>'+esc(mine?'Vos':p.nick)+'</b><small>'+ago+'</small></span>'+(mine?'<button class="ib flat" data-a="postDel" data-v="'+p.id+'" aria-label="Borrar publicación">'+ic('trash',16)+'</button>':'')+'</header>'+
    '<h4 class="post-t">'+esc(d.n||'Entrenamiento')+'</h4>'+
-   '<div class="post-s"><span>'+ic('timer',14)+' '+(d.dur||0)+' min</span><span>'+(d.sets||0)+' series</span>'+(d.vol?'<span>'+nf(d.vol)+' kg</span>':'')+'</div>'+
+   '<div class="post-s"><span>'+ic('timer',14)+' '+(+d.dur||0)+' min</span><span>'+(+d.sets||0)+' series</span>'+(+d.vol?'<span>'+nf(+d.vol)+' kg</span>':'')+'</div>'+
    ((d.prs||[]).length||(d.ups||[]).length?'<div class="post-pr">'+(d.ups||[]).map(u=>'<span class="up" style="--c:'+lvlColor(u.L)+'">'+ic('up',13)+' '+esc(u.n)+': '+lvlName(u.L)+'</span>').join('')+(d.prs||[]).map(n=>'<span>'+ic('trophy',13)+' Récord en '+esc(n)+'</span>').join('')+'</div>':'')+
-   ((d.ex||[]).length?'<div class="post-ex">'+d.ex.slice(0,full?6:4).map(e=>'<div><span>'+esc(e.n)+'</span><span class="mut">'+e.s+' × · '+esc(e.b)+'</span></div>').join('')+((d.ex.length>4&&!full)||d.more?'<small class="mut">y '+((d.ex.length>4&&!full?d.ex.length-4:0)+(d.more||0))+' más</small>':'')+'</div>':'')+
+   ((d.ex||[]).length?'<div class="post-ex">'+d.ex.slice(0,full?6:4).map(e=>'<div><span>'+esc(e.n)+'</span><span class="mut">'+(+e.s||0)+' × · '+esc(e.b)+'</span></div>').join('')+((d.ex.length>4&&!full)||d.more?'<small class="mut">y '+((d.ex.length>4&&!full?d.ex.length-4:0)+(+d.more||0))+' más</small>':'')+'</div>':'')+
    '<div class="post-a"><button class="fire'+(liked?' on':'')+'" data-a="postFire" data-v="'+p.id+'" aria-pressed="'+liked+'" aria-label="Dar fuego">'+ic('flame',18)+'<b>'+(p.likes.length||'')+'</b></button>'+
    '<button data-a="postCmt" data-v="'+p.id+'" aria-label="Comentar">'+ic('chat',18)+'<b>'+(p.cmts.length||'')+'</b></button>'+
    (likers.length?'<span class="post-lk">'+ic('flame',12)+' '+esc(likers.slice(0,3).join(', '))+(likers.length>3?' y '+(likers.length-3)+' más':'')+'</span>':'')+'</div>'+
@@ -5715,7 +5728,7 @@ function welcomeHTML(m){
 /* ---- Cargar marca ---- */
 function markList(d){
   const l=filterEx(d.q,d.g).filter(hasRank);
-  return l.length?l.slice(0,60).map(e=>{const b=bestE1(e.id),L=b?levelIdx(e,b.e):null;
+  return l.length?l.map(e=>{const b=bestE1(e.id),L=b?levelIdx(e,b.e):null;
     return '<button class="ex" data-a="markPick" data-v="'+e.id+'">'+miniMap(mapOf(e))+'<span class="grow"><h4>'+esc(e.n)+'</h4><span class="mut sm-t">'+(b?lvlName(L)+' · '+bestTxt(e,b):esc(e.eq))+'</span></span>'+(b?badge(L,36):ic('right',18))+'</button>';}).join('')
    :'<div class="empty">Ningún ejercicio coincide.</div>';
 }
@@ -5740,18 +5753,18 @@ function markHTML(d){
   if(d.step==='form'){
     const noKg=ex.time&&!ex.bw;
     return '<div class="row">'+miniMap(mapOf(ex))+'<div class="grow"><h3 style="font:800 20px var(--f-d)">'+esc(ex.n)+'</h3><span class="mut sm-t">'+esc(ex.eq)+(ex.sk?' · '+esc(SKFAM[ex.sk.f]):'')+'</span></div><button class="btn sm line" data-a="markBack">Cambiar</button></div>'+
-     '<div class="g2">'+(noKg?'':'<label class="field">'+(ex.ph?'Peso de UNA mancuerna (kg)':ex.bw||ex.sk?'Peso extra (kg)':'Peso (kg)')+'<input class="big-in" type="number" inputmode="decimal" step="0.5" min="0" value="'+esc(d.kg)+'" data-i="mk" data-f="kg" placeholder="0"></label>')+
-     '<label class="field"'+(noKg?' style="grid-column:1/-1"':'')+'>'+(ex.time?'Segundos':'Repeticiones')+'<input class="big-in" type="number" inputmode="numeric" min="1" value="'+esc(d.reps)+'" data-i="mk" data-f="reps" placeholder="'+(ex.time?'30':'5')+'"></label></div>'+
-     '<label class="field">Fecha<input type="date" max="'+today()+'" value="'+esc(d.date)+'" data-i="mk" data-f="date"></label>'+
-     '<div id="markPrev">'+markPrev(d)+'</div><button class="btn pri wide big-btn" data-a="markGo">'+ic('bolt',18)+' Ver mi nivel</button>';
+     '<div class="g2">'+(noKg?'':'<label class="field">'+(ex.ph?'Peso de UNA mancuerna (kg)':ex.bw||ex.sk?'Peso extra (kg)':'Peso (kg)')+'<input class="big-in" type="number" inputmode="decimal" step="any" min="0" value="'+esc(d.kg)+'" data-i="mk" data-f="kg" placeholder="0" enterkeyhint="next"></label>')+
+     '<label class="field"'+(noKg?' style="grid-column:1/-1"':'')+'>'+(ex.time?'Segundos':'Repeticiones')+'<input class="big-in" type="number" inputmode="numeric" min="1" value="'+esc(d.reps)+'" data-i="mk" data-f="reps" placeholder="'+(ex.time?'30':'5')+'" enterkeyhint="done"></label></div>'+
+     '<div id="markPrev">'+markPrev(d)+'</div><button class="btn pri wide big-btn" data-a="markGo">'+ic('bolt',18)+' Guardar y ver mi nivel</button>'+
+     '<label class="mark-date">'+ic('cal',16)+'<span class="grow">¿Cuándo la hiciste?</span><input type="date" max="'+today()+'" value="'+esc(d.date)+'" data-i="mk" data-f="date"></label>';
   }
   /* reveal */
   const r=d.res,up=r.L>r.L0,first=r.L0==null||r.L0<0&&r.e0===0;
   const name=lvlName(r.L),col=lvlColor(r.L);
-  const msg=r.L<0?'Todavía no llegás a Bronce 1. ¡Seguí así!':up&&!first?'¡Subiste de '+lvlName(r.L0)+'!':r.rec&&!first?'¡Récord personal!':first?'Tu primer nivel en este ejercicio':'Tu mejor marca sigue siendo la anterior';
+  const msg=r.L<0?'Todavía no llegás a Bronce 1. ¡Seguí así!':up&&!first?'¡Subiste de '+lvlName(r.L0)+'!':r.rec&&!first?'¡Récord personal!':first?'Tu primer nivel en este ejercicio':r.eq?'Igualaste tu mejor marca':'Tu mejor marca sigue siendo la anterior';
   return '<div class="reveal'+(up?' up':'')+'" style="--c:'+col+'"><div class="rv-rays"></div><div class="rv-badge">'+badge(r.L,132)+'</div>'+
    '<div class="rv-name" style="color:'+col+'">'+[...name].map((ch,i)=>'<span style="animation-delay:'+(700+i*45)+'ms">'+(ch===' '?'&nbsp;':esc(ch))+'</span>').join('')+'</div>'+
-   '<p class="rv-msg">'+msg+'</p>'+(ex.st?'<div class="rv-pct">'+pctTxt(pctStronger(ex,bestE1(ex.id).e))+'</div>':'')+'<p class="mut sm-t tc">'+esc(ex.n)+' · '+(ex.time?d.reps+' s':(+d.kg?num(+d.kg,1)+' kg × ':'')+d.reps+(ex.time?'':' reps'))+'</p>'+
+   '<p class="rv-msg">'+msg+'</p>'+(ex.st?'<div class="rv-pct">'+pctTxt(pctStronger(ex,(bestE1(ex.id)||{e:0}).e))+'</div>':'')+'<p class="mut sm-t tc">'+esc(ex.n)+' · '+((+d.kg?num(+d.kg,1)+' kg × ':'')+d.reps+(ex.time?' s':' reps'))+'</p>'+
    (r.L>=0&&r.L<18?'<div class="bar rv-bar"><i style="width:'+Math.round((r.L0===r.L?r.p0:0)*100)+'%;background:'+col+'" data-to="'+Math.round(r.pct*100)+'"></i></div><p class="mut sm-t tc">Para '+lvlName(r.L+1)+': '+needTxt(ex,r.L+1)+'</p>':'')+
    '</div><div class="g2"><button class="btn" data-a="markAgain">Cargar otra</button><button class="btn pri" data-a="close" data-v="m2">Listo</button></div>';
 }
@@ -5808,7 +5821,12 @@ function modalBody(m,l2){
   return '';
 }
 /* al redibujar, cada hoja mantiene su scroll (antes volvía arriba de todo) */
-function keepScroll(el,fn){const k=[...el.querySelectorAll('.msheet,.sess')].map(x=>x.scrollTop);fn();el.querySelectorAll('.msheet,.sess').forEach((x,i)=>{if(k[i])x.scrollTop=k[i];});}
+function keepScroll(el,fn){const q='.msheet,.sess,.pick',k=[...el.querySelectorAll(q)].map(x=>x.scrollTop);keepX(el,fn);el.querySelectorAll(q).forEach((x,i)=>{if(k[i])x.scrollTop=k[i];});}
+/* las tiras que se deslizan de costado (filtros) tampoco vuelven al principio, y el filtro elegido queda a la vista */
+function keepX(el,fn,fresh){const q='.scroll-x',k=fresh?[]:[...el.querySelectorAll(q)].map(x=>[x.scrollLeft,x.children.length]);fn();
+  el.querySelectorAll(q).forEach((x,i)=>{if(k[i]&&k[i][0]&&k[i][1]===x.children.length)x.scrollLeft=k[i][0];
+    const on=x.querySelector('.on');if(!on)return;const c=x.getBoundingClientRect();if(!c.width)return;const r=on.getBoundingClientRect();
+    if(r.left<c.left)x.scrollLeft-=c.left-r.left+14;else if(r.right>c.right)x.scrollLeft+=r.right-c.right+14;});}
 /* onda desde el punto donde tocás (se ve como un botón real) */
 document.addEventListener('pointerdown',e=>{
   const b=e.target.closest('.btn,.chip,.opt button,.qtile,.ptile,.gen-cta,.onb-opts button,.seg button');if(!b||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
@@ -5816,9 +5834,17 @@ document.addEventListener('pointerdown',e=>{
   i.className='rip';i.style.cssText='width:'+s+'px;height:'+s+'px;left:'+(e.clientX-r.left-s/2)+'px;top:'+(e.clientY-r.top-s/2)+'px';
   if(getComputedStyle(b).position==='static')b.style.position='relative';b.style.overflow='hidden';b.appendChild(i);setTimeout(()=>i.remove(),600);
 },{passive:true});
+/* ¿había un campo con el teclado abierto cuando empezó este toque? */
+document.addEventListener('pointerdown',e=>{const a=document.activeElement;S.kbT=e.pointerType==='touch'&&a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&!/^(checkbox|radio|range|file|button|submit|date|time|color)$/.test(a.type||'')?performance.now():0;},{capture:true,passive:true});
+/* el teclado no tapa el botón de guardar: las hojas suben lo que ocupa el teclado */
+if(window.visualViewport){const vv=visualViewport,rt=document.documentElement;const kbUpd=()=>{const kb=Math.max(0,Math.round(innerHeight-vv.height-vv.offsetTop)),on=kb>90;rt.style.setProperty('--kb',(on?kb:0)+'px');
+  if(on!==rt.classList.contains('kb')){rt.classList.toggle('kb',on);if(on)setTimeout(()=>{const a=document.activeElement;if(a&&a.closest&&a.closest('.msheet,.pick'))try{a.scrollIntoView({block:'nearest'});}catch(x){}},80);}};
+  vv.addEventListener('resize',kbUpd);vv.addEventListener('scroll',kbUpd);}
+/* al tocar un número se selecciona entero: escribís encima sin tener que borrar */
+document.addEventListener('focusin',e=>{const t=e.target;if(t&&t.tagName==='INPUT'&&t.type==='number'&&t.value!=='')setTimeout(()=>{try{if(document.activeElement===t)t.select();}catch(x){}},0);});
 /* si la ventana ya estaba abierta y solo cambió su contenido, no repite la animación de entrada (evita el parpadeo) */
 function renderModal(){syncLayers();
-  const put=(el,m,l2,k)=>{keepScroll(el,()=>{el.innerHTML=m?modalBody(m,l2):'';});const t=m?m.t:null,ke=el.querySelector('[key]'),kk=t?t+'|'+(ke?ke.getAttribute('key'):''):null,prev=S[k]||'';
+  const put=(el,m,l2,k)=>{keepScroll(el,()=>{el.innerHTML=m?modalBody(m,l2):'';});const t=m?m.t:null,ke=el.querySelector('[key]'),kk=t?t+'|'+(ke?ke.getAttribute('key'):''):null,prev=S[k]||'';{const dg=el.querySelector('[role=dialog]'),sg=t?t+'|'+(dg?dg.getAttribute('aria-label'):''):'';if(sg!==(S[k+'s']||'')){S[k+'s']=sg;S.layT=performance.now();}}
     /* misma ventana: sin fundido; mismo paso: el contenido no vuelve a animarse */
     if(t&&prev.split('|')[0]===t)el.querySelectorAll('.mback').forEach(x=>x.classList.add('stay'));if(kk&&prev===kk)el.querySelectorAll('.mback').forEach(x=>x.classList.add('same'));S[k]=kk;};
   put($('#modal'),S.modal,false,'_mk');put($('#modal2'),S.m2,true,'_m2k');
@@ -5838,8 +5864,8 @@ function renderPill(){
 function renderPicker(){
   const el=$('#picker');syncLayers();
   if(!S.picker){el.innerHTML='';return;}
-  el.innerHTML='<div class="pick'+(S.picker.target==='gen'?' top':'')+'"><div class="pick-in"><div class="pick-top"><div class="row"><h2 class="grow" style="font:800 24px var(--f-d)">Elegir ejercicios</h2><button class="btn pri sm" data-a="pickDone">Listo</button></div>'+
-   '<div class="field"><input id="pq" type="search" placeholder="Buscar ejercicio" value="'+esc(S.picker.q)+'" data-i="pq" aria-label="Buscar ejercicio"></div><div class="scroll-x" id="pg">'+pickChips()+'</div></div><div class="gap" id="pres">'+pickResults()+'</div><button class="btn wide" style="margin-top:14px" data-a="newEx">'+ic('plus',18)+' Crear ejercicio propio</button></div></div>';
+  keepScroll(el,()=>{el.innerHTML='<div class="pick'+(S.picker.target==='gen'?' top':'')+'"><div class="pick-in"><div class="pick-top"><div class="row"><h2 class="grow" style="font:800 24px var(--f-d)">Elegir ejercicios</h2><button class="btn pri sm" data-a="pickDone">Listo</button></div>'+
+   '<div class="field"><input id="pq" type="search" placeholder="Buscar ejercicio" value="'+esc(S.picker.q)+'" data-i="pq" aria-label="Buscar ejercicio"></div><div class="scroll-x" id="pg">'+pickChips()+'</div></div><div class="gap" id="pres">'+pickResults()+'</div>'+(S.picker.target==='gen'?'':'<button class="btn wide" style="margin-top:14px" data-a="newEx">'+ic('plus',18)+' Crear ejercicio propio</button>')+'</div></div>';});
 }
 function pickChips(){return GROUP_TABS().map(g=>'<button class="chip '+((S.picker.g||'Todos')===g?'on':'')+'" data-a="pgrp" data-v="'+g+'">'+g+'</button>').join('');}
 function pickResults(){const l=filterEx(S.picker.q,S.picker.g);return l.length?l.map(e=>exRow(e,'pickAdd','<span class="chip on">'+ic('plus',14)+'</span>')).join(''):'<div class="empty">Ningún ejercicio coincide.</div>';}
@@ -5867,7 +5893,8 @@ function render(){
   const av=$('#avatarSlot');if(av)av.innerHTML=avatarHTML();
   const v=$('#view'),key=S.tab+'/'+(S.tab==='entrenar'?S.etab||'hoy':''),changed=S.lastTab!==key;
   const order=['inicio/','entrenar/rutinas','entrenar/cal','niveles/','nutri/','perfil/'],dir=order.indexOf(key)>=order.indexOf(S.lastTab||'')?'fwd':'back';S.lastTab=key;
-  v.innerHTML=VIEWS[S.tab]();
+  try{keepX(v,()=>{v.innerHTML=VIEWS[S.tab]();},changed);}
+  catch(err){console.error(err);v.innerHTML='<div class="card"><h3>Algo falló en esta pantalla</h3><p class="mut sm-t" style="margin-top:6px">Tus datos siguen guardados. Probá recargar; si vuelve a pasar, bajá una copia y avisanos.</p><div class="g2" style="margin-top:12px"><button class="btn" data-a="export">Bajar una copia</button><button class="btn pri" data-a="reload">Recargar</button></div></div>';}
   if(changed&&!S.vt){v.classList.remove('enter','fwd','back');void v.offsetWidth;v.classList.add('enter',dir);countUp(v);clearTimeout(S.enterT);S.enterT=setTimeout(()=>v.classList.remove('enter'),1400);}
   applyTheme();renderModal();renderSess();renderPicker();renderPill();renderRest();syncLayers();
   /* el fondo toma el color de tu rango general */
@@ -5882,21 +5909,30 @@ function countUp(root){
 /* Cada ventana abierta suma una entrada al historial: el botón atrás de Android la cierra en vez de salir de la app. */
 let hDepth=0,ignorePop=0,layerQ=false,wakeLock=null;
 const openLayers=()=>(S.sessOpen&&db.active?1:0)+(S.modal?1:0)+(S.picker?1:0)+(S.m2?1:0);
+/* estar fuera de Inicio cuenta como un paso más del historial: atrás en Android vuelve a Inicio en vez de cerrar la app */
+const histDepth=()=>openLayers()+(S.tab!=='inicio'?1:0);
+/* hojas donde estás armando algo: tocar afuera o deslizar hacia abajo no las cierra (para eso está la X) */
+const DRAFT_T=['routine','logedit','gen','excreate','comp','import','login','delacc'];
+const isDraft=w=>{const m=w==='m2'?S.m2:S.modal;return !!m&&(DRAFT_T.includes(m.t)||(m.t==='mark'&&m.d.step==='form')||(m.t==='food'&&['new','quick'].includes(m.d.step)));};
 function syncLayers(){if(layerQ)return;layerQ=true;queueMicrotask(()=>{layerQ=false;
-  const d=openLayers();
+  const d=histDepth();
   while(hDepth<d){try{history.pushState({sw:hDepth+1},'');}catch(e){}hDepth++;}
-  if(hDepth>d){hDepth=d;ignorePop++;try{history.back();}catch(e){ignorePop--;}}
-  lockScroll(d>0);
+  if(hDepth>d){const n=hDepth-d;hDepth=d;ignorePop++;try{history.go(-n);}catch(e){ignorePop--;}}
+  lockScroll(openLayers()>0);
   keepAwake(!!db.active);
 });}
 window.addEventListener('popstate',()=>{
   if(ignorePop>0){ignorePop--;return;}
   hDepth=Math.max(0,hDepth-1);
   if(S.modal&&S.modal.t==='recap')clearTimeout(S.recapT);
-  if(S.m2)S.m2=null;
-  else if(S.picker)S.picker=null;
-  else if(S.modal){if((S.modal.t==='profile'&&!db.profile)||S.modal.t==='welcome'||S.modal.t==='onb'){try{history.pushState({sw:hDepth+1},'');hDepth++;}catch(e){}return;}S.modal=null;}
+  /* en la marca, atrás vuelve del formulario a la lista en vez de cerrar todo */
+  if(S.m2&&S.m2.t==='mark'&&S.m2.d.step==='form'&&!S.m2.d.direct&&!S.picker){S.m2.d.step='pick';try{history.pushState({sw:hDepth+1},'');hDepth++;}catch(e){}renderModal();return;}
+  /* el selector abierto desde el asistente está arriba de todo: se cierra primero */
+  if(S.picker&&(S.picker.target==='gen'||!S.m2))S.picker=null;
+  else if(S.m2)S.m2=null;
+  else if(S.modal){if((S.modal.t==='profile'&&!db.profile)||S.modal.t==='welcome'||S.modal.t==='onb'){try{history.pushState({sw:hDepth+1},'');hDepth++;}catch(e){}return;}if(S.modal.t==='tools'&&S.iv){S.modal=null;ACTIONS.ivStop();}S.modal=null;}
   else if(S.sessOpen)S.sessOpen=false;
+  else if(S.tab!=='inicio'){goTab('inicio');window.scrollTo(0,0);}
   render();
 });
 function lockScroll(on){
@@ -5920,7 +5956,7 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
     const s=e.target.closest('.msheet');if(!s||s.classList.contains('full'))return;
     const bar=e.target.closest('.mh-bar');if(!bar&&s.scrollTop>0)return;
     if(!s.querySelector('[data-a="close"]'))return;
-    if(e.target.closest('input,textarea,select'))return;
+    if(e.target.closest('input,textarea,select')||isDraft(s.parentElement.dataset.v))return;
     sh=s;y0=e.touches[0].clientY;dy=0;which=s.parentElement.dataset.v;sh.style.transition='none';
   },{passive:true});
   document.addEventListener('touchmove',e=>{if(!sh)return;dy=Math.max(0,e.touches[0].clientY-y0);if(dy>4)sh.style.transform='translateY('+dy+'px)';},{passive:true});
@@ -6060,21 +6096,25 @@ const ACTIONS={
     db.plan[v]=l;save();render();toast('Rutina agregada al '+longDate(v));
   },
   unplan(v){const k=S.calSel,l=(db.plan[k]||[]).filter(x=>x!==v);if(l.length)db.plan[k]=l;else delete db.plan[k];save();render();},
-  markOpen(v){S.m2={t:'mark',d:{step:v?'form':'pick',q:'',g:'',ex:v||null,kg:'',reps:'',date:today()}};render();},
+  markOpen(v){S.m2={t:'mark',d:{step:v?'form':'pick',direct:!!v,q:'',g:'',ex:v||null,kg:'',reps:'',date:today()}};render();},
   markG(v){const d=S.m2.d;d.g=v==='Todos'?'':v;renderModal();},
   markPick(v){const d=S.m2.d,ls=(lastSets(v)||[]).filter(s=>!s.w),b=bestE1(v);d.ex=v;d.step='form';const s=b||ls[0]||{};d.kg=s.kg||'';d.reps=s.reps||'';renderModal();},
   markBack(){S.m2.d.step='pick';renderModal();},
-  markAgain(){const d=S.m2.d;d.step='form';d.res=null;renderModal();},
+  markAgain(){const d=S.m2.d;d.step='pick';d.res=null;d.ex=null;d.kg='';d.reps='';renderModal();const sh=document.querySelector('#modal2 .msheet');if(sh)sh.scrollTop=0;},
   markGo(){
     const d=S.m2.d,ex=exById(d.ex);if(!ex)return;
-    const reps=Math.round(+d.reps||0),kg=Math.max(0,+d.kg||0);
+    const noKg=ex.time&&!ex.bw,reps=Math.min(ex.time?900:200,Math.round(+d.reps||0)),kg=noKg?0:Math.min(300,Math.max(0,+d.kg||0));
     if(!(reps>0))return toast(ex.time?'Poné los segundos':'Poné las repeticiones');
     if(!db.profile)return toast('Completá tu perfil primero');
+    /* sin peso en un ejercicio con carga no hay nivel que calcular: antes se guardaba igual y la pantalla quedaba trabada */
+    if(!(e1(ex,kg,reps)>0))return toast(ex.ph?'Poné el peso de una mancuerna':'Poné el peso');
     const b0=bestE1(ex.id),e0=b0?b0.e:0,L0=b0?levelIdx(ex,e0):null,i0=b0?lvlInfo(ex,e0):null;
     const date=d.date&&d.date<=today()?d.date:today();
-    db.tests.push({id:uid(),date,ex:ex.id,kg,reps});save();
-    const e=e1(ex,kg,reps),b=bestE1(ex.id),L=levelIdx(ex,b.e),i=lvlInfo(ex,b.e);
-    d.res={L,L0,p0:i0?clamp(i0.pct,0,1):0,pct:clamp(i.pct,0,1),rec:e0>0&&e>e0+.01,e0};
+    /* la misma marca el mismo día se guarda una sola vez */
+    if(!db.tests.some(t=>t.ex===ex.id&&t.date===date&&(+t.kg||0)===kg&&+t.reps===reps)){db.tests.push({id:uid(),date,ex:ex.id,kg,reps});save();}
+    d.kg=kg||'';d.reps=String(reps);
+    const e=e1(ex,kg,reps),b=bestE1(ex.id)||{e},L=levelIdx(ex,b.e),i=lvlInfo(ex,b.e);
+    d.res={L,L0,p0:i0?clamp(i0.pct,0,1):0,pct:clamp(i.pct,0,1),rec:e0>0&&e>e0+.01,eq:e0>0&&Math.abs(e-e0)<=.01,e0};
     if(L>(L0==null?-1:L0)&&L>=0)addEv({k:'up',x:ex.id,L});else if(d.res.rec)addEv({k:'pr',x:ex.id});save();
     d.step='reveal';renderModal();
     setTimeout(()=>{const bi=document.querySelector('.rv-bar i');if(bi)bi.style.width=bi.dataset.to+'%';},900);
@@ -6116,7 +6156,7 @@ const ACTIONS={
   foodQuick(){const d=S.m2.d;d.qk={n:String(d.q||'').trim()};d.step='quick';renderModal();},
   foodQuickSave(){const d=S.m2.d,k=Math.round(+String(d.qk.k||'').replace(',','.')||0),p=r1(+String(d.qk.p||'').replace(',','.')||0);
     if(!(k>0))return toast('Poné las calorías');
-    const e={id:d.edit||uid(),date:d.date,m:d.m,n:String(d.qk.n||'').trim().slice(0,40)||MEAL_N[d.m],g:0,k,p,c:0,f:0};
+    const o=d.edit&&db.meals.find(x=>x.id===d.edit),sc=o&&o.k>0?k/o.k:1,e=Object.assign({},o||{},{id:d.edit||uid(),date:d.date,m:d.m,n:String(d.qk.n||'').trim().slice(0,40)||MEAL_N[d.m],g:o?r1((+o.g||0)*sc):0,k,p,c:o?r1((+o.c||0)*sc):0,f:o?r1((+o.f||0)*sc):0});
     if(d.edit){const i=db.meals.findIndex(x=>x.id===d.edit);if(i>=0)db.meals[i]=e;}else db.meals.push(e);
     save();S.m2=null;render();toast('Anotado: '+k+' kcal');},
   phOpt(v){const[i,j]=v.split('|').map(Number),it=S.m2.d.ph.items[i];it.sel=j;it.other=null;renderModal();},
@@ -6185,7 +6225,11 @@ const ACTIONS={
   startFree(v,el){startSession(null,el.dataset.d);},
   sessOpen(){S.sessOpen=true;render();},
   sessMin(){S.sessOpen=false;render();},
-  sessFinish(){finishSession();},
+  sessFinish(){const a=db.active;if(!a)return;const p=a.entries.reduce((n,en)=>n+en.sets.filter(s=>!s.done&&!s.w).length,0),dn=a.entries.some(en=>en.sets.some(s=>s.done));
+    if(p&&dn){S.m2={t:'confirm',title:'Terminar entrenamiento',msg:(p===1?'Queda 1 serie sin tildar: no se guarda.':'Quedan '+p+' series sin tildar: no se guardan.')+' ¿Terminamos igual?',act:'sessFinishGo',ok:'Terminar'};render();}
+    else finishSession();},
+  sessFinishGo(){S.m2=null;renderModal();finishSession();},
+  reload(){location.reload();},
   sessCancel(){S.m2={t:'confirm',title:'Cancelar entrenamiento',msg:'Se descartan las series de este entrenamiento.',act:'sessCancelGo',ok:'Descartar'};render();},
   sessCancelGo(){db.active=null;save();S.sessOpen=false;S.m2=null;endRest(false);render();},
   setDone(v,el){
@@ -6339,7 +6383,7 @@ const ACTIONS={
   skMarkStep(v){const i=$('#skMarkN'),m=S.m2;m.n=Math.max(1,(parseInt(i&&i.value,10)||m.n)+(+v));renderModal();},
   skMarkSave(){const i=$('#skMarkN'),m=S.m2,n=Math.round(+String(i?i.value:m.n).replace(',','.'));if(!(n>0))return toast('Poné cuánto hacés');
     const f=findNode(m.id);if(!f)return;const node=f.b.nodes[f.i],was=nodeDone(f.b,f.i);
-    db.tests.push({id:uid(),date:today(),ex:m.id,kg:0,reps:n});save();S.m2=null;render();checkMissions();Social.schedule();
+    db.tests.push({id:uid(),date:today(),ex:m.id,kg:0,reps:Math.min((exById(m.id)||{}).time?900:200,n)});save();S.m2=null;render();checkMissions();try{checkGoals();checkAch();checkRankUp(2200);}catch(e){}Social.schedule();
     const now=nodeDone(f.b,f.i),nx=f.b.nodes[f.i+1];
     if(now&&!was){confetti(40);toast('¡Dominada!'+(nx?' Se desbloqueó '+shortN(nx.ex.n):' Terminaste la rama'));if(nx&&S.modal&&S.modal.t==='tree'){S.modal.sel=nx.id;renderModal();}}
     else toast(now?'Guardado':'Guardado: te faltan '+(node.t-n)+(node.time?' s':' reps')+' para dominarla');},
@@ -6353,14 +6397,17 @@ const ACTIONS={
     const en=db.active.entries[+el.dataset.e],l=en.sets[en.sets.length-1]||{kg:'',reps:10};
     en.sets.push({kg:l.kg,reps:l.reps,done:false});save();renderSess();
   },
-  delSet(v,el){const en=db.active.entries[+el.dataset.e];if(en.sets.length>1){en.sets.pop();save();renderSess();}},
+  delSet(v,el){const en=db.active.entries[+el.dataset.e];if(en.sets.length<2)return;if(en.sets[en.sets.length-1].done)return toast('La última serie ya está hecha: destildala si la querés borrar');en.sets.pop();save();renderSess();},
   goalUse(v,el){const en=db.active.entries[+el.dataset.e];const g=en.goal;if(!g)return;en.sets.forEach(s=>{if(!s.done&&!s.w){if(g.kg)s.kg=g.kg;s.reps=g.reps;}});save();renderSess();toast('Meta puesta en las series que faltan');},
   ssTog(v,el){const en=db.active.entries[+el.dataset.e];en.ss=en.ss?0:1;save();renderSess();if(en.ss)toast('Superserie: alternás este ejercicio con el siguiente, sin descanso entre medio');},
   recapOpen(){openRecap();},
   recapNext(){const m=S.modal;if(m.i<RECAP_N-1){m.i++;renderModal();recapTimer();countUp($('#modal'));}else ACTIONS.recapClose();},
   recapPrev(){const m=S.modal;if(m.i>0){m.i--;renderModal();recapTimer();countUp($('#modal'));}},
   recapClose(){clearTimeout(S.recapT);S.modal=null;render();},
-  delEntry(v,el){db.active.entries.splice(+el.dataset.e,1);save();renderSess();},
+  delEntry(v,el){const i=+el.dataset.e,en=db.active.entries[i];if(!en)return;
+    if(en.sets.some(s=>s.done)){const ex=exById(en.ex);S.m2={t:'confirm',title:'Quitar ejercicio',msg:'Se borran las series que ya hiciste de '+(ex?ex.n:'este ejercicio')+'.',act:'delEntryGo',arg:String(i),ok:'Quitar'};render();return;}
+    db.active.entries.splice(i,1);save();renderSess();},
+  delEntryGo(v){S.m2=null;if(db.active&&db.active.entries[+v]){db.active.entries.splice(+v,1);save();}render();},
   setW(v,el){const s=db.active.entries[+el.dataset.e].sets[+el.dataset.s];s.w=s.w?0:1;save();renderSess();},
   moveEntry(v,el){const a=db.active.entries,i=+el.dataset.e;if(i>0){const t=a[i];a[i]=a[i-1];a[i-1]=t;save();renderSess();}},
   replEx(v,el){S.picker={target:'replace',idx:+el.dataset.e,q:'',g:''};renderPicker();},
@@ -6390,12 +6437,13 @@ const ACTIONS={
   pickEx(v){S.picker={target:v,q:'',g:''};renderPicker();},
   pickAdd(v){
     const ex=exById(v);if(!ex)return;
+    if(S.picker.last===v&&Date.now()-S.picker.lastT<1500)return;S.picker.last=v;S.picker.lastT=Date.now();
     const reps=ex.time?45:10;
     if(S.picker.target==='gen'){const d=S.m2&&S.m2.d,r=d&&d.plan&&d.plan[S.picker.ri],it=r&&r.items[S.picker.ii];
       if(it){if(r.items.some(x=>x!==it&&x.ex===v)){toast('Ese ya está en esta rutina');return;}const old=exById(it.ex);it.ex=v;delete it.warm;if(!!ex.time!==!!(old&&old.time))it.reps=ex.time?30:10;d.plan.vol=weekVolume(d.plan);}
       S.picker=null;renderPicker();renderModal();toast('Cambiado por '+ex.n+(canDo(v)?'':' (ojo: todavía no la tenés desbloqueada)'));return;}
     if(S.picker.target==='routine'){S.modal.d.items.push({ex:v,sets:3,reps:reps});renderModal();}
-    else if(S.picker.target==='replace'){const old=db.active.entries[S.picker.idx];const ne=mkEntry(v,old?Math.max(1,old.sets.filter(s=>!s.done).length||old.sets.length):3,reps);if(old)db.active.entries[S.picker.idx]=ne;S.picker=null;save();renderPicker();renderSess();toast('Cambiado por '+ex.n);return;}
+    else if(S.picker.target==='replace'){const old=db.active.entries[S.picker.idx];const ne=mkEntry(v,old?Math.max(1,old.sets.filter(s=>!s.done).length||old.sets.length):3,reps);if(old){const dn=old.sets.filter(s=>s.done);/* lo que ya hiciste del anterior queda anotado */if(dn.length){old.sets=dn;db.active.entries.splice(S.picker.idx+1,0,ne);}else db.active.entries[S.picker.idx]=ne;}S.picker=null;save();renderPicker();renderSess();toast('Cambiado por '+ex.n);return;}
     else{db.active.entries.push(mkEntry(v,3,reps));save();renderSess();}
     toast('Agregado: '+ex.n);
   },
@@ -6491,8 +6539,11 @@ document.addEventListener('click',e=>{
   unlockAudio();
   const el=e.target.closest('[data-a]');
   if(!el)return;
+  /* doble toque: el segundo no puede caer en lo que recién apareció bajo el dedo (cerraba el resultado o repetía la acción) */
+  if(e.isTrusted&&performance.now()-(S.layT||0)<350)return;
   const a=el.dataset.a;
-  if(a==='back'){if(e.target===el)closeLayer(el.dataset.v);return;}
+  /* tocar afuera con el teclado abierto solo baja el teclado: no cierra la ventana ni pierde lo escrito */
+  if(a==='back'){if(e.target===el&&!isDraft(el.dataset.v)&&!(performance.now()-(S.kbT||0)<800))closeLayer(el.dataset.v);return;}
   if(a==='close'){closeLayer(el.dataset.v);return;}
   if(a==='act')return;
   const f=ACTIONS[a];
@@ -6505,7 +6556,10 @@ document.addEventListener('input',e=>{
   const f=el.dataset.f;
   if(i==='q'){S.q=el.value;const r=$('#exres');if(r)r.innerHTML=exResults();}
   else if(i==='pq'){S.picker.q=el.value;const r=$('#pres');if(r)r.innerHTML=pickResults();}
-  else if(i==='set'){const s=db.active.entries[+el.dataset.e].sets[+el.dataset.s];s[f]=el.value===''?'':+el.value;save();}
+  else if(i==='set'){const s=db.active.entries[+el.dataset.e].sets[+el.dataset.s],mx=f==='kg'?600:900;
+    /* un dedo de más (600 en vez de 60) no puede inventar un récord */
+    if(+el.value<0)el.value='';else if(+el.value>mx){el.value=mx;toast(f==='kg'?'Máximo 600 kg':'Máximo 900');}
+    s[f]=el.value===''?'':+el.value;saveSoon();}
   else if(i==='d'){
     if(el.closest('#view')){pfD()[f]=el.value;return;}
     const m=el.closest('#modal2')?S.m2:S.modal;
@@ -6525,6 +6579,7 @@ document.addEventListener('input',e=>{
     shrinkPhoto(file).then(blob=>PhotoDB.put({id:uid(),date:today(),t:Date.now(),blob})).then(()=>{loadPhotos();toast('Foto guardada en este dispositivo');}).catch(()=>toast('No se pudo guardar la foto'));}
   else if(i==='mq'){S.m2.d.q=el.value;const l=$('#markList');if(l)l.innerHTML=markList(S.m2.d);}
   else if(i==='mk'){const ex0=exById(S.m2.d.ex),mx=f==='kg'?300:ex0&&ex0.time?900:200;
+    if(f!=='date'&&+el.value<0)el.value='';
     if(f!=='date'&&+el.value>mx){el.value=mx;toast(f==='kg'?'Máximo 300 kg':ex0&&ex0.time?'Máximo 900 segundos (15 minutos)':'Máximo 200 repeticiones seguidas');}
     S.m2.d[f]=el.value;const p=$('#markPrev');if(p)p.innerHTML=markPrev(S.m2.d);}
   else if(i==='onb'){S.modal.d[f]=el.value;}
@@ -6534,13 +6589,13 @@ document.addEventListener('input',e=>{
   else if(i==='phg'){const d=S.m2.d,it=d.ph.items[+el.dataset.e];it.g=Math.max(0,Math.round(+el.value.replace(',','.')||0));const k=$('#phk'+el.dataset.e);if(k)k.textContent=phItemKcal(it)+' kcal';const t=$('#phTot');if(t)t.innerHTML=phTotHTML(d);}
   else if(i==='vid'){const f=el.files&&el.files[0],id=el.dataset.e;el.value='';if(!f)return;if(f.size>120e6)return toast('El video es muy largo: grabá una sola serie (hasta ~1 minuto)');
     VidDB.put(id,{blob:f,t:Date.now()}).then(()=>{renderModal();toast('Video guardado en tu celu');}).catch(()=>toast('No pude guardar el video (poco espacio)'));}
-  else if(i==='pushAt'){clearTimeout(window.__pat);window.__pat=setTimeout(()=>{if(/^d{2}:d{2}$/.test(el.value))ACTIONS.pushAt();},700);}
+  else if(i==='pushAt'){clearTimeout(window.__pat);window.__pat=setTimeout(()=>{if(/^\d{2}:\d{2}$/.test(el.value))ACTIONS.pushAt();},700);}
   else if(i==='fq'){S.m2.d.q=el.value;const l=$('#foodList');if(l){l.innerHTML=foodList(S.m2.d);l.scrollTop=0;}}
   else if(i==='fa'){S.m2.d.qty=el.value;const p=$('#foodPrev');if(p)p.innerHTML=foodPrev(S.m2.d);}
   else if(i==='fn'){S.m2.d.nf[f]=el.value;}
   else if(i==='fk'){S.m2.d.qk[f]=el.value;}
-  else if(i==='enote'){db.active.entries[+el.dataset.e].note=el.value;save();}
-  else if(i==='anote'){db.active.note=el.value;save();}
+  else if(i==='enote'){db.active.entries[+el.dataset.e].note=el.value;saveSoon();}
+  else if(i==='anote'){db.active.note=el.value;saveSoon();}
   else if(i==='pl'){S.m2.d[f]=el.value;const o=document.createElement('div');o.innerHTML=platesHTML(S.m2.d);const n=o.querySelector('#plOut'),c=$('#plOut');if(n&&c)c.replaceWith(n);const b=$('#modal2 [data-a="platesUse"]'),nb=o.querySelector('[data-a="platesUse"]');if(b&&nb)b.replaceWith(nb);}
   else if(i==='file'){
     const file=el.files&&el.files[0];if(!file)return;
@@ -6562,6 +6617,10 @@ document.addEventListener('keydown',e=>{
     if(e.key==='Enter'){e.preventDefault();cmdRun(S.modal.i||0);return;}
   }
   if(e.key==='Enter'&&S.m2&&S.m2.t==='login'&&e.target.tagName==='INPUT'){e.preventDefault();Sync.loginGo();return;}
+  /* en la marca: "siguiente" pasa del peso a las repeticiones y "listo" guarda */
+  if(e.key==='Enter'&&e.target.tagName==='INPUT'&&S.m2&&S.m2.t==='mark'&&S.m2.d.step==='form'){e.preventDefault();const nx=e.target.dataset.f==='kg'&&document.querySelector('#modal2 input[data-f=reps]');if(nx){nx.focus();return;}e.target.blur();ACTIONS.markGo();return;}
+  /* en cualquier campo de números, la tecla "ir" del teclado lo cierra */
+  if(e.key==='Enter'&&e.target.tagName==='INPUT'&&e.target.type==='number'){e.target.blur();return;}
   if(e.key!=='Escape')return;
   if(S.m2)closeLayer('m2');
   else if(S.picker){S.picker=null;renderPicker();}
@@ -6784,7 +6843,9 @@ const Sync=(()=>{
 
 /* ============ Inicio ============ */
 applyTheme();
-render();
+try{render();}catch(e){console.error(e);}
+/* un error suelto no deja la app muda */
+{let errT=0;window.addEventListener('error',e=>{if(!e.message||!e.filename||e.filename.indexOf(location.origin)!==0||Date.now()-errT<8000)return;errT=Date.now();try{toast('Algo falló. Si se repite, recargá la app.');}catch(x){}});}
 if(!db.profile)ACTIONS.startOnb();
 /* el resumen de la semana pasada se abre solo una vez por semana */
 setTimeout(()=>{try{if(db.profile&&!S.modal&&!S.m2&&!S.sessOpen){const d=recapData();if(d.n&&db.settings.recapSeen!==d.key)openRecap();}}catch(e){}},1400);
@@ -6817,7 +6878,8 @@ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){
   window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>{setInterval(()=>r.update().catch(()=>{}),30*60*1000);}).catch(()=>{}));
   const hadSW=!!navigator.serviceWorker.controller;let swReload=false;
   navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!hadSW||swReload)return;swReload=true;
-    if(db.active){toast('Hay una versión nueva: se aplica cuando cierres la app');return;}location.reload();});
+    /* no recarga encima de algo que estás cargando: espera a que salgas de la app */
+    if(db.active||S.modal||S.m2||S.picker){if(db.active)toast('Hay una versión nueva: se aplica cuando cierres la app');document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&!db.active)location.reload();});return;}location.reload();});
 }
 </script>
 </body>
