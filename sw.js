@@ -1,6 +1,6 @@
 /* Service worker de Swole: hace que la app abra sin internet.
    Cuando cambies index.html, subí el número de VERSION para que los celulares bajen la nueva. */
-const VERSION = 'swole-v51';
+const VERSION = 'swole-v52';
 // Las fotos van en su propia caja, que NO se borra con cada versión (antes se bajaban de nuevo en cada actualización).
 const IMG = 'swole-img-1';
 const PICS = 'basquet cali ciclismo combate dep fuerza futbol grasa hip hockey natacion rugby running salud tenis voley'.split(' ').map(k => './img/' + k + '.jpg');
@@ -29,6 +29,7 @@ self.addEventListener('fetch', e => {
   // La página: primero la red (para tener siempre la última versión). Si no hay internet,
   // o la red tarda más de 3 segundos (señal mala en el gym), abre la copia guardada y la
   // versión nueva se guarda por detrás para la próxima vez.
+  if (url.pathname.includes('/info/')) return; // la página de presentación no pasa por la caché de la app
   if (req.mode === 'navigate') {
     const net = fetch(req).then(res => {
       if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put('./index.html', copy)); }

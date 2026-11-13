@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Swole: ¿qué tan fuerte sos?</title>
+<meta name="description" content="Swole te dice en qué rango estás, de Bronce a Élite, te arma la rutina según tu deporte y te deja competir con tus amigos. Gratis.">
+<meta property="og:title" content="Swole: ¿qué tan fuerte sos?">
+<meta property="og:description" content="Rangos de Bronce a Élite, rutinas a tu medida y torneos con amigos. Gratis.">
+<meta property="og:image" content="../icons/icon-512.png">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;800;900&family=Geist:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#F4F5FA;--night:#171A26;--raise:#232838;--m:clamp(16px,3vw,40px);
+  --bronce:#A35F2B;--plata:#8794AC;--oro:#CC8A12;--platino:#147A73;--diamante:#2F73E0;--campeon:#8F43EA;--elite:#DA2A52}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{font:400 18px/1.5 Geist,system-ui,sans-serif;background:var(--night);color:var(--ink);-webkit-font-smoothing:antialiased}
+h1,h2{font-family:Archivo,sans-serif;font-weight:900;letter-spacing:-.035em;line-height:.95;text-wrap:balance}
+h1{font-size:clamp(52px,10.5vw,168px)}
+h2{font-size:clamp(40px,7.6vw,118px)}
+p{max-width:46ch}
+a{color:inherit}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:18px 30px;border-radius:999px;border:0;background:var(--ink);color:var(--night);font:800 18px Archivo,sans-serif;text-decoration:none;cursor:pointer;transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}.btn:active{transform:scale(.97)}
+.btn:focus-visible,a:focus-visible,input:focus-visible,button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.ch{min-height:92svh;padding:clamp(72px,10vw,140px) var(--m);display:grid;align-content:center;gap:clamp(24px,4vw,48px);overflow:hidden}
+.nav{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:20px var(--m);z-index:2}
+.nav b{font:900 24px Archivo,sans-serif;letter-spacing:-.04em}.nav a{font-weight:600;font-size:16px;text-decoration:none}
+
+/* portada: los 7 rangos como carpetas */
+.hero{position:relative;min-height:100svh;padding:110px 0 0;display:flex;flex-direction:column;background:var(--night)}
+.hero-t{padding:0 var(--m);display:grid;gap:20px;justify-items:start}
+.stack{margin-top:auto;padding-top:clamp(40px,7vh,90px);display:grid}
+.stack a{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:clamp(12px,1.9vh,20px) var(--m);font:800 clamp(20px,2.4vw,28px) Archivo,sans-serif;letter-spacing:-.02em;text-decoration:none;color:#fff;transition:padding-left .25s cubic-bezier(.22,1,.36,1)}
+.stack a:hover{padding-left:calc(var(--m) + 18px)}
+.stack a span{font:400 16px Geist,sans-serif;opacity:.92}
+@media (max-width:640px){.stack a span{display:none}}
+
+/* calculadora de rango */
+.calc{background:var(--bronce);transition:background-color .35s}
+.calc-g{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,5vw,80px);align-items:center}
+.out{font:900 clamp(56px,11vw,180px)/.9 Archivo,sans-serif;letter-spacing:-.04em}
+.out small{display:block;font:600 clamp(18px,2vw,26px)/1.3 Geist,sans-serif;letter-spacing:0;margin-top:14px;max-width:22ch}
+.form{display:grid;gap:14px;max-width:440px;margin-bottom:12px}
+.form label{display:grid;gap:6px;font-weight:600;font-size:16px}
+.form input,.seg button{font:800 28px Archivo,sans-serif;padding:14px 16px;border-radius:14px;border:0;background:rgba(0,0,0,.45);color:#fff;width:100%}
+.form .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}.seg button{font-size:18px;cursor:pointer}.seg button[aria-pressed=true]{background:#fff;color:#171A26}
+@media (max-width:820px){.calc-g{grid-template-columns:1fr}}
+
+/* rutinas */
+.rut{background:var(--plata);color:#12141d}
+.strip{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:0 calc(var(--m)*-1)}
+.strip figure{margin:0;position:relative;aspect-ratio:3/4;overflow:hidden}
+.strip img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s cubic-bezier(.22,1,.36,1)}
+.strip figure:hover img{transform:scale(1.06)}
+.strip figcaption{position:absolute;left:0;bottom:0;padding:6px 12px;font:800 18px Archivo,sans-serif;color:#12141d;background:#F4F5FA}
+@media (max-width:820px){.strip{grid-template-columns:repeat(3,1fr)}}
+
+/* habilidades: una por línea */
+.sk{background:var(--platino)}
+.poster{list-style:none;padding:0;display:grid}
+.poster li{display:flex;justify-content:space-between;align-items:baseline;gap:16px;font:900 clamp(38px,8.6vw,132px)/.95 Archivo,sans-serif;letter-spacing:-.04em;text-transform:lowercase;transition:color .2s}
+.poster li:hover{color:#12141d}
+.poster li span{font:600 clamp(15px,1.4vw,20px) Geist,sans-serif;letter-spacing:0;text-transform:none;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media (max-width:640px){.poster li span{display:none}}
+
+/* amigos */
+.soc{background:var(--diamante)}
+.soc-g{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(24px,5vw,80px);align-items:center}
+.post{background:#171A26;border-radius:22px;padding:20px;display:grid;gap:12px;max-width:420px;justify-self:end;width:100%;font-size:16px}
+.post b{font-family:Archivo,sans-serif}
+.post .who{display:flex;gap:10px;align-items:center}.av{width:40px;height:40px;border-radius:50%;background:var(--elite);display:grid;place-items:center;font:800 17px Archivo,sans-serif}
+.post .pr{display:inline-block;padding:6px 10px;border-radius:10px;background:#3a2f12;color:#F2C14E;font-weight:600;font-size:16px}
+.post .row{display:flex;justify-content:space-between;gap:10px}
+.fire{display:inline-flex;gap:8px;align-items:center;padding:10px 16px;border-radius:12px;border:0;background:#232838;color:#fff;font:800 16px Archivo,sans-serif;cursor:pointer;transition:transform .15s,background-color .2s}
+.fire[aria-pressed=true]{background:#5a2a12;color:#FF8A4D}.fire:active{transform:scale(.92)}
+@media (max-width:820px){.soc-g{grid-template-columns:1fr}.post{justify-self:start}}
+
+/* comida */
+.food{background:var(--campeon)}
+.bar{display:flex;gap:6px;height:22vh;min-height:150px}
+.bar div{padding:18px;border-radius:14px;display:flex;flex-direction:column;justify-content:space-between;min-width:0;font-size:16px;line-height:1.35}
+.bar b{font:800 28px Archivo,sans-serif}.bar p{max-width:none}
+.bar div:nth-child(1){flex:1;background:#171A26}.bar div:nth-child(2){flex:2;background:#F4F5FA;color:#171A26}.bar div:nth-child(3){flex:1.4;background:#5d22ad}
+@media (max-width:640px){.bar{flex-direction:column;height:auto}.bar div{min-height:110px}}
+
+/* cierre */
+.end{background:var(--elite);align-content:end}
+.end p{font-size:20px}
+.steps{display:grid;gap:6px;padding:0;list-style:none;font-size:18px;max-width:46ch}
+.tiles{display:grid;grid-template-columns:repeat(12,1fr);gap:8px;padding:8px;background:var(--night)}
+.tile{border-radius:16px;padding:22px;background:var(--raise);min-height:170px;display:flex;flex-direction:column;justify-content:space-between;font-size:16px;text-decoration:none}
+.tile.w{grid-column:span 8;background:var(--ink);color:var(--night);font:900 clamp(60px,12vw,190px)/.8 Archivo,sans-serif;letter-spacing:-.05em;justify-content:center;align-items:center;min-height:260px}
+.tile.a{grid-column:span 4;background:var(--elite);font:800 28px/1.05 Archivo,sans-serif;min-height:260px}
+.tile.s{grid-column:span 6}
+.tile small{font-size:16px;opacity:.85}
+@media (max-width:820px){.tile.w,.tile.a,.tile.s{grid-column:span 12}}
+
+/* entradas */
+.rv{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1);transition-delay:calc(var(--i,0)*80ms)}
+.rv.in{opacity:1;transform:none}
+.no-js .rv{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}.btn,.strip img,.stack a{transition:none}}
+</style>
+</head>
+<body class="no-js">
+<header class="hero">
+  <nav class="nav"><b>swole</b><a href="../">Abrir la app</a></nav>
+  <div class="hero-t">
+    <h1 class="rv">¿Qué tan fuerte sos?</h1>
+    <p class="rv" style="--i:1">Swole mide tu fuerza contra gente de tu peso y tu edad y te pone un rango, de Bronce a Élite. Después te arma la rutina para subir.</p>
+    <a class="btn rv" style="--i:2" href="../">Empezar gratis</a>
+  </div>
+  <div class="stack" aria-label="Los siete rangos">
+    <a href="#rango" style="background:var(--bronce)">Bronce <span>Calculá tu rango ahora</span></a>
+    <a href="#rutinas" style="background:var(--plata);color:#12141d">Plata <span>Rutinas hechas para tu semana</span></a>
+    <a href="#rutinas" style="background:var(--oro);color:#12141d">Oro <span>6 programas famosos listos</span></a>
+    <a href="#habilidades" style="background:var(--platino)">Platino <span>52 habilidades de calistenia</span></a>
+    <a href="#amigos" style="background:var(--diamante)">Diamante <span>Torneos con tus amigos</span></a>
+    <a href="#comida" style="background:var(--campeon)">Campeón <span>Calorías con el código de barras</span></a>
+    <a href="#instalar" style="background:var(--elite)">Élite <span>Instalala en un minuto</span></a>
+  </div>
+</header>
+
+<section class="ch calc" id="rango">
+  <h2 class="rv">Tu rango en banca</h2>
+  <div class="calc-g">
+    <form class="form rv" style="--i:1" onsubmit="return false">
+      <div class="seg" role="group" aria-label="Sexo"><button type="button" data-s="m" aria-pressed="true">Hombre</button><button type="button" data-s="f" aria-pressed="false">Mujer</button></div>
+      <label>Tu peso (kg)<input id="bw" type="number" inputmode="decimal" value="75" min="35" max="200"></label>
+      <div class="two"><label>Banca (kg)<input id="kg" type="number" inputmode="decimal" value="60" min="0" max="350"></label><label>Repeticiones<input id="rp" type="number" inputmode="numeric" value="5" min="1" max="15"></label></div>
+    </form>
+    <div class="out rv" style="--i:2" aria-live="polite"><span id="rk">Oro I</span><small id="pc">Más fuerte que el 50 % de la gente que entrena.</small></div>
+  </div>
+  <p class="rv" style="--i:3">La escala sale de millones de marcas reales. En la app tenés lo mismo para 85 ejercicios, y un rango general que sube con vos.</p>
+</section>
+
+<section class="ch rut" id="rutinas">
+  <h2 class="rv">Una rutina para tu semana</h2>
+  <p class="rv" style="--i:1">Decís qué deporte hacés, qué días tenés práctica o partido y cuánto tiempo hay. Swole acomoda las piernas lejos del partido, te dice qué peso poner y te baja la carga cada cinco semanas. Si preferís un clásico, hay 5×5, Push Pull Legs, 5/3/1, GZCLP, Upper/Lower y Full Body.</p>
+  <div class="strip rv" style="--i:2">
+    <figure><img src="../img/futbol.jpg" alt="Jugadores de fútbol disputando la pelota" width="480" height="640" loading="lazy"><figcaption>Fútbol</figcaption></figure>
+    <figure><img src="../img/rugby.jpg" alt="Jugadores de rugby en un partido" width="480" height="640" loading="lazy"><figcaption>Rugby</figcaption></figure>
+    <figure><img src="../img/fuerza.jpg" alt="Persona levantando una barra con peso" width="480" height="640" loading="lazy"><figcaption>Fuerza</figcaption></figure>
+    <figure><img src="../img/cali.jpg" alt="Persona entrenando calistenia en barras" width="480" height="640" loading="lazy"><figcaption>Calistenia</figcaption></figure>
+    <figure><img src="../img/running.jpg" alt="Corredores en una carrera" width="480" height="640" loading="lazy"><figcaption>Running</figcaption></figure>
+    <figure><img src="../img/natacion.jpg" alt="Nadador en una pileta" width="480" height="640" loading="lazy"><figcaption>Natación</figcaption></figure>
+  </div>
+</section>
+
+<section class="ch sk" id="habilidades">
+  <ul class="poster">
+    <li class="rv">muscle-up <span>5 pasos desde el remo invertido</span></li>
+    <li class="rv" style="--i:1">vertical <span>3 pasos desde la flexión en pica</span></li>
+    <li class="rv" style="--i:2">front lever <span>5 pasos, de encogido a completo</span></li>
+    <li class="rv" style="--i:3">planche <span>6 pasos desde el cuervo</span></li>
+    <li class="rv" style="--i:4">bandera <span>4 pasos, cada uno con su figura</span></li>
+  </ul>
+  <p class="rv" style="--i:5">Un árbol de 52 habilidades. Marcás la que ya te sale, se desbloquea la siguiente y Swole te arma el plan para llegar.</p>
+</section>
+
+<section class="ch soc" id="amigos">
+  <div class="soc-g">
+    <div style="display:grid;gap:24px">
+      <h2 class="rv">Entrenar solo aburre</h2>
+      <p class="rv" style="--i:1">Tus amigos ven tus entrenos y te dan fuego. Armás torneos de una semana o un mes: quién entrena más días, quién hace más series, quién suma más puntos. Al final hay podio.</p>
+    </div>
+    <div class="post rv" style="--i:2" data-ui>
+      <div class="who"><span class="av">P</span><span><b>Pedro</b><br><small>hace 2 h</small></span></div>
+      <b style="font-size:20px">Pecho y tríceps</b>
+      <span>62 min · 18 series · 7.450 kg</span>
+      <span class="pr">Récord en press banca</span>
+      <div class="row"><span>Press banca</span><span>4 × 85 kg × 5</span></div>
+      <div class="row"><span>Fondos</span><span>3 × 12 reps</span></div>
+      <div><button class="fire" id="fire" aria-pressed="false" aria-label="Dar fuego">Fuego <span id="fn">2</span></button></div>
+    </div>
+  </div>
+</section>
+
+<section class="ch food" id="comida">
+  <h2 class="rv">Comida en tres toques</h2>
+  <div class="bar rv" style="--i:1" data-ui>
+    <div><b>Escaneás</b><p>Apuntás la cámara al código de barras del paquete.</p></div>
+    <div><b>Elegís cuánto</b><p>Una porción, medio paquete o los gramos justos. Swole hace la cuenta.</p></div>
+    <div><b>Anotado</b><p>Calorías y proteína contra tu meta del día.</p></div>
+  </div>
+  <p class="rv" style="--i:2">También podés buscar entre 100 comidas de acá, como milanesa o dulce de leche, o anotar solo las calorías si comiste afuera.</p>
+</section>
+
+<section class="ch end" id="instalar">
+  <h2 class="rv">Empezá en Bronce hoy</h2>
+  <p class="rv" style="--i:1">Es gratis y no hay que bajar nada de una tienda. Se instala desde el navegador y anda sin internet.</p>
+  <ol class="steps rv" style="--i:2">
+    <li>Abrí Swole desde el botón.</li>
+    <li>En Android: menú del navegador y "Instalar app". En iPhone: Compartir y "Agregar a inicio".</li>
+    <li>Contestás cinco preguntas y ya tenés tu plan.</li>
+  </ol>
+  <div class="rv" style="--i:3"><a class="btn" href="../">Abrir Swole</a></div>
+</section>
+
+<footer class="tiles">
+  <div class="tile s"><span>Hecha en Uruguay por alguien que entrena y quería saber en qué nivel estaba de verdad.</span><small>Fotos de deportes: Wikimedia Commons, con sus licencias en el archivo TERCEROS de la app.</small></div>
+  <div class="tile s"><span>Tus datos son tuyos: se guardan en tu celu, y en la nube solo si creás una cuenta. Podés exportarlos a Excel o borrar todo cuando quieras.</span><small>Sin publicidad.</small></div>
+  <div class="tile w" aria-hidden="true">swole</div>
+  <a class="tile a" href="../"><span>Abrir la app</span><svg width="56" height="56" viewBox="0 0 56 56" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" style="align-self:flex-end" aria-hidden="true"><path d="M10 46L46 10M18 10h28v28"/></svg></a>
+</footer>
+
+<script>
+document.body.classList.remove('no-js');
+/* entradas */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.12});
+document.querySelectorAll('.rv').forEach(e=>io.observe(e));
+/* calculadora: la misma escala que usa la app (percentiles de StrengthLevel para banca) */
+const TIERS=['Bronce','Plata','Oro','Platino','Diamante','Campeón','Élite'],COL=['--bronce','--plata','--oro','--platino','--diamante','--campeon','--elite'];
+const A=[.70,.93,1.22,1.53,1.87],P=[5,20,50,80,95],T=[[0,2],[3,25],[6,50],[9,68],[12,80],[15,92],[16,95],[17,98],[18,99.5]];
+let sex='m';
+function calc(){
+  const W=Math.min(200,Math.max(35,+bw.value||75)),kg=+document.getElementById('kg').value||0,r=Math.min(15,Math.max(1,+rp.value||1));
+  const e=kg*(1+r/30),sf=sex==='f'?.6:1,Wa=75*Math.pow(W/75,2/3),a=A.map(x=>x*sf*Wa);
+  let p;if(e<a[0])p=5*Math.pow(e/a[0],2);else{p=99.9;for(let i=1;i<5;i++)if(e<=a[i]){p=P[i-1]+(P[i]-P[i-1])*(e-a[i-1])/(a[i]-a[i-1]);break;}if(e>a[4])p=Math.min(99.9,95+4.9*Math.min(1,(e-a[4])/(a[4]*.25)));}
+  const g=p+8*Math.sin(Math.PI*p/100);let L=18;
+  if(g<=2)L=-1;else for(let i=1;i<T.length;i++)if(g<=T[i][1]){L=T[i-1][0]+(T[i][0]-T[i-1][0])*(g-T[i-1][1])/(T[i][1]-T[i-1][1]);break;}
+  const n=Math.floor(L),t=n<0?0:Math.min(6,Math.floor(n/3));
+  rk.textContent=n<0?'Casi Bronce':n>=18?'Élite':TIERS[t]+' '+['I','II','III'][n%3];
+  pc.textContent=n<0?'Todavía sin rango: con un poco más entrás en Bronce.':'Más fuerte que el '+Math.max(1,Math.round(g))+' % de la gente que entrena.';
+  const sec=document.getElementById('rango');sec.style.backgroundColor='var('+COL[t]+')';sec.style.color=t===1?'#12141d':'';
+}
+document.querySelectorAll('.form input').forEach(i=>i.addEventListener('input',calc));
+document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{sex=b.dataset.s;document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-pressed',x===b));calc();}));
+calc();
+/* fuego */
+fire.addEventListener('click',()=>{const on=fire.getAttribute('aria-pressed')!=='true';fire.setAttribute('aria-pressed',on);fn.textContent=on?3:2;});
+</script>
+</body>
+</html>

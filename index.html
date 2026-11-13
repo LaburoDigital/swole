@@ -1506,6 +1506,28 @@ small{line-height:1.35}
 .ffc-r{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}.ffc-r small{display:block;color:var(--mut);font-size:12px}.ffc-r .grow{min-width:0;font-size:14px}
 .onb-plan{display:grid;gap:8px;margin:14px 0 4px;text-align:left}.onb-plan>div{display:grid;gap:2px;padding:12px 14px;border-radius:14px;background:var(--raise);border:1px solid var(--line)}.onb-plan b{font:800 16px var(--f-d)}.onb-plan span{color:var(--mut);font-size:13px}
 .onb-skip{display:block;margin:6px auto 0;background:none;border:0;color:var(--mut);font:600 14px var(--f-b);padding:8px}
+/* v52: programas */
+.prog{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:14px;border-radius:16px;background:var(--raise);border:1px solid var(--line);color:var(--text)}
+.prog b{display:block;font:800 17px var(--f-d)}.prog small{display:block;color:var(--mut);font-size:13px;margin:3px 0 8px;line-height:1.35}
+.prog-m{display:flex;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--mut);align-items:center}
+.prog-how{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--ok) 12%,var(--raise));font-size:13.5px;margin:10px 0}
+.prog-day{padding:12px;border-radius:14px;background:var(--raise);margin-top:8px}.prog-day>.row{margin-bottom:6px}
+.prog-it{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:3px 0}
+.prog-cta .gen-ic{background:linear-gradient(135deg,#E8B64C,#FF7A3D)}
+/* v52: colores desbloqueables, video de técnica */
+:root[data-accent="oro"]:not(#_){--acc:#F2C14E;--acc2:#FF8A3D;--glow:#FFE08A}
+:root[data-theme="light"][data-accent="oro"]:not(#_){--acc:#B9820A;--acc2:#D9601A}
+:root[data-accent="elite"]:not(#_){--acc:#FF4F6A;--acc2:#8F43EA;--glow:#FF8DA0}
+:root[data-theme="light"][data-accent="elite"]:not(#_){--acc:#D42A4A;--acc2:#7030C8}
+.acc-row{grid-template-columns:repeat(3,1fr)}
+.acc-sw.lock i{display:grid;place-items:center;color:#fff;filter:saturate(.5) brightness(.7)}.acc-sw.lock{opacity:.8}.acc-sw small{display:block;font-size:10.5px;color:var(--mut);font-weight:600}
+.inv-cta{display:flex;align-items:center;gap:10px;width:100%;margin-top:10px;padding:12px;border-radius:14px;text-align:left;color:var(--text);background:color-mix(in srgb,var(--acc) 14%,var(--raise));border:1px solid color-mix(in srgb,var(--acc) 35%,transparent)}
+.inv-cta b{display:block;font-size:14.5px}.inv-cta small{display:block;color:var(--mut);font-size:12.5px}
+#vidSlot{margin-top:10px}
+.vid-cmp{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.vid-fig,.vid-me{display:grid;gap:4px;justify-items:center;padding:8px;border-radius:14px;background:var(--raise)}
+.vid-fig .tq{width:100%;height:auto;max-width:150px}.vid-me video{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;background:#000}
+.vid-cmp small{color:var(--mut);font-size:12px}
 </style>
 </head>
 <body>
@@ -2510,7 +2532,9 @@ function goTab(v){if(v==='hoy')v='inicio';if(['rutinas','cal'].includes(v)){S.ta
 let toastT=null;
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2800);}
 function effTheme(){const t=document.documentElement.dataset.theme;if(t)return t;return window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}
-const ACCENTS=[['aurora','Aurora','#9B7BFF','#FF5FA2'],['fuego','Fuego','#FF7A45','#FF3D7A'],['oceano','Océano','#3FA0FF','#2FE0C8'],['lima','Lima','#A8E83A','#2FE0A0']];
+const ACCENTS=[['aurora','Aurora','#9B7BFF','#FF5FA2'],['fuego','Fuego','#FF7A45','#FF3D7A'],['oceano','Océano','#3FA0FF','#2FE0C8'],['lima','Lima','#A8E83A','#2FE0A0'],['oro','Oro','#F2C14E','#FF8A3D',1],['elite','Élite','#FF4F6A','#8F43EA',3]];
+/* cuántos amigos tenés (se guarda para saberlo sin internet) */
+const frCount=()=>S.social?S.social.friends.length:(db.settings.frCount||0);
 function applyTheme(){const ac=db.settings.accent;if(ac&&ac!=='aurora')document.documentElement.dataset.accent=ac;else delete document.documentElement.dataset.accent;const t=db.settings.theme;if(t==='auto')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=t;const b=$('#themeBtn');if(b)b.innerHTML=ic(effTheme()==='dark'?'sun':'moon');}
 
 /* ============ Piezas reutilizables ============ */
@@ -2578,6 +2602,7 @@ function routineCard(r){
 function viewRutinas(){
   let h='<h1 class="pg">Rutinas</h1><div class="seg" style="margin-bottom:16px"><button class="'+(S.rtab==='rut'?'on':'')+'" data-a="rtab" data-v="rut">Mis rutinas</button><button class="'+(S.rtab==='ej'?'on':'')+'" data-a="rtab" data-v="ej">Ejercicios</button></div>';
   if(S.rtab==='rut'){
+    h+='<button class="gen-cta prog-cta" data-a="progsOpen"><span class="gen-ic">'+ic('trophy',22)+'</span><span class="grow"><b>Programas famosos</b><span>5×5, PPL, 5/3/1, GZCLP, Upper/Lower… listos para usar</span></span>'+ic('right',18)+'</button>';
     h+='<button class="gen-cta" data-a="genOpen"><span class="gen-ic">'+ic('bolt',22)+'</span><span class="grow"><b>Armame una rutina</b><span>Según tu deporte, tu objetivo y los días que tenés</span></span>'+ic('right',18)+'</button>'+
      '<button class="btn wide" data-a="newR" style="margin-bottom:14px">'+ic('plus',18)+' Nueva rutina desde cero</button>';
     if(db.routines.length)h+=db.routines.map(routineCard).join('');
@@ -3508,6 +3533,8 @@ function publicSummary(){
 }
 function afterSocial(){
   try{
+    const fc=S.social.friends.length,was=db.settings.frCount||0;
+    if(fc!==was){db.settings.frCount=fc;save();const un=ACCENTS.filter(a=>a[4]&&a[4]>was&&a[4]<=fc);if(un.length)setTimeout(()=>{toast('Desbloqueaste el color '+un.map(a=>a[1]).join(' y ')+': elegilo en Perfil');confetti(40);},600);}
     /* ¿alguien te pasó en la temporada? */
     const rows=rankRows('season'),i=rows.findIndex(x=>x.me),m=monthKey(),old=db.settings.seasonPos;
     if(i>=0){if(old&&old.m===m&&i>old.i&&rows[i-1]&&rows[i-1].v>0)db.settings.seasonPass={m,by:rows[i-1].r.nick||'Un amigo',seen:0};db.settings.seasonPos={m,i};save();}
@@ -4301,10 +4328,21 @@ function techSVG(k,stat){
    '<g class="tq-b">'+bone('n','p',9)+bone('p','k',7.5)+bone('k','f',6)+bone('n','e',5.5)+bone('e','a',5)+dot('k',2.2,'tq-j')+dot('e',2,'tq-j')+'</g>'+
    dot('h',7.5,'tq-h')+plate+'</svg>';
 }
+/* tu video de cada ejercicio queda solo en este dispositivo (IndexedDB), no se sube a ningún lado */
+const VidDB=(()=>{let p=null;const open=()=>p||(p=new Promise((ok,bad)=>{const r=indexedDB.open('swole-vid',1);r.onupgradeneeded=()=>r.result.createObjectStore('v');r.onsuccess=()=>ok(r.result);r.onerror=()=>bad(r.error);}));
+  const tx=(m,f)=>open().then(d=>new Promise((ok,bad)=>{const t=d.transaction('v',m),q=f(t.objectStore('v'));t.oncomplete=()=>ok(q.result);t.onerror=()=>bad(t.error);}));
+  return{get:id=>tx('readonly',s=>s.get(id)),put:(id,v)=>tx('readwrite',s=>s.put(v,id)),del:id=>tx('readwrite',s=>s.delete(id))};})();
+let vidUrl=null;
+function vidSlot(ex){
+  setTimeout(()=>VidDB.get(ex.id).then(v=>{const el=document.getElementById('vidSlot');if(!el||el.dataset.ex!==ex.id)return;if(vidUrl){URL.revokeObjectURL(vidUrl);vidUrl=null;}
+    if(v&&v.blob){vidUrl=URL.createObjectURL(v.blob);el.innerHTML='<div class="vid-cmp"><div class="vid-fig">'+techSVG(techOf(ex))+'<small>Así se hace</small></div><div class="vid-me"><video src="'+vidUrl+'" controls loop muted playsinline></video><small>Vos · '+shortDate(v.t)+'</small></div></div><div class="g2" style="margin-top:8px"><label class="btn sm">'+ic('camera',15)+' Grabar otra<input type="file" accept="video/*" capture="environment" data-i="vid" data-e="'+ex.id+'" hidden></label><button class="btn sm line" data-a="vidDel" data-v="'+ex.id+'">Borrar video</button></div>';}
+    else el.innerHTML='<label class="btn wide">'+ic('camera',16)+' Grabar mi técnica<input type="file" accept="video/*" capture="environment" data-i="vid" data-e="'+ex.id+'" hidden></label><p class="mut sm-t tc" style="margin-top:6px">Grabá una serie de costado y comparala con la figura. El video queda solo en tu celu.</p>';}).catch(()=>{}),30);
+  return '<div id="vidSlot" data-ex="'+ex.id+'"></div>';
+}
 function techCard(ex){
   const k=techOf(ex),T=k&&TECH[k];if(!T)return '';
   return '<div class="tech"><div class="tech-fig">'+techSVG(k)+'</div><div class="tech-txt"><h4>Cómo se hace</h4><ul>'+T.cues.map(c=>'<li>'+esc(c)+'</li>').join('')+'</ul>'+
-   '<p class="tech-err">'+ic('x',14)+'<span><b>Error común:</b> '+esc(T.err)+'</span></p></div></div>';
+   '<p class="tech-err">'+ic('x',14)+'<span><b>Error común:</b> '+esc(T.err)+'</span></p></div></div>'+vidSlot(ex);
 }
 
 /* ============ Recordatorios en el celular (notificaciones push) ============ */
@@ -4362,6 +4400,9 @@ function coachTips(){
   /* 0. sueño: varias noches malas seguidas */
   {const sl=db.settings.sleep||{},last=[0,1,2,3,4,5,6].map(i=>sl[addDays(t,-i)]).filter(Boolean);
    if(last.length>=3&&last.filter(v=>v<=2).length>=3&&!hide.sleep)out.push({id:'sleep',i:'moon',tone:'warn',txt:'Dormiste mal '+last.filter(v=>v<=2).length+' de las últimas noches. El músculo crece cuando descansás: probá acostarte 30 minutos antes esta semana.'});}
+  /* sin cuenta y sin copia hace rato: tus datos viven solo en este celu */
+  if(!Sync.user()&&logs.length>=5&&!hide.bkp){const lb=db.settings.lastBackup,dd=lb?Math.round((parseK(t)-parseK(String(lb).slice(0,10)))/864e5):999;
+    if(dd>=21)out.push({id:'bkp',i:'cloud',tone:'warn',txt:'Tus '+logs.length+' entrenos están solo en este dispositivo'+(lb?' y la última copia es de hace '+dd+' días':'')+'. Creá una cuenta gratis o bajá una copia desde Perfil.',a:'profile',al:'Ir a Perfil'});}
   /* 1. hace mucho que no entrenás */
   if(gap>=8)out.push({id:'gap',i:'play',tone:'warn',txt:'Hace '+gap+' días que no entrenás. Volvé con una sesión corta y liviana: lo importante es retomar.',a:'todayGo',al:'Entreno de hoy'});
   /* 2. estancado: 4+ sesiones en 6 semanas y las últimas 3 no superan a las anteriores */
@@ -4662,6 +4703,75 @@ function plApply(r,act){
     en.goal=kg?{kg,reps:rp,prev:Math.round(pct*100)+' %',why:Math.round(pct*100)+' % de tu máximo'}:null;
     if(!kg)en.note='Todavía no tengo tu máximo: hacé una serie pesada de 3-5 y cargala como marca';
   });
+}
+/* ============ Programas famosos, listos para usar ============
+   Las rutinas suben solas con la meta de cada ejercicio (si completás todas las series, la próxima sube el peso).
+   5/3/1 usa porcentajes de tu máximo de entrenamiento (90 % de tu 1RM estimado) por semana. */
+const PI_=(ex,sets,reps,o)=>Object.assign({ex,sets,reps},o||{});
+const PROGRAMS=[
+ {id:'fb3',n:'Full Body 3 días',lv:'Principiante',min:55,src:'Clásico de cuerpo completo',
+  d:'Todo el cuerpo en cada sesión, alternando A y B. La mejor forma de arrancar: cada músculo se entrena 3 veces por semana.',
+  how:'Cuando completás todas las series con un peso, la próxima subís (la meta te dice cuánto).',
+  r:[{n:'Full Body A',days:[1,5],it:[PI_('squat',3,8),PI_('bench',3,8),PI_('row',3,8),PI_('lateral',2,12),PI_('plank',3,40)]},
+     {n:'Full Body B',days:[3],it:[PI_('deadlift',3,5),PI_('ohp',3,8),PI_('latpull',3,10),PI_('legcurl',2,12),PI_('curl',2,12)]}]},
+ {id:'sl5',n:'StrongLifts 5×5',lv:'Principiante',min:50,src:'Mehdi Hadim, basado en el 5×5 de Bill Starr',
+  d:'Tres básicos por sesión, 5 series de 5. Simple y brutal para ganar fuerza los primeros meses.',
+  how:'Si hacés 5×5 completo, la próxima +2,5 kg (+5 kg en peso muerto). Si fallás 3 veces seguidas, bajá 10 %.',
+  r:[{n:'5×5 A',days:[1,5],it:[PI_('squat',5,5),PI_('bench',5,5),PI_('row',5,5)]},
+     {n:'5×5 B',days:[3],it:[PI_('squat',5,5),PI_('ohp',5,5),PI_('deadlift',1,5)]}]},
+ {id:'ul4',n:'Upper / Lower',lv:'Intermedio',min:60,src:'Split clásico de 4 días',
+  d:'Tren superior e inferior dos veces por semana: un día pesado (pocas reps) y uno de volumen.',
+  how:'Doble progresión: subí reps hasta el número de la meta en todas las series y después subí el peso.',
+  r:[{n:'Upper pesado',days:[1],it:[PI_('bench',4,6),PI_('row',4,6),PI_('ohp',3,8),PI_('latpull',3,10),PI_('curl',3,12),PI_('pushdown',3,12)]},
+     {n:'Lower pesado',days:[2],it:[PI_('squat',4,6),PI_('rdl',3,8),PI_('legpress',3,10),PI_('legcurl',3,12),PI_('calf',4,12)]},
+     {n:'Upper volumen',days:[4],it:[PI_('incbench',3,8),PI_('pullup',4,8),PI_('dbohp',3,10),PI_('cablerow',3,10),PI_('lateral',3,15),PI_('hammer',3,12)]},
+     {n:'Lower volumen',days:[5],it:[PI_('deadlift',3,5),PI_('frontsquat',3,8),PI_('bulgarian',3,10),PI_('legext',3,12),PI_('hipthrust',3,10)]}]},
+ {id:'gzclp',n:'GZCLP',lv:'Intermedio',min:60,src:'Cody Lefever (GZCL)',
+  d:'Tres niveles por día: T1 pesado (5×3), T2 de volumen (3×10) y T3 de bombeo (3×15). Muy bien pensado para seguir progresando.',
+  how:'T1 y T2: si completás todo, la próxima +2,5 kg (+5 kg en piernas). T3: cuando hagas 25+ en la última serie, subí.',
+  r:[{n:'GZCLP 1',days:[1],it:[PI_('squat',5,3),PI_('bench',3,10),PI_('latpull',3,15)]},
+     {n:'GZCLP 2',days:[2],it:[PI_('ohp',5,3),PI_('deadlift',3,10),PI_('dbrow',3,15)]},
+     {n:'GZCLP 3',days:[4],it:[PI_('bench',5,3),PI_('squat',3,10),PI_('latpull',3,15)]},
+     {n:'GZCLP 4',days:[5],it:[PI_('deadlift',5,3),PI_('ohp',3,10),PI_('dbrow',3,15)]}]},
+ {id:'ppl',n:'Push Pull Legs',lv:'Intermedio',min:65,src:'Split de empuje, tirón y piernas',
+  d:'Empuje, tirón y piernas, dos veces por semana. Mucho volumen para ganar músculo si podés entrenar 6 días.',
+  how:'Doble progresión en todo: cuando llegás a las reps en todas las series, subís el peso.',
+  r:[{n:'Push',days:[1,4],it:[PI_('bench',4,6),PI_('ohp',3,8),PI_('dbpress',3,10),PI_('lateral',4,15),PI_('pushdown',3,12),PI_('skull',3,10)]},
+     {n:'Pull',days:[2,5],it:[PI_('deadlift',3,5),PI_('pullup',4,8),PI_('row',3,8),PI_('facepull',3,15),PI_('curl',3,12),PI_('hammer',3,12)]},
+     {n:'Legs',days:[3,6],it:[PI_('squat',4,6),PI_('rdl',3,8),PI_('legpress',3,10),PI_('legcurl',3,12),PI_('calf',4,15)]}]},
+ {id:'531',n:'5/3/1 Boring But Big',lv:'Intermedio',min:60,src:'Jim Wendler',
+  d:'Un básico por día con la ola 5/3/1 (semanas de 5, 3 y 1 repeticiones) y después 5×10 livianas del mismo ejercicio.',
+  how:'Los pesos salen solos: porcentajes de tu máximo de entrenamiento. La última serie es AMRAP (todas las que puedas). Cada 4 semanas, una liviana.',
+  r:[{n:'5/3/1 · Press militar',days:[1],it:[PI_('ohp',3,5,{w531:1}),PI_('ohp',5,10,{bbb:1}),PI_('latpull',5,10)]},
+     {n:'5/3/1 · Peso muerto',days:[2],it:[PI_('deadlift',3,5,{w531:1}),PI_('deadlift',5,10,{bbb:1}),PI_('legraise',5,12)]},
+     {n:'5/3/1 · Banca',days:[4],it:[PI_('bench',3,5,{w531:1}),PI_('bench',5,10,{bbb:1}),PI_('dbrow',5,10)]},
+     {n:'5/3/1 · Sentadilla',days:[5],it:[PI_('squat',3,5,{w531:1}),PI_('squat',5,10,{bbb:1}),PI_('legcurl',5,10)]}]}
+];
+/* 5/3/1: semana 1 (5s), 2 (3s), 3 (5/3/1), 4 (liviana) */
+const W531=[[[.65,5],[.75,5],[.85,5,1]],[[.70,3],[.80,3],[.90,3,1]],[[.75,5],[.85,3],[.95,1,1]],[[.40,5],[.50,5],[.60,5]]];
+const week531=r=>r&&r.since?Math.max(0,Math.floor((parseK(today())-parseK(r.since))/864e5/7))%4:0;
+function apply531(r,act){
+  const w=week531(r);act.name=r.name+' · semana '+(w+1)+(w===3?' (liviana)':'');
+  act.entries.forEach((en,k)=>{const it=r.items[k];if(!it||it.ex!==en.ex||!(it.w531||it.bbb))return;
+    const b=bestE1(it.ex),tm=b?b.e*.9:0,R=v=>tm?Math.round(tm*v/2.5)*2.5:'';
+    if(it.w531){en.sets=W531[w].map(([p,rp,amrap])=>({kg:R(p),reps:rp,done:false}));
+      const last=W531[w][2];en.goal=tm?{kg:R(last[0]),reps:last[1],prev:Math.round(last[0]*100)+' %',why:(last[2]?'última serie: todas las que puedas':'semana liviana')}:null;}
+    else{en.sets=Array.from({length:w===3?3:5},()=>({kg:R(.5),reps:10,done:false}));en.goal=null;}
+    if(!tm)en.note='Todavía no tengo tu máximo: hacé una serie pesada de 3-5 y cargala como marca';
+  });
+}
+function progsHTML(m){
+  if(m.sel){const p=PROGRAMS.find(x=>x.id===m.sel);if(!p)return '';
+    const hasGen=db.routines.some(r=>r.gen||r.prog);
+    return '<button class="btn sm line" data-a="progSel" data-v="" style="margin-bottom:10px">'+ic('left',14)+' Todos los programas</button>'+
+     '<h3 style="font:800 24px var(--f-d)">'+esc(p.n)+'</h3><p class="mut sm-t" style="margin:2px 0 10px">'+esc(p.lv)+' · '+p.r.reduce((s,x)=>s+x.days.length,0)+' días por semana · ~'+p.min+' min · '+esc(p.src)+'</p>'+
+     '<p>'+esc(p.d)+'</p><div class="prog-how">'+ic('up',16)+'<span>'+esc(p.how)+'</span></div>'+
+     p.r.map(x=>'<div class="prog-day"><div class="row"><b class="grow">'+esc(x.n)+'</b><span class="mut sm-t">'+x.days.map(k=>DIAS3[k]).join(' · ')+'</span></div>'+
+       x.it.map(it=>{const e=exById(it.ex);return '<div class="prog-it"><span>'+esc(e?e.n:it.ex)+(it.bbb?' <small class="mut">(5×10 livianas)</small>':'')+'</span><span class="mut">'+(it.w531?'5/3/1':it.sets+' × '+(e&&e.time?it.reps+' s':it.reps))+'</span></div>';}).join('')+'</div>').join('')+
+     (hasGen?'<label class="auto-post" style="margin-top:12px"><input type="checkbox" id="progRep" checked><span>Reemplazar mis rutinas a medida y de otros programas</span></label>':'')+
+     '<button class="btn pri wide" data-a="progUse" data-v="'+p.id+'">'+ic('check',16)+' Usar este programa</button><p class="mut sm-t tc" style="margin-top:6px">Los días los podés mover después en cada rutina.</p>';}
+  return '<p class="mut sm-t" style="margin-bottom:10px">Los programas más usados del mundo, con su progresión ya armada. Elegí uno y Swole te va diciendo qué peso poner.</p><div class="gap">'+
+   PROGRAMS.map(p=>'<button class="prog" data-a="progSel" data-v="'+p.id+'"><span class="grow"><b>'+esc(p.n)+'</b><small>'+esc(p.d)+'</small><span class="prog-m"><span class="tag">'+esc(p.lv)+'</span><span>'+p.r.reduce((s,x)=>s+x.days.length,0)+' días</span><span>~'+p.min+' min</span></span></span>'+ic('right',18)+'</button>').join('')+'</div>';
 }
 /* total, DOTS y clase */
 function dots(total,w,sex){
@@ -5225,6 +5335,7 @@ function startSession(rid,dk,adhoc){
   const its=(r?r.items:[]).map(it=>bw&&bw.deload?Object.assign({},it,{sets:Math.max(2,Math.round(it.sets*.6))}):it);
   db.active={id:uid(),date:dk||today(),routineId:r&&!adhoc?r.id:null,name:r?r.name+(bw&&bw.deload?' · descarga':''):'Entrenamiento libre',t0:Date.now(),note:'',entries:its.map(it=>mkEntry(it.ex,it.sets,it.reps,it.warm))};
   if(r&&r.pl&&!adhoc)plApply(r,db.active);
+  if(r&&r.p531&&!adhoc)apply531(r,db.active);
   /* si dormiste mal: un poco menos de peso y una serie menos; si dormiste bárbaro, a buscar récord */
   const sl=(db.settings.sleep||{})[db.active.date];
   if(sl&&sl<=2&&!(bw&&bw.deload)&&r){db.active.tired=1;db.active.entries.forEach(en=>{en.goal=null;const eff=en.sets.filter(s=>!s.w);if(eff.length>2)en.sets.splice(en.sets.lastIndexOf(eff[eff.length-1]),1);en.sets.forEach(s=>{if(+s.kg)s.kg=Math.round(+s.kg*.9/2.5)*2.5;});});
@@ -5507,7 +5618,7 @@ function profileHTML(d){
    '<div class="field"><span>Objetivo</span><div class="seg">'+Object.keys(GOALS).map(k=>'<button class="'+(d.goal===k?'on':'')+'" data-a="pfGoal" data-v="'+k+'">'+GOALS[k]+'</button>').join('')+'</div></div>'+
    '<button class="btn pri wide" data-a="pfSave">Guardar perfil</button>'+
    (first?'<button class="btn line wide" data-a="loginOpen">'+ic('cloud',18)+' Ya uso Swole: entrar con mi cuenta</button>':'<div class="div" style="margin:0"></div>'+accountHTML())+
-   (first?'':'<div class="div" style="margin:0"></div><p class="mut sm-t">'+(Sync.user()?'También podés guardar una copia en un archivo.':'Tus datos viven solo en este dispositivo. Hacé una copia cada tanto.')+' Última copia: <b>'+(db.settings.lastBackup?esc(longDate(db.settings.lastBackup)):'nunca')+'</b></p><div class="g2"><button class="btn sm" data-a="export">Exportar datos</button><button class="btn sm" data-a="importOpen">Importar datos</button></div><button class="btn sm bad line" data-a="wipeAsk">Borrar todos los datos</button><p class="mut tc" style="font-size:11px">Figura anatómica adaptada de react-body-highlighter (MIT).</p>');
+   (first?'':'<div class="div" style="margin:0"></div><p class="mut sm-t">'+(Sync.user()?'También podés guardar una copia en un archivo.':'Tus datos viven solo en este dispositivo. Hacé una copia cada tanto.')+' Última copia: <b>'+(db.settings.lastBackup?esc(longDate(db.settings.lastBackup)):'nunca')+'</b></p><div class="g2"><button class="btn sm" data-a="export">Exportar datos</button><button class="btn sm" data-a="importOpen">Importar datos</button></div><button class="btn sm wide" data-a="exportCSV" style="margin-top:8px">'+ic('list',15)+' Bajar mis entrenos para Excel (CSV)</button><button class="btn sm bad line" data-a="wipeAsk">Borrar todos los datos</button><p class="mut tc" style="font-size:11px">Figura anatómica adaptada de react-body-highlighter (MIT).</p>');
 }
 function accountHTML(){
   const u=Sync.user(),st=Sync.state;
@@ -5649,6 +5760,7 @@ function modalBody(m,l2){
     case 'phview':return sheet('Foto de progreso',photoViewHTML(m),{l2:true});
     case 'friends':return sheet('Amigos',friendsHTML(m));
     case 'delacc':return sheet('Eliminar mi cuenta','<p>Se borra <b>para siempre</b>: tu cuenta, todos tus datos en la nube, tus amigos, solicitudes, torneos y recordatorios. También se borra lo que hay en este dispositivo.</p><p class="mut sm-t">No se puede deshacer. Si querés conservar algo, antes hacé una copia en Perfil → Copia de seguridad. Después podés crear una cuenta nueva con el mismo mail.</p><label class="field">Escribí <b>ELIMINAR</b> para confirmar<input id="delAccIn" type="text" autocomplete="off" autocapitalize="characters" placeholder="ELIMINAR"></label><div class="g2"><button class="btn" data-a="close" data-v="m2">Cancelar</button><button class="btn bad" data-a="delAccGo"'+(m.busy?' disabled':'')+'>'+(m.busy?'Borrando…':'Eliminar para siempre')+'</button></div>',{l2:true});
+    case 'progs':return sheet('Programas',progsHTML(m.d||{}),{l2:true});
     case 'music':return sheet('Música',musicPickHTML(),{l2:true});
     case 'notif':return sheet('Avisos',notifHTML(),{l2:true});
     case 'podium':return sheet('Podio',podiumHTML(m.id),{l2:true});
@@ -5729,7 +5841,8 @@ function viewEntrenar(){
 function viewPerfil(){
   let h='<h1 class="pg">Perfil</h1>';
   if(!S.pf)S.pf=Object.assign({sex:'m',age:'',height:'',weight:'',activity:2,goal:'recomp',nick:'',sport:''},db.profile||{});
-  h+='<div class="card"><div class="hd"><div><h3>Color de la app</h3><span class="mut sm-t">Elegí el que más te guste</span></div></div><div class="acc-row">'+ACCENTS.map(([k,n,a,b])=>'<button class="acc-sw'+((db.settings.accent||'aurora')===k?' on':'')+'" data-a="accent" data-v="'+k+'" style="--a:'+a+';--b:'+b+'" aria-pressed="'+((db.settings.accent||'aurora')===k)+'"><i></i>'+n+'</button>').join('')+'</div></div>';
+  h+='<div class="card"><div class="hd"><div><h3>Color de la app</h3><span class="mut sm-t">Elegí el que más te guste</span></div></div><div class="acc-row">'+ACCENTS.map(([k,n,a,b,need])=>{const lock=need&&frCount()<need;return '<button class="acc-sw'+((db.settings.accent||'aurora')===k?' on':'')+(lock?' lock':'')+'" data-a="accent" data-v="'+k+'" style="--a:'+a+';--b:'+b+'" aria-pressed="'+((db.settings.accent||'aurora')===k)+'"><i>'+(lock?ic('lock',14):'')+'</i>'+n+(lock?'<small>'+need+(need===1?' amigo':' amigos')+'</small>':'')+'</button>';}).join('')+'</div>'+
+   (frCount()<3?'<button class="inv-cta" data-a="invite">'+ic('share',16)+'<span class="grow"><b>Invitá amigos y desbloqueá colores</b><small>Tenés '+frCount()+' de 3 · con 1 se abre Oro, con 3 Élite</small></span>'+ic('right',16)+'</button>':'')+'</div>';
   h+=pushCard();
   return h+'<div class="card"><div class="hd"><div><h3>Deportes y semana</h3><span class="mut sm-t">Lo usan tus rutinas, la recuperación y las calorías</span></div></div><div class="mbody">'+(db.profile?weekEditor():'')+'</div></div><div class="card"><div class="mbody">'+profileHTML(S.pf)+'</div></div><div class="card row"><div class="grow"><b>Tema</b><br><span class="mut sm-t">'+(effTheme()==='dark'?'Oscuro':'Claro')+'</span></div><button class="btn sm" data-a="theme">'+ic(effTheme()==='dark'?'sun':'moon',16)+' Cambiar</button></div>';
 }
@@ -5844,6 +5957,15 @@ function notify(title,body){
       navigator.serviceWorker.ready.then(r=>r.showNotification(title,{body,icon:'icons/icon-192.png',badge:'icons/icon-192.png',tag:'swole-crea'})).catch(()=>{});
     }else new Notification(title,{body,icon:'icons/icon-192.png'});
   }catch(e){}
+}
+/* entrenos en CSV: una fila por serie, se abre directo en Excel o Google Sheets */
+function exportCSV(){
+  const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"',rows=[['Fecha','Entrenamiento','Ejercicio','Serie','Peso (kg)','Repeticiones o segundos','Calentamiento','Minutos','Nota']];
+  allSess().slice().sort((a,b)=>a.date<b.date?-1:1).forEach(l=>l.entries.forEach(en=>{const ex=exById(en.ex);en.sets.forEach((s,i)=>rows.push([l.date,l.test?'Marca':(l.name||''),ex?ex.n:en.ex,i+1,String(s.kg||0).replace('.',','),s.reps,s.w?'sí':'',l.dur||'',en.note||'']));}));
+  if(rows.length<2)return toast('Todavía no hay entrenos para exportar');
+  const blob=new Blob(['\ufeff'+rows.map(r=>r.map(q).join(';')).join('\r\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='swole-entrenos-'+today()+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  toast('Listo: '+(rows.length-1)+' series exportadas');
 }
 async function exportData(){
   const json=JSON.stringify(db,null,1),name='swole-'+today()+'.json';
@@ -6135,7 +6257,8 @@ const ACTIONS={
     if(!items.length)return toast('La rutina no trae ejercicios válidos');
     db.routines.push({id:uid(),name:o.n,days:[],since:today(),items,rest:Math.min(600,Math.max(30,+o.r||90))});
     S.modal=null;goTab('rutinas');save();render();confetti(30);toast('Rutina agregada: elegí qué días hacerla en Editar');},
-  accent(v){db.settings.accent=v;save();applyTheme();render();},
+  accent(v){const a=ACCENTS.find(x=>x[0]===v);if(a&&a[4]&&frCount()<a[4])return toast('Se desbloquea con '+a[4]+(a[4]===1?' amigo':' amigos')+' en Swole. Tocá "Invitá amigos".');db.settings.accent=v;save();applyTheme();render();},
+  invite(){if(Social.on())return ACTIONS.socShare();ACTIONS.socOpen('list');toast('Activá Amigos y compartí tu código');},
   plOpen(){S.modal={t:'pl'};render();},
   plPlanGo(){S.modal=null;ACTIONS.genOpen();const d=S.m2&&S.m2.d;if(d){d.goals=['pl'];d.step=1;renderModal();}},
   soon(){toast('Próximamente: lo estamos armando');},
@@ -6175,6 +6298,12 @@ const ACTIONS={
   postDelGo(v,el){const id=el&&el.dataset.v||v;S.m2=null;const p=(S.social.posts||[]).find(x=>x.id===id);if(!p)return render();Social.unshare(p.log_id).then(()=>{render();toast('Publicación borrada');}).catch(e=>toast(Social.errTxt(e)));},
   postUndo(v){Social.unshare(v).then(()=>{if(S.modal&&S.modal.t==='summary')S.modal.posted=false;renderModal();toast('No se publicó');}).catch(e=>toast(Social.errTxt(e)));},
   autoPost(v,el){db.settings.autoPost=!!(el&&el.checked);save();toast(db.settings.autoPost?'Tus próximos entrenos se publican para tus amigos':'Tus entrenos ya no se publican');},
+  progsOpen(){S.m2={t:'progs',d:{}};render();},
+  progSel(v){S.m2.d.sel=v||null;renderModal();const s=document.querySelector('#modal2 .msheet');if(s)s.scrollTop=0;},
+  progUse(v){const p=PROGRAMS.find(x=>x.id===v);if(!p)return;const rp=$('#progRep');
+    if(rp&&rp.checked){const old=db.routines.filter(r=>r.gen||r.prog).map(r=>r.id);db.routines=db.routines.filter(r=>!(r.gen||r.prog));Object.keys(db.plan).forEach(k=>{db.plan[k]=db.plan[k].filter(x=>!old.includes(x));if(!db.plan[k].length)delete db.plan[k];});}
+    p.r.forEach(x=>{const o={id:uid(),name:x.n,days:x.days.slice(),since:today(),items:x.it.map(it=>Object.assign({},it)),prog:p.id,min:p.min,note:p.how};if(p.id==='531')o.p531=1;db.routines.push(o);});
+    S.m2=null;goTab('rutinas');S.rtab='rut';save();render();confetti(40);toast('Listo: '+p.n+' en tu semana');checkAch();},
   musPick(){S.m2={t:'music'};render();},
   musSet(v){db.settings.musicApp=v;save();S.m2=null;render();const a=MUSIC_APPS.find(x=>x[0]===v);if(a)toast('Listo: '+a[1]);},
   musConnect(){Music.connect();},
@@ -6300,6 +6429,8 @@ const ACTIONS={
     S.m2=null;S.modal=null;save();render();
   },
   export(){exportData();},
+  exportCSV(){exportCSV();},
+  vidDel(v){VidDB.del(v).then(()=>{renderModal();toast('Video borrado');});},
   importOpen(){S.m2={t:'import',text:''};render();},
   csvGo(){const m=S.m2;if(!m||!m.csv||!m.csv.ws)return;const n=csvImport(m.csv);S.m2=null;save();checkAch(true);render();toast(n?'Listo: '+n+(n===1?' entreno importado':' entrenos importados'):'No había entrenos nuevos para importar');if(n)confetti(40);},
   importGo(){
@@ -6383,6 +6514,8 @@ document.addEventListener('input',e=>{
   else if(i==='pho'){const d=S.m2.d,it=d.ph.items[+el.dataset.e];it.other=it.other||{};it.other.q=el.value;it.other.f=el.value.trim()?{n:el.value.trim().slice(0,40),id:'',k:it.opts[0].k,p:it.opts[0].p,c:it.opts[0].c,f:it.opts[0].f}:null;
     const s=$('#phs'+el.dataset.e);if(s)s.innerHTML=phSug(it,+el.dataset.e);const k=$('#phk'+el.dataset.e);if(k)k.textContent=phItemKcal(it)+' kcal';const t=$('#phTot');if(t)t.innerHTML=phTotHTML(d);}
   else if(i==='phg'){const d=S.m2.d,it=d.ph.items[+el.dataset.e];it.g=Math.max(0,Math.round(+el.value.replace(',','.')||0));const k=$('#phk'+el.dataset.e);if(k)k.textContent=phItemKcal(it)+' kcal';const t=$('#phTot');if(t)t.innerHTML=phTotHTML(d);}
+  else if(i==='vid'){const f=el.files&&el.files[0],id=el.dataset.e;el.value='';if(!f)return;if(f.size>120e6)return toast('El video es muy largo: grabá una sola serie (hasta ~1 minuto)');
+    VidDB.put(id,{blob:f,t:Date.now()}).then(()=>{renderModal();toast('Video guardado en tu celu');}).catch(()=>toast('No pude guardar el video (poco espacio)'));}
   else if(i==='pushAt'){clearTimeout(window.__pat);window.__pat=setTimeout(()=>{if(/^d{2}:d{2}$/.test(el.value))ACTIONS.pushAt();},700);}
   else if(i==='fq'){S.m2.d.q=el.value;const l=$('#foodList');if(l){l.innerHTML=foodList(S.m2.d);l.scrollTop=0;}}
   else if(i==='fa'){S.m2.d.qty=el.value;const p=$('#foodPrev');if(p)p.innerHTML=foodPrev(S.m2.d);}
