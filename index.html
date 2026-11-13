@@ -1528,6 +1528,8 @@ small{line-height:1.35}
 .vid-fig,.vid-me{display:grid;gap:4px;justify-items:center;padding:8px;border-radius:14px;background:var(--raise)}
 .vid-fig .tq{width:100%;height:auto;max-width:150px}.vid-me video{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;background:#000}
 .vid-cmp small{color:var(--mut);font-size:12px}
+.pick.top{z-index:96}.gen-it{gap:6px}.gen-it>span:first-child{flex:1;min-width:0}.gen-it .ib.flat{width:30px;height:30px;flex:none}
+.gen-way{margin:14px 0 4px;display:grid;gap:8px}
 </style>
 </head>
 <body>
@@ -2830,7 +2832,16 @@ function genDays(n,sport){
 }
 /* bloque de calistenia: una habilidad al principio de los días de torso, de la variante que te toca */
 const SK_ROT=['hs','pull','lsit','push','fl','dip','pl','bl'];
+/* ¿este ejercicio está a tu alcance? Las habilidades del árbol solo si ya las hacés o son la que te toca */
+/* lv: lo que dijiste que sos (principiante 0, intermedio 1, avanzado 2) habilita los primeros escalones de cada rama aunque no tengas marcas */
+function canDo(id,lv){const f=findNode(id);if(!f)return true;if(f.i<=(lv||0)&&!(XREQ[id]||[]).length)return true;const s=nodeState(f.b,f.i);return s.done||s.avail||s.best>0;}
+const doable=(list,lv)=>{const l=list.filter(x=>canDo(x,lv));return l;};
 function skillFor(i,lvl){
+  const fam=SK_ROT[i%SK_ROT.length],br=branches().find(b=>b.f===fam);
+  if(br){const st=br.nodes.map((_,k)=>nodeState(br,k));let k=st.findIndex(s=>s.avail);if(k<0)k=st.map(s=>s.done).lastIndexOf(true);return k<0?null:br.nodes[k].ex;}
+  return skillForOld(i,lvl);
+}
+function skillForOld(i,lvl){
   const f=SK_ROT[i%SK_ROT.length],vs=skFam(f);if(!vs.length)return null;
   let cur=-1;vs.forEach((e,k)=>{if(bestE1(e.id))cur=k;});
   const base={beg:0,int:1,adv:2}[lvl];
@@ -2876,7 +2887,7 @@ function genPlan(d){
     for(let k=0,added=0;k<extra.length&&added<(after?1:2);k++){const pt=extra[(k+di*2)%extra.length];if(!pats.includes(pt)){pats.push(pt);added++;}}
     let firstBig=true;
     pats.forEach((pt,pi)=>{
-      const list=(pool[pt]||[]).filter(id=>exById(id)&&!used.has(id));if(!list.length)return;
+      const list0=(pool[pt]||[]).filter(id=>exById(id)&&!used.has(id));if(!list0.length)return;const list=doable(list0,lvlI);if(!list.length)return;
       const b=Math.min(list.length-1,lvlI+(onlyCali?lvlI:0));
       const id=list[(b+rep+(d.seed||0))%list.length]||list[0];
       used.add(id);const ex=exById(id),ds=genDose(ex,gs,lvl,pt,pi<4,age);
@@ -2885,7 +2896,7 @@ function genPlan(d){
       if(firstBig&&pi<4&&!ex.time&&!ex.sk&&ex.st&&!/Peso corporal|Barra fija|Paralelas|Anillas/.test(ex.eq)){it.warm=2;firstBig=false;}
       items.push(it);
     });
-    ['core','rot','plyo','carry'].forEach(pt=>{if(items.length>=Math.min(5,T.p.length))return;const id=(pool[pt]||[]).find(x=>exById(x)&&!used.has(x));if(id){used.add(id);const ds=genDose(exById(id),gs,lvl,pt,false,age);items.push({ex:id,sets:ds[0],reps:ds[1]});}});
+    ['core','rot','plyo','carry'].forEach(pt=>{if(items.length>=Math.min(5,T.p.length))return;const id=(pool[pt]||[]).find(x=>exById(x)&&!used.has(x)&&canDo(x,lvlI));if(id){used.add(id);const ds=genDose(exById(id),gs,lvl,pt,false,age);items.push({ex:id,sets:ds[0],reps:ds[1]});}});
     let its=items.slice(0,(prim==='grasa'?8:7)-(withCali&&!onlyCali&&!T.low?1:0));
     if(after){its=its.slice(0,5).map(x=>Object.assign({},x,{sets:Math.max(2,x.sets-1)}));notes.push('Después de la '+actName(dinfo).toLowerCase()+': sesión corta');}
     if(before)notes.push('Antes de la '+actName(dinfo).toLowerCase()+': no llegues al fallo');
@@ -2938,18 +2949,20 @@ function genHTML(d){
   const nav=(back,next,lbl)=>'<div class="g2">'+(back?'<button class="btn" data-a="genStep" data-v="'+back+'">Atrás</button>':'<span></span>')+'<button class="btn pri" data-a="genStep" data-v="'+next+'">'+(lbl||'Siguiente')+'</button></div>';
   if(d.step===1){d.sports=(db.profile&&db.profile.sports||[]).slice();return st+'<h4>Tus deportes y tu semana</h4><p class="mut sm-t">Tus deportes y qué días entrenás. Se guarda en tu perfil.</p>'+weekEditor()+nav(0,2);}
   if(d.step===2)return st+'<h4>¿Qué querés lograr?</h4><p class="mut sm-t">Podés combinar varios: por ejemplo, ganar músculo y calistenia.</p><div class="ptiles">'+
-    Object.keys(GEN_GOALS).map(k=>photoTile(k,GEN_GOALS[k].n,GEN_GOALS[k].i,d.goals.includes(k),'genGoal',k)).join('')+'</div>'+nav(1,3);
+    Object.keys(GEN_GOALS).map(k=>photoTile(k,GEN_GOALS[k].n,GEN_GOALS[k].i,d.goals.includes(k),'genGoal',k)).join('')+'</div>'+
+    '<div class="gen-way"><b>¿Cómo la querés?</b><div class="opt"><button class="'+(d.goals.includes('cali')&&d.goals.length===1?'':'on')+'" data-a="genWay" data-v="mix">'+ic('dumb',18)+'A mi medida</button><button class="'+(d.goals.includes('cali')&&d.goals.length===1?'on':'')+'" data-a="genWay" data-v="cali">'+ic('acro',18)+'Solo calistenia</button><button data-a="progsOpen">'+ic('trophy',18)+'Un programa famoso</button></div></div>'+nav(1,3);
   if(d.step===3){const wk=weekGymDays(),onlyCali=d.goals.length===1&&d.goals[0]==='cali';
     return st+(wk.length?'<h4>Tus días de entrenamiento</h4><p class="mut sm-t">Según tu semana: '+wk.map(x=>DIAS3[x]+(dayInfo(x).gym==='antes'?' (antes del deporte)':dayInfo(x).gym==='despues'?' (después del deporte)':'')).join(', ')+'.</p>'
      :'<h4>¿Cuántos días por semana vas a entrenar?</h4><div class="opt">'+[2,3,4,5,6].map(n=>'<button class="'+(+d.days===n?'on':'')+'" data-a="genSet" data-f="days" data-v="'+n+'">'+n+' días</button>').join('')+'</div>')+
     '<h4>¿Cuánto tiempo tenés por sesión?</h4><div class="opt">'+[30,45,60,75,90].map(n=>'<button class="'+(+d.min===n?'on':'')+'" data-a="genSet" data-f="min" data-v="'+n+'">'+n+' min</button>').join('')+'</div>'+
-    (onlyCali?'':'<h4>¿Con qué entrenás?</h4>'+opt('eq',GEN_EQ))+'<h4>¿Qué nivel tenés?</h4>'+opt('lvl',GEN_LVL)+nav(2,4,'Armar mi rutina');}
+    (onlyCali?'<p class="mut sm-t">Elegiste solo calistenia: la rutina va con peso corporal, barra y paralelas.</p>':'<h4>¿Con qué entrenás?</h4>'+opt('eq',GEN_EQ))+'<h4>¿Qué nivel tenés?</h4>'+opt('lvl',GEN_LVL)+nav(2,4,'Armar mi rutina');}
   const plan=d.plan||[],v=plan.vol||{},gs=plan.gs||d.goals,[mn,mx]=volTarget(gs);
   return st+'<p class="mut sm-t">'+d.goals.map(g=>GEN_GOALS[g].n).join(' + ')+(d.sports.length?' · para '+esc(d.sports.map(k=>SPORTS[k].n).join(' y ')):'')+' · '+plan.length+' días por semana.</p>'+
    '<div class="card vol-card" style="margin:0"><div class="hd" style="margin-bottom:8px"><div><h4>Series por semana</h4><span class="mut sm-t">La franja marcada es el rango recomendado</span></div></div>'+
    Object.keys(GROUPS).map(g=>{const [lo,hi]=volRange(g,gs),top=hi*1.25,x=Math.round(v[g]||0),pct=Math.min(100,Math.round(x/top*100)),ok=x>=lo&&x<=hi*1.15;return '<div class="vrow"><span>'+g+'</span><div class="bar"><i style="width:'+pct+'%;background:'+(ok?'var(--ok)':x<lo||x<=hi*1.35?'#FFC34D':'var(--hot)')+'"></i><u style="left:'+Math.round(lo/top*100)+'%;width:'+Math.round((hi-lo)/top*100)+'%"></u></div><b>'+x+'</b></div>';}).join('')+'</div>'+
    plan.map(r=>'<div class="card" style="margin:0;padding:12px"><div class="row top-a">'+miniMap(mapOfRoutine(r)).replace('mini','mini" style="width:54px')+'<div class="grow"><b>'+esc(r.name)+'</b><br><span class="tag">'+r.days.map(x=>DIAS3[x]).join(' ')+'</span>'+(r.note?'<p class="rnote">'+ic('spark',13)+' '+esc(r.note)+'</p>':'')+
-     '<div style="margin-top:6px">'+r.items.map(it=>{const ex=exById(it.ex);return '<div class="rowline" style="padding:5px 0"><span>'+esc(ex.n)+(it.warm?' <span class="tag" style="font-size:10.5px">+'+it.warm+' de calentamiento</span>':'')+(ex.sk?' <span class="tag" style="font-size:10.5px;color:var(--acc)">habilidad</span>':'')+'</span><span class="mut">'+it.sets+' × '+it.reps+(ex.time?' s':'')+'</span></div>';}).join('')+'</div></div></div></div>').join('')+
+     '<div style="margin-top:6px">'+r.items.map(it=>{const ex=exById(it.ex);return '<div class="rowline gen-it" style="padding:5px 0"><span>'+esc(ex.n)+(it.warm?' <span class="tag" style="font-size:10.5px">+'+it.warm+' de calentamiento</span>':'')+(ex.sk?' <span class="tag" style="font-size:10.5px;color:var(--acc)">habilidad</span>':'')+'</span><span class="mut">'+it.sets+' × '+it.reps+(ex.time?' s':'')+'</span><button class="ib flat" data-a="genSwap" data-v="'+plan.indexOf(r)+'|'+r.items.indexOf(it)+'" aria-label="Cambiar '+esc(ex.n)+' por otro">'+ic('swap',15)+'</button></div>';}).join('')+'</div></div></div></div>').join('')+
+   '<p class="mut sm-t tc">¿No te gusta alguno? Tocá '+ic('swap',12)+' y elegí otro.</p>'+
    '<details class="why"><summary>¿Por qué así?</summary><div class="mut sm-t">'+
    '<p><b>Volumen:</b> el músculo crece sobre todo por la cantidad de series efectivas por semana. Apuntamos a '+mn+'-'+mx+' por músculo (piernas, espalda y brazos suman varios músculos, por eso llevan más), repartidas en 2 o más días.</p>'+
    '<p><b>Repeticiones:</b> '+(d.goals.includes('fuerza')?'para fuerza, pocas repeticiones (4-6) con más peso en los básicos; ':'')+'para crecer sirven rangos amplios (6 a 15+) si llegás cerca del fallo.</p>'+
@@ -5825,7 +5838,7 @@ function renderPill(){
 function renderPicker(){
   const el=$('#picker');syncLayers();
   if(!S.picker){el.innerHTML='';return;}
-  el.innerHTML='<div class="pick"><div class="pick-in"><div class="pick-top"><div class="row"><h2 class="grow" style="font:800 24px var(--f-d)">Elegir ejercicios</h2><button class="btn pri sm" data-a="pickDone">Listo</button></div>'+
+  el.innerHTML='<div class="pick'+(S.picker.target==='gen'?' top':'')+'"><div class="pick-in"><div class="pick-top"><div class="row"><h2 class="grow" style="font:800 24px var(--f-d)">Elegir ejercicios</h2><button class="btn pri sm" data-a="pickDone">Listo</button></div>'+
    '<div class="field"><input id="pq" type="search" placeholder="Buscar ejercicio" value="'+esc(S.picker.q)+'" data-i="pq" aria-label="Buscar ejercicio"></div><div class="scroll-x" id="pg">'+pickChips()+'</div></div><div class="gap" id="pres">'+pickResults()+'</div><button class="btn wide" style="margin-top:14px" data-a="newEx">'+ic('plus',18)+' Crear ejercicio propio</button></div></div>';
 }
 function pickChips(){return GROUP_TABS().map(g=>'<button class="chip '+((S.picker.g||'Todos')===g?'on':'')+'" data-a="pgrp" data-v="'+g+'">'+g+'</button>').join('');}
@@ -6364,6 +6377,8 @@ const ACTIONS={
     const i=g.indexOf(v);if(i>=0){if(g.length>1)g.splice(i,1);else toast('Elegí al menos un objetivo');}else g.push(v);renderModal();},
   genSet(v,el){const d=S.m2.d;d[el.dataset.f]=el.dataset.f==='days'?+v:v;renderModal();},
   genStep(v){const d=S.m2.d,n=+v;if(d.step===1&&n===2&&weekPend().length)return toast(weekPendMsg());if(n===4){if(d.step===4)d.seed=(d.seed||0)+1;d.plan=genPlan(d);}d.step=n;renderModal();const s=document.querySelector('#modal2 .msheet');if(s)s.scrollTop=0;},
+  genWay(v){const d=S.m2.d;if(v==='cali')d.goals=['cali'];else if(d.goals.length===1&&d.goals[0]==='cali')d.goals=['hip'];renderModal();},
+  genSwap(v){const[ri,ii]=v.split('|').map(Number);S.picker={target:'gen',ri,ii,q:'',g:''};renderPicker();},
   genSave(){
     const d=S.m2.d;if(!d.plan||!d.plan.length)return;
     if(d.replace){const old=db.routines.filter(r=>r.gen).map(r=>r.id);db.routines=db.routines.filter(r=>!r.gen);Object.keys(db.plan).forEach(k=>{db.plan[k]=db.plan[k].filter(x=>!old.includes(x));if(!db.plan[k].length)delete db.plan[k];});}
@@ -6376,6 +6391,9 @@ const ACTIONS={
   pickAdd(v){
     const ex=exById(v);if(!ex)return;
     const reps=ex.time?45:10;
+    if(S.picker.target==='gen'){const d=S.m2&&S.m2.d,r=d&&d.plan&&d.plan[S.picker.ri],it=r&&r.items[S.picker.ii];
+      if(it){if(r.items.some(x=>x!==it&&x.ex===v)){toast('Ese ya está en esta rutina');return;}const old=exById(it.ex);it.ex=v;delete it.warm;if(!!ex.time!==!!(old&&old.time))it.reps=ex.time?30:10;d.plan.vol=weekVolume(d.plan);}
+      S.picker=null;renderPicker();renderModal();toast('Cambiado por '+ex.n+(canDo(v)?'':' (ojo: todavía no la tenés desbloqueada)'));return;}
     if(S.picker.target==='routine'){S.modal.d.items.push({ex:v,sets:3,reps:reps});renderModal();}
     else if(S.picker.target==='replace'){const old=db.active.entries[S.picker.idx];const ne=mkEntry(v,old?Math.max(1,old.sets.filter(s=>!s.done).length||old.sets.length):3,reps);if(old)db.active.entries[S.picker.idx]=ne;S.picker=null;save();renderPicker();renderSess();toast('Cambiado por '+ex.n);return;}
     else{db.active.entries.push(mkEntry(v,3,reps));save();renderSess();}
