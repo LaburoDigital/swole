@@ -1540,6 +1540,8 @@ small{line-height:1.35}
 .mback,.pick{padding-bottom:var(--kb,0px)}
 .mark-date{display:flex;align-items:center;gap:8px;margin-top:12px;color:var(--mut);font-size:13.5px;font-weight:600}
 .mark-date input{background:var(--raise);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:15px;font-weight:500;color:var(--text);min-height:44px;max-width:172px}
+/* v55: en el celu, la cabecera cambia el botón de tema (sigue en Perfil) por Amigos */
+@media (max-width:440px){#themeBtn{display:none}}
 </style>
 </head>
 <body>
@@ -1574,6 +1576,7 @@ small{line-height:1.35}
     <div class="tools">
       <button class="ib notif-b" data-a="notifOpen" id="notifBtn" hidden aria-label="Avisos"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button>
       <button class="ib" data-a="cmdOpen" aria-label="Buscar (Ctrl+K)" title="Buscar (Ctrl+K)"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+      <button class="ib" data-a="socOpen" data-v="auto" id="socBtn" aria-label="Amigos" title="Amigos"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.2-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17.5" cy="9" r="2.6"/><path d="M17.8 14.7c2 .5 3.3 2 3.8 4.6"/></svg></button>
       <button class="ib" data-a="theme" id="themeBtn" aria-label="Cambiar tema"></button>
       <span id="avatarSlot"></span>
     </div>
@@ -1770,12 +1773,15 @@ if(!db.settings.look2){if(db.settings.theme==='auto')db.settings.theme='dark';db
    cada clave gana lo más reciente (y un borrado más nuevo le gana a la cosa). */
 const SYNC_COLL={logs:'id',routines:'id',customEx:'id',weights:'date',tests:'id',goals:'id',meas:'date',meals:'id',foods:'id'};
 const SYNC_MAP=['creatine','water','ach'];
-const SYNC_ONE=['profile','plan','settings'];
+/* perfil, calendario y ajustes se unen campo por campo (antes iban en bloque: cambiar el descanso en un celu pisaba el apodo cambiado en otro) */
+const SYNC_FIELDS=['profile','plan','settings'];
+/* cosas de ESTE dispositivo que no viajan a la nube: suscripción a avisos, publicaciones en cola, cachés */
+const LOCAL_SET=['push','postQ','frCount','lastBackup'];
 function syncKeys(d){
   const m={};
   for(const c in SYNC_COLL){const k=SYNC_COLL[c];(d[c]||[]).forEach(x=>{if(x&&x[k]!=null)m[c+':'+x[k]]=JSON.stringify(x);});}
   SYNC_MAP.forEach(c=>Object.keys(d[c]||{}).forEach(k=>{m[c+':'+k]=JSON.stringify(d[c][k]);}));
-  SYNC_ONE.forEach(c=>{m[c]=JSON.stringify(d[c]==null?null:d[c]);});
+  SYNC_FIELDS.forEach(c=>{const o=d[c];if(!o||typeof o!=='object')return;Object.keys(o).forEach(f=>{if(o[f]===undefined||(c==='settings'&&LOCAL_SET.includes(f)))return;m[c+':'+f]=JSON.stringify(o[f]);});});
   return m;
 }
 let snap=syncKeys(db);
@@ -2389,6 +2395,7 @@ const IC={
   rank:'<path d="M12 3l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.3 6.8 19l1-5.8L3.6 9.1l5.8-.8z"/>',
   bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
   user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
+  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.2-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17.5" cy="9" r="2.6"/><path d="M17.8 14.7c2 .5 3.3 2 3.8 4.6"/>',
   plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',
   x:'<path d="M6 6l12 12M18 6L6 18"/>',
   check:'<path d="M5 12.5l4.5 4.5L19 7"/>',
@@ -3571,6 +3578,9 @@ function afterSocial(){
   }catch(e){}
   updNotif();
 }
+/* lo que escribieron otros entra sin < ni > (y con largo acotado): así nunca puede terminar pintado como HTML */
+const cleanJ=(x,d)=>{d=d||0;if(typeof x==='string')return x.replace(/</g,'‹').replace(/>/g,'›').slice(0,400);if(x==null||typeof x!=='object')return x;if(d>8)return null;
+  if(Array.isArray(x))return x.slice(0,300).map(v=>cleanJ(v,d+1));const o={};Object.keys(x).slice(0,300).forEach(k=>{const kk=k.replace(/[<>"'&]/g,'');if(kk==='__proto__'||kk==='toString'||kk==='valueOf')return;o[kk]=cleanJ(x[k],d+1);});return o;};
 const addMsg=r=>r==='sent'?'Solicitud enviada: cuando la acepte, ya son amigos':r==='already'?'Ya son amigos':'¡Listo! Ya son amigos';
 const Social=(()=>{
   let pub='',timer=null;
@@ -3594,10 +3604,10 @@ const Social=(()=>{
   async function load(){
     if(!on())return null;
     try{await publish();}catch(e){}
-    const rows=await Sync.req('/rest/v1/swole_public?select=user_id,code,nick,data,updated_at',{auth:true});
+    const rows=cleanJ(await Sync.req('/rest/v1/swole_public?select=user_id,code,nick,data,updated_at',{auth:true}));
     const me=Sync.user().id;
     S.social={at:Date.now(),me:(rows||[]).find(r=>r.user_id===me)||null,friends:(rows||[]).filter(r=>r.user_id!==me),req:[],comps:[]};
-    try{S.social.req=await Sync.req('/rest/v1/rpc/swole_requests',{method:'POST',auth:true,body:{}})||[];}catch(e){}
+    try{S.social.req=cleanJ(await Sync.req('/rest/v1/rpc/swole_requests',{method:'POST',auth:true,body:{}}))||[];}catch(e){}
     try{await loadComps();}catch(e){}
     try{await flush();}catch(e){}
     try{await loadPosts();}catch(e){}
@@ -3626,7 +3636,7 @@ const Social=(()=>{
   /* torneos: cada uno sube su propio puntaje, calculado en su celu */
   async function loadComps(){
     const me=Sync.user().id,t=today();
-    const rows=await Sync.req('/rest/v1/swole_comp?select=*,swole_comp_member(*)&end_day=gte.'+addDays(t,-30)+'&order=end_day.desc',{auth:true})||[];
+    const rows=cleanJ(await Sync.req('/rest/v1/swole_comp?select=*,swole_comp_member(*)&end_day=gte.'+addDays(t,-30)+'&order=end_day.desc',{auth:true}))||[];
     for(const c of rows){
       const m=(c.swole_comp_member||[]).find(x=>x.user_id===me);if(!m||!m.joined||t>addDays(c.end_day,1))continue;
       const sc=compScore(c);if(+m.score===sc&&m.nick===nick())continue;
@@ -3668,7 +3678,7 @@ const Social=(()=>{
   }
   async function loadPosts(){
     const r=await Sync.req('/rest/v1/swole_post?select=id,user_id,log_id,nick,day,data,created_at,swole_like(user_id),swole_comment(id,user_id,nick,body,created_at)&order=created_at.desc&limit=40',{auth:true})||[];
-    r.forEach(p=>{p.likes=(p.swole_like||[]).map(x=>x.user_id);p.cmts=(p.swole_comment||[]).sort((a,b)=>a.created_at<b.created_at?-1:1);delete p.swole_like;delete p.swole_comment;});
+    r.forEach((p,i)=>{r[i]=p=cleanJ(p);p.likes=(p.swole_like||[]).map(x=>x.user_id);p.cmts=(p.swole_comment||[]).sort((a,b)=>a.created_at<b.created_at?-1:1);delete p.swole_like;delete p.swole_comment;});
     if(S.social)S.social.posts=r;return r;
   }
   async function fire(id){
@@ -5061,7 +5071,7 @@ function quickHTML(){
   const t=today(),pl=plannedFor(t).filter(r=>!doneOn(t).some(l=>l.routineId===r.id)),taken=!!db.creatine[t];
   const items=[{i:'play',l:'Entreno libre',a:'startFree',c:'#7A66FF'}];
   pl.slice(0,2).forEach(r=>items.push({i:'dumb',l:r.name,a:'startR',v:r.id,c:'#1F9E95'}));
-  items.push({i:'bolt',l:'Cargar marca',a:'markOpen',c:'#FF4F93'},{i:'food',l:'Anotar comida',a:'foodOpen',c:'#E8722A'},{i:'drop',l:'+1 vaso de agua',a:'water',v:'1',c:'#2F73E0'},{i:'pill',l:taken?'Creatina: tomada':'Tomé creatina',a:'creaToggle',v:t,c:'#CC8A12'},{i:'spark',l:'Armar rutina',a:'genOpen',c:'#8F43EA'},{i:'timer',l:'Intervalos',a:'toolsOpen',v:'iv',c:'#2F73E0'},{i:'weight',l:'1RM y %',a:'toolsOpen',v:'rm',c:'#1F9E95'});
+  items.push({i:'bolt',l:'Cargar marca',a:'markOpen',c:'#FF4F93'},{i:'food',l:'Anotar comida',a:'foodOpen',c:'#E8722A'},{i:'drop',l:'+1 vaso de agua',a:'water',v:'1',c:'#2F73E0'},{i:'pill',l:taken?'Creatina: tomada':'Tomé creatina',a:'creaToggle',v:t,c:'#CC8A12'},{i:'spark',l:'Armar rutina',a:'genOpen',c:'#8F43EA'},{i:'timer',l:'Intervalos',a:'toolsOpen',v:'iv',c:'#2F73E0'},{i:'weight',l:'1RM y %',a:'toolsOpen',v:'rm',c:'#1F9E95'},{i:'users',l:'Amigos',a:'socOpen',v:'auto',c:'#FF4F6A'});
   return '<div class="qgrid big">'+items.map(q=>'<button class="qtile" data-a="'+q.a+'"'+(q.v?' data-v="'+esc(q.v)+'"':'')+' data-close="1" style="--qc:'+q.c+'"><span class="qi">'+ic(q.i,24)+'</span><span>'+esc(q.l)+'</span></button>').join('')+'</div>';
 }
 function avatarHTML(){
@@ -5802,7 +5812,7 @@ function modalBody(m,l2){
     case 'tree':return sheet('Árbol de habilidades',treeWrap(m),{full:true});
     case 'skplan':return sheet('Tu camino',skPlanHTML(skillPlan(m.id)),{l2:true});
     case 'excreate':return sheet('Ejercicio propio',exCreateHTML(m.d),{l2:true});
-    case 'confirm':return sheet(m.title,'<p>'+esc(m.msg)+'</p><div class="g2"><button class="btn" data-a="close" data-v="m2">Cancelar</button><button class="btn pri" data-a="'+m.act+'" data-v="'+esc(m.arg||'')+'">'+esc(m.ok||'Confirmar')+'</button></div>',{l2:true});
+    case 'confirm':return sheet(m.title,'<p>'+esc(m.msg)+'</p><div class="g2"><button class="btn" data-a="close" data-v="m2">'+esc(m.no||'Cancelar')+'</button><button class="btn pri" data-a="'+m.act+'" data-v="'+esc(m.arg||'')+'">'+esc(m.ok||'Confirmar')+'</button></div>',{l2:true});
     case 'mark':return sheet(m.d.step==='reveal'?'Tu nivel':m.d.step==='form'?'Tu marca':'Elegí el ejercicio',markHTML(m.d),{l2:true});
     case 'carta':return '<div class="mback carta-back" data-a="back" data-v="modal"><div class="msheet carta-sheet" role="dialog" aria-modal="true" aria-label="Tu carta"><div class="mh-bar"><h3>Tu carta</h3><button class="ib flat" data-a="close" data-v="modal" aria-label="Cerrar">'+ic('x')+'</button></div>'+cartaHTML(true)+
      '<p class="mut sm-t tc" style="margin-top:12px">Tocala o deslizala para darla vuelta</p><div class="cbtns" style="margin-top:10px"><button class="btn" data-a="cardFlip">'+ic('swap',16)+' Dar vuelta</button><button class="btn pri" data-a="cardShare">Compartir</button>'+(window.DeviceOrientationEvent&&DeviceOrientationEvent.requestPermission?'<button class="btn" data-a="cardGyro">Moverla con el celu</button>':'<button class="btn" data-a="close" data-v="modal">Listo</button>')+'</div>'+
@@ -5844,7 +5854,7 @@ if(window.visualViewport){const vv=visualViewport,rt=document.documentElement;co
 document.addEventListener('focusin',e=>{const t=e.target;if(t&&t.tagName==='INPUT'&&t.type==='number'&&t.value!=='')setTimeout(()=>{try{if(document.activeElement===t)t.select();}catch(x){}},0);});
 /* si la ventana ya estaba abierta y solo cambió su contenido, no repite la animación de entrada (evita el parpadeo) */
 function renderModal(){syncLayers();
-  const put=(el,m,l2,k)=>{keepScroll(el,()=>{el.innerHTML=m?modalBody(m,l2):'';});const t=m?m.t:null,ke=el.querySelector('[key]'),kk=t?t+'|'+(ke?ke.getAttribute('key'):''):null,prev=S[k]||'';{const dg=el.querySelector('[role=dialog]'),sg=t?t+'|'+(dg?dg.getAttribute('aria-label'):''):'';if(sg!==(S[k+'s']||'')){S[k+'s']=sg;S.layT=performance.now();}}
+  const put=(el,m,l2,k)=>{if(m&&m.d&&typeof m.d==='object'&&(m._s==null||m._ss!==m.d.step)){m._ss=m.d.step;m._s=snapOf(m);}keepScroll(el,()=>{el.innerHTML=m?modalBody(m,l2):'';});const t=m?m.t:null,ke=el.querySelector('[key]'),kk=t?t+'|'+(ke?ke.getAttribute('key'):''):null,prev=S[k]||'';{const dg=el.querySelector('[role=dialog]'),sg=t?t+'|'+(dg?dg.getAttribute('aria-label'):''):'';if(sg!==(S[k+'s']||'')){S[k+'s']=sg;S.layT=performance.now();}}
     /* misma ventana: sin fundido; mismo paso: el contenido no vuelve a animarse */
     if(t&&prev.split('|')[0]===t)el.querySelectorAll('.mback').forEach(x=>x.classList.add('stay'));if(kk&&prev===kk)el.querySelectorAll('.mback').forEach(x=>x.classList.add('same'));S[k]=kk;};
   put($('#modal'),S.modal,false,'_mk');put($('#modal2'),S.m2,true,'_m2k');
@@ -5926,11 +5936,12 @@ window.addEventListener('popstate',()=>{
   hDepth=Math.max(0,hDepth-1);
   if(S.modal&&S.modal.t==='recap')clearTimeout(S.recapT);
   /* en la marca, atrás vuelve del formulario a la lista en vez de cerrar todo */
-  if(S.m2&&S.m2.t==='mark'&&S.m2.d.step==='form'&&!S.m2.d.direct&&!S.picker){S.m2.d.step='pick';try{history.pushState({sw:hDepth+1},'');hDepth++;}catch(e){}renderModal();return;}
+  if(S.m2&&S.m2.t==='mark'&&S.m2.d.step==='form'&&!S.m2.d.direct&&!S.picker&&!isDirty('m2')){S.m2.d.step='pick';try{history.pushState({sw:hDepth+1},'');hDepth++;}catch(e){}renderModal();return;}
   /* el selector abierto desde el asistente está arriba de todo: se cierra primero */
   if(S.picker&&(S.picker.target==='gen'||!S.m2))S.picker=null;
-  else if(S.m2)S.m2=null;
-  else if(S.modal){if((S.modal.t==='profile'&&!db.profile)||S.modal.t==='welcome'||S.modal.t==='onb'){try{history.pushState({sw:hDepth+1},'');hDepth++;}catch(e){}return;}if(S.modal.t==='tools'&&S.iv){S.modal=null;ACTIONS.ivStop();}S.modal=null;}
+  /* atrás sobre una ventana con cambios sin guardar pregunta antes de tirarlos (el render de abajo repone el paso del historial) */
+  else if(S.m2){if(!askDiscard('m2'))S.m2=null;}
+  else if(S.modal){if((S.modal.t==='profile'&&!db.profile)||S.modal.t==='welcome'||S.modal.t==='onb'){try{history.pushState({sw:hDepth+1},'');hDepth++;}catch(e){}return;}if(!askDiscard('modal')){if(S.modal.t==='tools'&&S.iv){S.modal=null;ACTIONS.ivStop();}S.modal=null;}}
   else if(S.sessOpen)S.sessOpen=false;
   else if(S.tab!=='inicio'){goTab('inicio');window.scrollTo(0,0);}
   render();
@@ -5978,7 +5989,19 @@ function openProfile(){
   S.modal={t:'profile',d:Object.assign({sex:'m',age:'',height:'',weight:'',activity:2,goal:'recomp'},db.profile||{})};
   render();
 }
+/* foto de lo que tenía la ventana al abrirse (o al entrar a ese paso), para saber si cambiaste algo */
+const snapOf=m=>{try{return JSON.stringify(m.d,(k,v)=>k==='q'||k==='step'||k==='res'||v===''?undefined:typeof v==='number'?String(v):v);}catch(e){return '';}};
+function isDirty(which){const m=which==='m2'?S.m2:S.modal;if(!m||!m.d)return false;
+  if(m.t==='gen')return !!m.d.plan; /* el asistente: importa cuando ya hay un plan armado */
+  if(!(['routine','logedit','excreate'].includes(m.t)||(m.t==='mark'&&m.d.step==='form')||(m.t==='food'&&['new','quick'].includes(m.d.step))))return false;
+  return m._s!=null&&snapOf(m)!==m._s;}
+/* devuelve true si en vez de cerrar hay que quedarse (preguntando, o volviendo de la pregunta a lo que estabas editando) */
+function askDiscard(which){const m=which==='m2'?S.m2:S.modal;
+  if(which==='m2'&&m&&m.t==='confirm'&&m.prev){S.m2=m.prev;return true;}
+  if(!isDirty(which))return false;
+  S.m2={t:'confirm',title:'¿Descartar los cambios?',msg:'Lo que cargaste en esta ventana todavía no se guardó.',act:'discardGo',arg:which,ok:'Descartar',no:'Seguir editando',prev:which==='m2'?m:null};return true;}
 function closeLayer(which){
+  if(askDiscard(which)){render();return;}
   if(which==='modal'&&S.modal&&S.modal.t==='tools'&&S.iv)ACTIONS.ivStop();
   if(which==='m2')S.m2=null;
   else{if(!db.profile&&S.modal&&S.modal.t==='profile')return;S.modal=null;}
@@ -6229,6 +6252,7 @@ const ACTIONS={
     if(p&&dn){S.m2={t:'confirm',title:'Terminar entrenamiento',msg:(p===1?'Queda 1 serie sin tildar: no se guarda.':'Quedan '+p+' series sin tildar: no se guardan.')+' ¿Terminamos igual?',act:'sessFinishGo',ok:'Terminar'};render();}
     else finishSession();},
   sessFinishGo(){S.m2=null;renderModal();finishSession();},
+  discardGo(v){S.m2=null;if(v==='modal'){if(S.modal&&S.modal.t==='tools'&&S.iv){S.modal=null;ACTIONS.ivStop();}S.modal=null;}render();},
   reload(){location.reload();},
   sessCancel(){S.m2={t:'confirm',title:'Cancelar entrenamiento',msg:'Se descartan las series de este entrenamiento.',act:'sessCancelGo',ok:'Descartar'};render();},
   sessCancelGo(){db.active=null;save();S.sessOpen=false;S.m2=null;endRest(false);render();},
@@ -6264,7 +6288,7 @@ const ACTIONS={
   photoView(v){S.m2={t:'phview',id:v};render();},
   photoDel(v){PhotoDB.del(v).then(()=>{S.m2=null;if(S.modal&&S.modal.t==='phcmp')S.modal=null;render();loadPhotos();toast('Foto borrada');});},
   photoCompare(){const ps=photoCache||[];if(ps.length<2)return;S.modal={t:'phcmp',a:ps[0].id,b:ps[ps.length-1].id,x:50};render();},
-  socOpen(v){S.modal={t:'friends',tab:v==='season'?'comp':v||'rank',met:'ovr'};render();if(Social.on())Social.load().then(()=>renderModal()).catch(e=>toast(Social.errTxt(e)));},
+  socOpen(v){if(v==='auto')v=frCount()>0?'feed':'list';S.modal={t:'friends',tab:v==='season'?'comp':v||'rank',met:'ovr'};render();if(Social.on())Social.load().then(()=>renderModal()).catch(e=>toast(Social.errTxt(e)));},
   socTab(v){S.modal.tab=v==='season'?'comp':v;renderModal();},
   socYes(v){Social.answer(v,true).then(()=>{renderModal();toast('¡Listo! Ya son amigos');confetti(30);}).catch(e=>toast(Social.errTxt(e)));},
   socNo(v){Social.answer(v,false).then(()=>{renderModal();toast('Solicitud rechazada');}).catch(e=>toast(Social.errTxt(e)));},
@@ -6547,7 +6571,7 @@ document.addEventListener('click',e=>{
   if(a==='close'){closeLayer(el.dataset.v);return;}
   if(a==='act')return;
   const f=ACTIONS[a];
-  if(el.dataset.close&&S.modal&&S.modal.t==='quick'){S.modal=null;if(!['startFree','startR','markOpen','genOpen'].includes(a)){render();}}
+  if(el.dataset.close&&S.modal&&S.modal.t==='quick'){S.modal=null;if(!['startFree','startR','markOpen','genOpen','socOpen'].includes(a)){render();}}
   if(f)f(el.dataset.v,el);
 });
 document.addEventListener('input',e=>{
@@ -6622,8 +6646,8 @@ document.addEventListener('keydown',e=>{
   /* en cualquier campo de números, la tecla "ir" del teclado lo cierra */
   if(e.key==='Enter'&&e.target.tagName==='INPUT'&&e.target.type==='number'){e.target.blur();return;}
   if(e.key!=='Escape')return;
-  if(S.m2)closeLayer('m2');
-  else if(S.picker){S.picker=null;renderPicker();}
+  if(S.picker&&(S.picker.target==='gen'||!S.m2)){S.picker=null;renderPicker();}
+  else if(S.m2)closeLayer('m2');
   else if(S.modal)closeLayer('modal');
 });
 
@@ -6668,10 +6692,22 @@ function mergeDb(L,R){
     out[c]=m;
   });
   const empty=v=>v==null||(typeof v==='object'&&!Object.keys(v).length);
-  SYNC_ONE.forEach(c=>{
-    const lt=L.clock[c]||0,rt=R.clock[c]||0;
-    /* empate (datos de antes de sincronizar): gana la nube, salvo que esté vacía */
-    out[c]=clone(rt>lt||(rt===lt&&!empty(R[c]))?R[c]:L[c]);
+  /* El reloj de un campo es el suyo o, si todavía no tiene (datos de antes de este cambio, u otro celu con la versión vieja), el del bloque entero. */
+  const ck=(D,k,c)=>Math.max(+D.clock[k]||0,+D.clock[c]||0);
+  SYNC_FIELDS.forEach(c=>{
+    const A=L[c]&&typeof L[c]==='object'?L[c]:null,B=R[c]&&typeof R[c]==='object'?R[c]:null;
+    if(!A&&!B){out[c]=c==='profile'?null:{};return;}
+    const m={},ks=new Set(Object.keys(A||{}).concat(Object.keys(B||{})));
+    ks.forEach(f=>{
+      const a=A?A[f]:undefined,b=B?B[f]:undefined;
+      /* lo que es de este dispositivo no se toca */
+      if(c==='settings'&&LOCAL_SET.includes(f)){if(a!==undefined)m[f]=clone(a);return;}
+      const k=c+':'+f,ta=a!==undefined?ck(L,k,c):-1,tb=b!==undefined?ck(R,k,c):-1,d=dl[k]||0;
+      /* empate (datos de antes de sincronizar): gana la nube, salvo que venga vacía */
+      const v=tb>ta||(tb===ta&&b!==undefined&&!empty(b))?b:(a!==undefined?a:b);
+      if(v!==undefined&&!(d&&d>=Math.max(ta,tb)))m[f]=clone(v);
+    });
+    out[c]=c==='profile'&&!Object.keys(m).length?null:m;
   });
   out.settings=normalize({settings:out.settings}).settings;
   /* los borrados de hace más de un año ya no hacen falta */
@@ -6679,7 +6715,11 @@ function mergeDb(L,R){
   out.clock=cl;out.del=dl;out.active=L.active;
   return out;
 }
-const syncPayload=d=>{const o=Object.assign({},d);delete o.active;return o;};
+const syncPayload=d=>{const o=Object.assign({},d);delete o.active;o.settings=Object.assign({},d.settings);LOCAL_SET.forEach(f=>{delete o.settings[f];});return o;};
+/* misma información = misma firma, aunque cada celu la tenga guardada en otro orden (si no, cada sincronización reescribía la nube sin que hubiera nada nuevo) */
+const syncSig=d=>{const p=syncPayload(d),o={};Object.keys(p).forEach(k=>{o[k]=p[k];});
+  for(const c in SYNC_COLL){const key=SYNC_COLL[c];o[c]=(Array.isArray(p[c])?p[c]:[]).slice().sort((a,b)=>String(a&&a[key])<String(b&&b[key])?-1:1);}
+  return JSON.stringify(o,(k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.keys(v).sort().reduce((r,x)=>{r[x]=v[x];return r;},{}):v);};
 
 const Sync=(()=>{
   const URL_='https://couuuvckplstgksanzgr.supabase.co',KEY='sb_publishable_labsOx_gAy1Njn6mHAuhuw_jWBRPkgB',AK='swole.auth';
@@ -6746,7 +6786,7 @@ const Sync=(()=>{
           try{await req('/rest/v1/swole_data',{method:'POST',auth:true,headers:{Prefer:'return=minimal'},body:{user_id:uid,data}});break;}
           catch(e){if(e.status===409)continue;throw e;}
         }
-        if(JSON.stringify(data)===JSON.stringify(syncPayload(normalize(row.data))))break;
+        if(syncSig(db)===syncSig(normalize(row.data)))break;
         /* solo escribe si nadie más escribió desde que leí (rev igual); si no, vuelvo a unir */
         const up=await req('/rest/v1/swole_data?user_id=eq.'+uid+'&rev=eq.'+row.rev,{method:'PATCH',auth:true,headers:{Prefer:'return=representation'},body:{data}});
         if(up&&up.length)break;
