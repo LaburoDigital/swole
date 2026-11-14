@@ -1528,7 +1528,7 @@ small{line-height:1.35}
 .vid-fig,.vid-me{display:grid;gap:4px;justify-items:center;padding:8px;border-radius:14px;background:var(--raise)}
 .vid-fig .tq{width:100%;height:auto;max-width:150px}.vid-me video{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;background:#000}
 .vid-cmp small{color:var(--mut);font-size:12px}
-.pick.top{z-index:96}.gen-it{gap:6px}.gen-it>span:first-child{flex:1;min-width:0}.gen-it .ib.flat{width:30px;height:30px;flex:none}
+.pick.ptop{z-index:96}.gen-it{gap:6px}.gen-it>span:first-child{flex:1;min-width:0}.gen-it .ib.flat{width:30px;height:30px;flex:none}
 .gen-way{margin:14px 0 4px;display:grid;gap:8px}
 /* v54: teclado, marca, controles más grandes en el entreno */
 .toast{bottom:calc(150px + env(safe-area-inset-bottom,0px) + var(--kb,0px))}
@@ -2828,9 +2828,9 @@ function genSplit(n,gs,lvl){
 /* series × repeticiones según la evidencia */
 function genDose(ex,gs,lvl,pat,first,age){
   const prim=primGoal(gs),big=['squat','hinge','hpush','vpush','hpull','vpull'].includes(pat)&&first;
-  if(ex.time){const s={plank:40,lsit:20,tucklsit:20,copenhagen:25,farmer:40,neckiso:20}[ex.id]||(ex.sk?15:30);return[ex.sk?4:3,lvl==='adv'?Math.round(s*1.5):s];}
+  if(ex.time){const s={plank:40,lsit:20,tucklsit:20,copenhagen:25,farmer:40,neckiso:20}[ex.id]||(ex.sk?15:30);const bt=ex.sk?bestRep(ex.id):0;return[ex.sk?4:3,bt>0?Math.max(5,Math.min(Math.round(s*1.5),Math.round(bt*.7))):lvl==='adv'?Math.round(s*1.5):s];}
   if(pat==='plyo'||pat==='power')return[3,ex.id==='kbswing'?12:5];
-  if(ex.sk)return[4,lvl==='beg'?5:lvl==='int'?6:8];
+  if(ex.sk){const bt=bestRep(ex.id),base=lvl==='beg'?5:lvl==='int'?6:8;return[4,bt>0?Math.max(1,Math.min(15,Math.round(bt*.75))):Math.max(2,Math.min(base,Math.round((ex.sk.t||10)*.5)))];}
   const both=gs.includes('hip')&&gs.includes('fuerza');
   const t=both?(big?[4,6]:[3,10]):({hip:big?[3,8]:[3,12],fuerza:big?[4,5]:[3,8],dep:big?[3,5]:[3,10],grasa:big?[3,10]:[3,15],salud:big?[3,8]:[3,12]}[prim]||[3,10]);
   let s=t[0],r=t[1];
@@ -2856,6 +2856,14 @@ const SK_ROT=['hs','pull','lsit','push','fl','dip','pl','bl'];
 /* lv: lo que dijiste que sos (principiante 0, intermedio 1, avanzado 2) habilita los primeros escalones de cada rama aunque no tengas marcas */
 function canDo(id,lv){const f=findNode(id);if(!f)return true;if(f.i<=(lv||0)&&!(XREQ[id]||[]).length)return true;const s=nodeState(f.b,f.i);return s.done||s.avail||s.best>0;}
 const doable=(list,lv)=>{const l=list.filter(x=>canDo(x,lv));return l;};
+/* variantes del árbol: nunca una más fácil que la que ya dominás ni más de un escalón por encima */
+function genPick(list,lv,b,rot){
+  const nd=list.map(findNode);
+  if(!nd.some(Boolean))return list[(b+rot)%list.length]||list[0];
+  let fl=-1;nd.forEach((f,i)=>{if(f&&(nodeDone(f.b,f.i)||bestRep(list[i])>=3||(f.i<=lv&&!(XREQ[list[i]]||[]).length)))fl=i;});
+  let ahead=0;const c=list.filter((x,i)=>!nd[i]||(i>=fl&&(i<=fl||ahead++<1)));
+  return c[rot%c.length]||list[0];
+}
 function skillFor(i,lvl){
   const fam=SK_ROT[i%SK_ROT.length],br=branches().find(b=>b.f===fam);
   if(br){const st=br.nodes.map((_,k)=>nodeState(br,k));let k=st.findIndex(s=>s.avail);if(k<0)k=st.map(s=>s.done).lastIndexOf(true);return k<0?null:br.nodes[k].ex;}
@@ -2909,7 +2917,7 @@ function genPlan(d){
     pats.forEach((pt,pi)=>{
       const list0=(pool[pt]||[]).filter(id=>exById(id)&&!used.has(id));if(!list0.length)return;const list=doable(list0,lvlI);if(!list.length)return;
       const b=Math.min(list.length-1,lvlI+(onlyCali?lvlI:0));
-      const id=list[(b+rep+(d.seed||0))%list.length]||list[0];
+      const id=genPick(list,lvlI,b,rep+(d.seed||0));
       used.add(id);const ex=exById(id),ds=genDose(ex,gs,lvl,pt,pi<4,age);
       const it={ex:id,sets:ds[0],reps:ds[1]};
       /* calentamiento automático en el primer básico con carga del día */
@@ -3750,7 +3758,7 @@ function friendsHTML(m){
   let body='';
   if(tab==='rank'){
     const met=m.met||'ovr',rows=rankRows(met);
-    body='<div class="scroll-x" style="margin:4px 0 10px">'+RANK_OPTS.filter(o=>o[0]!=='season').map(([k,n])=>'<button class="chip '+(met===k?'on':'')+'" data-a="socMet" data-v="'+k+'">'+n+'</button>').join('')+'</div>'+
+    body='<div class="chips" style="margin:4px 0 12px">'+RANK_OPTS.filter(o=>o[0]!=='season').map(([k,n])=>'<button class="chip '+(met===k?'on':'')+'" data-a="socMet" data-v="'+k+'">'+n+'</button>').join('')+'</div>'+
      (rows.length?'<div class="lb">'+rows.map((x,i)=>{const d=x.r.data||{},L=met==='ovr'||met==='OVR'?(d.ovr?d.ovr.L:-1):Math.floor(x.v),li=d.lifts&&d.lifts[met];
        const val=met==='OVR'?'<b>'+(+x.v||0)+'</b> pts':met==='ovr'?lvlSpan(L)+(d.pctl?'<small>Top '+(100-d.pctl)+' %</small>':''):lvlSpan(Math.max(-1,Math.floor(x.v)))+(li&&li.r?'<small>'+num(li.r,2)+'× su peso</small>':'');
        return '<button class="lb-r'+(x.me?' me':'')+'" data-a="socCard" data-v="'+x.r.user_id+'"><span class="lb-n">'+(i+1)+'</span>'+badge(L,36)+'<span class="grow"><b>'+esc(x.r.nick||'Atleta')+(x.me?' <span class="tag">vos</span>':'')+'</b></span><span class="lb-v">'+val+'</span></button>';}).join('')+'</div>'
@@ -5874,7 +5882,7 @@ function renderPill(){
 function renderPicker(){
   const el=$('#picker');syncLayers();
   if(!S.picker){el.innerHTML='';return;}
-  keepScroll(el,()=>{el.innerHTML='<div class="pick'+(S.picker.target==='gen'?' top':'')+'"><div class="pick-in"><div class="pick-top"><div class="row"><h2 class="grow" style="font:800 24px var(--f-d)">Elegir ejercicios</h2><button class="btn pri sm" data-a="pickDone">Listo</button></div>'+
+  keepScroll(el,()=>{el.innerHTML='<div class="pick'+(S.picker.target==='gen'?' ptop':'')+'"><div class="pick-in"><div class="pick-top"><div class="row"><h2 class="grow" style="font:800 24px var(--f-d)">Elegir ejercicios</h2><button class="btn pri sm" data-a="pickDone">Listo</button></div>'+
    '<div class="field"><input id="pq" type="search" placeholder="Buscar ejercicio" value="'+esc(S.picker.q)+'" data-i="pq" aria-label="Buscar ejercicio"></div><div class="scroll-x" id="pg">'+pickChips()+'</div></div><div class="gap" id="pres">'+pickResults()+'</div>'+(S.picker.target==='gen'?'':'<button class="btn wide" style="margin-top:14px" data-a="newEx">'+ic('plus',18)+' Crear ejercicio propio</button>')+'</div></div>';});
 }
 function pickChips(){return GROUP_TABS().map(g=>'<button class="chip '+((S.picker.g||'Todos')===g?'on':'')+'" data-a="pgrp" data-v="'+g+'">'+g+'</button>').join('');}
