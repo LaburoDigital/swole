@@ -2551,7 +2551,7 @@ S.crM=new Date(S.crM.getFullYear(),S.crM.getMonth(),1);
 const TABS=[{id:'inicio',i:'home',l:'Inicio'},{id:'entrenar',i:'dumb',l:'Entrenar'},{id:'niveles',i:'rank',l:'Nivel'},{id:'nutri',i:'flame',l:'Nutrición'}];
 const ETABS=[{id:'rutinas',l:'Rutinas'},{id:'cal',l:'Calendario'}];
 /* las secciones viejas (hoy, rutinas, cal) ahora viven dentro de Entrenar */
-function goTab(v){const t0=S.tab;if(v==='hoy')v='inicio';if(['rutinas','cal'].includes(v)){S.tab='entrenar';S.etab=v;}else S.tab=v;if(S.tab!=='perfil')S.pf=null;/* pestaña nueva: al cerrarse la ventana abierta no vuelve al scroll de la pestaña anterior */if(S.tab!==t0)S.lockY=0;}
+function goTab(v){const t0=S.tab;if(v==='hoy')v='inicio';if(['rutinas','cal'].includes(v)){S.tab='entrenar';S.etab=v;}else S.tab=v;if(S.tab!=='perfil'&&S.pf){/* cambios del perfil sin guardar: quedan esperando y se avisa, no se pierden */if(pfDirty()){if(t0==='perfil')setTimeout(()=>toast('Tu perfil quedó con cambios sin guardar'),60);}else S.pf=null;}/* pestaña nueva: al cerrarse la ventana abierta no vuelve al scroll de la pestaña anterior */if(S.tab!==t0)S.lockY=0;}
 let toastT=null;
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2800);}
 function effTheme(){const t=document.documentElement.dataset.theme;if(t)return t;return window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}
@@ -6005,6 +6005,7 @@ function setWeight(kg,date){
 /* el peso del perfil es siempre el último registrado */
 function syncProfileWeight(){if(!db.profile||!db.weights.length)return;const last=db.weights.slice().sort((a,b)=>a.date<b.date?-1:1).pop();db.profile.weight=last.kg;}
 /* el formulario de perfil vive en la ventana de bienvenida o en la pestaña Perfil */
+function pfDirty(){if(!S.pf)return false;const b=Object.assign({sex:'m',age:'',height:'',weight:'',activity:2,goal:'recomp',nick:'',sport:''},db.profile||{});return Object.keys(S.pf).some(k=>String(S.pf[k]==null?'':S.pf[k])!==String(b[k]==null?'':b[k]));}
 function pfD(){return S.modal&&S.modal.t==='profile'?S.modal.d:(S.pf||(S.pf=Object.assign({},db.profile||{})));}
 function openProfile(){
   S.modal={t:'profile',d:Object.assign({sex:'m',age:'',height:'',weight:'',activity:2,goal:'recomp'},db.profile||{})};
