@@ -1,2 +1,4 @@
 .taste-skill/
 index.bak*.html
+native/node_modules/
+native/www/

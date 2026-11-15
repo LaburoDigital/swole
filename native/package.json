@@ -1,0 +1,16 @@
+{
+  "name": "swole-native",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Envoltorio de Swole para las tiendas (Capacitor)",
+  "scripts": {
+    "www": "node copiar.js",
+    "sync": "node copiar.js && cap sync"
+  },
+  "dependencies": {
+    "@capacitor-mlkit/barcode-scanning": "^8.2.2",
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/cli": "^8.6.2",
+    "@capacitor/core": "^8.6.2"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "appId": "uy.swole.app",
+  "appName": "Swole",
+  "webDir": "www",
+  "backgroundColor": "#171A26",
+  "android": { "allowMixedContent": false }
+}
