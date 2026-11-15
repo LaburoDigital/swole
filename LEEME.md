@@ -39,6 +39,8 @@ Después, en la app: Perfil → **Entrar o crear cuenta**. En un celular nuevo, 
 
 ## Subir Swole a App Store / Play Store (cuando llegue el momento)
 
+**Android ya está armado** en la carpeta `native/` (Capacitor 8, id `uy.swole.app`, permiso de cámara, ícono y escáner nativo). El APK de prueba se compila solo en GitHub: pestaña **Actions** → **APK de Android** → **Run workflow**, y al terminar se baja de **Artifacts** (`swole-debug-apk`). Para probar en la compu: `cd native`, `npm ci`, `npm run sync`. Falta para la tienda: cuenta de Google Play, firmar la versión final (AAB) y avisos nativos (los avisos web no andan adentro de la app empaquetada). Lo de abajo es la receta original, que sigue valiendo para iPhone.
+
 Swole es una web app (PWA). Para las tiendas se "envuelve" con **Capacitor**: es la misma app adentro de una app nativa.
 
 1. En una compu (para iPhone hace falta una **Mac con Xcode** y la cuenta de Apple Developer, US$99 por año; Google Play cobra US$25 una vez):
