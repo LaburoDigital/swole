@@ -1,10 +1,12 @@
 /* Service worker de Swole: hace que la app abra sin internet.
-   Cuando cambies index.html, subí el número de VERSION para que los celulares bajen la nueva. */
-const VERSION = 'swole-v59';
+   Con cada cambio subí el número V (y el ?v= de index.html): lo hace solo  node tools/version.js N  */
+const V = 60;
+const VERSION = 'swole-v' + V;
 // Las fotos van en su propia caja, que NO se borra con cada versión (antes se bajaban de nuevo en cada actualización).
 const IMG = 'swole-img-1';
 const PICS = 'basquet cali ciclismo combate dep fuerza futbol grasa hip hockey natacion rugby running salud tenis voley'.split(' ').map(k => './img/' + k + '.jpg');
-const CORE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/logo.svg'];
+const APP = ['app.css'].concat('datos entreno progreso extras pantallas acciones sync'.split(' ').map(k => 'js/' + k + '.js')).map(f => './' + f + '?v=' + V);
+const CORE = ['./', './index.html'].concat(APP, ['./manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/logo.svg']);
 
 self.addEventListener('install', e => {
   e.waitUntil(Promise.all([
