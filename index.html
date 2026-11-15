@@ -2839,9 +2839,9 @@ function genSplit(n,gs,lvl){
 /* series × repeticiones según la evidencia */
 function genDose(ex,gs,lvl,pat,first,age){
   const prim=primGoal(gs),big=['squat','hinge','hpush','vpush','hpull','vpull'].includes(pat)&&first;
-  if(ex.time){const s={plank:40,lsit:20,tucklsit:20,copenhagen:25,farmer:40,neckiso:20}[ex.id]||(ex.sk?15:30);const bt=ex.sk?bestRep(ex.id):0;return[ex.sk?4:3,bt>0?Math.max(5,Math.min(Math.round(s*1.5),Math.round(bt*.7))):lvl==='adv'?Math.round(s*1.5):s];}
+  if(ex.time){const s={plank:40,lsit:20,tucklsit:20,copenhagen:25,farmer:40,neckiso:20}[ex.id]||(ex.sk?15:30);const bt=ex.sk?effBest(ex.id):0;return[ex.sk?4:3,bt>0?Math.max(5,Math.min(Math.round(s*1.5),Math.round(bt*.7))):lvl==='adv'?Math.round(s*1.5):s];}
   if(pat==='plyo'||pat==='power')return[3,ex.id==='kbswing'?12:5];
-  if(ex.sk){const bt=bestRep(ex.id),base=lvl==='beg'?5:lvl==='int'?6:8;return[4,bt>0?Math.max(1,Math.min(15,Math.round(bt*.75))):Math.max(2,Math.min(base,Math.round((ex.sk.t||10)*.5)))];}
+  if(ex.sk){const bt=effBest(ex.id),base=lvl==='beg'?5:lvl==='int'?6:8;return[4,bt>0?Math.max(1,Math.min(15,Math.round(bt*.75))):Math.max(2,Math.min(base,Math.round((ex.sk.t||10)*.5)))];}
   const both=gs.includes('hip')&&gs.includes('fuerza');
   const t=both?(big?[4,6]:[3,10]):({hip:big?[3,8]:[3,12],fuerza:big?[4,5]:[3,8],dep:big?[3,5]:[3,10],grasa:big?[3,10]:[3,15],salud:big?[3,8]:[3,12]}[prim]||[3,10]);
   let s=t[0],r=t[1];
@@ -2871,7 +2871,7 @@ const doable=(list,lv)=>{const l=list.filter(x=>canDo(x,lv));return l;};
 function genPick(list,lv,b,rot){
   const nd=list.map(findNode);
   if(!nd.some(Boolean))return list[(b+rot)%list.length]||list[0];
-  let fl=-1;nd.forEach((f,i)=>{if(f&&(nodeDone(f.b,f.i)||bestRep(list[i])>=3||(f.i<=lv&&!(XREQ[list[i]]||[]).length)))fl=i;});
+  let fl=-1;nd.forEach((f,i)=>{if(f&&(nodeDone(f.b,f.i)||effBest(list[i])>=3||(f.i<=lv&&!(XREQ[list[i]]||[]).length)))fl=i;});
   let ahead=0;const c=list.filter((x,i)=>!nd[i]||(i>=fl&&(i<=fl||ahead++<1)));
   return c[rot%c.length]||list[0];
 }
@@ -3331,13 +3331,16 @@ function bestRep(id){let b=0;allSess().forEach(l=>l.entries.forEach(en=>{if(en.e
 function treeNode(s){const [id,t]=s.split(':'),ex=exById(id);return ex?{id,ex,t:+t||(ex.sk?ex.sk.t:10),time:!!ex.time}:null;}
 const branches=()=>TREE.map(b=>Object.assign({},b,{nodes:b.ids.map(treeNode).filter(Boolean)}));
 /* dominada = llegaste a la meta de esta o de cualquier variante más difícil de la misma rama */
-const nodeDone=(b,i)=>b.nodes.slice(i).some(n=>bestRep(n.id)>=n.t);
+/* si hacés una variante más difícil, las más fáciles se estiman solas: cada escalón hacia abajo duplica el avance (tope: 125 % de la meta) */
+function estBest(b,i){let fr=0;for(let j=i+1;j<b.nodes.length;j++){const m=b.nodes[j],r=bestRep(m.id);if(r>0)fr=Math.max(fr,r/m.t*Math.pow(2,j-i));}return fr>0?Math.round(b.nodes[i].t*Math.min(1.25,fr)):0;}
+function effBest(id){const f=findNode(id),o=bestRep(id);return f?Math.max(o,estBest(f.b,f.i)):o;}
+const nodeDone=(b,i)=>b.nodes.slice(i).some(n=>bestRep(n.id)>=n.t)||estBest(b,i)>=b.nodes[i].t;
 function nodeState(b,i){
-  const n=b.nodes[i],best=bestRep(n.id),done=nodeDone(b,i);
+  const n=b.nodes[i],own=bestRep(n.id),best=Math.max(own,estBest(b,i)),done=nodeDone(b,i);
   const prevOk=i===0||nodeDone(b,i-1)||best>0;
   const reqs=(XREQ[n.id]||[]).map(([id,t])=>{const bb=bestRep(id);return{id,t,best:bb,ok:bb>=t};});
   const ok=prevOk&&reqs.every(r=>r.ok);
-  return{n,best,done,pct:Math.min(1,best/n.t),avail:!done&&ok,locked:!done&&!ok,reqs,prevOk};
+  return{n,best,est:best>own,done,pct:Math.min(1,best/n.t),avail:!done&&ok,locked:!done&&!ok,reqs,prevOk};
 }
 function findNode(id){const bs=branches();for(const b of bs){const i=b.nodes.findIndex(n=>n.id===id);if(i>=0)return{b,i};}return null;}
 const nodeTier=ex=>ex.sk?Math.min(6,Math.floor(ex.sk.b/3)):1;
@@ -3369,7 +3372,7 @@ function nodeDetail(id){
   const s=nodeState(f.b,f.i),ex=s.n.ex,u=s.n.time?' s':' reps',prev=f.i>0?f.b.nodes[f.i-1]:null;
   const req=(prev&&!s.best&&!nodeDone(f.b,f.i-1)?[{id:prev.id,t:prev.t,best:bestRep(prev.id),ok:false}]:[]).concat(s.reqs);
   return '<div class="td-det" id="tdDet"><div class="row" style="gap:12px"><div class="td-fig">'+(techOf(ex)?techSVG(techOf(ex)):badge(ex.sk?ex.sk.b:3,46))+'</div><div class="grow">'+badge(ex.sk?ex.sk.b:3,26).replace('<svg class="badge"','<svg class="badge td-b"')+' <b style="font:800 18px var(--f-d)">'+esc(shortN(ex.n))+'</b><br>'+
-   '<span class="mut sm-t">Meta: '+s.n.t+u+' seguid'+(s.n.time?'os':'as')+' · Tu mejor: '+(s.best?s.best+u:'sin registrar')+'</span></div></div>'+
+   '<span class="mut sm-t">Meta: '+s.n.t+u+' seguid'+(s.n.time?'os':'as')+' · Tu mejor: '+(s.best?s.best+u+(s.est?' (estimado por una variante más difícil)':''):'sin registrar')+'</span></div></div>'+
    '<div class="bar" style="margin:10px 0 4px"><i style="width:'+Math.round(s.pct*100)+'%;background:'+TCOL[nodeTier(ex)]+'"></i></div>'+
    '<p class="sm-t" style="margin-top:8px">'+esc(ex.d)+'</p>'+
    (req.length?'<div class="reqs"><span class="mut sm-t" style="font-weight:600">Antes necesitás</span>'+req.map(r=>{const e=exById(r.id),ru=e&&e.time?' s':' reps';return '<div class="rq'+(r.ok?' ok':'')+'">'+ic(r.ok?'check':'lock',14)+'<span class="grow">'+esc(shortN(e?e.n:r.id))+' · '+r.t+ru+'</span><span class="mut sm-t">'+(r.best?r.best+ru:'—')+'</span></div>';}).join('')+'</div>':'')+
