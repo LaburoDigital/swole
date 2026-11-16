@@ -485,6 +485,7 @@ const ACTIONS={
   },
   muscle(v){const m=muscleLevels()[v];const best=rankedList().filter(x=>x.ex.p.includes(v)&&x.info.L>=0)[0];toast((MUSC[v]||v)+': '+(m==null?'todavía sin rango':lvlName(Math.floor(m))+(best?' con '+best.ex.n:'')));},
   pickEx(v){S.picker={target:v,q:'',g:''};renderPicker();},
+  rSwap(v){S.picker={target:'rswap',idx:+v,q:'',g:''};renderPicker();},
   pickAdd(v){
     const ex=exById(v);if(!ex)return;
     if(S.picker.last===v&&Date.now()-S.picker.lastT<1500)return;S.picker.last=v;S.picker.lastT=Date.now();
@@ -492,6 +493,7 @@ const ACTIONS={
     if(S.picker.target==='gen'){const d=S.m2&&S.m2.d,r=d&&d.plan&&d.plan[S.picker.ri],it=r&&r.items[S.picker.ii];
       if(it){if(r.items.some(x=>x!==it&&x.ex===v)){toast('Ese ya está en esta rutina');return;}const old=exById(it.ex);it.ex=v;delete it.warm;if(!!ex.time!==!!(old&&old.time))it.reps=ex.time?30:10;d.plan.vol=weekVolume(d.plan);}
       S.picker=null;renderPicker();renderModal();toast('Cambiado por '+ex.n+(canDo(v)?'':' (ojo: todavía no la tenés desbloqueada)'));return;}
+    if(S.picker.target==='rswap'){const it=S.modal&&S.modal.d.items[S.picker.idx];if(it){if(S.modal.d.items.some(x=>x!==it&&x.ex===v)){toast('Ese ya está en esta rutina');return;}it.ex=v;}S.picker=null;renderPicker();renderModal();toast('Cambiado por '+ex.n);return;}
     if(S.picker.target==='routine'){S.modal.d.items.push({ex:v,sets:3,reps:reps});renderModal();}
     else if(S.picker.target==='replace'){const old=db.active.entries[S.picker.idx];const ne=mkEntry(v,old?Math.max(1,old.sets.filter(s=>!s.done).length||old.sets.length):3,reps);if(old){const dn=old.sets.filter(s=>s.done);/* lo que ya hiciste del anterior queda anotado */if(dn.length){old.sets=dn;db.active.entries.splice(S.picker.idx+1,0,ne);}else db.active.entries[S.picker.idx]=ne;}S.picker=null;save();renderPicker();renderSess();toast('Cambiado por '+ex.n);return;}
     else{db.active.entries.push(mkEntry(v,3,reps));save();renderSess();}

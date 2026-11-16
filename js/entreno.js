@@ -302,6 +302,19 @@ function viewRutinas(){
 }
 const GROUP_TABS=()=>['Todos'].concat(Object.keys(GROUPS),'Calistenia','Deporte');
 function groupChips(){return GROUP_TABS().map(g=>'<button class="chip '+((S.grp||'Todos')===g?'on':'')+'" data-a="grp" data-v="'+g+'">'+g+'</button>').join('');}
+/* parecidos: mismos músculos principales, mismo movimiento, equipo que tenés, a tu alcance y sin cargar una lesión */
+function patsOf(id){const s=new Set();Object.values(POOL).forEach(P=>Object.keys(P).forEach(k=>{if(P[k].includes(id))s.add(k);}));return s;}
+function similarEx(id,ctx){
+  const src=exById(id);if(!src)return[];ctx=ctx||{};
+  const sp=patsOf(id),skip=new Set(ctx.skip||[]),BW=['Peso corporal','Barra fija','Paralelas','Anillas','Barra vertical','Cajón','Banda'];
+  const okEq=e=>!ctx.eq||ctx.eq==='gym'||BW.includes(e.eq)||(ctx.eq==='dumb'&&/Mancuerna|Kettlebell/.test(e.eq));
+  const ov=(a,b)=>a.filter(x=>b.includes(x)).length;
+  return allEx().filter(e=>e.id!==id&&!e.hidden&&!skip.has(e.id)&&!!e.time===!!src.time&&okEq(e)&&!(ctx.inj&&ctx.inj.length&&injBad(e.id,'',ctx.inj)))
+    .map(e=>{const pp=ov(src.p,e.p),ps=ov(src.p.concat(src.s),e.p.concat(e.s)),pt=[...patsOf(e.id)].some(k=>sp.has(k));
+      let sc=pp*4+ps+(pt?3:0)+(groupOf(e)===groupOf(src)?1:0)+(e.eq===src.eq?.5:0);
+      if(e.sk&&!canDo(e.id,ctx.lv||0))sc-=3;if(e.sport&&!src.sport)sc-=2;if(!!e.sk!==!!src.sk)sc-=1.5;if(bestE1(e.id))sc+=.6;
+      return{e,sc,pp};}).filter(x=>x.pp>0&&x.sc>=5).sort((a,b)=>b.sc-a.sc).slice(0,6).map(x=>x.e);
+}
 function filterEx(q,g){
   q=fnorm(q).trim();
   const CAL_EQ=['Peso corporal','Barra fija','Paralelas','Anillas','Barra vertical'];

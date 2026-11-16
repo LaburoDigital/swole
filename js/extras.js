@@ -1099,6 +1099,7 @@ const BIG=['squat','bench','deadlift','ohp','row','frontsquat','incbench','rdl',
 const restFor=ex=>ex&&(BIG.includes(ex.id)||ex.st&&isBarbell(ex))?Math.max(db.settings.rest,150):db.settings.rest;
 /* "más fuerte que el X %": estimación a partir del nivel (tablas de referencia de gente que entrena) */
 function pctStronger(ex,e){
+  if(ex&&ex.sk&&REPS[ex.id]&&!ex.time&&db.profile)return Math.min(99,Math.max(1,Math.round(pGen(repPct(ex,e)))));
   if(!ex||!ex.st||!db.profile)return null;
   const v=levelVal(ex,e);
   return Math.min(99,Math.max(1,Math.round(pGen(pctOf(ex,e)))));

@@ -228,9 +228,11 @@ function viewNiveles(){
   h+='<button class="gen-cta mark-cta" data-a="markOpen"><span class="gen-ic">'+ic('bolt',22)+'</span><span class="grow"><b>Cargar marca</b><span>Poné tu peso y reps, y mirá tu nivel al instante</span></span>'+ic('right',18)+'</button>';
   /* rango de cada grupo muscular */
   const gl=groupLevels();
-  h+='<div class="card"><div class="hd"><div><h3>Por grupo muscular</h3><span class="mut sm-t">Promedio de tus 3 mejores ejercicios de cada grupo. Tu rango general es el promedio de estos.</span></div></div><div class="glist">'+
+  h+='<div class="card"><div class="hd"><div><h3>Por grupo muscular</h3><span class="mut sm-t">Manda tu mejor ejercicio de cada grupo; los demás ajustan poco. El general pesa más piernas y espalda.</span></div></div><div class="glist">'+
    Object.keys(GROUPS).map(g=>{const x=gl[g],L=x?Math.min(18,Math.floor(x.v)):-1;return '<div class="grow-row">'+badge(x?L:-1,40)+'<div class="grow"><div class="row" style="justify-content:space-between"><b>'+g+'</b>'+(x?lvlSpan(L):'<span class="mut sm-t">Sin datos</span>')+'</div>'+
     '<div class="bar" style="margin:6px 0 3px"><i style="width:'+(x?Math.round((L>=18?1:x.v-L)*100):0)+'%;background:'+lvlColor(L)+'"></i></div><span class="mut sm-t">'+(x?'Según '+x.used.map(e=>esc(e.n)).join(', '):'Cargá un ejercicio de '+g.toLowerCase()+' para ver tu rango')+'</span></div></div>';}).join('')+'</div></div>';
+  {const zl=zoneLevels();if(Object.values(zl).some(v=>v!=null))h+='<div class="card"><div class="hd"><div><h3>Por zona</h3><span class="mut sm-t">Tren superior, inferior y core</span></div></div><div class="zones">'+
+    Object.keys(zl).map(z=>{const v=zl[z],L=v==null?-1:Math.min(18,Math.floor(v));return '<div class="zone">'+badge(L,46)+'<b>'+z+'</b>'+(v==null?'<span class="mut sm-t">Sin datos</span>':lvlSpan(L))+'</div>';}).join('')+'</div></div>';}
   h+=goalsCard(false)+improveCard()+recordsCard()+heatCard();
   /* tu carta */
   h+='<div class="card carta-card">'+cartaHTML(false)+'<div class="carta-side"><h3>Tu carta</h3><p class="mut sm-t">'+(cardStats().OVR==null?'Todavía está vacía: cargá marcas o entrená para que se llene con tus números reales.':'Tu rango, tu cuerpo y 6 atributos del 40 al 99. Movela con el dedo.')+'</p>'+
@@ -247,7 +249,7 @@ function viewNiveles(){
       const i=x.info;
       return '<button class="ex" data-a="exInfo" data-v="'+x.ex.id+'" style="align-items:flex-start">'+badge(i.L,52)+'<span class="grow"><h4>'+esc(x.ex.n)+'</h4><span class="sm-t">'+lvlSpan(i.L)+'<span class="mut"> · '+bestTxt(x.ex,x.b)+'</span></span>'+
        '<div class="bar" style="margin:8px 0 4px"><i style="width:'+Math.round(clamp(i.pct,0,1)*100)+'%;background:'+lvlColor(i.L)+'"></i></div>'+
-       '<span class="mut sm-t">'+(i.next==null?'Nivel máximo alcanzado':'Para '+lvlName(i.next||0)+': '+needTxt(x.ex,i.next||0))+'</span>'+(x.ex.st?pctLine(pctStronger(x.ex,x.b.e)):'')+'</span></button>';
+       '<span class="mut sm-t">'+(i.next==null?'Nivel máximo alcanzado':'Para '+lvlName(i.next||0)+': '+needTxt(x.ex,i.next||0))+'</span>'+(x.ex.st||REPS[x.ex.id]?pctLine(pctStronger(x.ex,x.b.e)):'')+'</span></button>';
     }).join('')+'</div>';
   }
   /* calistenia: progresiones */
@@ -660,7 +662,7 @@ function routineHTML(d){
    '<div class="field"><span>Ejercicios</span></div>'+
    (d.items.length?d.items.map((it,i)=>{const ex=exById(it.ex);if(!ex)return '';
      return '<div class="card" style="margin:0;padding:12px"><div class="row">'+miniMap(mapOf(ex)).replace('mini','mini" style="width:44px')+'<b class="grow" style="font-size:15px">'+esc(ex.n)+'</b>'+
-      '<button class="ib flat" data-a="rUp" data-v="'+i+'" aria-label="Subir">'+ic('up',18)+'</button><button class="ib flat" data-a="rDel" data-v="'+i+'" aria-label="Quitar">'+ic('x',18)+'</button></div>'+
+      '<button class="ib flat" data-a="rSwap" data-v="'+i+'" aria-label="Cambiar '+esc(ex.n)+' por otro">'+ic('swap',18)+'</button><button class="ib flat" data-a="rUp" data-v="'+i+'" aria-label="Subir">'+ic('up',18)+'</button><button class="ib flat" data-a="rDel" data-v="'+i+'" aria-label="Quitar">'+ic('x',18)+'</button></div>'+
       '<div class="g2" style="margin-top:10px"><label class="field">Series<input type="number" inputmode="numeric" min="1" max="12" value="'+it.sets+'" data-i="item" data-e="'+i+'" data-f="sets"></label><label class="field">'+(ex.time?'Segundos':'Repeticiones')+'<input type="number" inputmode="numeric" min="1" max="200" value="'+it.reps+'" data-i="item" data-e="'+i+'" data-f="reps"></label></div></div>';}).join(''):'<p class="mut sm-t">Todavía no agregaste ejercicios.</p>')+
    '<button class="btn wide" data-a="pickEx" data-v="routine">'+ic('plus',18)+' Agregar ejercicio</button>'+
    '<button class="btn pri wide" data-a="rSave">Guardar rutina</button>'+(d.id?'<button class="btn bad wide line" data-a="rDelAsk">Eliminar rutina</button>':'');
@@ -744,7 +746,7 @@ function markHTML(d){
   const msg=r.L<0?'Todavía no llegás a Bronce 1. ¡Seguí así!':up&&!first?'¡Subiste de '+lvlName(r.L0)+'!':r.rec&&!first?'¡Récord personal!':first?'Tu primer nivel en este ejercicio':r.eq?'Igualaste tu mejor marca':'Tu mejor marca sigue siendo la anterior';
   return '<div class="reveal'+(up?' up':'')+'" style="--c:'+col+'"><div class="rv-rays"></div><div class="rv-badge">'+badge(r.L,132)+'</div>'+
    '<div class="rv-name" style="color:'+col+'">'+[...name].map((ch,i)=>'<span style="animation-delay:'+(700+i*45)+'ms">'+(ch===' '?'&nbsp;':esc(ch))+'</span>').join('')+'</div>'+
-   '<p class="rv-msg">'+msg+'</p>'+(ex.st?'<div class="rv-pct">'+pctTxt(pctStronger(ex,(bestE1(ex.id)||{e:0}).e))+'</div>':'')+'<p class="mut sm-t tc">'+esc(ex.n)+' · '+((+d.kg?num(+d.kg,1)+' kg × ':'')+d.reps+(ex.time?' s':' reps'))+'</p>'+
+   '<p class="rv-msg">'+msg+'</p>'+(ex.st||REPS[ex.id]?'<div class="rv-pct">'+pctTxt(pctStronger(ex,(bestE1(ex.id)||{e:0}).e))+'</div>':'')+'<p class="mut sm-t tc">'+esc(ex.n)+' · '+((+d.kg?num(+d.kg,1)+' kg × ':'')+d.reps+(ex.time?' s':' reps'))+'</p>'+
    (r.L>=0&&r.L<18?'<div class="bar rv-bar"><i style="width:'+Math.round((r.L0===r.L?r.p0:0)*100)+'%;background:'+col+'" data-to="'+Math.round(r.pct*100)+'"></i></div><p class="mut sm-t tc">Para '+lvlName(r.L+1)+': '+needTxt(ex,r.L+1)+'</p>':'')+
    '</div><div class="g2"><button class="btn" data-a="markAgain">Cargar otra</button><button class="btn pri" data-a="close" data-v="m2">Listo</button></div>';
 }
@@ -841,13 +843,24 @@ function renderPill(){
   else el.innerHTML='';
 }
 /* Selector de ejercicios */
+/* las tarjetas que están más abajo aparecen suaves cuando llegan a la pantalla */
+const REV=('IntersectionObserver' in window)&&!matchMedia('(prefers-reduced-motion: reduce)').matches?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');REV.unobserve(e.target);}}),{rootMargin:'0px 0px -6% 0px'}):null;
+function revealSoon(v){if(!REV)return;requestAnimationFrame(()=>{const vh=innerHeight;v.querySelectorAll(':scope>.card,:scope>.subview>.card,:scope>section').forEach(c=>{if(c.dataset.rv)return;c.dataset.rv=1;if(c.getBoundingClientRect().top>vh*.92){c.classList.add('rv');REV.observe(c);}});});}
 function renderPicker(){
   const el=$('#picker');syncLayers();
   if(!S.picker){el.innerHTML='';return;}
-  keepScroll(el,()=>{el.innerHTML='<div class="pick'+(S.picker.target==='gen'?' ptop':'')+'"><div class="pick-in"><div class="pick-top"><div class="row"><h2 class="grow" style="font:800 24px var(--f-d)">Elegir ejercicios</h2><button class="btn pri sm" data-a="pickDone">Listo</button></div>'+
-   '<div class="field"><input id="pq" type="search" placeholder="Buscar ejercicio" value="'+esc(S.picker.q)+'" data-i="pq" aria-label="Buscar ejercicio"></div><div class="scroll-x" id="pg">'+pickChips()+'</div></div><div class="gap" id="pres">'+pickResults()+'</div>'+(S.picker.target==='gen'?'':'<button class="btn wide" style="margin-top:14px" data-a="newEx">'+ic('plus',18)+' Crear ejercicio propio</button>')+'</div></div>';});
+  keepScroll(el,()=>{el.innerHTML='<div class="pick'+(S.picker.target==='gen'?' ptop':'')+'"><div class="pick-in"><div class="pick-top"><div class="row"><h2 class="grow" style="font:800 24px var(--f-d)">'+(pickCtx()?'Cambiar ejercicio':'Elegir ejercicios')+'</h2><button class="btn pri sm" data-a="pickDone">Listo</button></div>'+
+   '<div class="field"><input id="pq" type="search" placeholder="Buscar ejercicio" value="'+esc(S.picker.q)+'" data-i="pq" aria-label="Buscar ejercicio"></div><div class="scroll-x" id="pg">'+pickChips()+'</div></div>'+pickSimilar()+'<div class="gap" id="pres">'+pickResults()+'</div>'+(S.picker.target==='gen'||S.picker.target==='rswap'?'':'<button class="btn wide" style="margin-top:14px" data-a="newEx">'+ic('plus',18)+' Crear ejercicio propio</button>')+'</div></div>';});
 }
 function pickChips(){return GROUP_TABS().map(g=>'<button class="chip '+((S.picker.g||'Todos')===g?'on':'')+'" data-a="pgrp" data-v="'+g+'">'+g+'</button>').join('');}
+function pickCtx(){const P=S.picker;if(!P)return null;
+  if(P.target==='gen'){const d=S.m2&&S.m2.d,r=d&&d.plan&&d.plan[P.ri],it=r&&r.items[P.ii];return it?{id:it.ex,eq:(d.goals.length===1&&d.goals[0]==='cali')?'bw':d.eq,inj:d.inj,lv:{beg:0,int:1,adv:2}[d.lvl],skip:r.items.map(x=>x.ex)}:null;}
+  if(P.target==='replace'){const en=db.active&&db.active.entries[P.idx];return en?{id:en.ex,skip:db.active.entries.map(x=>x.ex),lv:2}:null;}
+  if(P.target==='rswap'){const it=S.modal&&S.modal.d&&S.modal.d.items[P.idx];return it?{id:it.ex,skip:S.modal.d.items.map(x=>x.ex),lv:2}:null;}
+  return null;}
+function pickSimilar(){const c=pickCtx();if(!c)return '';const src=exById(c.id),l=similarEx(c.id,c);if(!src||!l.length)return '';
+  return '<div class="psim"><h3>Trabajan lo mismo que '+esc(src.n)+'</h3><span class="mut sm-t">Mismos músculos y movimiento, con lo que tenés a mano</span><div class="gap" style="margin-top:10px">'+
+    l.map((e,i)=>exRow(e,'pickAdd',(i===0?'<span class="tag rec">Recomendado</span>':'')+'<span class="chip on">'+ic('swap',14)+'</span>')).join('')+'</div><h3 style="margin-top:18px">Todos los ejercicios</h3></div>';}
 function pickResults(){const l=filterEx(S.picker.q,S.picker.g);return l.length?l.map(e=>exRow(e,'pickAdd','<span class="chip on">'+ic('plus',14)+'</span>')).join(''):'<div class="empty">Ningún ejercicio coincide.</div>';}
 
 /* ============ Render principal ============ */
@@ -875,6 +888,7 @@ function render(){
   const order=['inicio/','entrenar/rutinas','entrenar/cal','niveles/','nutri/','perfil/'],dir=order.indexOf(key)>=order.indexOf(S.lastTab||'')?'fwd':'back';S.lastTab=key;
   try{keepX(v,()=>{v.innerHTML=VIEWS[S.tab]();},changed);}
   catch(err){console.error(err);v.innerHTML='<div class="card"><h3>Algo falló en esta pantalla</h3><p class="mut sm-t" style="margin-top:6px">Tus datos siguen guardados. Probá recargar; si vuelve a pasar, bajá una copia y avisanos.</p><div class="g2" style="margin-top:12px"><button class="btn" data-a="export">Bajar una copia</button><button class="btn pri" data-a="reload">Recargar</button></div></div>';}
+  revealSoon(v);
   if(changed&&!S.vt){v.classList.remove('enter','fwd','back');void v.offsetWidth;v.classList.add('enter',dir);countUp(v);clearTimeout(S.enterT);S.enterT=setTimeout(()=>v.classList.remove('enter'),1400);}
   applyTheme();renderModal();renderSess();renderPicker();renderPill();renderRest();syncLayers();
   /* el fondo toma el color de tu rango general */

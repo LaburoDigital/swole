@@ -247,8 +247,24 @@ function e1(ex,kg,reps){
 const allo=w=>75*Math.pow(w/75,2/3);
 const ANCH={bench:[.70,.93,1.22,1.53,1.87],squat:[.94,1.26,1.64,2.09,2.56],deadlift:[1.11,1.48,1.92,2.42,2.96],ohp:[.41,.57,.77,1.0,1.25],
   curl:[.27,.41,.57,.78,1.0],row:[.60,.82,1.09,1.41,1.74],
-  /* dominadas 1/7/13/21/28 reps y fondos 4/10/20/31/42 reps, pasadas a carga total con Epley */
-  pullup:[1.03,1.23,1.43,1.70,1.93],dips:[1.13,1.33,1.67,2.03,2.40]};
+  /* dominadas 1/7/13/22/34 reps y fondos 2/9/20/33/48 reps (StrengthLevel), pasadas a carga total con Epley */
+  pullup:[1.03,1.23,1.43,1.73,2.13],dips:[1.07,1.30,1.67,2.10,2.60]};
+/* Repeticiones con tu peso (hombre de 75 kg, 18 a 39 años) en los percentiles 5/20/50/80/95 de gente que entrena.
+   Fuente: tablas de StrengthLevel (flexiones 5/19/39/62, sentadilla sin peso 5/23/55/93/137); el resto, proporcional. */
+const REPS={pushup:[5,19,39,62,90],kneepush:[10,28,50,75,105],diamond:[2,10,24,42,64],benchdip:[8,20,38,58,85],
+  austrow:[3,10,20,32,48],airsquat:[5,23,55,93,137],pistol:[1,3,8,15,25],shrimp:[1,3,8,15,24]};
+/* las repeticiones bajan más que la fuerza con el peso (movés todo tu cuerpo), con la edad y entre mujeres en el tren superior */
+function repAnch(ex){
+  const p=db.profile||{},W=+p.weight||75,lo=ex.reg==='l',sx=p.sex==='f'?(lo?.8:.5):p.sex==='m'?1:(lo?.9:.75);
+  const k=sx*ageF(+p.age||25)*clamp(Math.pow(75/W,lo?.33:.6),.6,1.3);
+  return REPS[ex.id].map(x=>Math.max(1,x*k));
+}
+function repPct(ex,r){
+  const A=repAnch(ex);
+  if(r<A[0])return Math.max(0,5*r/A[0]);
+  for(let i=1;i<5;i++)if(r<=A[i])return LV_P[i-1]+(LV_P[i]-LV_P[i-1])*(r-A[i-1])/(A[i]-A[i-1]);
+  return Math.min(99.9,95+4.9*Math.min(1,(r-A[4])/(A[4]*.3)));
+}
 const LV_T=[[0,2],[3,25],[6,50],[9,68],[12,80],[15,92],[16,95],[17,98],[18,99.5]],LV_P=[5,20,50,80,95];
 const pGen=p=>p+8*Math.sin(Math.PI*p/100);
 function pToL(p){if(p<=LV_T[0][1])return p/LV_T[0][1]-1;for(let i=1;i<LV_T.length;i++)if(p<=LV_T[i][1]){const a=LV_T[i-1],b=LV_T[i];return a[0]+(b[0]-a[0])*(p-a[1])/(b[1]-a[1]);}return 18;}
@@ -283,7 +299,10 @@ function stdForOld(ex){
 }
 /* nivel con decimales (puede ser negativo si todavía no llegás a Bronce 1) */
 function levelVal(ex,e){
-  if(ex.sk){const s=ex.sk;if(!(e>=1))return -1;if(ex.time&&e<3)return Math.max(0,s.b-1+e/3*.99);return Math.min(18,s.b+s.g*Math.min(1,e/s.t));}
+  if(ex.sk){const s=ex.sk;if(!(e>=1))return -1;if(ex.time&&e<3)return Math.max(0,s.b-1+e/3*.99);
+    const top=s.b+s.g,x=e/s.t;let v=x<=1?s.b+s.g*x:top+(18-top)*(1-Math.exp(-1.1*(x-1)));
+    if(REPS[ex.id]&&!ex.time)v=Math.max(v,pToL(pGen(repPct(ex,e))));
+    return Math.min(18,v);}
   return Math.min(18,pToL(pGen(pctOf(ex,e))));
 }
 function levelIdx(ex,e){
@@ -305,7 +324,7 @@ function needTxt(ex,L){
   if(ex.sk){
     const s=ex.sk;
     if(L<=s.b)return '1'+unitOf(ex);
-    if(L<=s.b+s.g)return Math.max(1,Math.ceil(s.t*(L-s.b)/s.g))+unitOf(ex);
+    for(let e=1;e<=Math.max(400,s.t*8);e++)if(levelVal(ex,e)>=L)return e+unitOf(ex);
     const nx=skFam(s.f).find(e=>e.sk.b+e.sk.g>=L&&e.sk.b>s.b);
     return nx?'pasá a '+nx.n:'nivel máximo';
   }
@@ -352,25 +371,38 @@ function rankedList(){
    Así probar un ejercicio nuevo nunca te baja el rango; entrenar un grupo nuevo sí cuenta. */
 /* Rango de cada grupo muscular: promedio de sus (hasta) 3 mejores ejercicios.
    Así cuenta más de un ejercicio, pero probar uno nuevo y flojo no te hunde el grupo. */
+/* v61: el ejercicio cuenta en cada grupo donde es principal (la diamante suma a pecho y a brazos).
+   Tu mejor ejercicio del grupo manda; los otros (hasta 2, si no están 3 niveles abajo) restan como mucho medio nivel.
+   Antes era un promedio parejo y un ejercicio flojo o recién empezado te hundía el grupo. */
 function groupLevels(){
   const by={};
-  rankedList().filter(x=>x.info.L>=0).forEach(x=>{const g=groupOf(x.ex);(by[g]=by[g]||[]).push({ex:x.ex,v:x.info.L+clamp(x.info.pct,0,.999)});});
+  rankedList().filter(x=>x.info.L>=0).forEach(x=>{const v=x.info.L+clamp(x.info.pct,0,.999),gs=new Set(x.ex.p.map(k=>Object.keys(GROUPS).find(g=>GROUPS[g].includes(k))).filter(Boolean));
+    if(!gs.size)gs.add(groupOf(x.ex));gs.forEach(g=>(by[g]=by[g]||[]).push({ex:x.ex,v}));});
   const out={};
-  Object.keys(GROUPS).forEach(g=>{const l=(by[g]||[]).sort((a,b)=>b.v-a.v),top=l.slice(0,3);out[g]=top.length?{v:top.reduce((s,x)=>s+x.v,0)/top.length,n:l.length,used:top.map(x=>x.ex)}:null;});
+  Object.keys(GROUPS).forEach(g=>{const l=(by[g]||[]).sort((a,b)=>b.v-a.v);if(!l.length){out[g]=null;return;}
+    const best=l[0].v,rest=l.slice(1,3).filter(x=>best-x.v<3),gap=rest.length?rest.reduce((s,x)=>s+best-x.v,0)/rest.length:0;
+    out[g]={v:Math.max(0,best-Math.min(.5,gap*.15)),n:l.length,used:[l[0].ex].concat(rest.map(x=>x.ex))};});
   return out;
 }
+/* peso de cada grupo en el rango general: piernas y espalda pesan más que brazos o core */
+const GROUP_W={Pecho:1,Espalda:1.2,Hombros:.9,Brazos:.7,Piernas:1.4,Core:.6};
+const ZONES={'Tren superior':['Pecho','Espalda','Hombros','Brazos'],'Tren inferior':['Piernas'],Core:['Core']};
+function zoneLevels(){const gl=groupLevels(),out={};Object.keys(ZONES).forEach(z=>{const l=ZONES[z].filter(g=>gl[g]);out[z]=l.length?l.reduce((s,g)=>s+gl[g].v*GROUP_W[g],0)/l.reduce((s,g)=>s+GROUP_W[g],0):null;});return out;}
 /* Rango general: promedio de los grupos que tienen datos */
 function overall(){
-  const vals=Object.values(groupLevels()).filter(Boolean).map(x=>x.v);
+  const gl=groupLevels(),ks=Object.keys(gl).filter(g=>gl[g]),vals=ks.map(g=>gl[g].v);
   if(!vals.length)return null;
-  const avg=vals.reduce((s,v)=>s+v,0)/vals.length;
+  const avg=ks.reduce((s,g)=>s+gl[g].v*GROUP_W[g],0)/ks.reduce((s,g)=>s+GROUP_W[g],0);
   const L=Math.min(18,Math.floor(avg));
   return{L,pct:L>=18?1:avg-L,n:vals.length};
 }
 /* nivel de cada músculo: el mejor ejercicio donde ese músculo es principal */
 function muscleLevels(){
   const m={};
-  rankedList().forEach(x=>{if(x.info.L<0)return;const v=x.info.L+clamp(x.info.pct,0,.999);x.ex.p.forEach(k=>{if(m[k]==null||v>m[k])m[k]=v;});});
+  const sec={};
+  rankedList().forEach(x=>{if(x.info.L<0)return;const v=x.info.L+clamp(x.info.pct,0,.999);x.ex.p.forEach(k=>{if(m[k]==null||v>m[k])m[k]=v;});x.ex.s.forEach(k=>{if(sec[k]==null||v>sec[k])sec[k]=v;});});
+  /* un músculo que solo trabajó como secundario muestra un rango estimado más bajo, en vez de quedar vacío */
+  Object.keys(sec).forEach(k=>{if(m[k]==null)m[k]=Math.max(0,sec[k]-2);});
   return m;
 }
 function e1Points(id){
