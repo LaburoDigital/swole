@@ -685,9 +685,41 @@ async function barLookup(code){
     db.foods.push(f);save();if(S.m2&&S.m2.d===d){ACTIONS.foodPick(id);toast('Encontrado: '+f.n);}
   }catch(e){if(S.m2&&S.m2.d===d){d.bar={code,manual:1,err:navigator.onLine===false?'Sin conexión: el código necesita internet.':'No pude buscarlo ahora. Probá de nuevo.'};renderModal();}}
 }
-/* ============ Comida desde una foto (IA en el servidor, función swole-food) ============
-   La IA dice qué hay y cuántos gramos; vos elegís la opción correcta, ajustás el tamaño y se anota.
-   La foto se achica en el celu y no se guarda en ningún lado. */
+/* ============ Comida desde una foto ============
+   1) Gratis y en el celu: un modelo chico (MobileCLIP S0, 23 MB, se baja una vez y queda guardado) compara la foto con cómo
+      "suena" cada alimento de la lista (data/comida-ia.json, calculado de antemano con tools/ia/comida.js). La foto no sale del celu.
+   2) Si eso falla y tenés cuenta: la IA del servidor (función swole-food), cuando tenga su clave.
+   En los dos casos vos elegís la opción correcta y ajustás el tamaño antes de anotar. */
+const FoodAI=(()=>{
+  const TJS='https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.1';let ready=null;
+  function load(onProg){return ready||(ready=(async()=>{
+    const[T,j]=await Promise.all([import(TJS),fetch('data/comida-ia.json').then(r=>{if(!r.ok)throw new Error('labels');return r.json();})]);
+    const E=j.q.map(b=>{const s=atob(b),a=new Float32Array(j.dim);for(let i=0;i<j.dim;i++){let v=s.charCodeAt(i);if(v>127)v-=256;a[i]=v*j.scale;}return a;});
+    const pr=await T.AutoProcessor.from_pretrained(j.model),opt={dtype:'fp16',progress_callback:onProg};
+    let vm=null;if(navigator.gpu)try{vm=await T.CLIPVisionModelWithProjection.from_pretrained(j.model,Object.assign({device:'webgpu'},opt));}catch(e){vm=null;}
+    if(!vm)vm=await T.CLIPVisionModelWithProjection.from_pretrained(j.model,Object.assign({device:'wasm'},opt));
+    return{T,E,ids:j.ids,dim:j.dim,pr,vm};
+  })().catch(e=>{ready=null;throw e;}));}
+  /* devuelve todos los alimentos ordenados por parecido, con su probabilidad */
+  async function guess(url,onProg){
+    const m=await load(onProg),im=await m.T.RawImage.fromURL(url),{image_embeds}=await m.vm(await m.pr(im)),v=image_embeds.data;
+    let n=0;for(let k=0;k<v.length;k++)n+=v[k]*v[k];n=Math.sqrt(n)||1;
+    const s=m.E.map((r,i)=>{let d=0;for(let k=0;k<m.dim;k++)d+=r[k]*v[k];return{id:m.ids[i],d:d/n};}).sort((a,b)=>b.d-a.d);
+    const ex=s.map(x=>Math.exp((x.d-s[0].d)*100)),z=ex.reduce((a,b)=>a+b,0);
+    return s.map((x,i)=>({id:x.id,p:ex[i]/z}));
+  }
+  return{guess};
+})();
+/* porción típica de un alimento: su primera unidad (1 milanesa, 1 banana, 1 plato) o 150 g */
+const foodPortion=f=>{const u=(f&&f.u||[])[0];return Math.max(10,Math.round(u&&u.g||150));};
+async function foodPhotoLocal(d,pic){
+  const res=await FoodAI.guess(pic.thumb,p=>{if(p&&p.status==='progress'&&p.total>2e6&&/onnx/.test(p.file||'')){const el=document.getElementById('phDl');d.ph.dl=Math.round(p.progress||p.loaded/p.total*100);if(el)el.textContent='Bajando el reconocedor de comida (solo la primera vez): '+d.ph.dl+' %';}});
+  const top=res[0];if(/^x_/.test(top.id)&&top.p>.45)return{thumb:pic.thumb,items:[],food:false};
+  const opts=res.filter(x=>!/^x_/.test(x.id)).map(x=>foodById(x.id)).filter(Boolean).slice(0,3);if(!opts.length)return{thumb:pic.thumb,items:[],food:false};
+  const g=foodPortion(opts[0]),sure=res.find(x=>x.id===opts[0].id).p;
+  return{thumb:pic.thumb,local:1,food:true,items:[{opts:opts.map(f=>({n:f.n,id:f.id,k:f.k,p:f.p,c:f.c,f:f.f})),sel:0,g,g0:g,lo:Math.max(5,Math.round(g*.7)),hi:Math.round(g*1.4),other:null,on:true}],
+    tip:sure<.5?'No estoy muy seguro: fijate si es alguna de las otras opciones.':'',scale:''};
+}
 function shrinkB64(file,max){
   return new Promise((ok,bad)=>{const u=URL.createObjectURL(file),im=new Image();
     im.onload=()=>{const s=Math.min(1,(max||1024)/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);
@@ -697,14 +729,19 @@ function shrinkB64(file,max){
 const PH_ERR={nokey:'La foto con IA todavía no está activada en el servidor. Mientras tanto, buscá el alimento o anotá solo las calorías.',
   limit:'Llegaste a las 20 fotos de hoy. Mañana se renueva; mientras tanto, buscalo a mano.',login:'Para analizar fotos necesitás una cuenta (así nadie abusa del servicio). Creala gratis en Perfil.',
   refusal:'No pude analizar esa foto. Probá con otra o buscalo a mano.',busy:'El servicio está con mucha demanda. Probá de nuevo en un rato.',bad:'No pude leer la foto. Probá con otra.',
-  net:'Sin conexión. La foto necesita internet.',api:'Algo falló al analizar la foto. Probá de nuevo.'};
+  net:'Sin conexión. La primera vez el reconocedor necesita internet para bajarse (23 MB); después anda sin conexión.',
+  ia:'No pude reconocer la foto en este celu. Buscá el alimento a mano o anotá las calorías.',api:'Algo falló al analizar la foto. Probá de nuevo.'};
 function phOptOf(o){const m=o.match_id&&foodById(o.match_id);return m?{n:m.n,id:m.id,k:m.k,p:m.p,c:m.c,f:m.f}:{n:o.name,id:'',k:+o.kcal_100||0,p:+o.prot_100||0,c:+o.carb_100||0,f:+o.fat_100||0};}
 async function foodPhotoGo(file){
   const d=S.m2&&S.m2.d;if(!d||!file)return;
   d.step='photo';d.ph={busy:true};renderModal();
-  if(!Sync.user()){d.ph={err:'login'};renderModal();return;}
   let pic;try{pic=await shrinkB64(file,1024);}catch(e){d.ph={err:'bad'};renderModal();return;}
   d.ph.thumb=pic.thumb;renderModal();
+  /* primero en el celu, gratis */
+  let loc=null;try{loc=await foodPhotoLocal(d,pic);}catch(e){console.error(e);}
+  if(!S.m2||S.m2.d!==d)return;
+  if(loc){d.ph=loc;renderModal();return;}
+  if(!Sync.user()){d.ph={thumb:pic.thumb,err:navigator.onLine===false?'net':'ia'};renderModal();return;}
   let r;
   try{r=await Sync.req('/functions/v1/swole-food',{method:'POST',auth:true,body:{img:pic.b64,foods:allFoods().map(f=>[f.id,f.n]),hint:d.ph.hint||''}});}
   catch(e){r={error:e.status===401?'login':navigator.onLine===false?'net':'api'};}
@@ -727,7 +764,7 @@ function photoHTML(d){
   const ph=d.ph||{};
   let h=ph.thumb?'<div class="ph-pic"><img src="'+ph.thumb+'" alt="Tu foto">'+(ph.busy?'<div class="ph-scan"><i></i><span>Mirando tu plato…</span></div>':'')+'</div>':
     (ph.busy?'<div class="ph-wait"><span class="ph-dot"></span>Preparando la foto…</div>':'');
-  if(ph.busy)return h+'<p class="mut sm-t tc">Tarda unos segundos. Estoy calculando qué hay y cuánto pesa cada cosa.</p>';
+  if(ph.busy)return h+'<p class="mut sm-t tc" id="phDl">'+(ph.dl!=null?'Bajando el reconocedor de comida (solo la primera vez): '+ph.dl+' %':'Mirando tu plato en el celu: la foto no sale de acá.')+'</p>';
   if(ph.err)return h+'<div class="warn">'+esc(PH_ERR[ph.err]||PH_ERR.api)+'</div>'+(ph.err==='login'?'<div class="g2"><button class="btn pri" data-a="loginOpen" data-v="up">Crear cuenta</button><button class="btn" data-a="loginOpen">Ya tengo cuenta</button></div>':'')+'<button class="btn wide" data-a="foodStep" data-v="list">Buscar a mano</button>';
   if(!ph.food||!ph.items||!ph.items.length)return h+'<div class="warn">No encontré comida en la foto. Probá sacándola de más cerca, con el plato entero.</div>'+photoBtn('Sacar otra')+'<button class="btn line wide" data-a="foodStep" data-v="list">Buscar a mano</button>';
   h+='<p class="mut sm-t">Revisá cada cosa: tocá la opción correcta y ajustá el tamaño. Si no es ninguna, tocá <b>Otra cosa</b>.</p>';
@@ -748,7 +785,7 @@ function photoHTML(d){
    (ph.tip?'<p class="ph-tip">'+ic('bolt',14)+' '+esc(ph.tip)+'</p>':'')+
    '<div class="field"><span>Comida</span>'+mealChips(d)+'</div>'+
    '<button class="btn pri wide" data-a="phSave">Agregar todo</button>'+photoBtn('Sacar otra foto')+
-   '<p class="mut tc" style="font-size:11.5px">Es una estimación: la IA puede errarle al tamaño. Por eso revisalo vos.'+(ph.left!=null?' Te quedan '+ph.left+' fotos hoy.':'')+'</p>';
+   '<p class="mut tc" style="font-size:11.5px">'+(ph.local?'Reconocido en tu celu, gratis. El tamaño es una porción típica: ajustalo vos.':'Es una estimación: la IA puede errarle al tamaño. Por eso revisalo vos.')+(ph.left!=null?' Te quedan '+ph.left+' fotos hoy.':'')+'</p>';
   return h;
 }
 const photoBtn=l=>'<label class="btn wide ph-btn">'+ic('camera',18)+' '+esc(l)+'<input type="file" accept="image/*" data-i="foodPhoto" hidden></label>';
