@@ -216,7 +216,7 @@ const ACTIONS={
   phStep(v){const[i,s]=v.split('|').map(Number),it=S.m2.d.ph.items[i],st=it.g>=200?20:10;it.g=Math.max(0,Math.round((it.g+s*st)/st)*st);renderModal();},
   phOn(v){const it=S.m2.d.ph.items[+v];it.on=!it.on;renderModal();},
   phSave(){const d=S.m2.d,its=d.ph.items.filter(x=>x.on&&x.g>0);if(!its.length)return toast('No quedó nada para agregar');
-    its.forEach(it=>{const o=phCur(it),v=foodCalc(o,it.g);const e=Object.assign({id:uid(),date:d.date,m:d.m,n:o.n,g:it.g,ai:1},v);if(o.id)e.fid=o.id;db.meals.push(e);});
+    its.forEach(it=>{const o=phCur(it),v=foodCalc(o,it.g);const e=Object.assign({id:uid(),date:d.date,m:d.m,n:o.n,g:it.g,ai:1},v);if(o.id)e.fid=o.id;db.meals.push(e);if(d.ph.local&&o.id)FoodMem.learn(it.e,o.id,it.g);});
     save();const k=its.reduce((s,x)=>s+phItemKcal(x),0);S.m2=null;render();toast('Anotado: '+nf(k)+' kcal en '+MEAL_N[d.m].toLowerCase());},
   foodDay(v){const t=today(),n=addDays(S.fd||t,+v);S.fd=n>t?t:n;render();},
   foodRepeat(){const dk=S.fd||today(),prev=mealsOn(addDays(dk,-1));prev.forEach(e=>db.meals.push(Object.assign({},e,{id:uid(),date:dk})));save();render();toast('Copié '+prev.length+(prev.length===1?' comida':' comidas'));},

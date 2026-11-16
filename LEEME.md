@@ -31,7 +31,7 @@ Después, en la app: Perfil → **Entrar o crear cuenta**. En un celular nuevo, 
 
 ## Cuando cambies algo
 1. Editá lo que haga falta: `index.html` (la página), `app.css` (el diseño) o los archivos de `js/` (el código, en orden: datos, entreno, progreso, extras, pantallas, acciones, sync).
-2. Subí la versión (`swole-v65` → `swole-v66`) con `node tools/version.js 61`: cambia `sw.js` y los `?v=` de `index.html` juntos. Si no la subís, los celulares siguen mostrando la versión vieja.
+2. Subí la versión (`swole-v66` → `swole-v67`) con `node tools/version.js 61`: cambia `sw.js` y los `?v=` de `index.html` juntos. Si no la subís, los celulares siguen mostrando la versión vieja.
 3. Subí los cambios (en 1 o 2 minutos GitHub Pages publica la versión nueva):
    ```bash
    git add -A && git commit -m "Cambios" && git push
@@ -57,7 +57,7 @@ Swole es una web app (PWA). Para las tiendas se "envuelve" con **Capacitor**: es
 
 ## Foto de comida (gratis, en el celu)
 
-La foto se reconoce en el propio celu con MobileCLIP S0 (23 MB, se baja la primera vez y queda guardado; la foto no sale del celu). La app compara la foto con `data/comida-ia.json`, que tiene cómo "suena" cada alimento de la lista. **Si agregás o cambiás alimentos de la lista**, regenerá ese archivo: `cd tools/ia`, `npm i`, `node comida.js` (las descripciones en inglés están arriba de todo en ese archivo). Para probar con fotos: `node probar.js <carpeta>`. Si el reconocimiento falla y hay cuenta, se usa la IA del servidor (`swole-food`), que necesita su clave.
+La foto se reconoce en el propio celu con MobileCLIP S0 (23 MB, se baja la primera vez y queda guardado; la foto no sale del celu). La app compara la foto con `data/comida-ia.json`, que tiene cómo "suena" cada alimento de la lista. **Si agregás o cambiás alimentos de la lista**, regenerá ese archivo: `cd tools/ia`, `npm i`, `node comida.js` (las descripciones en inglés están arriba de todo en ese archivo). Para probar con fotos: `node probar.js <carpeta>`. Aprende de cada foto que anotás: guarda en el celu (no en la nube) la huella numérica de cada cosa con lo que elegiste y la porción que comés (`FoodMem`, clave `swole.foodmem`, hasta 300). Si una foto nueva se parece 0,85 o más, propone lo tuyo. Probado con `node probar.js`: describir cada comida de varias formas o usar MobileCLIP S2 (72 MB) no mejoró los aciertos. Si el reconocimiento falla y hay cuenta, se usa la IA del servidor (`swole-food`), que necesita su clave.
 
 ## Música (Spotify)
 

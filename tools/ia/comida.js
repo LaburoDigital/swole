@@ -21,13 +21,16 @@ const P={pech:'grilled chicken breast',muslo:'roasted chicken thigh',bife:'grill
 const NO={x_persona:'a person',x_gym:'gym equipment',x_mascota:'a dog or a cat',x_texto:'a document with text',x_pantalla:'a phone or computer screen',x_mesa:'an empty table',x_paisaje:'a landscape'};
 (async()=>{
   const {AutoTokenizer,CLIPTextModelWithProjection}=await import('@huggingface/transformers');
-  const M='Xenova/mobileclip_s0',tok=await AutoTokenizer.from_pretrained(M),tm=await CLIPTextModelWithProjection.from_pretrained(M,{dtype:'fp32'});
-  const ids=Object.keys(P).concat(Object.keys(NO)),txt=ids.map(k=>'a photo of '+(P[k]||NO[k])+(P[k]?', a type of food':''));
-  const inp=tok(txt,{padding:'max_length',truncation:true});const {text_embeds}=await tm(inp);
-  const dim=text_embeds.dims[1],d=text_embeds.data,out={model:M,dim,ids,q:[]};
+  const M=process.argv[2]||'Xenova/mobileclip_s0',tok=await AutoTokenizer.from_pretrained(M),tm=await CLIPTextModelWithProjection.from_pretrained(M,{dtype:'fp32'});
+  /* se pueden sumar más formas de describir cada comida a T: se promedian */
+  const T=[x=>'a photo of '+x+', a type of food']; /* probado: más frases o el modelo S2 (72 MB) no aciertan más con las fotos de prueba */
+  const ids=Object.keys(P).concat(Object.keys(NO)),txt=[];ids.forEach(k=>T.forEach(t=>txt.push(P[k]?t(P[k]):'a photo of '+NO[k])));
+  const inp=tok(txt,{padding:'max_length',truncation:true});const te=(await tm(inp)).text_embeds,dim=te.dims[1],raw=te.data,d=new Float32Array(ids.length*dim);
+  for(let i=0;i<ids.length;i++)for(let t=0;t<T.length;t++){const o=(i*T.length+t)*dim;let n=0;for(let j=0;j<dim;j++)n+=raw[o+j]**2;n=Math.sqrt(n);for(let j=0;j<dim;j++)d[i*dim+j]+=raw[o+j]/n/T.length;}
+  const out={model:M,dtype:process.argv[4]||'fp16',dim,ids,q:[]};
   /* normalizado y guardado en 8 bits: 0,1 % de error, 8 veces más chico */
   for(let i=0;i<ids.length;i++){let n=0;for(let j=0;j<dim;j++)n+=d[i*dim+j]**2;n=Math.sqrt(n);const row=new Int8Array(dim);for(let j=0;j<dim;j++)row[j]=Math.max(-127,Math.min(127,Math.round(d[i*dim+j]/n*127*2.8)));out.q.push(Buffer.from(row.buffer).toString('base64'));}
   out.scale=1/(127*2.8);
-  const dst=path.join(__dirname,'..','..','data','comida-ia.json');fs.mkdirSync(path.dirname(dst),{recursive:true});fs.writeFileSync(dst,JSON.stringify(out));
+  const dst=process.argv[3]?path.resolve(process.argv[3]):path.join(__dirname,'..','..','data','comida-ia.json');fs.mkdirSync(path.dirname(dst),{recursive:true});fs.writeFileSync(dst,JSON.stringify(out));
   console.log('ok',ids.length,'dim',dim,Math.round(fs.statSync(dst).size/1024)+' KB');
 })().catch(e=>{console.error(e);process.exit(1);});

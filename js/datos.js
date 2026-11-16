@@ -701,7 +701,7 @@ const FoodAI=(()=>{
     return{T,E,ids:j.ids,dim:j.dim,pr,vm};
   })().catch(e=>{ready=null;throw e;}));}
   /* lo que hay en el plato: la foto entera y cinco recortes, en una sola pasada */
-  async function guess(url,onProg){const m=await load(onProg),im=await m.T.RawImage.fromURL(url);return plateItems(await plateScan(m,im));}
+  async function guess(url,onProg){const m=await load(onProg),im=await m.T.RawImage.fromURL(url);m.mem=FoodMem.list();return plateItems(await plateScan(m,im));}
   return{guess};
 })();
 /*<plato> Lo comparte la app con tools/ia/probar.js: un solo lugar para la lógica del plato.
@@ -725,9 +725,14 @@ async function plateScan(m,im){
   const W=im.width,H=im.height,cw=Math.round(W*.6),ch=Math.round(H*.6),box=[[0,0],[W-cw,0],[0,H-ch],[W-cw,H-ch],[Math.round((W-cw)/2),Math.round((H-ch)/2)]];
   const ims=[im].concat(await Promise.all(box.map(([x,y])=>im.crop([x,y,x+cw-1,y+ch-1]))));
   const {image_embeds}=await m.vm(await m.pr(ims)),v=image_embeds.data,dim=m.dim;
-  return ims.map((_,b)=>{let n=0;for(let k=0;k<dim;k++)n+=v[b*dim+k]**2;n=Math.sqrt(n)||1;
-    const s=m.E.map((r,i)=>{let d=0;for(let k=0;k<dim;k++)d+=r[k]*v[b*dim+k];return{id:m.ids[i],d:d/n};}).sort((a,c)=>c.d-a.d);
-    const ex=s.map(x=>Math.exp((x.d-s[0].d)*100)),z=ex.reduce((a,c)=>a+c,0);return s.map((x,i)=>({id:x.id,p:ex[i]/z}));});
+  const R=ims.map((_,b)=>{let n=0;for(let k=0;k<dim;k++)n+=v[b*dim+k]**2;n=Math.sqrt(n)||1;const e=new Float32Array(dim);for(let k=0;k<dim;k++)e[k]=v[b*dim+k]/n;
+    const s=m.E.map((r,i)=>{let d=0;for(let k=0;k<dim;k++)d+=r[k]*e[k];return{id:m.ids[i],d};}).sort((a,c)=>c.d-a.d);
+    const ex=s.map(x=>Math.exp((x.d-s[0].d)*100)),z=ex.reduce((a,c)=>a+c,0),l=s.map((x,i)=>({id:x.id,p:ex[i]/z}));l.e=e;
+    /* lo que ya corregiste antes: si esta parte se parece mucho a una foto tuya, manda lo que elegiste ahí */
+    const mm=(m.mem||[]).reduce((b2,x)=>{let d=0;for(let k=0;k<dim;k++)d+=x.e[k]*e[k];return d>b2.d?{d,id:x.id}:b2;},{d:0,id:null});
+    if(mm.id&&mm.d>=.85){const j=l.findIndex(x=>x.id===mm.id);const it=j>=0?l.splice(j,1)[0]:{id:mm.id,p:0};it.p=Math.max(it.p,.9);it.mem=1;l.unshift(it);}
+    return l;});
+  return R;
 }
 /* qué se anota: lo principal (la foto entera) y hasta 2 cosas más que se ven claras en alguna parte y no son "lo mismo" ni parte del plato */
 function plateItems(R){
@@ -735,27 +740,43 @@ function plateItems(R){
   if(!food(all[0])&&all[0].p>.45)return[];
   const top=all.filter(food);if(!top.length)return[];
   const main=top[0].id,used=new Set([pFam(main)].concat(FOOD_PART[main]||[])),rank=new Map(all.map((x,i)=>[x.id,i]));
-  const out=[{id:main,opts:top.slice(0,3).map(x=>x.id),p:top[0].p}],free=x=>food(x)&&!used.has(pFam(x.id))&&!used.has(x.id);
+  const out=[{id:main,opts:top.slice(0,3).map(x=>x.id),p:top[0].p,e:all.e,mem:top[0].mem}],free=x=>food(x)&&!used.has(pFam(x.id))&&!used.has(x.id);
   /* en cada parte del plato, lo más claro que todavía no está anotado; gana lo que aparece en más partes */
   while(out.length<3){
     const cand={};
     R.slice(1).forEach(r=>{const t=r.find(free);if(!t||t.p<.3||!((rank.get(t.id)??99)<=15))return;const c=cand[t.id]||(cand[t.id]={id:t.id,n:0,p:0,r});c.n++;if(t.p>c.p){c.p=t.p;c.r=r;}});
     const c=Object.values(cand).sort((a,b)=>b.n-a.n||b.p-a.p)[0];if(!c)break;
     const f=pFam(c.id);used.add(f);used.add(c.id);(FOOD_PART[c.id]||[]).forEach(x=>used.add(x));
-    out.push({id:c.id,opts:[c.id].concat(c.r.filter(x=>food(x)&&x.id!==c.id&&pFam(x.id)===f).slice(0,2).map(x=>x.id)),p:c.p});
+    out.push({id:c.id,opts:[c.id].concat(c.r.filter(x=>food(x)&&x.id!==c.id&&pFam(x.id)===f).slice(0,2).map(x=>x.id)),p:c.p,e:c.r.e,mem:c.r[0].mem});
   }
   return out;
 }
 /*</plato>*/
-/* porción típica de un alimento: su primera unidad (1 milanesa, 1 banana, 1 plato) o 150 g */
-const foodPortion=f=>{const u=(f&&f.u||[])[0];return Math.max(10,Math.round(u&&u.g||150));};
+/* Lo que aprende de vos, solo en este celu: la "huella" de cada cosa que anotaste por foto (no la foto) y tus porciones.
+   Si la próxima foto se parece mucho, propone lo que elegiste vos; y te pone la porción que solés comer. */
+const FoodMem=(()=>{
+  const K='swole.foodmem',MAX=300;let m=null;
+  const get=()=>{if(m)return m;try{m=JSON.parse(localStorage.getItem(K)||'null');}catch(e){}if(!m||!Array.isArray(m.v))m={v:[],g:{}};return m;};
+  const put=()=>{try{localStorage.setItem(K,JSON.stringify(m));}catch(e){m.v=m.v.slice(-Math.floor(MAX/2));try{localStorage.setItem(K,JSON.stringify(m));}catch(x){}}};
+  const pack=e=>{let s='';for(let k=0;k<e.length;k++)s+=String.fromCharCode((Math.max(-127,Math.min(127,Math.round(e[k]*355)))+256)%256);return btoa(s);};
+  const unpack=b=>{const s=atob(b),e=new Float32Array(s.length);for(let k=0;k<s.length;k++){let x=s.charCodeAt(k);if(x>127)x-=256;e[k]=x/355;}return e;};
+  return{
+    list(){return get().v.map(x=>({id:x.id,e:unpack(x.e)}));},
+    learn(e,id,g){const M=get();if(e&&id){M.v.push({id,e:pack(e)});if(M.v.length>MAX)M.v=M.v.slice(-MAX);}
+      if(id&&g>0){const o=M.g[id];M.g[id]=o?Math.round(o*.6+g*.4):g;}put();},
+    portion(id){return get().g[id]||0;},
+    size(){return get().v.length;}
+  };
+})();
+/* porción: la que solés comer de eso, o su primera unidad (1 milanesa, 1 banana, 1 plato), o 150 g */
+const foodPortion=f=>{const mine=f&&FoodMem.portion(f.id);if(mine)return mine;const u=(f&&f.u||[])[0];return Math.max(10,Math.round(u&&u.g||150));};
 async function foodPhotoLocal(d,pic){
   const found=await FoodAI.guess(pic.thumb,p=>{if(p&&p.status==='progress'&&p.total>2e6&&/onnx/.test(p.file||'')){const el=document.getElementById('phDl');d.ph.dl=Math.round(p.progress||p.loaded/p.total*100);if(el)el.textContent='Bajando el reconocedor de comida (solo la primera vez): '+d.ph.dl+' %';}});
   const items=found.map(it=>{const opts=it.opts.map(foodById).filter(Boolean);if(!opts.length)return null;const g=foodPortion(opts[0]);
-    return{opts:opts.map(f=>({n:f.n,id:f.id,k:f.k,p:f.p,c:f.c,f:f.f})),sel:0,g,g0:g,lo:Math.max(5,Math.round(g*.7)),hi:Math.round(g*1.4),other:null,on:true};}).filter(Boolean);
+    return{opts:opts.map(f=>({n:f.n,id:f.id,k:f.k,p:f.p,c:f.c,f:f.f})),sel:0,g,g0:g,lo:Math.max(5,Math.round(g*.7)),hi:Math.round(g*1.4),other:null,on:true,e:it.e,mem:it.mem};}).filter(Boolean);
   if(!items.length)return{thumb:pic.thumb,items:[],food:false};
   return{thumb:pic.thumb,local:1,food:true,items,scale:'',
-    tip:found[0].p<.5?'No estoy muy seguro de lo principal: fijate si es alguna de las otras opciones.':items.length>1?'Encontré '+items.length+' cosas en el plato. Si alguna no va, sacala con la X.':''};
+    tip:items.some(x=>x.mem)?'Me acordé de lo que elegiste la otra vez.':found[0].p<.5?'No estoy muy seguro de lo principal: fijate si es alguna de las otras opciones.':items.length>1?'Encontré '+items.length+' cosas en el plato. Si alguna no va, sacala con la X.':''};
 }
 function shrinkB64(file,max){
   return new Promise((ok,bad)=>{const u=URL.createObjectURL(file),im=new Image();
