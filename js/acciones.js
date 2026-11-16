@@ -167,13 +167,13 @@ const ACTIONS={
     if(L>(L0==null?-1:L0)&&L>=0)addEv({k:'up',x:ex.id,L});else if(d.res.rec)addEv({k:'pr',x:ex.id});save();
     d.step='reveal';renderModal();
     setTimeout(()=>{const bi=document.querySelector('.rv-bar i');if(bi)bi.style.width=bi.dataset.to+'%';},900);
-    if(L>(L0==null?-1:L0)&&L>=0)setTimeout(()=>{confetti(L0!=null&&L0>=0?70:40);try{navigator.vibrate&&navigator.vibrate([30,60,30,60,120]);}catch(e){}},950);
+    if(L>(L0==null?-1:L0)&&L>=0)setTimeout(()=>{confetti(L0!=null&&L0>=0?70:40);buzz([30,60,30,60,120]);},950);
     checkGoals();checkAch();checkRankUp(2800);checkMissions();
   },
   delTest(v){S.m2={t:'confirm',title:'Borrar marca',msg:'Se borra esta marca. Tu nivel en este ejercicio se recalcula.',act:'delTestGo',arg:v,ok:'Borrar'};render();},
   delTestGo(v){db.tests=db.tests.filter(t=>t.id!==v);S.m2=null;save();render();toast('Marca borrada');checkRankUp();},
   cardOpen(){S.cardBack=false;S.modal={t:'carta'};render();},
-  cardFlip(){if(S.flipBlock)return;S.cardBack=!S.cardBack;const c=document.querySelector('.cflip');if(c)c.classList.toggle('flipped',S.cardBack);try{navigator.vibrate&&navigator.vibrate(10);}catch(e){}},
+  cardFlip(){if(S.flipBlock)return;S.cardBack=!S.cardBack;const c=document.querySelector('.cflip');if(c)c.classList.toggle('flipped',S.cardBack);buzz(10);},
   cardShare(){shareCard();},
   cardGyro(){try{DeviceOrientationEvent.requestPermission().then(r=>toast(r==='granted'?'Mové el celu para inclinarla':'Sin permiso de movimiento'));}catch(e){}},
   quickOpen(){S.modal={t:'quick'};render();},
@@ -193,7 +193,8 @@ const ACTIONS={
   foodEdit(v){const e=db.meals.find(x=>x.id===v);if(!e)return;
     if(e.fid&&foodById(e.fid))S.m2={t:'food',d:{step:'amt',edit:v,sel:e.fid,unit:-1,qty:e.g,m:e.m,date:e.date}};
     else S.m2={t:'food',d:{step:'quick',edit:v,m:e.m,date:e.date,qk:{n:e.n,k:e.k,p:e.p||''}}};render();},
-  foodDel(){const d=S.m2.d;db.meals=db.meals.filter(x=>x.id!==d.edit);save();S.m2=null;render();toast('Borrado');},
+  foodDel(){const d=S.m2.d,i=db.meals.findIndex(x=>x.id===d.edit);if(i<0)return;const m=db.meals.splice(i,1)[0];save();S.m2=null;render();
+    toast('Comida borrada',()=>{db.meals.splice(Math.min(i,db.meals.length),0,m);save();render();});},
   foodNew(){const d=S.m2.d;d.nf={n:String(d.q||'').trim(),per:'100'};d.step='new';renderModal();},
   foodPer(v){S.m2.d.nf.per=v;renderModal();},
   foodNewSave(){const d=S.m2.d,n=d.nf,num_=x=>Math.max(0,+String(x||'').replace(',','.')||0);
@@ -255,7 +256,8 @@ const ACTIONS={
   weekDay(v){const p=db.profile;if(!p)return;p.week=p.week||{};const w=p.week[v]=p.week[v]||{};w.gym=w.gym?'':(w.act?'ask':'solo');save();render();},
   weekGym(v){const[d,g]=v.split('|'),p=db.profile;p.week=p.week||{};const w=p.week[d]=p.week[d]||{};w.gym=g;save();render();},
   onbSport(v){const d=S.modal.d;d.sports=d.sports||[];if(!v)d.sports=[];else{const i=d.sports.indexOf(v);if(i>=0)d.sports.splice(i,1);else d.sports.push(v);}renderModal();},
-  delLog(v){S.m2={t:'confirm',title:'Borrar entrenamiento',msg:'Se elimina este entrenamiento y sus series. Tus niveles pueden cambiar.',act:'delLogGo',arg:v,ok:'Borrar'};render();},
+  delLog(v){const i=db.logs.findIndex(l=>l.id===v);if(i<0)return;const l=db.logs.splice(i,1)[0];if(S.modal&&S.modal.t==='logedit')S.modal=null;save();render();buzz(10);
+    toast('Entrenamiento borrado',()=>{db.logs.splice(Math.min(i,db.logs.length),0,l);save();render();});},
   delLogGo(v){db.logs=db.logs.filter(l=>l.id!==v);S.m2=null;if(S.modal&&S.modal.t==='logedit')S.modal=null;save();render();},
   editLog(v){const l=db.logs.find(x=>x.id===v);if(!l)return;S.modal={t:'logedit',d:JSON.parse(JSON.stringify(l))};render();},
   leAddSet(v,el){const en=S.modal.d.entries[+el.dataset.e],l=en.sets[en.sets.length-1]||{kg:0,reps:10};en.sets.push({kg:l.kg,reps:l.reps});renderModal();},
@@ -287,7 +289,7 @@ const ACTIONS={
     const ei=+el.dataset.e,en=db.active.entries[ei],ex=exById(en.ex),nx=db.active.entries[ei+1];
     s.done=!s.done;
     if(s.done){
-      S.justDone=el.dataset.e+':'+el.dataset.s;try{navigator.vibrate&&navigator.vibrate(18);}catch(e){}
+      S.justDone=el.dataset.e+':'+el.dataset.s;buzz(18);
       /* la primera vez: el peso de esta serie pasa a las que siguen */
       const j=+el.dataset.s;en.sets.forEach((x,k)=>{if(k>j&&!x.done&&!x.w&&(x.kg===''||x.kg==null)&&s.kg!=='')x.kg=s.kg;});
       if(!s.w&&!ex.time)S.rirAsk=ei+':'+j;
@@ -299,9 +301,9 @@ const ACTIONS={
     save();
     render();S.justDone=null;
   },
-  stepKg(v,el){const en=db.active.entries[+el.dataset.e],j=+el.dataset.s,s=en.sets[j],old=s.kg;s.kg=Math.max(0,Math.round(((+s.kg||0)+(+v))*4)/4);
+  stepKg(v,el){buzz(5);const en=db.active.entries[+el.dataset.e],j=+el.dataset.s,s=en.sets[j],old=s.kg;s.kg=Math.max(0,Math.round(((+s.kg||0)+(+v))*4)/4);
     en.sets.forEach((x,k)=>{if(k>j&&!x.done&&!x.w&&String(x.kg)===String(old))x.kg=s.kg;});save();renderSess();},
-  stepRep(v,el){const s=db.active.entries[+el.dataset.e].sets[+el.dataset.s];s.reps=Math.max(0,(+s.reps||0)+(+v));save();renderSess();},
+  stepRep(v,el){buzz(5);const s=db.active.entries[+el.dataset.e].sets[+el.dataset.s];s.reps=Math.max(0,(+s.reps||0)+(+v));save();renderSess();},
   rirSet(v,el){const s=db.active.entries[+el.dataset.e].sets[+el.dataset.s];s.rir=+v;S.rirAsk=null;save();renderSess();},
   measSave(){
     const o={date:today()};let n=0;
@@ -396,7 +398,7 @@ const ACTIONS={
   rtZoom(v){S.rt=S.rt||{x:0,y:0,w:820};if(v==='home')rtFocus(0,0,820);else rtFocus(S.rt.x,S.rt.y,clamp(S.rt.w*(v==='in'?.72:1.38),320,1800));},
   treeSel(v){S.modal.sel=S.modal.sel===v?null:v;renderModal();if(S.modal.view==='radial'&&S.modal.sel){const p=rtLayout().find(q=>q.n.id===v);if(p)rtFocus(p.x*.85,p.y*.85+60);}const d=document.getElementById('tdDet');if(d)d.scrollIntoView({block:'nearest',behavior:'smooth'});},
   postFire(v){const rr=()=>{if(S.modal&&S.modal.t==='friends')renderModal();else render();};const p=(S.social&&S.social.posts||[]).find(x=>x.id===v);const was=p&&p.likes.includes(Sync.user().id);
-    Social.fire(v).then(()=>{rr();if(!was)try{navigator.vibrate&&navigator.vibrate(15);}catch(e){}}).catch(e=>{rr();toast(Social.errTxt(e));});rr();},
+    Social.fire(v).then(()=>{rr();if(!was)buzz(15);}).catch(e=>{rr();toast(Social.errTxt(e));});rr();},
   postCmt(v){S.cOpen=S.cOpen===v?null:v;renderModal();if(S.cOpen)setTimeout(()=>{const i=document.getElementById('cmt-'+v);if(i){i.focus();i.scrollIntoView({block:'center'});}},80);},
   cmtSend(v){const i=document.getElementById('cmt-'+v),t=(i?i.value:'').trim();if(!t)return;if(i)i.value='';
     Social.comment(v,t.slice(0,200)).then(()=>{renderModal();const n=document.getElementById('cmt-'+v);if(n)n.focus();}).catch(e=>toast(Social.errTxt(e)));},
@@ -447,16 +449,17 @@ const ACTIONS={
     const en=db.active.entries[+el.dataset.e],l=en.sets[en.sets.length-1]||{kg:'',reps:10};
     en.sets.push({kg:l.kg,reps:l.reps,done:false});save();renderSess();
   },
-  delSet(v,el){const en=db.active.entries[+el.dataset.e];if(en.sets.length<2)return;if(en.sets[en.sets.length-1].done)return toast('La última serie ya está hecha: destildala si la querés borrar');en.sets.pop();save();renderSess();},
+  delSet(v,el){const en=db.active.entries[+el.dataset.e];if(en.sets.length<2)return;if(en.sets[en.sets.length-1].done)return toast('La última serie ya está hecha: destildala si la querés borrar');const gone=en.sets.pop();save();renderSess();buzz(6);toast('Serie quitada',()=>{en.sets.push(gone);save();renderSess();});},
   goalUse(v,el){const en=db.active.entries[+el.dataset.e];const g=en.goal;if(!g)return;en.sets.forEach(s=>{if(!s.done&&!s.w){if(g.kg)s.kg=g.kg;s.reps=g.reps;}});save();renderSess();toast('Meta puesta en las series que faltan');},
   ssTog(v,el){const en=db.active.entries[+el.dataset.e];en.ss=en.ss?0:1;save();renderSess();if(en.ss)toast('Superserie: alternás este ejercicio con el siguiente, sin descanso entre medio');},
   recapOpen(){openRecap();},
   recapNext(){const m=S.modal;if(m.i<RECAP_N-1){m.i++;renderModal();recapTimer();countUp($('#modal'));}else ACTIONS.recapClose();},
   recapPrev(){const m=S.modal;if(m.i>0){m.i--;renderModal();recapTimer();countUp($('#modal'));}},
   recapClose(){clearTimeout(S.recapT);S.modal=null;render();},
-  delEntry(v,el){const i=+el.dataset.e,en=db.active.entries[i];if(!en)return;
-    if(en.sets.some(s=>s.done)){const ex=exById(en.ex);S.m2={t:'confirm',title:'Quitar ejercicio',msg:'Se borran las series que ya hiciste de '+(ex?ex.n:'este ejercicio')+'.',act:'delEntryGo',arg:String(i),ok:'Quitar'};render();return;}
-    db.active.entries.splice(i,1);save();renderSess();},
+  delEntry(v,el){const i=+el.dataset.e,Ac=db.active,en=Ac&&Ac.entries[i];if(!en)return;const ex=exById(en.ex);
+    Ac.entries.splice(i,1);save();renderSess();buzz(10);
+    toast('Quitaste '+(ex?ex.n:'el ejercicio'),()=>{if(db.active!==Ac)return;Ac.entries.splice(Math.min(i,Ac.entries.length),0,en);save();renderSess();});},
+  moveDown(v,el){const Es=db.active.entries,i=+el.dataset.e;if(i<Es.length-1){Es.splice(i+1,0,Es.splice(i,1)[0]);save();renderSess();}},
   delEntryGo(v){S.m2=null;if(db.active&&db.active.entries[+v]){db.active.entries.splice(+v,1);save();}render();},
   setW(v,el){const s=db.active.entries[+el.dataset.e].sets[+el.dataset.s];s.w=s.w?0:1;save();renderSess();},
   moveEntry(v,el){const a=db.active.entries,i=+el.dataset.e;if(i>0){const t=a[i];a[i]=a[i-1];a[i-1]=t;save();renderSess();}},
@@ -486,6 +489,14 @@ const ACTIONS={
   },
   muscle(v){const m=muscleLevels()[v];const best=rankedList().filter(x=>x.ex.p.includes(v)&&x.info.L>=0)[0];toast((MUSC[v]||v)+': '+(m==null?'todavía sin rango':lvlName(Math.floor(m))+(best?' con '+best.ex.n:'')));},
   pickEx(v){S.picker={target:v,q:'',g:''};renderPicker();},
+  undo(){const f=S.undo;S.undo=null;clearTimeout(toastT);$('#toast').classList.remove('on','act');if(f){f();buzz(10);}},
+  setCopy(v,el){const en=db.active.entries[+el.dataset.e],j=+el.dataset.s,s=en.sets[j],ex=exById(en.ex);
+    const src=v==='prev'?en.sets[j-1]:(lastSets(en.ex)||[]).filter(x=>!x.w)[en.sets.slice(0,j).filter(x=>!x.w).length];if(!s||!src)return;
+    if(!ex.time)s.kg=src.kg;s.reps=src.reps;save();renderSess();buzz(6);},
+  exMenuGo(v,el){const e=el.dataset.e;S.m2=null;if(v==='exInfo'){render();ACTIONS.exInfo(el.dataset.x);return;}const f=ACTIONS[v];if(f)f('',{dataset:{e}});render();},
+  wkPick(v){S.wkSel=S.wkSel===v?null:v;render();if(S.wkSel)toast('Ahora tocá el día al que la querés pasar');},
+  wkDrop(v){if(!S.wkSel)return;const[id,from]=S.wkSel.split('|');S.wkSel=null;wkMove(id,+from,+v);},
+  prefTog(v){const s=db.settings;if(v==='calm')s.calm=!s.calm;else s[v]=s[v]===false;save();render();if(v==='haptics'&&s.haptics!==false)buzz(20);},
   rSwap(v){S.picker={target:'rswap',idx:+v,q:'',g:''};renderPicker();},
   pickAdd(v){
     const ex=exById(v);if(!ex)return;
@@ -520,7 +531,8 @@ const ACTIONS={
     }else db.routines.push({id:uid(),name:name,days:d.days,since:today(),items:items});
     save();S.modal=null;render();toast('Rutina guardada');
   },
-  rDelAsk(){S.m2={t:'confirm',title:'Eliminar rutina',msg:'Se elimina la rutina y sus días planeados. Tus entrenamientos ya registrados se mantienen.',act:'rDelGo',arg:S.modal.d.id,ok:'Eliminar'};render();},
+  rDelAsk(){const id=S.modal.d.id,i=db.routines.findIndex(r=>r.id===id);if(i<0)return;const r=db.routines[i],pl=JSON.parse(JSON.stringify(db.plan));
+    ACTIONS.rDelGo(id);buzz(10);toast('Rutina eliminada',()=>{if(db.routines.some(x=>x.id===id))return;db.routines.splice(Math.min(i,db.routines.length),0,r);db.plan=pl;save();render();});},
   rDelGo(v){
     db.routines=db.routines.filter(r=>r.id!==v);
     Object.keys(db.plan).forEach(k=>{db.plan[k]=db.plan[k].filter(x=>x!==v);if(!db.plan[k].length)delete db.plan[k];});

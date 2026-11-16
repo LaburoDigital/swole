@@ -656,7 +656,7 @@ async function barScan(){
   if(!('BarcodeDetector' in window)){
     try{const ZX=await zxLoad(),v=document.getElementById('barVid');if(!v||!S.m2||S.m2.d!==d||d.step!=='bar')return;
       const rd=new ZX.BrowserMultiFormatReader();
-      barZx=await rd.decodeFromVideoDevice(undefined,v,(res)=>{if(res&&barZx){const code=res.getText();barStop();try{navigator.vibrate&&navigator.vibrate(30);}catch(e){}barLookup(code);}});
+      barZx=await rd.decodeFromVideoDevice(undefined,v,(res)=>{if(res&&barZx){const code=res.getText();barStop();buzz(30);barLookup(code);}});
     }catch(e){barStop();if(S.m2&&S.m2.d===d){d.bar={manual:1,err:'No pude usar la cámara. Escribí el número del código.'};renderModal();}}
     return;}
   try{barStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});}
@@ -667,7 +667,7 @@ async function barScan(){
     if(!dd||dd.step!=='bar'||!v){barStop();return;}
     if(v.srcObject!==barStream){v.srcObject=barStream;v.play().catch(()=>{});}
     if(v.readyState<2)return;
-    try{const c=await det.detect(v);if(c&&c[0]&&c[0].rawValue){barStop();try{navigator.vibrate&&navigator.vibrate(30);}catch(e){}barLookup(c[0].rawValue);}}catch(e){}
+    try{const c=await det.detect(v);if(c&&c[0]&&c[0].rawValue){barStop();buzz(30);barLookup(c[0].rawValue);}}catch(e){}
   },300);
 }
 async function barLookup(code){

@@ -170,7 +170,7 @@ function rankUpScene(from,to){
    '<p class="ru-from">Antes: '+esc(lvlName(from))+'</p>'+
    '<div class="ru-btns"><button class="btn pri" data-ru="card">Ver mi carta</button><button class="btn" data-ru="close">Seguir</button></div>';
   document.body.appendChild(el);
-  setTimeout(()=>{confetti(90);try{navigator.vibrate&&navigator.vibrate([40,40,40,40,200]);}catch(e){}},2000);
+  setTimeout(()=>{confetti(90);buzz([40,40,40,40,200]);},2000);
   el.addEventListener('click',e=>{const b=e.target.closest('[data-ru]');if(!b)return;el.classList.add('out');setTimeout(()=>el.remove(),400);if(b.dataset.ru==='card'){S.m2=null;S.modal={t:'carta'};goTab('niveles');render();}});
 }
 /* ============ Mapa de recuperación ============ */

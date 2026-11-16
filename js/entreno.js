@@ -215,7 +215,12 @@ const ETABS=[{id:'rutinas',l:'Rutinas'},{id:'cal',l:'Calendario'}];
 /* las secciones viejas (hoy, rutinas, cal) ahora viven dentro de Entrenar */
 function goTab(v){const t0=S.tab;if(v==='hoy')v='inicio';if(['rutinas','cal'].includes(v)){S.tab='entrenar';S.etab=v;}else S.tab=v;if(S.tab!=='perfil'&&S.pf){/* cambios del perfil sin guardar: quedan esperando y se avisa, no se pierden */if(pfDirty()){if(t0==='perfil')setTimeout(()=>toast('Tu perfil quedó con cambios sin guardar'),60);}else S.pf=null;}/* pestaña nueva: al cerrarse la ventana abierta no vuelve al scroll de la pestaña anterior */if(S.tab!==t0)S.lockY=0;}
 let toastT=null;
-function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2800);}
+/* aviso abajo; si trae "undo", muestra Deshacer unos segundos (en vez de pedir confirmación antes de borrar) */
+function toast(msg,undo){const t=$('#toast');S.undo=undo||null;t.textContent=msg;
+  if(undo){const b=document.createElement('button');b.className='toast-u';b.dataset.a='undo';b.textContent='Deshacer';t.appendChild(b);}
+  t.classList.toggle('act',!!undo);t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>{t.classList.remove('on','act');S.undo=null;},undo?5500:2800);}
+/* vibración corta; se apaga en Perfil → Preferencias */
+function buzz(p){if(db.settings&&db.settings.haptics===false)return;try{navigator.vibrate&&navigator.vibrate(p);}catch(e){}}
 function effTheme(){const t=document.documentElement.dataset.theme;if(t)return t;return window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}
 const ACCENTS=[['aurora','Aurora','#9B7BFF','#FF5FA2'],['fuego','Fuego','#FF7A45','#FF3D7A'],['oceano','Océano','#3FA0FF','#2FE0C8'],['lima','Lima','#A8E83A','#2FE0A0'],['oro','Oro','#F2C14E','#FF8A3D',1],['elite','Élite','#FF4F6A','#8F43EA',3]];
 /* cuántos amigos tenés (se guarda para saberlo sin internet) */
@@ -291,7 +296,7 @@ function viewRutinas(){
     h+='<button class="gen-cta" data-a="genOpen"><span class="gen-ic">'+ic('bolt',22)+'</span><span class="grow"><b>Armame una rutina</b><span>Según tu deporte, tu objetivo y los días que tenés</span></span>'+ic('right',18)+'</button>'+
      '<button class="btn wide" data-a="newR" style="margin-bottom:14px">'+ic('plus',18)+' Nueva rutina desde cero</button>';
     if(db.routines.length)h+=db.routines.map(routineCard).join('');
-    else h+='<div class="card empty">'+emptyArt()+'<b>Todavía no tenés rutinas</b>Creá una desde cero o empezá con una plantilla.</div>';
+    else h+='<div class="card empty">'+emptyArt()+'<b>Todavía no tenés rutinas</b>Te armo una según tu objetivo, tu tiempo y tus días.<div class="g2 e-cta"><button class="btn pri" data-a="genOpen">Armame una</button><button class="btn" data-a="newR">Desde cero</button></div></div>';
     h+='<h3 style="font:800 19px var(--f-d);margin:22px 0 10px">Plantillas</h3><div class="gap">'+TPL.map((t,i)=>'<div class="card row" style="margin:0"><div class="grow"><b>'+esc(t.name)+'</b><br><span class="mut sm-t">'+t.items.length+' ejercicios</span></div><button class="btn sm" data-a="addTpl" data-v="'+i+'">'+ic('plus',16)+' Agregar</button></div>').join('')+'</div>';
   }else{
     h+='<div class="field" style="margin-bottom:10px"><input id="exq" type="search" placeholder="Buscar ejercicio" value="'+esc(S.q)+'" data-i="q" aria-label="Buscar ejercicio"></div>'+
@@ -334,13 +339,25 @@ function monthGrid(m,cell){
 const monthNav=(m,act)=>'<div class="mnav"><button class="ib" data-a="'+act+'" data-v="-1" aria-label="Mes anterior">'+ic('left')+'</button><b>'+MESES[m.getMonth()]+' '+m.getFullYear()+'</b><button class="ib" data-a="'+act+'" data-v="1" aria-label="Mes siguiente">'+ic('right')+'</button></div>';
 function viewCal(){
   const t=today();
-  let h='<h1 class="pg">Calendario</h1><div class="card">'+monthNav(S.calM,'calMove')+
+  let h='<h1 class="pg">Calendario</h1>'+weekPlanCard()+'<div class="card">'+monthNav(S.calM,'calMove')+
    monthGrid(S.calM,(dk,d)=>{
      const done=doneOn(dk).length,plan=plannedFor(dk).length,cr=db.creatine[dk];
      return '<button class="day'+(dk===S.calSel?' sel':'')+(dk===t?' td':'')+'" data-a="calSel" data-v="'+dk+'" aria-label="'+esc(longDate(dk))+'">'+d+'<span class="dots">'+(done?'<u class="dot done"></u>':plan?'<u class="dot plan"></u>':'')+(cr?'<u class="dot cr"></u>':'')+'</span></button>';
    })+
    '<div class="legend" style="gap:14px;flex-wrap:wrap"><span class="row" style="gap:6px"><u class="dot done"></u>Entrenado</span><span class="row" style="gap:6px"><u class="dot plan"></u>Planeado</span><span class="row" style="gap:6px"><u class="dot cr"></u>Creatina</span></div></div>';
   return h+dayPanel(S.calSel);
+}
+/* tu semana fija: cada rutina en su día. Se arrastra a otro día, o se toca y después se toca el día */
+function weekPlanCard(){
+  if(!db.routines.some(r=>(r.days||[]).length))return '';
+  return '<div class="card wkp'+(S.wkSel?' sel':'')+'" data-noswipe><div class="hd"><div><h3>Tu semana</h3><span class="mut sm-t">Arrastrá una rutina a otro día, o tocala y después tocá el día</span></div></div>'+
+    [1,2,3,4,5,6,0].map(d=>{const rs=db.routines.filter(r=>(r.days||[]).includes(d));
+      return '<div class="wkp-d" data-wkday="'+d+'" data-a="wkDrop" data-v="'+d+'"><b>'+DIAS3[d]+'</b><div class="wkp-c">'+(rs.length?rs.map(r=>{const k=r.id+'|'+d;return '<button class="wkp-r'+(S.wkSel===k?' on':'')+'" data-a="wkPick" data-v="'+k+'" data-wkr="'+k+'" aria-pressed="'+(S.wkSel===k)+'">'+esc(r.name)+'</button>';}).join(''):'<span class="mut sm-t">Descanso</span>')+'</div></div>';}).join('')+'</div>';
+}
+function wkMove(id,from,to){
+  const r=db.routines.find(x=>x.id===id);if(!r||from===to){render();return;}
+  const old=(r.days||[]).slice();r.days=old.filter(d=>d!==from);if(!r.days.includes(to))r.days.push(to);save();render();buzz(10);
+  toast(r.name+': ahora el '+DIAS3[to],()=>{r.days=old;save();render();});
 }
 function dayPanel(dk){
   const done=doneOn(dk),pl=plannedFor(dk),fut=dk>today();
@@ -674,7 +691,7 @@ function genHTML(d){
   const st='<div class="steps">'+[1,2,3,4].map(i=>'<i class="'+(d.step>=i?'on':'')+'"></i>').join('')+'</div>';
   const opt=(f,obj)=>'<div class="opt">'+Object.keys(obj).map(k=>{const o=obj[k],on=d[f]===k;
     return '<button class="'+(on?'on':'')+'" data-a="genSet" data-f="'+f+'" data-v="'+k+'" aria-pressed="'+on+'">'+(o.i?ic(o.i,18):'')+esc(o.n||o)+'</button>';}).join('')+'</div>';
-  const nav=(back,next,lbl)=>'<div class="g2">'+(back?'<button class="btn" data-a="genStep" data-v="'+back+'">Atrás</button>':'<span></span>')+'<button class="btn pri" data-a="genStep" data-v="'+next+'">'+(lbl||'Siguiente')+'</button></div>';
+  const nav=(back,next,lbl)=>'<div class="g2 stick">'+(back?'<button class="btn" data-a="genStep" data-v="'+back+'">Atrás</button>':'<span></span>')+'<button class="btn pri" data-a="genStep" data-v="'+next+'">'+(lbl||'Siguiente')+'</button></div>';
   if(d.step===1){d.sports=(db.profile&&db.profile.sports||[]).slice();return st+'<h4>Tus deportes y tu semana</h4><p class="mut sm-t">Tus deportes y qué días entrenás. Se guarda en tu perfil.</p>'+weekEditor()+nav(0,2);}
   if(d.step===2)return st+'<h4>¿Qué querés lograr?</h4><p class="mut sm-t">Podés combinar varios: por ejemplo, ganar músculo y fuerza.</p><div class="ptiles">'+
     Object.keys(GEN_GOALS).filter(k=>k!=='cali').map(k=>photoTile(k,GEN_GOALS[k].n,GEN_GOALS[k].i,d.goals.includes(k),'genGoal',k)).join('')+'</div>'+
