@@ -222,7 +222,7 @@ const genPrefs=()=>{const g=db.settings.gen||{},ov=overall();return{goals:g.goal
 const REC_SC={green:1,yellow:.2,red:-1.5};
 const heavyEq=ex=>!ex.time&&!ex.sk&&ex.st&&!/Peso corporal|Barra fija|Paralelas|Anillas/.test(ex.eq);
 function todayPlan(seed){
-  const r=recovery(),p=db.profile||{},age=p.age||25,P=genPrefs(),gs=P.goals,onlyCali=gs.length===1&&gs[0]==='cali';
+  const r=recovery(),p=db.profile||{},age=p.age||25,P=genPrefs(),gs=P.goals,onlyCali=gs.includes('cali');
   const dow=new Date().getDay(),dT=dayInfo(dow),dM=dayInfo((dow+1)%7);
   const pool=POOL[onlyCali?'bw':P.eq]||POOL.gym;
   const musOf=pt=>{const ex=exById((pool[pt]||[])[0]);return ex?ex.p:[];};
@@ -371,7 +371,7 @@ function skillPlan(id){
   /* arranca en la variante más difícil que ya venís practicando; si no, en la primera que te falta */
   const open=st.map((s,i)=>i).filter(i=>i<=ti&&!st[i].done),worked=open.filter(i=>st[i].best>0);
   let si=worked.length?worked[worked.length-1]:open.length?open[0]:ti;
-  const step=st[si],P=genPrefs(),bw=P.eq==='bw'||P.goals.length===1&&P.goals[0]==='cali';
+  const step=st[si],P=genPrefs(),bw=P.eq==='bw'||P.goals.includes('cali');
   /* práctica de habilidad: series cortas y de calidad, a ~70 % de tu máximo (lejos del fallo) */
   const dose=(n,best,main)=>{
     if(n.time){const h=best?Math.max(5,Math.min(n.t,Math.round(best*.7))):Math.max(5,Math.round(n.t*.4));return[main?6:3,h];}

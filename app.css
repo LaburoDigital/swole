@@ -1543,3 +1543,7 @@ small{line-height:1.35}
 .zone{display:grid;justify-items:center;gap:4px;text-align:center;padding:12px 6px;border-radius:16px;background:var(--raise);border:1px solid var(--line)}
 .zone b{font-size:13.5px}
 @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none}.mback .msheet>*,.pick .gap>.ex{animation:none!important}}
+
+/* v62: tiempo por sesión a medida */
+.min-step{display:flex;align-items:center;gap:12px;margin-top:10px;padding:10px 12px;border-radius:16px;background:var(--raise);border:1px solid var(--line)}
+.min-step b{display:block;font:800 20px var(--f-d)}.min-step .mut{display:block}

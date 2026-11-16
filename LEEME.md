@@ -31,7 +31,7 @@ Después, en la app: Perfil → **Entrar o crear cuenta**. En un celular nuevo, 
 
 ## Cuando cambies algo
 1. Editá lo que haga falta: `index.html` (la página), `app.css` (el diseño) o los archivos de `js/` (el código, en orden: datos, entreno, progreso, extras, pantallas, acciones, sync).
-2. Subí la versión (`swole-v61` → `swole-v62`) con `node tools/version.js 61`: cambia `sw.js` y los `?v=` de `index.html` juntos. Si no la subís, los celulares siguen mostrando la versión vieja.
+2. Subí la versión (`swole-v62` → `swole-v63`) con `node tools/version.js 61`: cambia `sw.js` y los `?v=` de `index.html` juntos. Si no la subís, los celulares siguen mostrando la versión vieja.
 3. Subí los cambios (en 1 o 2 minutos GitHub Pages publica la versión nueva):
    ```bash
    git add -A && git commit -m "Cambios" && git push

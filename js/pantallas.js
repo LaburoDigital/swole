@@ -101,7 +101,7 @@ function onbHTML(m){
 /* al terminar la bienvenida: si no tiene rutinas, se las armo con lo que contestó (objetivos, días, si ya entrena) */
 function autoPlan(){
   try{if(db.routines.length||!db.profile)return;
-    const g=db.settings.gen||{},goals=(g.goals&&g.goals.length?g.goals:['hip']),only=goals.length===1&&goals[0]==='cali';
+    const g=db.settings.gen||{},goals=(g.goals&&g.goals.length?g.goals:['hip']),only=goals.includes('cali');
     const d={goals:goals.slice(),eq:only?'home':'gym',lvl:db.profile.trains?'int':'beg',days:3,min:g.min||60,seed:0};
     const plan=genPlan(d);if(!plan||!plan.length)return;
     db.settings.gen=Object.assign({},g,{goals:d.goals,eq:d.eq,lvl:d.lvl,min:d.min});
@@ -854,7 +854,7 @@ function renderPicker(){
 }
 function pickChips(){return GROUP_TABS().map(g=>'<button class="chip '+((S.picker.g||'Todos')===g?'on':'')+'" data-a="pgrp" data-v="'+g+'">'+g+'</button>').join('');}
 function pickCtx(){const P=S.picker;if(!P)return null;
-  if(P.target==='gen'){const d=S.m2&&S.m2.d,r=d&&d.plan&&d.plan[P.ri],it=r&&r.items[P.ii];return it?{id:it.ex,eq:(d.goals.length===1&&d.goals[0]==='cali')?'bw':d.eq,inj:d.inj,lv:{beg:0,int:1,adv:2}[d.lvl],skip:r.items.map(x=>x.ex)}:null;}
+  if(P.target==='gen'){const d=S.m2&&S.m2.d,r=d&&d.plan&&d.plan[P.ri],it=r&&r.items[P.ii];return it?{id:it.ex,eq:d.goals.includes('cali')?'bw':d.eq,inj:d.inj,lv:{beg:0,int:1,adv:2}[d.lvl],skip:r.items.map(x=>x.ex)}:null;}
   if(P.target==='replace'){const en=db.active&&db.active.entries[P.idx];return en?{id:en.ex,skip:db.active.entries.map(x=>x.ex),lv:2}:null;}
   if(P.target==='rswap'){const it=S.modal&&S.modal.d&&S.modal.d.items[P.idx];return it?{id:it.ex,skip:S.modal.d.items.map(x=>x.ex),lv:2}:null;}
   return null;}

@@ -464,22 +464,23 @@ const ACTIONS={
   plates(v,el){const en=db.active.entries[+el.dataset.e],s=en.sets.find(x=>!x.done)||en.sets[en.sets.length-1]||{};S.m2={t:'plates',d:{kg:s.kg||'',bar:20,e:+el.dataset.e}};render();},
   platesOpen(){S.m2={t:'plates',d:{kg:'',bar:20,e:null}};render();},
   platesUse(){const d=S.m2.d,en=db.active&&db.active.entries[d.e];if(en)en.sets.forEach(s=>{if(!s.done)s.kg=+d.kg||0;});S.m2=null;save();render();toast('Peso puesto en las series que faltan');},
-  genOpen(){const ov=overall();S.m2={t:'gen',d:{step:1,sports:[],sdays:[],goals:(db.settings.gen&&db.settings.gen.goals||['hip']).slice(),min:(db.settings.gen&&db.settings.gen.min)||60,days:3,inj:(db.settings.gen&&db.settings.gen.inj||[]).slice(),eq:'gym',lvl:!ov||ov.L<6?'beg':ov.L<12?'int':'adv',plan:null,seed:0,replace:true}};render();},
+  genOpen(){const ov=overall();S.m2={t:'gen',d:{step:1,sports:[],sdays:[],goals:genGoals0(),skills:genSkills0(),min:(db.settings.gen&&db.settings.gen.min)||60,days:3,inj:(db.settings.gen&&db.settings.gen.inj||[]).slice(),eq:'gym',lvl:!ov||ov.L<6?'beg':ov.L<12?'int':'adv',plan:null,seed:0,replace:true}};render();},
   genTog(v,el){const a=S.m2.d[el.dataset.f];const i=a.indexOf(v);if(i>=0)a.splice(i,1);else a.push(v);if(!S.m2.d.sports.length)S.m2.d.sdays=[];renderModal();},
   genSD(v){const a=S.m2.d.sdays,n=+v,i=a.indexOf(n);if(i>=0)a.splice(i,1);else a.push(n);renderModal();},
   genGoal(v){let g=S.m2.d.goals;
     /* powerlifting arma su propia semana: no se mezcla con los otros objetivos */
     if(v==='pl'&&!g.includes('pl')){S.m2.d.goals=['pl'];renderModal();toast('Powerlifting arma su propia semana (con accesorios incluidos)');return;}
     if(v!=='pl'&&g.includes('pl')){S.m2.d.goals=g=[];}
-    const i=g.indexOf(v);if(i>=0){if(g.length>1)g.splice(i,1);else toast('Elegí al menos un objetivo');}else g.push(v);renderModal();},
+    const i=g.indexOf(v);if(i>=0){if(g.filter(x=>x!=='cali').length>1)g.splice(i,1);else toast('Elegí al menos un objetivo');}else g.push(v);renderModal();},
   genSet(v,el){const d=S.m2.d;d[el.dataset.f]=el.dataset.f==='days'?+v:v;renderModal();},
   genStep(v){const d=S.m2.d,n=+v;if(d.step===1&&n===2&&weekPend().length)return toast(weekPendMsg());if(n===4){if(d.step===4)d.seed=(d.seed||0)+1;d.plan=genPlan(d);}d.step=n;renderModal();const s=document.querySelector('#modal2 .msheet');if(s)s.scrollTop=0;},
-  genWay(v){const d=S.m2.d;if(v==='cali')d.goals=['cali'];else if(d.goals.length===1&&d.goals[0]==='cali')d.goals=['hip'];renderModal();},
+  genWay(v){const d=S.m2.d;let g=d.goals.filter(x=>x!=='cali'&&(v!=='cali'||x!=='pl'));if(!g.length)g=['hip'];if(v==='cali')g.push('cali');d.goals=g;renderModal();},
+  genMin(v){const d=S.m2.d;d.min=Math.max(20,Math.min(180,(+d.min||60)+(+v)));renderModal();},
   genSwap(v){const[ri,ii]=v.split('|').map(Number);S.picker={target:'gen',ri,ii,q:'',g:''};renderPicker();},
   genSave(){
     const d=S.m2.d;if(!d.plan||!d.plan.length)return;
     if(d.replace){const old=db.routines.filter(r=>r.gen).map(r=>r.id);db.routines=db.routines.filter(r=>!r.gen);Object.keys(db.plan).forEach(k=>{db.plan[k]=db.plan[k].filter(x=>!old.includes(x));if(!db.plan[k].length)delete db.plan[k];});}
-    db.settings.gen={goals:d.goals.slice(),eq:d.eq,lvl:d.lvl,min:+d.min||60,inj:(d.inj||[]).slice()};
+    db.settings.gen={v2:1,goals:d.goals.slice(),skills:(d.skills||[]).slice(),eq:d.eq,lvl:d.lvl,min:+d.min||60,inj:(d.inj||[]).slice()};
     d.plan.forEach(r=>{const o={id:uid(),name:r.name,days:r.days,since:today(),items:r.items,rest:r.rest,note:r.note,gen:1,min:r.min};if(r.pl)o.pl=1;db.routines.push(o);});
     S.m2=null;goTab('rutinas');S.rtab='rut';save();render();confetti(40);toast('Listo: '+d.plan.length+' rutinas en tu semana');checkAch();
   },
