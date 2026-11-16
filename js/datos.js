@@ -700,25 +700,62 @@ const FoodAI=(()=>{
     if(!vm)vm=await T.CLIPVisionModelWithProjection.from_pretrained(j.model,Object.assign({device:'wasm'},opt));
     return{T,E,ids:j.ids,dim:j.dim,pr,vm};
   })().catch(e=>{ready=null;throw e;}));}
-  /* devuelve todos los alimentos ordenados por parecido, con su probabilidad */
-  async function guess(url,onProg){
-    const m=await load(onProg),im=await m.T.RawImage.fromURL(url),{image_embeds}=await m.vm(await m.pr(im)),v=image_embeds.data;
-    let n=0;for(let k=0;k<v.length;k++)n+=v[k]*v[k];n=Math.sqrt(n)||1;
-    const s=m.E.map((r,i)=>{let d=0;for(let k=0;k<m.dim;k++)d+=r[k]*v[k];return{id:m.ids[i],d:d/n};}).sort((a,b)=>b.d-a.d);
-    const ex=s.map(x=>Math.exp((x.d-s[0].d)*100)),z=ex.reduce((a,b)=>a+b,0);
-    return s.map((x,i)=>({id:x.id,p:ex[i]/z}));
-  }
+  /* lo que hay en el plato: la foto entera y cinco recortes, en una sola pasada */
+  async function guess(url,onProg){const m=await load(onProg),im=await m.T.RawImage.fromURL(url);return plateItems(await plateScan(m,im));}
   return{guess};
 })();
+/*<plato> Lo comparte la app con tools/ia/probar.js: un solo lugar para la lógica del plato.
+   Familias: dos opciones de la misma familia son la misma cosa vista distinto (milanesa de carne o de pollo), no dos comidas. */
+const FOOD_FAM={bife:'carne',asado:'carne',vacio:'carne',picada:'carne',hamb:'carne',pech:'pollo',muslo:'pollo',bondiola:'carne',jamon:'fiambre',chori:'embutido',pancho:'embutido',
+  milc:'mila',milp:'mila',milnapo:'mila',atun:'pescado',salmon:'pescado',merluza:'pescado',sushi:'pescado',huevo:'huevo',clara:'huevo',tortilla:'huevo',
+  leche:'lacteo',lechedes:'lacteo',yogur:'lacteo',yogurf:'lacteo',griego:'lacteo',whey:'lacteo',cremoso:'queso',muzza:'queso',rallado:'queso',untable:'queso',
+  ddl:'untar',manteca:'untar',mermelada:'untar',miel:'untar',pmani:'untar',arroz:'arroz',arrozi:'arroz',fideos:'pasta',noquis:'pasta',fideosalsa:'pasta',
+  papa:'papa',fritas:'papa',pure:'papa',batata:'papa',pan:'pan',lactal:'pan',panint:'pan',wrap:'pan',arrozt:'pan',agua:'pan',avena:'cereal',granola:'cereal',copos:'cereal',
+  barrac:'barra',barrap:'barra',lentejas:'legumbre',garbanzo:'legumbre',porotos:'legumbre',guiso:'legumbre',polenta:'maiz',choclo:'maiz',
+  ensalada:'ensalada',ensp:'ensalada',tomate:'ensalada',zanahoria:'verdura',brocoli:'verdura',zapallo:'verdura',espinaca:'verdura',salteado:'verdura',
+  mani:'seco',nuez:'seco',almendra:'seco',mayo:'salsa',ketchup:'salsa',aceite:'salsa',medialuna:'dulce',alfajor:'dulce',galled:'dulce',choco:'dulce',azucar:'dulce',
+  gaseosa:'bebida',zero:'bebida',jugo:'bebida',cafel:'bebida',isot:'bebida',cerveza:'bebida',vino:'bebida'};
+/* lo que ya viene adentro de un plato armado: no se anota aparte (la pizza ya tiene queso) */
+const FOOD_PART={pizza:['queso','salsa','ensalada','fiambre'],milnapo:['queso','fiambre','ensalada','salsa','pizza','empa','tortilla'],milc:['empa','tortilla','pizza'],milp:['empa','tortilla','pizza'],fritas:['tortilla'],hambc:['carne','pan','queso','ensalada','salsa'],sandjq:['pan','queso','fiambre'],
+  fideosalsa:['queso','salsa','ensalada'],empa:['carne','pan'],tarta:['verdura','huevo','queso'],ensp:['pollo','verdura'],guiso:['carne','verdura'],pancho:['pan','salsa'],
+  sushi:['arroz','pescado'],tortilla:['papa'],wrap:['pollo','carne','ensalada','queso'],yogurf:['dulce'],medialuna:['untar']};
+const pFam=id=>FOOD_FAM[id]||id;
+/* foto entera + 4 esquinas + centro, todo en una pasada del modelo; devuelve, por imagen, los alimentos ordenados con su probabilidad */
+async function plateScan(m,im){
+  const W=im.width,H=im.height,cw=Math.round(W*.6),ch=Math.round(H*.6),box=[[0,0],[W-cw,0],[0,H-ch],[W-cw,H-ch],[Math.round((W-cw)/2),Math.round((H-ch)/2)]];
+  const ims=[im].concat(await Promise.all(box.map(([x,y])=>im.crop([x,y,x+cw-1,y+ch-1]))));
+  const {image_embeds}=await m.vm(await m.pr(ims)),v=image_embeds.data,dim=m.dim;
+  return ims.map((_,b)=>{let n=0;for(let k=0;k<dim;k++)n+=v[b*dim+k]**2;n=Math.sqrt(n)||1;
+    const s=m.E.map((r,i)=>{let d=0;for(let k=0;k<dim;k++)d+=r[k]*v[b*dim+k];return{id:m.ids[i],d:d/n};}).sort((a,c)=>c.d-a.d);
+    const ex=s.map(x=>Math.exp((x.d-s[0].d)*100)),z=ex.reduce((a,c)=>a+c,0);return s.map((x,i)=>({id:x.id,p:ex[i]/z}));});
+}
+/* qué se anota: lo principal (la foto entera) y hasta 2 cosas más que se ven claras en alguna parte y no son "lo mismo" ni parte del plato */
+function plateItems(R){
+  const food=x=>!/^x_/.test(x.id),all=R[0];
+  if(!food(all[0])&&all[0].p>.45)return[];
+  const top=all.filter(food);if(!top.length)return[];
+  const main=top[0].id,used=new Set([pFam(main)].concat(FOOD_PART[main]||[])),rank=new Map(all.map((x,i)=>[x.id,i]));
+  const out=[{id:main,opts:top.slice(0,3).map(x=>x.id),p:top[0].p}],free=x=>food(x)&&!used.has(pFam(x.id))&&!used.has(x.id);
+  /* en cada parte del plato, lo más claro que todavía no está anotado; gana lo que aparece en más partes */
+  while(out.length<3){
+    const cand={};
+    R.slice(1).forEach(r=>{const t=r.find(free);if(!t||t.p<.3||!((rank.get(t.id)??99)<=15))return;const c=cand[t.id]||(cand[t.id]={id:t.id,n:0,p:0,r});c.n++;if(t.p>c.p){c.p=t.p;c.r=r;}});
+    const c=Object.values(cand).sort((a,b)=>b.n-a.n||b.p-a.p)[0];if(!c)break;
+    const f=pFam(c.id);used.add(f);used.add(c.id);(FOOD_PART[c.id]||[]).forEach(x=>used.add(x));
+    out.push({id:c.id,opts:[c.id].concat(c.r.filter(x=>food(x)&&x.id!==c.id&&pFam(x.id)===f).slice(0,2).map(x=>x.id)),p:c.p});
+  }
+  return out;
+}
+/*</plato>*/
 /* porción típica de un alimento: su primera unidad (1 milanesa, 1 banana, 1 plato) o 150 g */
 const foodPortion=f=>{const u=(f&&f.u||[])[0];return Math.max(10,Math.round(u&&u.g||150));};
 async function foodPhotoLocal(d,pic){
-  const res=await FoodAI.guess(pic.thumb,p=>{if(p&&p.status==='progress'&&p.total>2e6&&/onnx/.test(p.file||'')){const el=document.getElementById('phDl');d.ph.dl=Math.round(p.progress||p.loaded/p.total*100);if(el)el.textContent='Bajando el reconocedor de comida (solo la primera vez): '+d.ph.dl+' %';}});
-  const top=res[0];if(/^x_/.test(top.id)&&top.p>.45)return{thumb:pic.thumb,items:[],food:false};
-  const opts=res.filter(x=>!/^x_/.test(x.id)).map(x=>foodById(x.id)).filter(Boolean).slice(0,3);if(!opts.length)return{thumb:pic.thumb,items:[],food:false};
-  const g=foodPortion(opts[0]),sure=res.find(x=>x.id===opts[0].id).p;
-  return{thumb:pic.thumb,local:1,food:true,items:[{opts:opts.map(f=>({n:f.n,id:f.id,k:f.k,p:f.p,c:f.c,f:f.f})),sel:0,g,g0:g,lo:Math.max(5,Math.round(g*.7)),hi:Math.round(g*1.4),other:null,on:true}],
-    tip:sure<.5?'No estoy muy seguro: fijate si es alguna de las otras opciones.':'',scale:''};
+  const found=await FoodAI.guess(pic.thumb,p=>{if(p&&p.status==='progress'&&p.total>2e6&&/onnx/.test(p.file||'')){const el=document.getElementById('phDl');d.ph.dl=Math.round(p.progress||p.loaded/p.total*100);if(el)el.textContent='Bajando el reconocedor de comida (solo la primera vez): '+d.ph.dl+' %';}});
+  const items=found.map(it=>{const opts=it.opts.map(foodById).filter(Boolean);if(!opts.length)return null;const g=foodPortion(opts[0]);
+    return{opts:opts.map(f=>({n:f.n,id:f.id,k:f.k,p:f.p,c:f.c,f:f.f})),sel:0,g,g0:g,lo:Math.max(5,Math.round(g*.7)),hi:Math.round(g*1.4),other:null,on:true};}).filter(Boolean);
+  if(!items.length)return{thumb:pic.thumb,items:[],food:false};
+  return{thumb:pic.thumb,local:1,food:true,items,scale:'',
+    tip:found[0].p<.5?'No estoy muy seguro de lo principal: fijate si es alguna de las otras opciones.':items.length>1?'Encontré '+items.length+' cosas en el plato. Si alguna no va, sacala con la X.':''};
 }
 function shrinkB64(file,max){
   return new Promise((ok,bad)=>{const u=URL.createObjectURL(file),im=new Image();
