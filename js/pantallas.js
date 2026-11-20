@@ -230,7 +230,7 @@ function viewNiveles(){
   const gl=groupLevels();
   h+='<div class="card"><div class="hd"><div><h3>Por grupo muscular</h3><span class="mut sm-t">Manda tu mejor ejercicio de cada grupo; los demás ajustan poco. El general pesa más piernas y espalda.</span></div></div><div class="glist">'+
    Object.keys(GROUPS).map(g=>{const x=gl[g],L=x?Math.min(18,Math.floor(x.v)):-1;return '<div class="grow-row">'+badge(x?L:-1,40)+'<div class="grow"><div class="row" style="justify-content:space-between"><b>'+g+'</b>'+(x?lvlSpan(L):'<span class="mut sm-t">Sin datos</span>')+'</div>'+
-    '<div class="bar" style="margin:6px 0 3px"><i style="width:'+(x?Math.round((L>=18?1:x.v-L)*100):0)+'%;background:'+lvlColor(L)+'"></i></div><span class="mut sm-t">'+(x?'Según '+x.used.map(e=>esc(e.n)).join(', '):'Cargá un ejercicio de '+g.toLowerCase()+' para ver tu rango')+'</span></div></div>';}).join('')+'</div></div>';
+    '<div class="bar" style="margin:6px 0 3px"><i style="width:'+(x?Math.round((L>=18?1:x.v-L)*100):0)+'%;background:'+lvlColor(L)+'"></i></div>'+(x?'<span class="g-used"><span class="mut sm-t">Según </span>'+x.used.map(e=>'<button class="chip sm" data-a="exInfo" data-v="'+e.id+'">'+esc(e.n)+'</button>').join('')+'</span>':'<span class="mut sm-t">Cargá un ejercicio de '+g.toLowerCase()+' para ver tu rango</span>')+'</div></div>';}).join('')+'</div></div>';
   {const zl=zoneLevels();if(Object.values(zl).some(v=>v!=null))h+='<div class="card"><div class="hd"><div><h3>Por zona</h3><span class="mut sm-t">Tren superior, inferior y core</span></div></div><div class="zones">'+
     Object.keys(zl).map(z=>{const v=zl[z],L=v==null?-1:Math.min(18,Math.floor(v));return '<div class="zone">'+badge(L,46)+'<b>'+z+'</b>'+(v==null?'<span class="mut sm-t">Sin datos</span>':lvlSpan(L))+'</div>';}).join('')+'</div></div>';}
   h+=goalsCard(false)+improveCard()+recordsCard()+heatCard();
@@ -595,7 +595,8 @@ function exDetail(id){
   h+='<p class="mut sm-t">Equipo: '+esc(ex.eq)+'. Los músculos resaltados son los principales y los claros, los secundarios.</p>';
   h+='<div class="row" style="gap:8px;flex-wrap:wrap">'+(hasRank(ex)?'<button class="btn sm pri" data-a="markOpen" data-v="'+ex.id+'">'+ic('bolt',16)+' Cargar marca</button>':'')+(isBarbell(ex)?'<button class="btn sm line" data-a="platesOpen">'+ic('disc',16)+' Calculadora de discos</button>':'')+'</div>';
   const b=bestE1(id);
-  if(hasRank(ex)&&db.profile){
+  if(hasRank(ex)&&db.profile){const off=noRank(id);
+    h+='<button class="pref" data-a="rankTog" data-v="'+id+'" role="switch" aria-checked="'+!off+'"><span class="grow"><b>Cuenta para mi nivel</b><small>'+(off?'Apagado: no suma ni resta en tu rango por grupo ni en el general':'Si una marca vieja o un ejercicio que hacés poco te baja el grupo, apagalo')+'</small></span><i class="sw'+(off?'':' on')+'"></i></button>';
     const cur=curV(ex),nextL=Math.max(0,Math.min(18,Math.floor(cur)+1)),has=(db.goals||[]).find(g=>g.ex===id&&!g.done);
     if(cur<18)h+=has?'<div class="goal hit" style="border-style:dashed"><span class="grow"><span class="mut sm-t">Tu objetivo</span><br><b>'+lvlName(has.L)+'</b></span>'+ic('flag',20)+'</div>'
       :'<div class="goal"><span class="grow"><span class="mut sm-t">Próximo objetivo</span><br><b>'+lvlName(nextL)+'</b> <span class="mut sm-t">· '+needTxt(ex,nextL)+'</span></span><button class="btn sm" data-a="goalAdd" data-v="'+id+'" data-l="'+nextL+'">'+ic('flag',14)+' Fijar</button></div>';
@@ -617,7 +618,7 @@ function exDetail(id){
   /* historial: todas las veces que lo hiciste */
   const hist=allSess().filter(l=>l.entries.some(en=>en.ex===id)).sort((a,b)=>a.date<b.date?1:-1);
   if(hist.length)h+='<div><h4 style="margin-bottom:6px">Historial ('+hist.length+(hist.length===1?' vez':' veces')+')</h4><div class="hist">'+hist.slice(0,30).map(l=>{const en=l.entries.find(x=>x.ex===id);
-    return '<div class="rowline"><span><b>'+shortDate(parseK(l.date).getTime())+'</b>'+(l.test?' <span class="tag" style="color:var(--acc)">Marca</span> <button class="ib flat" style="width:28px;height:28px;display:inline-grid;vertical-align:middle" data-a="delTest" data-v="'+l.id+'" aria-label="Borrar marca">'+ic('trash',14)+'</button>':'')+(en.note?'<br><span class="mut sm-t">'+esc(en.note)+'</span>':'')+'</span><span class="mut" style="text-align:right">'+en.sets.map(s=>setTxt(ex,s)).join(', ')+'</span></div>';}).join('')+'</div></div>';
+    return '<div class="rowline"><span><b>'+shortDate(parseK(l.date).getTime())+'</b>'+(l.test?' <span class="tag" style="color:var(--acc)">Marca</span>':'')+(en.note?'<br><span class="mut sm-t">'+esc(en.note)+'</span>':'')+'</span><span class="mut" style="text-align:right">'+en.sets.map(s=>setTxt(ex,s)).join(', ')+'</span><button class="ib flat hist-del" data-a="delRec" data-v="'+l.id+'|'+id+'" aria-label="Borrar este registro">'+ic('trash',14)+'</button></div>';}).join('')+'</div></div>';
   if(ex.custom&&!ex.hidden)h+='<button class="btn bad wide" data-a="delEx" data-v="'+id+'">Eliminar ejercicio</button>';
   return h;
 }

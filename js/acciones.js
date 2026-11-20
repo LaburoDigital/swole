@@ -170,6 +170,13 @@ const ACTIONS={
     if(L>(L0==null?-1:L0)&&L>=0)setTimeout(()=>{confetti(L0!=null&&L0>=0?70:40);buzz([30,60,30,60,120]);},950);
     checkGoals();checkAch();checkRankUp(2800);checkMissions();
   },
+  /* borra un registro del historial: una marca entera, o las series de ese ejercicio en ese entreno (con Deshacer) */
+  delRec(v){const[lid,ex]=v.split('|');const ti=db.tests.findIndex(t=>t.id===lid);
+    if(ti>=0){const t=db.tests.splice(ti,1)[0];save();render();buzz(8);toast('Marca borrada',()=>{db.tests.splice(Math.min(ti,db.tests.length),0,t);save();render();});checkRankUp();return;}
+    const li=db.logs.findIndex(l=>l.id===lid);if(li<0)return;const l=db.logs[li],ei=l.entries.findIndex(en=>en.ex===ex);if(ei<0)return;
+    const en=l.entries.splice(ei,1)[0],gone=!l.entries.length;if(gone)db.logs.splice(li,1);save();render();buzz(8);
+    toast(gone?'Entreno borrado (era lo único)':'Series borradas de ese día',()=>{if(gone)db.logs.splice(Math.min(li,db.logs.length),0,l);l.entries.splice(Math.min(ei,l.entries.length),0,en);save();render();});},
+  rankTog(v){const s=db.settings,l=(s.noRank||[]).slice(),i=l.indexOf(v);if(i>=0)l.splice(i,1);else l.push(v);s.noRank=l;save();render();toast(i>=0?'Vuelve a contar para tu nivel':'Ya no cuenta para tu nivel');},
   delTest(v){S.m2={t:'confirm',title:'Borrar marca',msg:'Se borra esta marca. Tu nivel en este ejercicio se recalcula.',act:'delTestGo',arg:v,ok:'Borrar'};render();},
   delTestGo(v){db.tests=db.tests.filter(t=>t.id!==v);S.m2=null;save();render();toast('Marca borrada');checkRankUp();},
   cardOpen(){S.cardBack=false;S.modal={t:'carta'};render();},
@@ -479,6 +486,9 @@ const ACTIONS={
   genStep(v){const d=S.m2.d,n=+v;if(d.step===1&&n===2&&weekPend().length)return toast(weekPendMsg());if(n===4){if(d.step===4)d.seed=(d.seed||0)+1;d.plan=genPlan(d);}d.step=n;renderModal();const s=document.querySelector('#modal2 .msheet');if(s)s.scrollTop=0;},
   genWay(v){const d=S.m2.d;let g=d.goals.filter(x=>x!=='cali'&&(v!=='cali'||x!=='pl'));if(!g.length)g=['hip'];if(v==='cali')g.push('cali');d.goals=g;renderModal();},
   genMin(v){const d=S.m2.d;d.min=Math.max(20,Math.min(180,(+d.min||60)+(+v)));renderModal();},
+  genDel(v){const d=S.m2.d,[ri,ii]=v.split('|').map(Number),r=d.plan&&d.plan[ri];if(!r||!r.items[ii])return;if(r.items.length<2)return toast('Dejá al menos un ejercicio en el día');
+    const it=r.items.splice(ii,1)[0],ex=exById(it.ex);r.min=routineMinutes(r);d.plan.vol=weekVolume(d.plan);renderModal();buzz(8);
+    toast('Quitaste '+(ex?ex.n:'el ejercicio'),()=>{r.items.splice(Math.min(ii,r.items.length),0,it);r.min=routineMinutes(r);d.plan.vol=weekVolume(d.plan);renderModal();});},
   genSwap(v){const[ri,ii]=v.split('|').map(Number);S.picker={target:'gen',ri,ii,q:'',g:''};renderPicker();},
   genSave(){
     const d=S.m2.d;if(!d.plan||!d.plan.length)return;

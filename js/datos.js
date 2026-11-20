@@ -357,11 +357,13 @@ function lastSets(id){
   if(!ls.length)return null;
   return ls[ls.length-1].entries.find(en=>en.ex===id).sets;
 }
+/* ejercicios que elegiste no contar para tus niveles */
+const noRank=id=>(db.settings.noRank||[]).includes(id);
 function rankedList(){
   const out=[];
   if(!db.profile)return out;
   allEx().forEach(ex=>{
-    if(!hasRank(ex))return;
+    if(!hasRank(ex)||noRank(ex.id))return;
     const b=bestE1(ex.id);if(!b)return;
     out.push({ex,b,info:lvlInfo(ex,b.e)});
   });

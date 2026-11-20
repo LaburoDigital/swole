@@ -1614,3 +1614,8 @@ html,body{overflow-x:clip;overscroll-behavior-x:none}
 html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #view{overflow-x:clip;overflow-clip-margin:24px}
 .msheet,.sess,.pick{overflow-x:hidden}
+
+/* v71: borrar registros y elegir qué cuenta */
+.hist .rowline{align-items:center}.hist-del{width:30px;height:30px;flex:none;margin-left:4px;opacity:.7}
+.g-used{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-top:2px}
+.gen-it .ib.flat+.ib.flat{margin-left:-4px}

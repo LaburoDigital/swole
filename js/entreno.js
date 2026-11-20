@@ -314,11 +314,11 @@ function similarEx(id,ctx){
   const sp=patsOf(id),skip=new Set(ctx.skip||[]),BW=['Peso corporal','Barra fija','Paralelas','Anillas','Barra vertical','Cajón','Banda'];
   const okEq=e=>!ctx.eq||ctx.eq==='gym'||BW.includes(e.eq)||(ctx.eq==='dumb'&&/Mancuerna|Kettlebell/.test(e.eq));
   const ov=(a,b)=>a.filter(x=>b.includes(x)).length;
-  return allEx().filter(e=>e.id!==id&&!e.hidden&&!skip.has(e.id)&&!!e.time===!!src.time&&okEq(e)&&!(ctx.inj&&ctx.inj.length&&injBad(e.id,'',ctx.inj)))
+  return allEx().filter(e=>e.id!==id&&!e.hidden&&!e.sport&&(!e.power||src.power)&&(!e.joint||src.joint)&&!skip.has(e.id)&&!!e.time===!!src.time&&okEq(e)&&!(ctx.inj&&ctx.inj.length&&injBad(e.id,'',ctx.inj)))
     .map(e=>{const pp=ov(src.p,e.p),ps=ov(src.p.concat(src.s),e.p.concat(e.s)),pt=[...patsOf(e.id)].some(k=>sp.has(k));
       let sc=pp*4+ps+(pt?3:0)+(groupOf(e)===groupOf(src)?1:0)+(e.eq===src.eq?.5:0);
       if(e.sk&&!canDo(e.id,ctx.lv||0))sc-=3;if(e.sport&&!src.sport)sc-=2;if(!!e.sk!==!!src.sk)sc-=1.5;if(bestE1(e.id))sc+=.6;
-      return{e,sc,pp};}).filter(x=>x.pp>0&&x.sc>=5).sort((a,b)=>b.sc-a.sc).slice(0,6).map(x=>x.e);
+      return{e,sc,pp,g:groupOf(e)===groupOf(src)};}).filter(x=>(x.pp>0&&x.sc>=4)||x.g).sort((a,b)=>b.sc-a.sc).slice(0,10).map(x=>x.e);
 }
 function filterEx(q,g){
   q=fnorm(q).trim();
@@ -710,7 +710,7 @@ function genHTML(d){
    '<div class="card vol-card" style="margin:0"><div class="hd" style="margin-bottom:8px"><div><h4>Series por semana</h4><span class="mut sm-t">La franja marcada es el rango recomendado</span></div></div>'+
    Object.keys(GROUPS).map(g=>{const [lo,hi]=volRange(g,gs),top=hi*1.25,x=Math.round(v[g]||0),pct=Math.min(100,Math.round(x/top*100)),ok=x>=lo&&x<=hi*1.15;return '<div class="vrow"><span>'+g+'</span><div class="bar"><i style="width:'+pct+'%;background:'+(ok?'var(--ok)':x<lo||x<=hi*1.35?'#FFC34D':'var(--hot)')+'"></i><u style="left:'+Math.round(lo/top*100)+'%;width:'+Math.round((hi-lo)/top*100)+'%"></u></div><b>'+x+'</b></div>';}).join('')+'</div>'+
    plan.map(r=>'<div class="card" style="margin:0;padding:12px"><div class="row top-a">'+miniMap(mapOfRoutine(r)).replace('mini','mini" style="width:54px')+'<div class="grow"><b>'+esc(r.name)+'</b><br><span class="tag">'+r.days.map(x=>DIAS3[x]).join(' ')+'</span>'+(r.note?'<p class="rnote">'+ic('spark',13)+' '+esc(r.note)+'</p>':'')+
-     '<div style="margin-top:6px">'+r.items.map(it=>{const ex=exById(it.ex);return '<div class="rowline gen-it" style="padding:5px 0"><span>'+esc(ex.n)+(it.warm?' <span class="tag" style="font-size:10.5px">+'+it.warm+' de calentamiento</span>':'')+(ex.sk?' <span class="tag" style="font-size:10.5px;color:var(--acc)">habilidad</span>':'')+'</span><span class="mut">'+it.sets+' × '+it.reps+(ex.time?' s':'')+'</span><button class="ib flat" data-a="genSwap" data-v="'+plan.indexOf(r)+'|'+r.items.indexOf(it)+'" aria-label="Cambiar '+esc(ex.n)+' por otro">'+ic('swap',15)+'</button></div>';}).join('')+'</div></div></div></div>').join('')+
+     '<div style="margin-top:6px">'+r.items.map(it=>{const ex=exById(it.ex);return '<div class="rowline gen-it" style="padding:5px 0"><span>'+esc(ex.n)+(it.warm?' <span class="tag" style="font-size:10.5px">+'+it.warm+' de calentamiento</span>':'')+(ex.sk?' <span class="tag" style="font-size:10.5px;color:var(--acc)">habilidad</span>':'')+'</span><span class="mut">'+it.sets+' × '+it.reps+(ex.time?' s':'')+'</span><button class="ib flat" data-a="genSwap" data-v="'+plan.indexOf(r)+'|'+r.items.indexOf(it)+'" aria-label="Cambiar '+esc(ex.n)+' por otro">'+ic('swap',15)+'</button><button class="ib flat" data-a="genDel" data-v="'+plan.indexOf(r)+'|'+r.items.indexOf(it)+'" aria-label="Quitar '+esc(ex.n)+'">'+ic('x',15)+'</button></div>';}).join('')+'</div></div></div></div>').join('')+
    '<p class="mut sm-t tc">¿No te gusta alguno? Tocá '+ic('swap',12)+' y elegí otro.</p>'+
    '<details class="why"><summary>¿Por qué así?</summary><div class="mut sm-t">'+
    '<p><b>Volumen:</b> el músculo crece sobre todo por la cantidad de series efectivas por semana. Apuntamos a '+mn+'-'+mx+' por músculo (piernas, espalda y brazos suman varios músculos, por eso llevan más), repartidas en 2 o más días.</p>'+
