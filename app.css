@@ -1619,3 +1619,7 @@ html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:10
 .hist .rowline{align-items:center}.hist-del{width:30px;height:30px;flex:none;margin-left:4px;opacity:.7}
 .g-used{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-top:2px}
 .gen-it .ib.flat+.ib.flat{margin-left:-4px}
+/* v73: sin rebote de la página (separaba el encabezado y la barra del contenido), menús que aparecen de una */
+html,body{overscroll-behavior-y:none}
+.mback:not(.same) .msheet>*{animation:none}
+body.navhide .nav{transform:none!important}

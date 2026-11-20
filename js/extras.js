@@ -26,7 +26,7 @@ function navTo(v,dir){
   },{passive:true});
   document.addEventListener('touchmove',e=>{
     if(!ok)return;const x=e.touches[0].clientX-x0,y=e.touches[0].clientY-y0;
-    if(!lock){if(Math.abs(x)>12||Math.abs(y)>12)lock=Math.abs(x)>Math.abs(y)*1.4?'x':'y';else return;}
+    if(!lock){if(Math.abs(x)>18||Math.abs(y)>18)lock=Math.abs(x)>Math.abs(y)*2.2?'x':'y';else return;}
     if(lock!=='x'){ok=false;return;}
     const i=TAB_ORDER.indexOf(S.tab),edge=(x>0&&i<=0)||(x<0&&i>=TAB_ORDER.length-1);
     dx=edge?x*.15:x;const v=$('#view');v.style.transition='none';v.style.transform='translateX('+(dx*.35)+'px)';v.style.opacity=String(1-Math.min(.35,Math.abs(dx)/600));
@@ -35,40 +35,21 @@ function navTo(v,dir){
     if(!ok)return;ok=false;const v=$('#view');v.style.transition='transform .25s cubic-bezier(.22,1,.36,1),opacity .25s';v.style.transform='';v.style.opacity='';
     if(lock!=='x')return;
     const i=TAB_ORDER.indexOf(S.tab),fast=Date.now()-t0<450;
-    if(Math.abs(dx)>(fast?50:110)){const j=i+(dx<0?1:-1);if(j>=0&&j<TAB_ORDER.length){setTimeout(()=>{v.style.transition='';navTo(TAB_ORDER[j],dx<0?1:-1);},10);}}
+    if(Math.abs(dx)>(fast?80:140)){const j=i+(dx<0?1:-1);if(j>=0&&j<TAB_ORDER.length){setTimeout(()=>{v.style.transition='';navTo(TAB_ORDER[j],dx<0?1:-1);},10);}}
   },{passive:true});
 })();
-/* al bajar: el título grande pasa al encabezado y la barra de abajo se esconde; al subir vuelve */
+/* al bajar: el título grande pasa al encabezado. La barra de abajo queda siempre fija (esconderla hacía saltar la pantalla) */
 (()=>{let lastY=0,tick=false;
   const upd=()=>{tick=false;
     const maxY=Math.max(0,document.documentElement.scrollHeight-window.innerHeight),y=Math.min(Math.max(0,window.scrollY),maxY),b=document.body,t=$('#view .pg'),tt=$('#topT');
     if(t&&tt){const gone=t.getBoundingClientRect().bottom<64;b.classList.toggle('scrolled',gone);if(gone&&tt.textContent!==t.textContent)tt.textContent=t.textContent;}
     else b.classList.remove('scrolled');
-    if(window.innerWidth<900&&!openLayers()){
-      /* abajo del todo la barra queda visible (el rebote del celular ya no la hace parpadear) */
-      if(maxY-y<90||y<80)b.classList.remove('navhide');
-      else if(y>lastY+14)b.classList.add('navhide');
-      else if(y<lastY-14)b.classList.remove('navhide');
-    }else b.classList.remove('navhide');
+    b.classList.remove('navhide');
     lastY=y;
   };
   window.addEventListener('scroll',()=>{if(!tick){tick=true;requestAnimationFrame(upd);}},{passive:true});
 })();
-/* tirar hacia abajo arriba de todo: sincroniza y actualiza */
-(()=>{let y0=0,dy=0,on=false,busy=false;
-  const ind=()=>$('#ptr');
-  document.addEventListener('touchstart',e=>{on=false;if(busy||window.scrollY>0||openLayers()||e.touches.length>1||!e.target.closest('#view')||e.target.closest('[data-wkr],.dh'))return;on=true;y0=e.touches[0].clientY;dy=0;},{passive:true});
-  document.addEventListener('touchmove',e=>{if(!on)return;dy=e.touches[0].clientY-y0;if(dy<=0||window.scrollY>0){dy=0;const p=ind();if(p)p.style.cssText='';return;}
-    const p=ind();if(!p)return;const k=Math.min(1,dy/90);p.style.opacity=String(k);p.style.transform='translate(-50%,'+(Math.min(dy,110)*.6)+'px) rotate('+(k*270)+'deg)';p.classList.toggle('ready',dy>90);},{passive:true});
-  document.addEventListener('touchend',async()=>{if(!on)return;on=false;const p=ind();if(!p)return;
-    if(dy<=90){p.style.cssText='';p.classList.remove('ready');return;}
-    busy=true;p.classList.add('spin');p.style.transform='translate(-50%,54px)';p.style.opacity='1';
-    buzz(12);
-    try{if(Sync.user())await Sync.run(true);if(Social.on())await Social.load();}catch(e){}
-    render();busy=false;p.classList.remove('spin','ready');p.style.cssText='';
-    toast(Sync.user()?(Sync.state.s==='ok'?'Actualizado':'Sin conexión: se actualiza cuando vuelva internet'):'Todo al día');
-  },{passive:true});
-})();
+/* (se sacó "tirar para actualizar": se disparaba solo al llegar arriba scrolleando; la sincronización ya es automática) */
 
 /* ============ Buscador: acciones, pantallas, rutinas y ejercicios ============ */
 const normTxt=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
