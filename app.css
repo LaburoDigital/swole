@@ -1623,3 +1623,24 @@ html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:10
 html,body{overscroll-behavior-y:none}
 .mback:not(.same) .msheet>*{animation:none}
 body.navhide .nav{transform:none!important}
+/* v74: movimiento de las capas, con la curva de las hojas de iPhone. Entran una vez y salen antes de irse */
+:root{--e-out:cubic-bezier(.22,1,.36,1);--e-sheet:cubic-bezier(.32,.72,0,1);--e-in:cubic-bezier(.4,0,.9,.6)}
+.mback{animation:mbIn .3s ease-out both}
+.msheet{animation:shUp .5s var(--e-sheet) both}
+@keyframes mbIn{from{opacity:0}}
+@keyframes shUp{from{transform:translateY(105%)}}
+.mback.leaving{animation:mbOut .27s ease-in both!important;pointer-events:none}
+.mback.leaving .msheet{animation:shDown .27s var(--e-in) both!important}
+@keyframes mbOut{to{opacity:0}}
+@keyframes shDown{to{transform:translateY(105%)}}
+.msheet.cmd{animation:cmdIn .3s var(--e-out) both}
+.mback.leaving .msheet.cmd,.mback.leaving .msheet.full{animation:mbOut .2s ease-in both!important}
+@media (min-width:700px){.msheet{animation:pkIn .36s var(--e-out) both}.mback.leaving .msheet{animation:pkOut .22s var(--e-in) both!important}}
+.pick{animation:pkIn .38s var(--e-out) both}
+.pick.leaving{animation:pkOut .24s var(--e-in) both;pointer-events:none}
+@keyframes pkIn{from{opacity:0;transform:translateY(32px)}}
+@keyframes pkOut{to{opacity:0;transform:translateY(32px)}}
+.sess{animation:shUp .5s var(--e-sheet) both}
+.sess.leaving{animation:shDown .3s var(--e-in) both;pointer-events:none}
+.pick.stay,.sess.stay,.pick.stay .gap>.ex{animation:none!important}
+.calm .mback,.calm .msheet,.calm .pick,.calm .sess{animation:none!important}

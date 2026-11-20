@@ -839,16 +839,24 @@ if(window.visualViewport){const vv=visualViewport,rt=document.documentElement;co
 document.addEventListener('focusin',e=>{const t=e.target;if(t&&t.tagName==='INPUT'&&t.type==='number'&&t.value!=='')setTimeout(()=>{try{if(document.activeElement===t)t.select();}catch(x){}},0);});
 /* si la ventana ya estaba abierta y solo cambió su contenido, no repite la animación de entrada (evita el parpadeo) */
 function renderModal(){syncLayers();
-  const put=(el,m,l2,k)=>{if(m&&m.d&&typeof m.d==='object'&&(m._s==null||m._ss!==m.d.step)){m._ss=m.d.step;m._s=snapOf(m);}keepScroll(el,()=>{el.innerHTML=m?modalBody(m,l2):'';});const t=m?m.t:null,ke=el.querySelector('[key]'),kk=t?t+'|'+(ke?ke.getAttribute('key'):''):null,prev=S[k]||'';{const dg=el.querySelector('[role=dialog]'),sg=t?t+'|'+(dg?dg.getAttribute('aria-label'):''):'';if(sg!==(S[k+'s']||'')){S[k+'s']=sg;S.layT=performance.now();}}
+  const put=(el,m,l2,k)=>{
+    /* al cerrar, la hoja baja y se desvanece antes de irse */
+    if(!m){if(el.querySelector(':scope>.mback')&&!el.querySelector(':scope>.mback.leaving')){S[k]=null;if(S[k+'s']){S[k+'s']='';S.layT=performance.now();}leaveLayer(el,':scope>.mback',()=>!(k==='_mk'?S.modal:S.m2));return;}if(el.querySelector(':scope>.mback.leaving'))return;}
+    else clearTimeout(el._lv);
+    if(m&&m.d&&typeof m.d==='object'&&(m._s==null||m._ss!==m.d.step)){m._ss=m.d.step;m._s=snapOf(m);}keepScroll(el,()=>{el.innerHTML=m?modalBody(m,l2):'';});const t=m?m.t:null,ke=el.querySelector('[key]'),kk=t?t+'|'+(ke?ke.getAttribute('key'):''):null,prev=S[k]||'';{const dg=el.querySelector('[role=dialog]'),sg=t?t+'|'+(dg?dg.getAttribute('aria-label'):''):'';if(sg!==(S[k+'s']||'')){S[k+'s']=sg;S.layT=performance.now();}}
     /* misma ventana: sin fundido; mismo paso: el contenido no vuelve a animarse */
     if(t&&prev.split('|')[0]===t)el.querySelectorAll('.mback').forEach(x=>x.classList.add('stay'));if(kk&&prev===kk)el.querySelectorAll('.mback').forEach(x=>x.classList.add('same'));S[k]=kk;};
   put($('#modal'),S.modal,false,'_mk');put($('#modal2'),S.m2,true,'_m2k');
   if(window.rtApply&&document.getElementById('rtSvg'))rtApply();
 }
+/* capas que entran y salen con movimiento: solo la primera vez entran (redibujar no repite la animación) y al cerrarse salen antes de borrarse */
+const calmMotion=()=>!!(db.settings&&db.settings.calm)||matchMedia('(prefers-reduced-motion: reduce)').matches;
+function leaveLayer(el,sel,still){const x=el.querySelector(sel);if(!x||calmMotion()){el.innerHTML='';return;}if(x.classList.contains('leaving'))return;x.classList.remove('stay','same');x.classList.add('leaving');clearTimeout(el._lv);el._lv=setTimeout(()=>{if(still())el.innerHTML='';},280);}
+function enterLayer(el,sel,draw){const had=el.querySelector(sel+':not(.leaving)');clearTimeout(el._lv);draw();const x=el.querySelector(sel);if(x&&had)x.classList.add('stay');}
 function renderSess(){
   const el=$('#sess');
-  if(db.active&&S.sessOpen){keepScroll(el,()=>{el.innerHTML=sessHTML();});document.body.classList.add('sessopen');}
-  else{el.innerHTML='';document.body.classList.remove('sessopen');}
+  if(db.active&&S.sessOpen){enterLayer(el,'.sess',()=>keepScroll(el,()=>{el.innerHTML=sessHTML();}));document.body.classList.add('sessopen');}
+  else{leaveLayer(el,'.sess',()=>!(db.active&&S.sessOpen));document.body.classList.remove('sessopen');}
 }
 /* en Inicio, la rutina planeada de hoy queda abajo, al alcance del pulgar */
 function todayGoHTML(){
@@ -867,9 +875,11 @@ const REV=('IntersectionObserver' in window)&&!matchMedia('(prefers-reduced-moti
 function revealSoon(v){if(!REV||db.settings.calm)return;requestAnimationFrame(()=>{const vh=innerHeight;v.querySelectorAll(':scope>.card,:scope>.subview>.card,:scope>section').forEach(c=>{if(c.dataset.rv)return;c.dataset.rv=1;if(c.getBoundingClientRect().top>vh*.92){c.classList.add('rv');REV.observe(c);}});});}
 function renderPicker(){
   const el=$('#picker');syncLayers();
-  if(!S.picker){el.innerHTML='';return;}
+  if(!S.picker){leaveLayer(el,'.pick',()=>!S.picker);return;}
+  const had=el.querySelector('.pick:not(.leaving)');clearTimeout(el._lv);
   keepScroll(el,()=>{el.innerHTML='<div class="pick'+(S.picker.target==='gen'?' ptop':'')+'"><div class="pick-in"><div class="pick-top"><div class="row"><h2 class="grow" style="font:800 24px var(--f-d)">'+(pickCtx()?'Cambiar ejercicio':'Elegir ejercicios')+'</h2><button class="btn pri sm" data-a="pickDone">Listo</button></div>'+
    '<div class="field"><input id="pq" type="search" placeholder="Buscar ejercicio" value="'+esc(S.picker.q)+'" data-i="pq" aria-label="Buscar ejercicio"></div><div class="scroll-x" id="pg">'+pickChips()+'</div></div>'+pickSimilar()+'<div class="gap" id="pres">'+pickResults()+'</div>'+(S.picker.target==='gen'||S.picker.target==='rswap'?'':'<button class="btn wide" style="margin-top:14px" data-a="newEx">'+ic('plus',18)+' Crear ejercicio propio</button>')+'</div></div>';});
+  if(had){const x=el.querySelector('.pick');if(x)x.classList.add('stay');}
 }
 function pickChips(){return GROUP_TABS().map(g=>'<button class="chip '+((S.picker.g||'Todos')===g?'on':'')+'" data-a="pgrp" data-v="'+g+'">'+g+'</button>').join('');}
 function pickCtx(){const P=S.picker;if(!P)return null;
