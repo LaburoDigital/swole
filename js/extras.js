@@ -428,7 +428,9 @@ function techOf(ex){
   if(!ex)return null;const id=ex.id,f=ex.sk&&ex.sk.f;
   const SKX={tuckfl:'fltuck',advfl:'fladv',onelegfl:'flone',straddlefl:'flstr',fullfl:'flfull',austrow:'invrow',airsquat:'airsq',skincat:'skincat',tuckbl:'bltuck',advbl:'bladv',straddlebl:'blstr',fullbl:'blfull',
     crow:'crow',pllean:'pllean',tuckpl:'pltuck',advpl:'pladv',straddlepl:'plstr',fullpl:'planche',tucklsit:'lsittuck',onelegl:'lsitone',lsit:'lsit',vsit:'vsit',
-    pikepush:'pike',wallhs:'wallhs',freehs:'hs',hspu:'hspu',freehspu:'freehspu',vflag:'vflag',tuckflag:'flagtuck',straddleflag:'flagstr',flag:'flag',russiandip:'dip',impdip:'dip',boxpistol:'pistol'};
+    pikepush:'pike',wallhs:'wallhs',freehs:'hs',hspu:'hspu',freehspu:'freehspu',vflag:'vflag',tuckflag:'flagtuck',straddleflag:'flagstr',flag:'flag',russiandip:'russiandip',impdip:'russiandip',boxpistol:'boxpistol',
+    kneepush:'kneepush',diamond:'diamond',archerpush:'archerpush',pppush:'pppush',oapush:'oapush',lpullup:'lpullup',archerpull:'archerpull',oapull:'oapull',muscleup:'muscleup',
+    benchdip:'benchdip',ringdip:'ringdip',shrimp:'shrimp',dragon:'dragon'};
   if(SKX[id])return SKX[id];
   if(f==='fl'||f==='bl')return 'fl';if(f==='pl')return 'planche';if(id==='pppush')return 'pushup';if(f==='hs')return 'hs';if(f==='lsit')return 'lsit';
   const M={squat:'squat',frontsquat:'squat',legpress:'squat',airsquat:'squat',jumpsquat:'squat',shrimp:'pistol',pistol:'pistol',dragon:'pistol',
@@ -446,6 +448,90 @@ function techOf(ex){
 }
 /* sentadilla sin peso: la misma postura pero sin la barra */
 if(TECH.squat&&!TECH.airsq){const nb=o=>{const c=Object.assign({},o);delete c.b;return c;};TECH.airsq={eq:TECH.squat.eq,A:Object.assign(nb(TECH.squat.A),{e:[70,42],a:[82,40]}),B:Object.assign(nb(TECH.squat.B||{}),{e:[78,62],a:[92,60]})};}
+/* ============ Poses armadas con articulaciones ============
+   Cada pose se describe con ángulos (grados: 0 derecha, 90 abajo, 180 izquierda, 270 arriba; la figura mira a la derecha)
+   y largos de cuerpo fijos, así las proporciones siempre dan bien. "at" dice qué punto queda fijo y dónde (el pie en el piso,
+   la mano en la barra...). t torso (cuello→cadera), th muslo, sh pierna, ua brazo, fa antebrazo; th2/sh2/ua2/fa2 la otra pierna o brazo.
+   b: dónde va el peso (disco o mancuerna); c: anclaje de la polea. */
+const PZ=(()=>{
+  const L={t:30,hd:9,th:20,sh:19,ua:14,fa:13},dir=a=>[Math.cos(a*Math.PI/180),Math.sin(a*Math.PI/180)],go=(p,a,l)=>{const d=dir(a);return[p[0]+d[0]*l,p[1]+d[1]*l];};
+  return s=>{
+    const P={n:[0,0]};P.h=go(P.n,s.t+180,L.hd);P.p=go(P.n,s.t,L.t);P.k=go(P.p,s.th,L.th);P.f=go(P.k,s.sh,L.sh);P.e=go(P.n,s.ua,L.ua);P.a=go(P.e,s.fa,L.fa);
+    if(s.th2!=null){P.k2=go(P.p,s.th2,L.th);P.f2=go(P.k2,s.sh2!=null?s.sh2:s.th2,L.sh);}
+    if(s.ua2!=null){P.e2=go(P.n,s.ua2,L.ua);P.a2=go(P.e2,s.fa2!=null?s.fa2:s.ua2,L.fa);}
+    const an=P[s.at[0]],dx=s.at[1]-an[0],dy=s.at[2]-an[1],o={},r=v=>Math.round(v*10)/10;
+    for(const k in P)o[k]=[r(P[k][0]+dx),r(P[k][1]+dy)];
+    if(s.b){const q=typeof s.b==='string'?o[s.b]:s.b,bd=s.bd||[0,0];o.b=[r(q[0]+bd[0]),r(q[1]+bd[1])];}
+    if(s.c)o.c=s.c;return o;
+  };
+})();
+/* de pie, brazos al costado */
+const ST={t:90,th:90,sh:90,ua:96,fa:92,at:['f',60,108]};
+const HANG={t:95,th:95,sh:112,ua:300,fa:290,at:['a',64,12]},PUTOP={t:95,th:100,sh:115,ua:60,fa:280,at:['a',64,12]};
+const PU_A={t:22,th:22,sh:22,ua:90,fa:90,at:['a',26,108]},PU_B={t:14,th:15,sh:15,ua:45,fa:125,at:['a',26,108]};
+const DIP_A={t:95,th:100,sh:150,ua:95,fa:90,at:['a',60,63]},DIP_B={t:75,th:95,sh:150,ua:135,fa:60,at:['a',60,63]};
+const HS_A={t:270,th:270,sh:270,ua:90,fa:90,at:['a',60,108]};
+const POSE={
+  squat:{A:Object.assign({},ST,{ua:150,fa:300,b:'n',bd:[-3,-2]}),B:{t:125,th:5,sh:100,ua:150,fa:300,at:['f',60,108],b:'n',bd:[-3,-2]}},
+  airsq:{A:ST,B:{t:125,th:5,sh:100,ua:10,fa:0,at:['f',60,108]}},
+  hinge:{A:Object.assign({},ST,{ua:92,fa:90,b:'a',bd:[0,2]}),B:{t:150,th:75,sh:100,ua:90,fa:90,at:['f',62,108],b:'a',bd:[0,2]}},
+  thrust:{A:{t:28,th:-28,sh:95,ua:180,fa:170,at:['n',28,88],b:'p',bd:[0,-6]},B:{t:0,th:-3,sh:110,ua:180,fa:170,at:['n',28,88],b:'p',bd:[0,-6]}},
+  bench:{A:{t:0,th:10,sh:85,ua:275,fa:270,at:['n',32,79],b:'a'},B:{t:0,th:10,sh:85,ua:110,fa:290,at:['n',32,79],b:'a'}},
+  press:{A:Object.assign({},ST,{ua:70,fa:280,b:'a'}),B:Object.assign({},ST,{ua:275,fa:272,b:'a'})},
+  row:{A:{t:140,th:80,sh:100,ua:90,fa:90,at:['f',64,108],b:'a',bd:[0,2]},B:{t:140,th:80,sh:100,ua:165,fa:80,at:['f',64,108],b:'a',bd:[0,2]}},
+  pullup:{A:HANG,B:PUTOP},
+  hang:{A:HANG,B:Object.assign({},HANG,{t:97})},
+  legraise:{A:HANG,B:Object.assign({},HANG,{t:97,th:-5,sh:-5})},
+  pushup:{A:PU_A,B:PU_B},
+  plank:{A:{t:12,th:12,sh:12,ua:90,fa:180,at:['e',32,106]},B:{t:11,th:12,sh:12,ua:90,fa:180,at:['e',32,106]}},
+  calf:{A:ST,B:Object.assign({},ST,{at:['f',60,103]})},
+  curl:{A:Object.assign({},ST,{ua:95,fa:90,b:'a'}),B:Object.assign({},ST,{ua:95,fa:300,b:'a'})},
+  pushdown:{A:Object.assign({},ST,{ua:95,fa:330,at:['f',56,108],c:[96,6]}),B:Object.assign({},ST,{ua:95,fa:95,at:['f',56,108],c:[96,6]})},
+  skull:{A:{t:0,th:10,sh:85,ua:280,fa:275,at:['n',32,79],b:'a'},B:{t:0,th:10,sh:85,ua:280,fa:160,at:['n',32,79],b:'a'}},
+  dip:{A:DIP_A,B:DIP_B},
+  lunge:{A:{t:90,th:80,sh:95,th2:100,sh2:95,ua:96,fa:92,at:['f',76,108]},B:{t:90,th:5,sh:95,th2:100,sh2:170,ua:96,fa:92,at:['f',76,108]}},
+  hs:{A:HS_A,B:Object.assign({},HS_A,{t:272,th:272,sh:274})},
+  wallhs:{A:Object.assign({},HS_A,{t:274,th:276,sh:276,at:['a',54,108]}),B:Object.assign({},HS_A,{t:275,th:277,sh:278,at:['a',54,108]})},
+  hspu:{A:Object.assign({},HS_A,{t:274,th:276,sh:276,at:['a',54,108]}),B:{t:276,th:277,sh:278,ua:40,fa:130,at:['a',54,108]}},
+  freehspu:{A:HS_A,B:{t:272,th:272,sh:272,ua:40,fa:130,at:['a',60,108]}},
+  pistol:{A:Object.assign({},ST,{th2:65,sh2:80}),B:{t:115,th:20,sh:110,th2:-5,sh2:-5,ua:0,fa:0,at:['f',58,108]}},
+  /* variantes del árbol: cada una con su dibujo */
+  kneepush:{A:{t:30,th:30,sh:-25,ua:90,fa:90,at:['a',28,108]},B:{t:20,th:22,sh:-25,ua:45,fa:125,at:['a',28,108]}},
+  diamond:{A:PU_A,B:Object.assign({},PU_B,{ua:70,fa:112})},
+  archerpush:{A:Object.assign({},PU_A,{ua2:165,fa2:180}),B:Object.assign({},PU_B,{ua2:160,fa2:178})},
+  pppush:{A:{t:18,th:20,sh:20,ua:60,fa:70,at:['a',48,108]},B:{t:12,th:15,sh:15,ua:20,fa:100,at:['a',48,108]}},
+  oapush:{A:Object.assign({},PU_A,{ua2:10,fa2:4,th2:30,sh2:30}),B:Object.assign({},PU_B,{ua2:4,fa2:0,th2:22,sh2:22})},
+  lpullup:{A:Object.assign({},HANG,{th:-3,sh:-3}),B:Object.assign({},PUTOP,{th:-3,sh:-3})},
+  archerpull:{A:Object.assign({},HANG,{ua2:300,fa2:290}),B:Object.assign({},PUTOP,{ua2:315,fa2:315})},
+  oapull:{A:Object.assign({},HANG,{ua2:100,fa2:95}),B:Object.assign({},PUTOP,{ua2:100,fa2:95})},
+  muscleup:{A:HANG,B:{t:70,th:110,sh:100,ua:150,fa:330,at:['a',64,12]}},
+  benchdip:{A:{t:88,th:0,sh:90,ua:100,fa:95,at:['a',30,83]},B:{t:88,th:-8,sh:95,ua:150,fa:60,at:['a',30,83]}},
+  ringdip:{A:DIP_A,B:DIP_B},
+  russiandip:{A:DIP_A,B:{t:80,th:100,sh:150,ua:110,fa:0,at:['a',72,63]}},
+  shrimp:{A:Object.assign({},ST,{th2:100,sh2:200,ua:20,fa:10}),B:{t:110,th:25,sh:105,th2:110,sh2:190,ua:15,fa:5,at:['f',60,108]}},
+  dragon:{A:Object.assign({},ST,{th2:110,sh2:120,ua:10,fa:0}),B:{t:115,th:20,sh:110,th2:120,sh2:175,ua:0,fa:0,at:['f',60,108]}},
+  boxpistol:{A:Object.assign({},ST,{th2:65,sh2:80,ua:0,fa:0}),B:{t:105,th:10,sh:105,th2:-5,sh2:-5,ua:0,fa:0,at:['f',64,108]}}
+};
+/* figuras nuevas: equipo y claves propias */
+const NEWTQ={
+  kneepush:{eq:['floor'],cues:['Rodillas apoyadas, cuerpo recto de rodillas a cabeza','Manos un poco más abiertas que los hombros','Bajá el pecho hasta casi tocar el piso','Empujá sin aflojar la cadera'],err:'Sacar la cola para arriba'},
+  diamond:{eq:['floor'],cues:['Manos juntas formando un rombo','Codos pegados al cuerpo al bajar','Cuerpo en línea recta','Empujá con los tríceps'],err:'Abrir los codos hacia afuera'},
+  archerpush:{eq:['floor'],cues:['Manos bien abiertas','Bajás hacia un lado, el otro brazo queda estirado','Cuerpo recto, sin rotar','Alterná los lados'],err:'Doblar el brazo que tiene que quedar estirado'},
+  pppush:{eq:['floor'],cues:['Manos a la altura de la cintura, dedos hacia atrás','Hombros bien adelante de las manos','Cuerpo rígido como una tabla','Bajá sin perder la inclinación'],err:'Volver los hombros atrás de las manos'},
+  oapush:{eq:['floor'],cues:['Piernas abiertas para equilibrar','La otra mano en la espalda','Bajá sin rotar la cadera','Empujá con el pecho y el tríceps'],err:'Girar el cuerpo para ayudarte'},
+  lpullup:{eq:['pullbar'],cues:['Piernas rectas a 90° todo el recorrido','Subí hasta pasar el mentón','Sin balancear las piernas','Bajá controlado'],err:'Dejar caer las piernas al subir'},
+  archerpull:{eq:['pullbar'],cues:['Agarre muy abierto','Subí hacia una mano','El otro brazo queda casi recto','Alterná los lados'],err:'Doblar los dos brazos por igual'},
+  oapull:{eq:['pullbar'],cues:['Colgado de una mano, hombro activo','La otra mano libre o en el pecho','Subí hasta pasar el mentón','Bajá lento'],err:'Girar el cuerpo para llegar'},
+  muscleup:{eq:['pullbar'],cues:['Dominada explosiva, bien alta','Llevá el pecho por encima de la barra','Pasá los codos rápido arriba','Terminá con un fondo arriba de la barra'],err:'Pasar un brazo antes que el otro'},
+  benchdip:{eq:['bench'],cues:['Manos en el banco detrás tuyo','Bajá doblando los codos a 90°','Espalda cerca del banco','Empujá hasta estirar los brazos'],err:'Bajar demasiado y forzar el hombro'},
+  ringdip:{eq:['rings'],cues:['Anillas pegadas al cuerpo arriba','Bajá controlando que no se abran','Codos atrás hasta 90°','Empujá hasta trabar los brazos'],err:'Dejar que las anillas se abran'},
+  russiandip:{eq:['bars'],cues:['Bajá en el fondo hasta apoyar los antebrazos','Pasá el peso a los antebrazos','Volvé a subir a brazos rectos','Movimiento controlado'],err:'Caer de golpe sobre los antebrazos'},
+  shrimp:{eq:['floor'],cues:['Agarrá el pie de atrás con la mano','Bajá hasta apoyar la rodilla de atrás','Torso un poco inclinado adelante','Subí empujando con la pierna de adelante'],err:'Golpear la rodilla contra el piso'},
+  dragon:{eq:['floor'],cues:['La pierna libre cruza por detrás','Bajá con control sobre una pierna','Rodilla de apoyo en la línea del pie','Subí sin apoyar la otra pierna'],err:'Apoyarte en la pierna de atrás'},
+  boxpistol:{eq:['floor','boxl'],cues:['Cajón o banco bajo detrás tuyo','Bajá en una pierna hasta sentarte','La otra pierna estirada adelante','Subí sin impulso'],err:'Dejarte caer sobre el cajón'}
+};
+Object.keys(NEWTQ).forEach(k=>{if(!TECH[k])TECH[k]=NEWTQ[k];});
+Object.keys(POSE).forEach(k=>{const T=TECH[k];if(!T)return;T.A=PZ(POSE[k].A);T.B=PZ(POSE[k].B);});
 function techSVG(k,stat){
   const T=TECH[k];if(!T)return '';
   /* que la figura se lea: el brazo que cae sobre el cuerpo se corre un poco adelante, y si la pose no trae el brazo y la pierna de atrás, se dibujan levemente corridos */
@@ -459,7 +545,7 @@ function techSVG(k,stat){
   const has=x=>T.eq.includes(x),fl='<line class="tq-floor" x1="4" y1="111" x2="116" y2="111"/>';
   let eq='';
   if(has('floor'))eq+=fl;
-  if(has('bench')){const th=k==='thrust',sp=k==='sideplank';const x=th?8:sp?82:16,w=th?26:sp?30:62;eq+='<rect class="tq-eq" x="'+x+'" y="'+(th?80:sp?84:83)+'" width="'+w+'" height="6" rx="3"/><line class="tq-eq" x1="'+(x+5)+'" y1="88" x2="'+(x+5)+'" y2="110"/><line class="tq-eq" x1="'+(x+w-5)+'" y1="88" x2="'+(x+w-5)+'" y2="110"/>'+fl;}
+  if(has('bench')){const th=k==='thrust',sp=k==='sideplank';const x=th?8:sp?82:16,w=th?26:sp?30:62;eq+='<rect class="tq-eq" x="'+x+'" y="'+(th?92:sp?84:83)+'" width="'+w+'" height="6" rx="3"/><line class="tq-eq" x1="'+(x+5)+'" y1="88" x2="'+(x+5)+'" y2="110"/><line class="tq-eq" x1="'+(x+w-5)+'" y1="88" x2="'+(x+w-5)+'" y2="110"/>'+fl;}
   if(has('seat'))eq+='<rect class="tq-eq" x="36" y="85" width="40" height="6" rx="3"/><rect class="tq-eq" x="34" y="44" width="6" height="44" rx="3"/><line class="tq-eq" x1="56" y1="91" x2="56" y2="110"/>'+fl;
   const lv=/^(fl|bl|skincat)/.test(k),ls=/^(lsit|vsit)/.test(k);
   if(has('pullbar'))eq+='<line class="tq-eq" x1="'+(lv?24:36)+'" y1="11" x2="'+(lv?62:84)+'" y2="11"/>';
@@ -467,15 +553,17 @@ function techSVG(k,stat){
   if(has('wall'))eq+='<line class="tq-eq" x1="70" y1="4" x2="70" y2="111"/>';
   if(has('bars'))eq+='<line class="tq-eq" x1="'+(ls?40:44)+'" y1="'+(ls?93:63)+'" x2="'+(ls?66:76)+'" y2="'+(ls?93:63)+'"/><line class="tq-eq" x1="'+(ls?46:70)+'" y1="'+(ls?93:63)+'" x2="'+(ls?46:70)+'" y2="111"/>'+fl;
   if(has('pole'))eq+='<line class="tq-eq" x1="28" y1="6" x2="28" y2="111"/>'+fl;
+  if(has('boxl'))eq+='<rect class="tq-eq" x="20" y="90" width="30" height="20" rx="3"/>';
+  if(has('rings'))eq+='<line class="tq-cab" x1="'+(A.a[0]-2)+'" y1="0" x2="'+A.a[0]+'" y2="'+A.a[1]+'">'+an('x2',A.a[0],B.a[0])+an('y2',A.a[1],B.a[1])+'</line><circle class="tq-eq" cx="'+A.a[0]+'" cy="'+A.a[1]+'" r="3.5">'+an('cx',A.a[0],B.a[0])+an('cy',A.a[1],B.a[1])+'</circle>';
   if(has('box'))eq+='<rect class="tq-eq" x="64" y="82" width="38" height="28" rx="3"/>'+fl;
   if(has('cables'))eq+='<line class="tq-cab" x1="8" y1="8" x2="'+A.a[0]+'" y2="'+A.a[1]+'">'+an('x2',A.a[0],B.a[0])+an('y2',A.a[1],B.a[1])+'</line><line class="tq-cab" x1="112" y1="8" x2="'+A.a2[0]+'" y2="'+A.a2[1]+'">'+an('x2',A.a2[0],B.a2[0])+an('y2',A.a2[1],B.a2[1])+'</line>';
   const cab=A.c?'<line class="tq-cab" x1="'+A.c[0]+'" y1="'+A.c[1]+'" x2="'+A.a[0]+'" y2="'+A.a[1]+'">'+an('x2',A.a[0],B.a[0])+an('y2',A.a[1],B.a[1])+'</line><circle class="tq-eq" cx="'+A.c[0]+'" cy="'+A.c[1]+'" r="3"/>':'';
-  const shadow=A.f&&!lv&&!/^(legraise|pullup|flag|vflag)/.test(k)?'<ellipse class="tq-sh" cx="'+A.f[0]+'" cy="111" rx="16" ry="2.5">'+an('cx',A.f[0],B.f[0])+'</ellipse>':'';
+  const shadow=A.f&&!lv&&!/^(legraise|pullup|flag|vflag|hang|lpullup|archerpull|oapull|muscleup|ringdip)/.test(k)?'<ellipse class="tq-sh" cx="'+A.f[0]+'" cy="111" rx="16" ry="2.5">'+an('cx',A.f[0],B.f[0])+'</ellipse>':'';
   const plate=A.b?(k==='slam'?'<circle class="tq-ball" cx="'+A.b[0]+'" cy="'+A.b[1]+'" r="7">'+an('cx',A.b[0],B.b[0])+an('cy',A.b[1],B.b[1])+'</circle>':dot('b',6.5,'tq-plate')+dot('b',2,'tq-hub')):'';
   return '<svg class="tq'+(stat?' st':'')+'" viewBox="0 0 120 120" role="img" aria-label="Cómo se hace">'+eq+shadow+cab+
    '<g class="tq-b2">'+bone('p','k2',6.5)+bone('k2','f2',5.5)+bone('n','e2',5)+bone('e2','a2',4.5)+'</g>'+
-   '<g class="tq-b">'+bone('n','p',11)+bone('p','k',8)+bone('k','f',6.5)+bone('n','e',5.5)+bone('e','a',5)+dot('k',2.2,'tq-j')+dot('e',2,'tq-j')+'</g>'+
-   dot('h',8,'tq-h')+plate+'</svg>';
+   '<g class="tq-b">'+bone('n','p',10)+bone('p','k',7.5)+bone('k','f',6)+bone('n','e',5.5)+bone('e','a',5)+dot('k',2.2,'tq-j')+dot('e',2,'tq-j')+'</g>'+
+   dot('h',7.5,'tq-h')+plate+'</svg>';
 }
 /* tu video de cada ejercicio queda solo en este dispositivo (IndexedDB), no se sube a ningún lado */
 const VidDB=(()=>{let p=null;const open=()=>p||(p=new Promise((ok,bad)=>{const r=indexedDB.open('swole-vid',1);r.onupgradeneeded=()=>r.result.createObjectStore('v');r.onsuccess=()=>ok(r.result);r.onerror=()=>bad(r.error);}));
