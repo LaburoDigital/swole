@@ -448,9 +448,13 @@ function techOf(ex){
 if(TECH.squat&&!TECH.airsq){const nb=o=>{const c=Object.assign({},o);delete c.b;return c;};TECH.airsq={eq:TECH.squat.eq,A:Object.assign(nb(TECH.squat.A),{e:[70,42],a:[82,40]}),B:Object.assign(nb(TECH.squat.B||{}),{e:[78,62],a:[92,60]})};}
 function techSVG(k,stat){
   const T=TECH[k];if(!T)return '';
-  const A=T.A,B=Object.assign({},A,T.B),D='2.8s',ks='keyTimes="0;.45;.55;1" calcMode="spline" keySplines=".45 0 .3 1;0 0 1 1;.45 0 .3 1"';
+  /* que la figura se lea: el brazo que cae sobre el cuerpo se corre un poco adelante, y si la pose no trae el brazo y la pierna de atrás, se dibujan levemente corridos */
+  const A0=Object.assign({},T.A),B0=Object.assign({},T.A,T.B),dseg=(q,a,b)=>{const dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((q[0]-a[0])*dx+(q[1]-a[1])*dy)/L));return Math.hypot(q[0]-a[0]-t*dx,q[1]-a[1]-t*dy);};
+  const armOn=A0.e&&A0.n&&A0.p&&(dseg(A0.e,A0.n,A0.p)<5||(A0.a&&dseg(A0.a,A0.n,A0.p)<5)),mv=(p,dx)=>p&&[p[0]+dx,p[1]];
+  const fix=P=>{if(armOn){P.e=mv(P.e,5);P.a=mv(P.a,5);}if(!T.A.k2&&P.k&&P.f&&P.p){P.k2=mv(P.k,-4);P.f2=mv(P.f,-4);}if(!T.A.e2&&P.e&&P.a&&P.n){P.e2=mv(P.e,-4);P.a2=mv(P.a,-4);}return P;};
+  const A=fix(A0),B=fix(B0),D='2.8s',ks='keyTimes="0;.45;.55;1" calcMode="spline" keySplines=".45 0 .3 1;0 0 1 1;.45 0 .3 1"';
   const an=(attr,a,b)=>stat||a===b?'':'<animate attributeName="'+attr+'" values="'+a+';'+b+';'+b+';'+a+'" dur="'+D+'" repeatCount="indefinite" '+ks+'/>';
-  const bone=(p,q,w,cls)=>A[p]&&A[q]?'<line class="'+(cls||'')+'" stroke-width="'+w+'" x1="'+A[p][0]+'" y1="'+A[p][1]+'" x2="'+A[q][0]+'" y2="'+A[q][1]+'">'+an('x1',A[p][0],B[p][0])+an('y1',A[p][1],B[p][1])+an('x2',A[q][0],B[q][0])+an('y2',A[q][1],B[q][1])+'</line>':'';
+  const bone=(p,q,w,cls)=>A[p]&&A[q]?'<line class="'+(cls||'')+'" style="stroke-width:'+w+'" x1="'+A[p][0]+'" y1="'+A[p][1]+'" x2="'+A[q][0]+'" y2="'+A[q][1]+'">'+an('x1',A[p][0],B[p][0])+an('y1',A[p][1],B[p][1])+an('x2',A[q][0],B[q][0])+an('y2',A[q][1],B[q][1])+'</line>':'';
   const dot=(p,r,cls)=>A[p]?'<circle class="'+cls+'" cx="'+A[p][0]+'" cy="'+A[p][1]+'" r="'+r+'">'+an('cx',A[p][0],B[p][0])+an('cy',A[p][1],B[p][1])+'</circle>':'';
   const has=x=>T.eq.includes(x),fl='<line class="tq-floor" x1="4" y1="111" x2="116" y2="111"/>';
   let eq='';
@@ -470,8 +474,8 @@ function techSVG(k,stat){
   const plate=A.b?(k==='slam'?'<circle class="tq-ball" cx="'+A.b[0]+'" cy="'+A.b[1]+'" r="7">'+an('cx',A.b[0],B.b[0])+an('cy',A.b[1],B.b[1])+'</circle>':dot('b',6.5,'tq-plate')+dot('b',2,'tq-hub')):'';
   return '<svg class="tq'+(stat?' st':'')+'" viewBox="0 0 120 120" role="img" aria-label="Cómo se hace">'+eq+shadow+cab+
    '<g class="tq-b2">'+bone('p','k2',6.5)+bone('k2','f2',5.5)+bone('n','e2',5)+bone('e2','a2',4.5)+'</g>'+
-   '<g class="tq-b">'+bone('n','p',9)+bone('p','k',7.5)+bone('k','f',6)+bone('n','e',5.5)+bone('e','a',5)+dot('k',2.2,'tq-j')+dot('e',2,'tq-j')+'</g>'+
-   dot('h',7.5,'tq-h')+plate+'</svg>';
+   '<g class="tq-b">'+bone('n','p',11)+bone('p','k',8)+bone('k','f',6.5)+bone('n','e',5.5)+bone('e','a',5)+dot('k',2.2,'tq-j')+dot('e',2,'tq-j')+'</g>'+
+   dot('h',8,'tq-h')+plate+'</svg>';
 }
 /* tu video de cada ejercicio queda solo en este dispositivo (IndexedDB), no se sube a ningún lado */
 const VidDB=(()=>{let p=null;const open=()=>p||(p=new Promise((ok,bad)=>{const r=indexedDB.open('swole-vid',1);r.onupgradeneeded=()=>r.result.createObjectStore('v');r.onsuccess=()=>ok(r.result);r.onerror=()=>bad(r.error);}));

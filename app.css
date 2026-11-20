@@ -1609,3 +1609,8 @@ small{line-height:1.35}
 .ph-size{min-width:0}.ph-size .seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%}
 .ph-size .seg button{min-width:0;white-space:normal;font-size:13px}
 .ph-size .fd-amt{width:100%;min-width:0}.ph-size .fd-amt .ib{flex:none}
+/* v68: la pantalla no se va de costado (las entradas animadas corrían el contenido) ni hace zoom con doble toque */
+html,body{overflow-x:clip;overscroll-behavior-x:none}
+html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#view{overflow-x:clip;overflow-clip-margin:24px}
+.msheet,.sess,.pick{overflow-x:hidden}
