@@ -1,5 +1,5 @@
 # Swole — Plan
-Última actualización: 2026-11-21 · Etapa actual: 3
+Última actualización: 2026-11-21 · Etapa actual: 4
 
 ## Visión
 App web instalable (PWA) en español rioplatense para entrenar (gym o calistenia) y saber qué tan fuerte sos: registrás entrenos y tus marcas se convierten en un rango de Bronce a Élite comparado con gente de tu sexo, edad y peso. Además: rutinas generadas, nutrición, árbol de calistenia, amigos y rankings. Público: gente que entrena, sobre todo adolescentes y jóvenes que hacen deporte.
@@ -127,7 +127,7 @@ Publicada en https://laburodigital.github.io/swole/ · versión v84 · repo Labu
 - Depende de: nada (puede ir en paralelo con la 1).
 - Resultado: tests/cargar.js levanta los js/ en el orden de index.html con un DOM de mentira; niveles.test.js (6), generador.test.js (8), ejercicios.test.js (1 + uno por ejercicio). CI verde en main (run 44925404636); rotura a propósito en la rama prueba-rotura (sacar las claves de técnica de dominadas) → CI rojo (run 44925479298), rama borrada.
 
-### Etapa 3 — Sync segura  [en curso · pruebas y arreglos hechos, falta CI y celu real]
+### Etapa 3 — Sync segura  [hecha 2026-11-21]
 - Objetivo: que la sync no pueda borrar historiales.
 - Tareas: pruebas de la sync (dos dispositivos, sin red, borrado, reinstalación, reloj desfasado); arreglar lo que falle; exportación/importación completa de datos del usuario; verificar backups de Supabase.
 - Archivos: js/sync.js, js/datos.js, tests/.
@@ -203,4 +203,5 @@ App Store (necesita Mac + cuenta Apple); widget de inicio; Apple Health y Google
 | 2026-11-21 | 1 | Checklist de 12 ítems en docs/checklist-celu.md; Etapa 1 en curso. | Juan corre el checklist en Android y iPhone; anotar ✓/✗ en Estado. |
 | 2026-11-21 | 1 | iPhone: 12/12 ✓ según Juan (sin detalle). No hay Android disponible. Etapa cerrada; Android pasa a la Etapa 5. | Etapa 2: pruebas automáticas. |
 | 2026-11-21 | 2 | tests/ + package.json + .github/workflows/test.yml; 131 pruebas verdes; CI verde en main y rojo con rotura a propósito (rama borrada). Sin cambios en la app. | Etapa 3: sync segura (sumar pruebas de sync al mismo cargador). Humo con navegador sigue pendiente (Etapa 6). |
-| 2026-11-21 | 3 | 20 pruebas de sync y copias (tests/nube.js: nube y celus de mentira con su reloj). Fallaban 11: reloj desfasado (3), bienvenida antes de entrar, otra cuenta, copias (5) y 1 del entorno de prueba. Arreglado en js/datos.js, js/sync.js y js/acciones.js; 151/151 en local; v84. | Push (CI) y la restauración en celu real. Backups de Supabase sin verificar. |
+| 2026-11-21 | 3 | 20 pruebas de sync y copias (tests/nube.js: nube y celus de mentira con su reloj). Fallaban 11: reloj desfasado (3), bienvenida antes de entrar, otra cuenta, copias (5) y 1 del entorno de prueba. Arreglado en js/datos.js, js/sync.js y js/acciones.js; 151/151 en local; v84. | CI verde en b893ba2 (v84 publicada). Backups de Supabase sin verificar. |
+| 2026-11-21 | 3 | Restauración probada en celu real con v84 (exportar → borrar todo → importar → entrar con la cuenta): "anduvo bien", según Juan (sin detalle de modelo ni de cantidades). Etapa cerrada. | Etapa 4: menores, privacidad y social. Backups de Supabase siguen sin verificar. |
