@@ -24,6 +24,8 @@ Publicada en https://laburodigital.github.io/swole/ · versión v83 · repo Labu
 - Capturas reales para info/.
 - PLAN-v5: **no existen** en el código el ciclo menstrual opcional ni los desafíos 1 contra 1 (verificado con búsqueda). Pasan a "Después".
 
+**Resultados celu real (Etapa 1, v83):** pendiente — Juan corre docs/checklist-celu.md en Android y iPhone.
+
 **Bugs conocidos / sin verificar:**
 - iPhone sin confirmar: tocar la barra de abajo scrolleando, temblor Rutinas/Calendario, rebote, fluidez, ícono de "Agregar a inicio".
 - Sin confirmar: abrir sin internet después de partir el archivo (v60), teclado al cargar marcas, atrás de Android dos veces.
@@ -106,8 +108,9 @@ Publicada en https://laburodigital.github.io/swole/ · versión v83 · repo Labu
 
 ## Etapas
 
-### Etapa 1 — Prueba en celu real  [pendiente]
+### Etapa 1 — Prueba en celu real  [en curso]
 - Objetivo: saber qué anda y qué no en un Android y un iPhone reales.
+- Checklist: docs/checklist-celu.md (12 ítems, armado 2026-11-21). Resultados van a "Resultados celu real" en Estado.
 - Tareas: armar checklist corto (arranque, sin conexión, entreno en vivo completo, descanso con pantalla bloqueada, teclado al cargar marca, barra de abajo, atrás de Android, Agregar a inicio, sync entre 2 celus, foto de comida); Juan lo corre; anotar resultados en Estado y bugs.
 - Archivos: PLAN.md, docs/checklist-celu.md (nuevo).
 - Terminado cuando: el checklist está corrido en los dos celus y cada ítem dice ✓ / ✗ con detalle.
@@ -185,3 +188,4 @@ App Store (necesita Mac + cuenta Apple); widget de inicio; Apple Health y Google
 | Fecha | Etapa | Qué se hizo | Qué quedó |
 |---|---|---|---|
 | 2026-11-21 | 0 | Se armó este plan desde el resumen del chat original + verificación del repo (v83, git limpio). | Arrancar Etapa 1 y 2. |
+| 2026-11-21 | 1 | Checklist de 12 ítems en docs/checklist-celu.md; Etapa 1 en curso. | Juan corre el checklist en Android y iPhone; anotar ✓/✗ en Estado. |
