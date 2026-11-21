@@ -609,6 +609,18 @@ function pushCard(){
 }
 
 /* ============ Coach: lee tu historial y te dice qué ajustar ============ */
+/* estancado: 4+ sesiones en 6 semanas y las últimas 3 no superan a las anteriores (con al menos 10 días entre la primera y la última) */
+function stallOf(id){
+  const ex=exById(id);if(!ex||ex.time||!hasRank(ex))return null;
+  const from=addDays(today(),-42),ses=[];
+  db.logs.filter(l=>l.date>=from).sort((a,b)=>a.date<b.date?-1:1).forEach(l=>{const en=l.entries.find(e=>e.ex===id);if(!en)return;const m=Math.max(0,...en.sets.filter(s=>!s.w).map(s=>e1(ex,s.kg,s.reps)));if(m>0)ses.push({d:l.date,m});});
+  if(ses.length<4)return null;
+  const rec=ses.slice(-3),old=ses.slice(0,-3),bestOld=Math.max(...old.map(s=>s.m)),bestRec=Math.max(...rec.map(s=>s.m));
+  return bestRec<=bestOld*1.005&&(parseK(rec[2].d)-parseK(rec[0].d))/864e5>=10?{ex,since:rec[0].d,n:ses.length}:null;
+}
+/* el plan que elegiste para salir del estancamiento, si sigue vigente */
+const fixOf=id=>{const f=(db.settings.fix||{})[id];return f&&f.until>=today()?f:null;};
+const FIX_N={deload:'Semana liviana',reps:'Cambio de repeticiones',vary:'Variante parecida'};
 const PUSH_M=['pecho','hombros','triceps'],PULL_M=['dorsales','trapecio','biceps'];
 function coachTips(){
   const out=[],t=today(),ws=weekStart(),hide=db.settings.coachHide||{};
@@ -624,15 +636,8 @@ function coachTips(){
   /* 1. hace mucho que no entrenás */
   if(gap>=8)out.push({id:'gap',i:'play',tone:'warn',txt:'Hace '+gap+' días que no entrenás. Volvé con una sesión corta y liviana: lo importante es retomar.',a:'todayGo',al:'Entreno de hoy'});
   /* 2. estancado: 4+ sesiones en 6 semanas y las últimas 3 no superan a las anteriores */
-  const from=addDays(t,-42),st=[];
-  rankedList().forEach(x=>{
-    if(x.ex.time)return;
-    const ses=[];logs.filter(l=>l.date>=from).forEach(l=>{const en=l.entries.find(e=>e.ex===x.ex.id);if(!en)return;const m=Math.max(0,...en.sets.filter(s=>!s.w).map(s=>e1(x.ex,s.kg,s.reps)));if(m>0)ses.push({d:l.date,m});});
-    if(ses.length<4)return;
-    const rec=ses.slice(-3),old=ses.slice(0,-3),bestOld=Math.max(...old.map(s=>s.m)),bestRec=Math.max(...rec.map(s=>s.m));
-    if(bestRec<=bestOld*1.005&&(parseK(rec[2].d)-parseK(rec[0].d))/864e5>=10)st.push(x.ex);
-  });
-  if(st.length)out.push({id:'stall-'+st[0].id,i:'swap',tone:'warn',txt:shortN(st[0].n)+' está estancado hace un par de semanas. Probá cambiar el estímulo: si venías en 8 repeticiones, hacé 3 semanas de 5 más pesadas (o al revés), o sumá una serie.',a:'exInfo',v:st[0].id,al:'Ver progreso'});
+  const st=rankedList().map(x=>stallOf(x.ex.id)).filter(x=>x&&!fixOf(x.ex.id)).map(x=>x.ex);
+  if(st.length)out.push({id:'stall-'+st[0].id,i:'swap',tone:'warn',txt:shortN(st[0].n)+' no sube hace un par de semanas. Elegí un plan para destrabarlo: una semana liviana, cambiar las repeticiones o probar una variante.',a:'exInfo',v:st[0].id,al:'Elegir un plan'});
   /* 3. desbalance empuje / tirón (últimas 4 semanas) */
   let pu=0,pl=0,up=0,lo=0;
   logs.filter(l=>l.date>=addDays(t,-28)).forEach(l=>l.entries.forEach(en=>{const ex=exById(en.ex);if(!ex)return;const n=en.sets.filter(s=>!s.w).length,p=ex.p[0];
@@ -1154,6 +1159,10 @@ function goalFor(id){
   if(ex.time){const best=Math.max(...ls.map(s=>+s.reps));return{kg:0,reps:best+5,prev:best+' s',why:'+5 segundos'};}
   const top=ls.reduce((a,s)=>e1(ex,s.kg,s.reps)>e1(ex,a.kg,a.reps)?s:a,ls[0]);
   const prev=(+top.kg?num(+top.kg,1)+' kg × ':'')+top.reps;
+  /* plan para destrabar un estancamiento */
+  const fx=typeof fixOf==='function'&&fixOf(id),r25=v=>Math.round(v/2.5)*2.5;
+  if(fx&&fx.k==='deload')return{kg:+top.kg?r25(+top.kg*.9):0,reps:+top.reps,prev,why:'semana liviana: 90 % para recargar'};
+  if(fx&&fx.k==='reps'){const hi=+top.reps>=8;return{kg:+top.kg?r25(+top.kg*(hi?1.1:.85)):0,reps:hi?5:10,prev,why:hi?'más pesado a 5 repeticiones (3 semanas)':'más liviano a 10 repeticiones (3 semanas)'};}
   if(ex.sk||ex.bw&&!+top.kg)return{kg:+top.kg||0,reps:+top.reps+1,prev,why:'+1 repetición'};
   const allHit=ls.every(s=>+s.reps>=+top.reps);
   if(!allHit)return{kg:+top.kg,reps:+top.reps,prev,why:'completá todas las series con este peso'};

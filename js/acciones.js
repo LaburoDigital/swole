@@ -176,6 +176,16 @@ const ACTIONS={
     const li=db.logs.findIndex(l=>l.id===lid);if(li<0)return;const l=db.logs[li],ei=l.entries.findIndex(en=>en.ex===ex);if(ei<0)return;
     const en=l.entries.splice(ei,1)[0],gone=!l.entries.length;if(gone)db.logs.splice(li,1);save();render();buzz(8);
     toast(gone?'Entreno borrado (era lo único)':'Series borradas de ese día',()=>{if(gone)db.logs.splice(Math.min(li,db.logs.length),0,l);l.entries.splice(Math.min(ei,l.entries.length),0,en);save();render();});},
+  saveAsR(v){const l=db.logs.find(x=>x.id===v);if(!l)return;
+    const items=l.entries.map(en=>{const ss=en.sets.filter(s=>!s.w);return ss.length?{ex:en.ex,sets:ss.length,reps:Math.max(...ss.map(s=>+s.reps||0))||10}:null;}).filter(Boolean);
+    if(!items.length)return toast('Ese entreno no tiene series para copiar');
+    const nm=l.name&&!/^Entreno libre/i.test(l.name)?l.name:'Mi rutina '+shortDate(parseK(l.date).getTime());
+    const r={id:uid(),name:nm,days:[],since:today(),items,rest:db.settings.rest||90};db.routines.push(r);l.routineId=r.id;save();
+    if(S.modal&&S.modal.t==='summary')S.modal.saved=r.id;render();buzz(10);toast('Guardada como rutina: '+nm);},
+  stallFix(v,el){const id=el.dataset.e,s=db.settings;s.fix=Object.assign({},s.fix||{});if(v==='off'){delete s.fix[id];save();render();toast('Plan quitado');return;}
+    s.fix[id]={k:v,from:today(),until:addDays(today(),v==='deload'?7:21)};save();render();buzz(10);
+    toast(v==='deload'?'Esta semana vas al 90 %: la meta del entreno ya lo tiene en cuenta':v==='reps'?'3 semanas con otras repeticiones: la meta del entreno te guía':'Probá una de las variantes parecidas en tu próximo entreno');},
+  exMet(v){S.exM=v;renderModal();},
   rankTog(v){const s=db.settings,l=(s.noRank||[]).slice(),i=l.indexOf(v);if(i>=0)l.splice(i,1);else l.push(v);s.noRank=l;save();render();toast(i>=0?'Vuelve a contar para tu nivel':'Ya no cuenta para tu nivel');},
   delTest(v){S.m2={t:'confirm',title:'Borrar marca',msg:'Se borra esta marca. Tu nivel en este ejercicio se recalcula.',act:'delTestGo',arg:v,ok:'Borrar'};render();},
   delTestGo(v){db.tests=db.tests.filter(t=>t.id!==v);S.m2=null;save();render();toast('Marca borrada');checkRankUp();},

@@ -301,7 +301,8 @@ function viewNutri(){
   /* peso */
   const ws=db.weights.slice().sort((a,b)=>a.date<b.date?-1:1),last=ws[ws.length-1],first=ws.length>1?ws[0]:null;
   h+='<div class="card"><div class="hd"><h3>Peso corporal</h3><span class="mut sm-t">'+(last?num(last.kg,1)+' kg':num(p.weight,1)+' kg')+(first?', '+(last.kg-first.kg>=0?'+':'')+num(last.kg-first.kg,1)+' kg total':'')+'</span></div>'+
-   chart(ws.map(w=>({t:parseK(w.date).getTime(),y:w.kg})),'kg')+
+   chart(ws.map(w=>({t:parseK(w.date).getTime(),y:w.kg})),'kg',wTrend(ws))+(()=>{const tr=wTrend(ws);if(tr.length<2)return '';const a=tr[0],b=tr[tr.length-1],wk=(b.t-a.t)/(7*864e5);if(wk<1)return '';const r=(b.y-a.y)/wk;
+     return '<p class="w-trend">'+ic(r<-.05?'down':r>.05?'up':'right',14)+' Tendencia: <b>'+(r>0?'+':'')+num(r,2)+' kg por semana</b> <span class="mut sm-t">(promedio que suaviza los días de más o menos agua)</span></p>';})()+
    '<div class="w-row"><div class="field" style="margin:0"><input id="wIn" type="number" inputmode="decimal" step="0.1" min="30" max="250" placeholder="Peso en kg" aria-label="Peso"></div>'+
    '<div class="field" style="margin:0"><input id="wDate" type="date" max="'+t+'" value="'+t+'" aria-label="Fecha del peso"></div><button class="btn pri" data-a="addW">Guardar</button></div>'+
    (ws.length?'<div class="wlist">'+ws.slice().reverse().slice(0,S.wAll?999:6).map(w=>'<div class="rowline"><span>'+esc(longDate(w.date))+'</span><span class="row" style="gap:6px"><b>'+num(w.kg,1)+' kg</b><button class="ib flat" style="width:32px;height:32px" data-a="editW" data-v="'+w.date+'" aria-label="Corregir">'+ic('edit',15)+'</button><button class="ib flat" style="width:32px;height:32px" data-a="delW" data-v="'+w.date+'" aria-label="Borrar">'+ic('trash',15)+'</button></span></div>').join('')+'</div>'+
@@ -517,6 +518,8 @@ function finishSession(){
   entries.forEach(en=>{const ex=exById(en.ex),b=bestE1(en.ex);before[en.ex]={e:b?b.e:0,L:hasRank(ex)?(b?levelIdx(ex,b.e):-1):null};});
   const log={id:a.id,date:a.date,name:a.name,routineId:a.routineId,dur:Math.max(1,Math.round((Date.now()-a.t0)/60000)),entries,prs:[]};
   if((a.note||'').trim())log.note=a.note.trim();
+  /* la vez anterior: la misma rutina, o el último entreno con esos ejercicios */
+  const prevLog=db.logs.slice().sort((a,b)=>a.date<b.date?1:-1).find(l=>a.routineId?l.routineId===a.routineId:l.entries.some(en=>entries.some(x=>x.ex===en.ex)));
   db.logs.push(log);
   const prs=[],ups=[];
   entries.forEach(en=>{
@@ -533,7 +536,10 @@ function finishSession(){
   addEv({k:'w',n:log.name,d:log.date});prs.forEach(p=>addEv({k:'pr',x:p.ex,d:log.date}));ups.forEach(u=>addEv({k:'up',x:u.ex,L:u.to,d:log.date}));
   db.active=null;save();endRest(false);S.sessOpen=false;
   const posted=Social.share(log,{vol,sets,prs,ups});
-  S.modal={t:'summary',log,prs,ups,vol,sets,goals:{hit:gHit,tot:gTot},posted};render();countUp($('#modal'));buzz([20,40,60]);
+  const vs=prevLog?entries.map(en=>{const ex=exById(en.ex),p=prevLog.entries.find(x=>x.ex===en.ex);if(!ex||!p)return null;
+    const top=ss=>ss.filter(s=>!s.w).reduce((b,s)=>!b||e1(ex,s.kg,s.reps)>e1(ex,b.kg,b.reps)?s:b,null),a1=top(p.sets),b1=top(en.sets);if(!a1||!b1)return null;
+    const ea=e1(ex,a1.kg,a1.reps),eb=e1(ex,b1.kg,b1.reps);return{ex:en.ex,a:setTxt(ex,a1),b:setTxt(ex,b1),d:ea?eb/ea-1:0};}).filter(Boolean):[];
+  S.modal={t:'summary',log,prs,ups,vol,sets,goals:{hit:gHit,tot:gTot},posted,vs,vsD:prevLog&&prevLog.date};render();countUp($('#modal'));buzz([20,40,60]);
   checkGoals();checkRankUp(900);checkMissions();
   if(ups.length||prs.length)setTimeout(()=>confetti(ups.length?70:36),250);
   checkAch();
@@ -578,7 +584,12 @@ function restTick(){
   if(f)f.style.strokeDashoffset=(163.4*(1-left/S.rest.total)).toFixed(1);
   if(w)w.classList.toggle('last',left<=3);
 }
-function endRest(alarm){clearInterval(restT);S.rest=null;$('#restbar').innerHTML='';if(alarm){beep();toast('Descanso terminado');}}
+function restNote(title,body,silent){try{if(!('Notification' in window)||Notification.permission!=='granted'||!navigator.serviceWorker)return;
+  navigator.serviceWorker.ready.then(r=>r.showNotification(title,{body,tag:'swole-rest',renotify:!silent,silent:!!silent,icon:'icons/icon-192.png',badge:'icons/icon-192.png',vibrate:silent?undefined:[200,80,200],data:{url:'./'}})).catch(()=>{});}catch(e){}}
+function restNoteClear(){try{navigator.serviceWorker&&navigator.serviceWorker.ready.then(r=>r.getNotifications({tag:'swole-rest'})).then(l=>l&&l.forEach(n=>n.close())).catch(()=>{});}catch(e){}}
+/* si salís de la app durante el descanso, el celu te avisa a qué hora termina y cuando termina */
+document.addEventListener('visibilitychange',()=>{if(!S.rest)return;if(document.hidden){const hm=new Date(S.rest.end).toTimeString().slice(0,5);restNote('Descansando','Termina a las '+hm,true);clearTimeout(S.restN);S.restN=setTimeout(()=>{if(S.rest&&document.hidden)restNote('Descanso terminado','Volvé a la siguiente serie',false);},Math.max(0,S.rest.end-Date.now()));}else{clearTimeout(S.restN);restNoteClear();}});
+function endRest(alarm){clearInterval(restT);clearTimeout(S.restN);const hid=document.hidden;S.rest=null;$('#restbar').innerHTML='';if(alarm){beep();toast('Descanso terminado');if(hid)restNote('Descanso terminado','Volvé a la siguiente serie',false);}else restNoteClear();}
 function renderRest(){
   if(!S.rest){$('#restbar').innerHTML='';return;}
   const left=Math.max(0,Math.ceil((S.rest.end-Date.now())/1000));
@@ -595,6 +606,11 @@ function exDetail(id){
   h+='<p class="mut sm-t">Equipo: '+esc(ex.eq)+'. Los músculos resaltados son los principales y los claros, los secundarios.</p>';
   h+='<div class="row" style="gap:8px;flex-wrap:wrap">'+(hasRank(ex)?'<button class="btn sm pri" data-a="markOpen" data-v="'+ex.id+'">'+ic('bolt',16)+' Cargar marca</button>':'')+(isBarbell(ex)?'<button class="btn sm line" data-a="platesOpen">'+ic('disc',16)+' Calculadora de discos</button>':'')+'</div>';
   const b=bestE1(id);
+  {const sx=stallOf(id),fx=fixOf(id);
+    if(fx)h+='<div class="stall on"><span class="ct-ic">'+ic('target',16)+'</span><div class="grow"><b>Plan: '+FIX_N[fx.k]+'</b><span class="mut sm-t">Hasta el '+esc(longDate(fx.until))+(fx.k==='vary'?'':'. La meta de cada serie ya lo tiene en cuenta')+'</span></div><button class="btn sm line" data-a="stallFix" data-v="off" data-e="'+id+'">Quitar</button></div>';
+    else if(sx)h+='<div class="stall"><span class="ct-ic">'+ic('swap',16)+'</span><div class="grow"><b>Estancado desde el '+esc(longDate(sx.since))+'</b><span class="mut sm-t">Las últimas 3 sesiones no superaron a las anteriores. Elegí cómo destrabarlo:</span>'+
+      '<div class="stall-o"><button class="btn sm" data-a="stallFix" data-v="deload" data-e="'+id+'">Semana liviana</button><button class="btn sm" data-a="stallFix" data-v="reps" data-e="'+id+'">Cambiar repeticiones</button><button class="btn sm" data-a="stallFix" data-v="vary" data-e="'+id+'">Probar variante</button></div></div></div>';
+    if(fx&&fx.k==='vary'){const sim=similarEx(id,{lv:2}).slice(0,4);if(sim.length)h+='<div class="chips" style="margin-top:-4px">'+sim.map(e=>'<button class="chip sm" data-a="exInfo" data-v="'+e.id+'">'+esc(e.n)+'</button>').join('')+'</div>';}}
   if(hasRank(ex)&&db.profile){const off=noRank(id);
     h+='<button class="pref" data-a="rankTog" data-v="'+id+'" role="switch" aria-checked="'+!off+'"><span class="grow"><b>Cuenta para mi nivel</b><small>'+(off?'Apagado: no suma ni resta en tu rango por grupo ni en el general':'Si una marca vieja o un ejercicio que hacés poco te baja el grupo, apagalo')+'</small></span><i class="sw'+(off?'':' on')+'"></i></button>';
     const cur=curV(ex),nextL=Math.max(0,Math.min(18,Math.floor(cur)+1)),has=(db.goals||[]).find(g=>g.ex===id&&!g.done);
@@ -680,8 +696,10 @@ function summaryHTML(m){
   return '<div class="sum-hero"><svg viewBox="0 0 64 64" aria-hidden="true"><circle class="sh-c" cx="32" cy="32" r="28"/><path class="sh-k" d="M20 33l8 8 16-17"/></svg><b>¡Entreno guardado!</b><span class="mut sm-t">'+esc(m.log.name)+'</span></div>'+(m.posted?'<div class="sum-post">'+ic('user',16)+'<span class="grow">Tus amigos lo ven en Novedades y te pueden dar fuego.</span><button class="btn sm line" data-a="postUndo" data-v="'+esc(m.log.id)+'">No publicar</button></div>':'')+'<div class="g3"><div class="stat"><b data-n="'+m.log.dur+'">'+m.log.dur+'</b><span>minutos</span></div><div class="stat"><b data-n="'+m.sets+'">'+m.sets+'</b><span>series</span></div><div class="stat"><b data-n="'+Math.round(m.vol)+'" data-fmt="1">'+nf(m.vol)+'</b><span>kg movidos</span></div></div>'+
    (m.ups.length?m.ups.map(u=>{const ex=exById(u.ex);return '<div class="card row pop" style="margin:0">'+badge(u.to,64)+'<div class="grow"><span class="mut sm-t">¡Subiste de nivel!</span><div style="font:800 20px var(--f-d)">'+esc(ex.n)+'</div><span class="sm-t">'+lvlName(u.from)+' a '+lvlSpan(u.to)+'</span></div></div>';}).join(''):'')+
    (m.prs.length?'<div class="card" style="margin:0"><h4 style="margin-bottom:6px">Récords personales</h4>'+m.prs.map(p=>{const ex=exById(p.ex);if(!ex)return '';return '<div class="rowline"><span>'+esc(ex.n)+'</span><span class="mut">'+(ex.time||ex.sk?'Mejor: '+Math.round(p.e)+unitOf(ex):ex.st?'1RM est. '+num(p.e,1)+' kg':'Mejor serie superada')+'</span></div>';}).join('')+'</div>':'')+
+   (m.vs&&m.vs.length?'<div class="card vs-card" style="margin:0"><h4 style="margin-bottom:6px">Contra la vez anterior <span class="mut sm-t">('+esc(shortDate(parseK(m.vsD).getTime()))+')</span></h4>'+m.vs.map(x=>{const ex=exById(x.ex),c=x.d>.005?'up':x.d<-.005?'down':'eq';
+      return '<div class="rowline vs-r"><span>'+esc(shortN(ex.n))+'</span><span class="vs-v"><small>'+esc(x.a)+'</small>'+ic(c==='up'?'up':c==='down'?'down':'right',13)+'<b class="'+c+'">'+esc(x.b)+'</b></span></div>';}).join('')+'</div>':'')+
    (m.goals&&m.goals.tot?'<div class="goal'+(m.goals.hit?' hit':'')+'"><span class="grow"><span class="mut sm-t">Sobrecarga progresiva</span><br><b>'+m.goals.hit+' de '+m.goals.tot+' metas cumplidas</b></span>'+ic(m.goals.hit===m.goals.tot?'trophy':'bolt',22)+'</div>':'')+
-   '<div class="g2 stick"><button class="btn" data-a="sumShare">'+ic('share',16)+' Compartir</button><button class="btn pri" data-a="close" data-v="modal">Listo</button></div>';
+   (!m.log.routineId&&!m.saved?'<button class="btn line wide" data-a="saveAsR" data-v="'+esc(m.log.id)+'">'+ic('plus',16)+' Guardar este entreno como rutina</button>':m.saved?'<p class="fd-ok">'+ic('check',15)+' Guardado en tus rutinas</p>':'')+'<div class="g2 stick"><button class="btn" data-a="sumShare">'+ic('share',16)+' Compartir</button><button class="btn pri" data-a="close" data-v="modal">Listo</button></div>';
 }
 function logEditHTML(d){
   return '<label class="field">Nombre<input type="text" maxlength="40" value="'+esc(d.name)+'" data-i="d" data-f="name"></label>'+
@@ -987,6 +1005,12 @@ const DLISTS={
   document.addEventListener('pointerup',end,true);document.addEventListener('pointercancel',end,true);
   document.addEventListener('contextmenu',e=>{if(e.target.closest('[data-lp]>.row,.dh,[data-wkr]'))e.preventDefault();});
 })();
+/* gráficos: tocar o arrastrar muestra el valor del día más cercano */
+document.addEventListener('pointerdown',e=>{const sv=e.target.closest('svg.chart[data-pts]');if(!sv)return;const pts=JSON.parse(sv.dataset.pts||'[]');if(!pts.length)return;
+  const show=ev2=>{const r=sv.getBoundingClientRect(),vb=sv.viewBox.baseVal,x=(ev2.clientX-r.left)/r.width*vb.width;let b=pts[0];pts.forEach(p=>{if(Math.abs(p[0]-x)<Math.abs(b[0]-x))b=p;});
+    let g=sv.querySelector('.ch-tip');if(!g){g=document.createElementNS('http://www.w3.org/2000/svg','g');g.setAttribute('class','ch-tip');sv.appendChild(g);}
+    const tx=Math.min(vb.width-60,Math.max(60,b[0]));g.innerHTML='<line x1="'+b[0]+'" x2="'+b[0]+'" y1="8" y2="'+(vb.height-22)+'"/><circle cx="'+b[0]+'" cy="'+b[1]+'" r="5"/><rect x="'+(tx-56)+'" y="0" width="112" height="20" rx="6"/><text x="'+tx+'" y="14" text-anchor="middle">'+b[2]+' · '+b[3]+'</text>';};
+  show(e);const mv=ev2=>show(ev2),up=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up);},{passive:true});
 /* ============ Capas como en una app nativa ============ */
 /* Cada ventana abierta suma una entrada al historial: el botón atrás de Android la cierra en vez de salir de la app. */
 let hDepth=0,ignorePop=0,layerQ=false,wakeLock=null;

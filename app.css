@@ -1644,3 +1644,17 @@ body.navhide .nav{transform:none!important}
 .sess.leaving{animation:shDown .3s var(--e-in) both;pointer-events:none}
 .pick.stay,.sess.stay,.pick.stay .gap>.ex{animation:none!important}
 .calm .mback,.calm .msheet,.calm .pick,.calm .sess{animation:none!important}
+
+/* v76: estancamiento, comparación, gráficos */
+.stall{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:16px;background:color-mix(in srgb,#FFC34D 10%,var(--raise));border:1px solid color-mix(in srgb,#FFC34D 35%,transparent)}
+.stall.on{background:color-mix(in srgb,var(--acc) 10%,var(--raise));border-color:color-mix(in srgb,var(--acc) 35%,transparent);align-items:center}
+.stall b{display:block;font-size:15px}.stall .mut{display:block;margin-top:2px}
+.stall-o{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.vs-r .vs-v{display:flex;align-items:center;gap:6px;text-align:right}.vs-v small{color:var(--mut)}.vs-v b.up{color:var(--ok,#3ad29f)}.vs-v b.down{color:var(--hot,#ff5a7e)}
+.exm{margin-bottom:6px}
+svg.chart{touch-action:pan-y;cursor:crosshair}
+.ch-tip line{stroke:var(--mut);stroke-width:1;stroke-dasharray:3 3}.ch-tip circle{fill:var(--acc);stroke:var(--surf);stroke-width:2}
+.ch-tip rect{fill:var(--text)}.ch-tip text{fill:var(--bg);font-size:11px;font-weight:700}
+.chart .tr{fill:none;stroke:var(--acc);stroke-width:2.5;stroke-linecap:round;opacity:.9}
+.w-trend{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:6px 0 10px;font-size:14px}
+.chart.has-tr .ln{opacity:.35}.chart.has-tr circle{opacity:.5}

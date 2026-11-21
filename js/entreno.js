@@ -166,7 +166,19 @@ const lvlSpan=L=>'<span class="lvl-t" style="color:'+lvlColor(L)+'">'+lvlName(L)
 /* ============ Gráfico de línea ============ */
 /* gráfico de un ejercicio: récords marcados, línea del próximo rango y cambio en el período */
 const EXR=[['1m','1 mes',30],['3m','3 meses',91],['6m','6 meses',182],['1a','1 año',365],['all','Todo',0]];
+/* puntos por día según lo que querés ver: 1RM estimado, peso más alto, repeticiones o volumen */
+function exPoints(id,k){
+  const ex=exById(id),map={};
+  allSess().forEach(l=>l.entries.forEach(en=>{if(en.ex!==id)return;const ss=en.sets.filter(s=>!s.w&&+s.reps>0);if(!ss.length)return;
+    const v=k==='kg'?Math.max(...ss.map(s=>+s.kg||0)):k==='reps'?Math.max(...ss.map(s=>+s.reps)):k==='vol'?ss.reduce((a,s)=>a+((ex.bw||0)*(weightNow()||70)+(+s.kg||0))*(+s.reps),0):Math.max(...ss.map(s=>e1(ex,s.kg,s.reps)));
+    if(v>(map[l.date]||0))map[l.date]=v;}));
+  return Object.keys(map).sort().map(d=>({t:parseK(d).getTime(),y:map[d]}));
+}
 function exChart(ex,all,unit){
+  /* en ejercicios con peso se puede cambiar lo que se grafica */
+  const EXM=[['e1','1RM est.','kg'],['kg','Peso','kg'],['reps','Repes','reps'],['vol','Volumen','kg']],mk=ex.st&&!ex.sk?(S.exM||'e1'):'e1';
+  if(mk!=='e1'){all=exPoints(ex.id,mk);unit=EXM.find(x=>x[0]===mk)[2];}
+  const mSel=ex.st&&!ex.sk?'<div class="exr exm">'+EXM.map(x=>'<button class="chip sm'+(mk===x[0]?' on':'')+'" data-a="exMet" data-v="'+x[0]+'">'+x[1]+'</button>').join('')+'</div>':'';
   if(!all.length)return '<p class="mut sm-t">Todavía no hay datos para graficar. Registrá una serie o cargá una marca.</p>';
   const rg=EXR.find(r=>r[0]===(S.exR||'all'))||EXR[4],from=rg[2]?Date.now()-rg[2]*864e5:0;
   let best=0;const pr=new Set();all.forEach((p,i)=>{if(p.y>best+1e-9){if(i)pr.add(p.t);best=p.y;}});
@@ -179,17 +191,20 @@ function exChart(ex,all,unit){
   const line=P.map((p,i)=>(i?'L':'M')+X(p.t).toFixed(1)+' '+Y(p.y).toFixed(1)).join(' '),area=line+' L'+X(t1).toFixed(1)+' '+(H-pb)+' L'+X(t0).toFixed(1)+' '+(H-pb)+'Z';
   let g='';[lo+m,(lo+hi)/2,hi-m].forEach(v=>{g+='<line class="gl" x1="'+pl+'" x2="'+(W-pr_)+'" y1="'+Y(v).toFixed(1)+'" y2="'+Y(v).toFixed(1)+'"/><text x="'+(pl-5)+'" y="'+(Y(v)+3).toFixed(1)+'" text-anchor="end">'+Math.round(v)+'</text>';});
   if(tier)g+='<line x1="'+pl+'" x2="'+(W-pr_)+'" y1="'+Y(tier.y).toFixed(1)+'" y2="'+Y(tier.y).toFixed(1)+'" stroke="'+tier.c+'" stroke-width="1.5" stroke-dasharray="5 4" opacity=".8"/><text x="'+(W-pr_)+'" y="'+(Y(tier.y)-4).toFixed(1)+'" text-anchor="end" fill="'+tier.c+'" style="font-weight:700">'+tier.n+'</text>';
+  const fmt=v=>unit==='kg'?num(v,1)+' kg':Math.round(v)+' '+unit;
   const dots=P.map(p=>pr.has(p.t)?'<g class="pr-dot"><circle cx="'+X(p.t).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="6.5"/><path d="M'+(X(p.t)-3).toFixed(1)+' '+Y(p.y).toFixed(1)+'l2 2 4-4"/></g>':P.length<=30?'<circle cx="'+X(p.t).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="3.5"/>':'').join('');
-  const bp=all.reduce((a,b)=>b.y>a.y?b:a,all[0]),ch=P.length>1&&P[0].y?Math.round((P[P.length-1].y/P[0].y-1)*100):null,fmt=v=>unit==='kg'?num(v,1)+' kg':Math.round(v)+' '+unit;
-  return '<div class="exr">'+EXR.map(r=>'<button class="chip sm'+(rg[0]===r[0]?' on':'')+'" data-a="exRange" data-v="'+r[0]+'">'+r[1]+'</button>').join('')+'</div>'+
-   '<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Progreso en '+unit+'">'+g+(P.length>1?'<path class="ar" d="'+area+'"/>':'')+'<path class="ln" d="'+line+'"/>'+dots+
+  const bp=all.reduce((a,b)=>b.y>a.y?b:a,all[0]),ch=P.length>1&&P[0].y?Math.round((P[P.length-1].y/P[0].y-1)*100):null;
+  return mSel+'<div class="exr">'+EXR.map(r=>'<button class="chip sm'+(rg[0]===r[0]?' on':'')+'" data-a="exRange" data-v="'+r[0]+'">'+r[1]+'</button>').join('')+'</div>'+
+   '<svg class="chart" data-pts="'+esc(JSON.stringify(P.map(p=>[+X(p.t).toFixed(1),+Y(p.y).toFixed(1),shortDate(p.t),fmt(p.y)])))+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Progreso en '+unit+'. Tocá el gráfico para ver cada día">'+g+(P.length>1?'<path class="ar" d="'+area+'"/>':'')+'<path class="ln" d="'+line+'"/>'+dots+
    '<text x="'+pl+'" y="'+(H-6)+'">'+shortDate(t0)+'</text>'+(P.length>1?'<text x="'+(W-pr_)+'" y="'+(H-6)+'" text-anchor="end">'+shortDate(t1)+'</text>':'')+'</svg>'+
    '<div class="ex-stats"><div><small>Récord</small><b>'+fmt(bp.y)+'</b><span>'+shortDate(bp.t)+'</span></div><div><small>En '+rg[1].toLowerCase()+'</small><b class="'+(ch>0?'up':'')+'">'+(ch==null?'—':(ch>0?'+':'')+ch+' %')+'</b><span>'+P.length+(P.length===1?' día':' días')+'</span></div><div><small>Récords</small><b>'+(pr.size+1)+'</b><span>'+ic('check',11)+' en el gráfico</span></div></div>';
 }
-function chart(pts,unit){
+/* tendencia del peso: promedio exponencial que pesa más los últimos días (el peso diario salta por agua y comida) */
+function wTrend(ws){let v=null,lt=0;return ws.map(w=>{const t=parseK(w.date).getTime();if(v==null)v=w.kg;else{const days=Math.max(1,(t-lt)/864e5),k=1-Math.pow(.9,days);v=v+(w.kg-v)*k;}lt=t;return{t,y:v};});}
+function chart(pts,unit,trend){
   if(!pts.length)return '<p class="mut sm-t">Todavía no hay datos para graficar.</p>';
   const W=320,H=150,pl=34,pr=12,pt=10,pb=24;
-  const ys=pts.map(p=>p.y);let lo=Math.min.apply(null,ys),hi=Math.max.apply(null,ys);
+  const ys=pts.map(p=>p.y).concat((trend||[]).map(p=>p.y));let lo=Math.min.apply(null,ys),hi=Math.max.apply(null,ys);
   if(hi-lo<1){lo-=1;hi+=1;}
   const m=(hi-lo)*.15;lo-=m;hi+=m;
   const t0=pts[0].t,t1=pts[pts.length-1].t;
@@ -200,8 +215,11 @@ function chart(pts,unit){
   let g='';
   [lo+m,(lo+hi)/2,hi-m].forEach(v=>{g+='<line class="gl" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(v).toFixed(1)+'" y2="'+Y(v).toFixed(1)+'"/><text x="'+(pl-5)+'" y="'+(Y(v)+3).toFixed(1)+'" text-anchor="end">'+Math.round(v)+'</text>';});
   const dots=pts.length<=24?pts.map(p=>'<circle cx="'+X(p.t).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="3.5"/>').join(''):'';
-  return '<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Gráfico de progreso en '+unit+'">'+g+
-   (pts.length>1?'<path class="ar" d="'+area+'"/>':'')+'<path class="ln" d="'+line+'"/>'+dots+
+  /* con tendencia: los puntos quedan tenues y manda la línea suavizada */
+  const tl=trend&&trend.length>1?trend.map((p,i)=>(i?'L':'M')+X(p.t).toFixed(1)+' '+Y(p.y).toFixed(1)).join(' '):'';
+  const tip=esc(JSON.stringify(pts.map((p,i)=>[+X(p.t).toFixed(1),+Y(p.y).toFixed(1),shortDate(p.t),num(p.y,1)+' '+unit+(trend&&trend[i]?' (tendencia '+num(trend[i].y,1)+')':'')])));
+  return '<svg class="chart'+(tl?' has-tr':'')+'" data-pts="'+tip+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Gráfico de progreso en '+unit+'. Tocá el gráfico para ver cada día">'+g+
+   (pts.length>1?'<path class="ar" d="'+area+'"/>':'')+'<path class="ln" d="'+line+'"/>'+(tl?'<path class="tr" d="'+tl+'"/>':'')+dots+
    '<text x="'+pl+'" y="'+(H-6)+'">'+shortDate(t0)+'</text>'+(pts.length>1?'<text x="'+(W-pr)+'" y="'+(H-6)+'" text-anchor="end">'+shortDate(t1)+'</text>':'')+'</svg>';
 }
 
@@ -363,7 +381,7 @@ function dayPanel(dk){
   const done=doneOn(dk),pl=plannedFor(dk),fut=dk>today();
   let h='<div class="card"><div class="hd"><h3 style="text-transform:capitalize">'+esc(longDate(dk))+'</h3></div>';
   if(done.length){
-    h+=done.map(l=>'<div style="margin-bottom:12px"><div class="row"><b class="grow">'+esc(l.name)+'</b><span class="tag">'+l.dur+' min</span><button class="ib flat" data-a="editLog" data-v="'+l.id+'" aria-label="Editar entrenamiento">'+ic('edit',18)+'</button><button class="ib flat" data-a="delLog" data-v="'+l.id+'" aria-label="Borrar entrenamiento">'+ic('trash',18)+'</button></div>'+
+    h+=done.map(l=>'<div style="margin-bottom:12px"><div class="row"><b class="grow">'+esc(l.name)+'</b><span class="tag">'+l.dur+' min</span>'+(l.routineId?'':'<button class="ib flat" data-a="saveAsR" data-v="'+l.id+'" aria-label="Guardar como rutina">'+ic('plus',18)+'</button>')+'<button class="ib flat" data-a="editLog" data-v="'+l.id+'" aria-label="Editar entrenamiento">'+ic('edit',18)+'</button><button class="ib flat" data-a="delLog" data-v="'+l.id+'" aria-label="Borrar entrenamiento">'+ic('trash',18)+'</button></div>'+
       (l.note?'<p class="mut sm-t" style="margin:4px 0 2px">'+esc(l.note)+'</p>':'')+
       l.entries.map(en=>{const ex=exById(en.ex);return ex?'<div class="rowline"><span>'+esc(ex.n)+(en.note?'<br><span class="mut sm-t">'+esc(en.note)+'</span>':'')+'</span><span class="mut" style="text-align:right">'+en.sets.map(s=>setTxt(ex,s)).join(', ')+'</span></div>':'';}).join('')+'</div>').join('');
   }
