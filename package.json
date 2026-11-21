@@ -1,0 +1,11 @@
+{
+  "name": "swole",
+  "private": true,
+  "description": "Swole (PWA). Este archivo solo existe para correr las pruebas: la app no usa npm ni compilación.",
+  "scripts": {
+    "test": "node --test \"tests/*.test.js\""
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
