@@ -1,5 +1,5 @@
 # Swole — Plan
-Última actualización: 2026-11-21 · Etapa actual: 2
+Última actualización: 2026-11-21 · Etapa actual: 3
 
 ## Visión
 App web instalable (PWA) en español rioplatense para entrenar (gym o calistenia) y saber qué tan fuerte sos: registrás entrenos y tus marcas se convierten en un rango de Bronce a Élite comparado con gente de tu sexo, edad y peso. Además: rutinas generadas, nutrición, árbol de calistenia, amigos y rankings. Público: gente que entrena, sobre todo adolescentes y jóvenes que hacen deporte.
@@ -33,7 +33,7 @@ Publicada en https://laburodigital.github.io/swole/ · versión v83 · repo Labu
 - Figuras de técnica: las de pie se parecen; solo dominadas tiene vista de espaldas.
 - Foto de comida: no estima porción, falla con asado y la tercera cosa; lo aprendido queda solo en ese celu.
 - Lesiones: cambiar a mano un ejercicio por uno que carga la zona no avisa.
-- Sin pruebas automáticas (una falla de 27 ejercicios estuvo semanas sin verse, arreglada en v83).
+- Pruebas automáticas (Etapa 2): 131 pruebas en `npm test` y en GitHub Actions ("Pruebas", cada push). Cubren niveles, generador y técnica/detalle de los 116 ejercicios. Todavía no cubren: sync, nutrición, pantallas fuera del detalle de ejercicio, ni humo con navegador.
 - Puede quedar algún dato de prueba en el navegador del preview.
 
 ## Aspectos
@@ -117,13 +117,14 @@ Publicada en https://laburodigital.github.io/swole/ · versión v83 · repo Labu
 - Te toca a vos: correr el checklist en tu celu y en un iPhone (tuyo o prestado), mandar capturas de lo que falle.
 - Depende de: nada.
 
-### Etapa 2 — Pruebas automáticas base  [pendiente]
+### Etapa 2 — Pruebas automáticas base  [hecha 2026-11-21]
 - Objetivo: red de seguridad para niveles, generador y ejercicios.
 - Tareas: cargar los js/ en un contexto Node (vm); pruebas de niveles (percentiles, rangos), generador (tiempo, lesiones, objetivos), "todo ejercicio tiene técnica y detalle"; `npm test`; correrlo en GitHub Actions.
 - Archivos: tests/ (nuevo), package.json (nuevo, raíz), .github/workflows/test.yml.
 - Terminado cuando: CI en verde y una rotura introducida a propósito hace fallar el CI.
 - Te toca a vos: nada.
 - Depende de: nada (puede ir en paralelo con la 1).
+- Resultado: tests/cargar.js levanta los js/ en el orden de index.html con un DOM de mentira; niveles.test.js (6), generador.test.js (8), ejercicios.test.js (1 + uno por ejercicio). CI verde en main (run 44925404636); rotura a propósito en la rama prueba-rotura (sacar las claves de técnica de dominadas) → CI rojo (run 44925479298), rama borrada.
 
 ### Etapa 3 — Sync segura  [pendiente]
 - Objetivo: que la sync no pueda borrar historiales.
@@ -181,6 +182,8 @@ Publicada en https://laburodigital.github.io/swole/ · versión v83 · repo Labu
 | nov 2026 (v14) | Perfil se abre desde el avatar | Barra con 4 zonas | PLAN-v2 (Perfil en la barra) |
 | nov 2026 | "Deshacer" en vez de confirmar; barra de abajo fija; sin pull-to-refresh ni rebote; sin emojis; tutorial con foco sobre la pantalla real | Más rápido y menos errores en el celu | v26 (pull-to-refresh) |
 | 2026-11-21 | Congelar features nuevas hasta cerrar Etapas 1–4 | Calidad y menores son los riesgos mayores | — |
+| 2026-11-21 | Pruebas con `node:test` y `vm`, sin dependencias; el cargador lee el orden de scripts de index.html | Nada que instalar ni mantener; un js/ nuevo entra solo en las pruebas | — |
+| 2026-11-21 | La prueba de técnica exige claves propias de la figura (no acepta el respaldo con la descripción) | Es lo que falló en v83; el respaldo esconde el error | — |
 | 2026-11-21 | Etapa 1 se da por cerrada con iPhone; la prueba en Android pasa a la Etapa 5 y es obligatoria antes de la 7 (Play) | Juan no tiene Android; no frenar el plan por eso | Etapa 1 "en los dos celus" |
 
 ## Después / fuera de alcance
@@ -192,3 +195,4 @@ App Store (necesita Mac + cuenta Apple); widget de inicio; Apple Health y Google
 | 2026-11-21 | 0 | Se armó este plan desde el resumen del chat original + verificación del repo (v83, git limpio). | Arrancar Etapa 1 y 2. |
 | 2026-11-21 | 1 | Checklist de 12 ítems en docs/checklist-celu.md; Etapa 1 en curso. | Juan corre el checklist en Android y iPhone; anotar ✓/✗ en Estado. |
 | 2026-11-21 | 1 | iPhone: 12/12 ✓ según Juan (sin detalle). No hay Android disponible. Etapa cerrada; Android pasa a la Etapa 5. | Etapa 2: pruebas automáticas. |
+| 2026-11-21 | 2 | tests/ + package.json + .github/workflows/test.yml; 131 pruebas verdes; CI verde en main y rojo con rotura a propósito (rama borrada). Sin cambios en la app. | Etapa 3: sync segura (sumar pruebas de sync al mismo cargador). Humo con navegador sigue pendiente (Etapa 6). |
