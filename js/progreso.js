@@ -587,6 +587,8 @@ function afterSocial(){
 /* lo que escribieron otros entra sin < ni > (y con largo acotado): así nunca puede terminar pintado como HTML */
 const cleanJ=(x,d)=>{d=d||0;if(typeof x==='string')return x.replace(/</g,'‹').replace(/>/g,'›').slice(0,400);if(x==null||typeof x!=='object')return x;if(d>8)return null;
   if(Array.isArray(x))return x.slice(0,300).map(v=>cleanJ(v,d+1));const o={};Object.keys(x).slice(0,300).forEach(k=>{const kk=k.replace(/[<>"'&]/g,'');if(kk==='__proto__'||kk==='toString'||kk==='valueOf')return;o[kk]=cleanJ(x[k],d+1);});return o;};
+/* edad: cuenta y amigos desde 13; de 13 a 17, amigos con cuidados extra */
+const MIN_AGE=13,ageNow=()=>+(db.profile&&db.profile.age)||0,tooYoung=()=>{const a=ageNow();return a>0&&a<MIN_AGE;},isTeen=()=>{const a=ageNow();return a>=MIN_AGE&&a<18;};
 const addMsg=r=>r==='sent'?'Solicitud enviada: cuando la acepte, ya son amigos':r==='already'?'Ya son amigos':'¡Listo! Ya son amigos';
 const Social=(()=>{
   let pub='',timer=null;
@@ -594,7 +596,7 @@ const Social=(()=>{
   const mkCode=()=>{let s='';const r=crypto.getRandomValues(new Uint8Array(6));r.forEach(x=>s+=A[x%A.length]);return s;};
   const on=()=>!!(db.settings.social&&db.settings.social.code&&Sync.user());
   const nick=()=>String((db.profile&&db.profile.nick)||'Atleta').slice(0,24);
-  const errTxt=e=>{const m=String(e&&e.message||'');return /too_many_req/.test(m)?'Tenés demasiadas solicitudes sin responder':/too_many_comps/.test(m)?'Ya tenés 5 torneos activos':/no_members/.test(m)?'Elegí al menos un amigo':/no_request/.test(m)?'Esa solicitud ya no existe':/code_not_found/.test(m)?'No encontré ese código':/own_code/.test(m)?'Ese es tu propio código':/too_many/.test(m)?'Llegaste al máximo de 100 amigos':/no_profile/.test(m)?'Primero activá amigos':!navigator.onLine?'Sin conexión: probá más tarde':'No se pudo: '+m;};
+  const errTxt=e=>{const m=String(e&&e.message||'');return /too_many_tries/.test(m)?'Probaste demasiados códigos hoy: probá mañana':/too_many_reports/.test(m)?'Mandaste muchas denuncias hoy: ya las estamos viendo':/young/.test(m)?'Amigos es para '+MIN_AGE+' años o más':/too_many_req/.test(m)?'Tenés demasiadas solicitudes sin responder':/too_many_comps/.test(m)?'Ya tenés 5 torneos activos':/no_members/.test(m)?'Elegí al menos un amigo':/no_request/.test(m)?'Esa solicitud ya no existe':/code_not_found/.test(m)?'No encontré ese código':/own_code/.test(m)?'Ese es tu propio código':/too_many/.test(m)?'Llegaste al máximo de 100 amigos':/no_profile/.test(m)?'Primero activá amigos':!navigator.onLine?'Sin conexión: probá más tarde':'No se pudo: '+m;};
   async function publish(force){
     if(!on())return;
     /* nuevas habilidades dominadas también son novedades */
@@ -621,6 +623,7 @@ const Social=(()=>{
     return S.social;
   }
   async function enable(){
+    if(tooYoung())throw new Error('young');
     if(!Sync.user()){S.m2={t:'login',d:{email:'',pw:'',mode:'up',busy:false}};render();toast('Para tener amigos necesitás una cuenta (así se guardan tus datos en la nube)');return;}
     for(let i=0;i<5;i++){
       const code=mkCode();db.settings.social={code,since:today()};
@@ -637,6 +640,7 @@ const Social=(()=>{
     code=String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
     if(code.length!==6)throw new Error('code_len');
     const r=await Sync.req('/rest/v1/rpc/swole_add_friend',{method:'POST',auth:true,body:{p_code:code}});
+    if(r==='not_found')throw new Error('code_not_found');
     await load();return r;
   }
   /* torneos: cada uno sube su propio puntaje, calculado en su celu */
@@ -703,6 +707,21 @@ const Social=(()=>{
     await Sync.req('/rest/v1/swole_comment?id=eq.'+cid,{method:'DELETE',auth:true});
     const p=(S.social.posts||[]).find(x=>x.id===pid);if(p)p.cmts=p.cmts.filter(c=>c.id!==cid);
   }
+  /* seguridad: bloquear, denunciar, cambiar el código */
+  const rpc=(f,body)=>Sync.req('/rest/v1/rpc/'+f,{method:'POST',auth:true,body:body||{}});
+  async function block(id){await rpc('swole_block_user',{p_user:id});await load();}
+  async function unblock(id){await rpc('swole_unblock_user',{p_user:id});}
+  async function blocked(){return cleanJ(await rpc('swole_blocked_list'))||[];}
+  async function report(o){await rpc('swole_report_add',{p_target:o.target||null,p_kind:o.kind,p_ref:o.ref||null,p_reason:o.reason,p_note:String(o.note||'').slice(0,500)});}
+  async function newCode(){
+    const old=db.settings.social.code;
+    for(let i=0;i<5;i++){
+      db.settings.social.code=mkCode();
+      try{await publish(true);save();return db.settings.social.code;}
+      catch(e){if(e.status!==409&&!/duplicate|unique/i.test(e.message)){db.settings.social.code=old;throw e;}}
+    }
+    db.settings.social.code=old;throw new Error('No se pudo crear el código');
+  }
   async function remove(id){await Sync.req('/rest/v1/rpc/swole_remove_friend',{method:'POST',auth:true,body:{p_friend:id}});await load();}
   /* código que llegó por link (?amigo=XXXXXX) */
   async function addPending(){
@@ -711,7 +730,7 @@ const Social=(()=>{
     try{localStorage.removeItem('swole.pendFriend');}catch(e){}
     try{const r=await add(c);toast(addMsg(r));render();}catch(e){toast(errTxt(e));}
   }
-  return{on,publish,schedule,load,enable,disable,add,remove,addPending,errTxt,answer,cancel,compCreate,compJoin,compDel,share,unshare,loadPosts,fire,comment,uncomment,link:()=>location.origin+location.pathname+'?amigo='+(db.settings.social?db.settings.social.code:'')};
+  return{block,unblock,blocked,report,newCode,on,publish,schedule,load,enable,disable,add,remove,addPending,errTxt,answer,cancel,compCreate,compJoin,compDel,share,unshare,loadPosts,fire,comment,uncomment,link:()=>location.origin+location.pathname+'?amigo='+(db.settings.social?db.settings.social.code:'')};
 })();
 
 /* textos */
@@ -742,7 +761,7 @@ function friendsHTML(m){
     '<p class="mut sm-t">Para usar amigos necesitás una cuenta: así tus datos quedan guardados en la nube.</p><div class="g2"><button class="btn pri" data-a="loginOpen" data-v="up">Crear cuenta</button><button class="btn line" data-a="loginOpen">Ya tengo cuenta</button></div>';
   if(!Social.on())return '<div class="soc-hero">'+ic('user',28)+'<h3>Entrená con tus amigos</h3><p class="mut">Rankings justos, una temporada por mes y las novedades de tus amigos.</p></div>'+
     '<div class="card" style="margin:0"><h4 style="margin-bottom:6px">Qué ven tus amigos</h4><p class="sm-t">Tu apodo, tus rangos y niveles, tu carta, tus habilidades, tus puntos de la temporada y tus novedades (entrenos, récords, subidas de rango).</p>'+
-    '<h4 style="margin:10px 0 6px">Qué NO ven</h4><p class="sm-t">Tu mail, tu peso, tu edad, tus medidas, tus fotos ni tus comidas. Solo te ven las personas que agregás (o que te agregan con tu código).</p></div>'+
+    (isTeen()?'<p class="soc-teen">'+ic('info',16)+'<span>Pasá tu código solo a gente que conocés en persona. Nadie te puede buscar: solo te encuentra quien tiene tu código.</span></p>':'')+'<h4 style="margin:10px 0 6px">Qué NO ven</h4><p class="sm-t">Tu mail, tu peso, tu edad, tus medidas, tus fotos ni tus comidas. Solo te ven las personas que agregás (o que te agregan con tu código).</p></div>'+
     '<button class="btn pri wide" style="margin-top:12px" data-a="socOn">Activar amigos</button>';
   const sc=db.settings.social.code,sv=S.social;
   const head='<div class="soc-code"><div><span class="mut sm-t">Tu código</span><b>'+sc+'</b></div><button class="btn sm" data-a="socShare">'+ic('share',16)+' Invitar</button></div>'+
@@ -751,6 +770,7 @@ function friendsHTML(m){
   const dot=n=>n?' <span class="soc-dot">'+n+'</span>':'';
   const tabs='<div class="seg soc-tabs">'+[['rank','Ranking',0],['comp','Torneos',cinv.length],['feed','Novedades',0],['list','Amigos',rin.length]].map(([k,n,c])=>'<button class="'+(tab===k?'on':'')+'" data-a="socTab" data-v="'+k+'">'+n+dot(c)+'</button>').join('')+'</div>';
   if(!sv)return head+tabs+'<p class="mut tc" style="padding:30px 0">Cargando…</p>';
+  const teen=isTeen()?'<p class="soc-teen">'+ic('info',16)+'<span>Aceptá solo a gente que conocés en persona. Si alguien te molesta, bloquealo o denuncialo: no se entera.</span></p>':'';
   const reqBox=rin.length&&tab!=='list'?'<button class="soc-alert" data-a="socTab" data-v="list">'+ic('user',18)+'<span class="grow"><b>'+(rin.length===1?esc(rin[0].nick)+' quiere ser tu amigo':rin.length+' solicitudes de amistad')+'</b><small>Tocá para responder</small></span>'+ic('right',16)+'</button>':'';
   const nf0=!sv.friends.length?'<div class="card empty" style="margin:0">'+ic('user',30)+'<b>Todavía no tenés amigos en Swole</b>Pasales tu código o tocá Invitar para mandarles el link.</div>':'';
   let body='';
@@ -775,12 +795,13 @@ function friendsHTML(m){
     body=all.length?'<div class="feed">'+all.slice(0,50).map(x=>'<div class="fd"><span class="fd-ic">'+ic(evIc(x.e.k),16)+'</span><span class="grow"><b>'+(x.me?'Vos':esc(x.r.nick||'Atleta'))+'</b> '+evTxt(x.e)+'</span><small class="mut">'+dayAgo(x.e.d)+'</small></div>').join('')+'</div>':'<p class="mut sm-t">Todavía no hay novedades.</p>'+nf0;
   }else{
     const rout=(sv.req||[]).filter(r=>r.dir==='out');
-    body=(rin.length?'<h4 class="soc-h">Solicitudes</h4><div class="lb">'+rin.map(r=>'<div class="lb-r soc-req"><span class="grow"><b>'+esc(r.nick)+'</b><small class="mut">Quiere ser tu amigo</small></span><button class="btn sm" data-a="socNo" data-v="'+r.user_id+'">Rechazar</button><button class="btn sm pri" data-a="socYes" data-v="'+r.user_id+'">Aceptar</button></div>').join('')+'</div>':'')+
-     (sv.friends.length?'<h4 class="soc-h">Tus amigos ('+sv.friends.length+')</h4><div class="lb">'+sv.friends.map(r=>{const d=r.data||{};return '<div class="lb-r"><button class="row grow" style="gap:10px;text-align:left;min-width:0" data-a="socCard" data-v="'+r.user_id+'">'+badge(d.ovr?d.ovr.L:-1,36)+'<span class="grow"><b>'+esc(r.nick||'Atleta')+'</b><small class="mut">Activo '+dayAgo(String(r.updated_at).slice(0,10))+'</small></span></button><button class="btn sm line" data-a="socDel" data-v="'+r.user_id+'">Eliminar</button></div>';}).join('')+'</div>':nf0)+
+    body=(rin.length?'<h4 class="soc-h">Solicitudes</h4><div class="lb">'+rin.map(r=>'<div class="lb-r soc-req"><span class="grow"><b>'+esc(r.nick)+'</b><small class="mut">Quiere ser tu amigo</small></span><button class="ib flat" data-a="socUser" data-v="'+r.user_id+'" data-x="'+esc(r.nick)+'" aria-label="Bloquear o denunciar a '+esc(r.nick)+'">'+ic('flag',16)+'</button><button class="btn sm" data-a="socNo" data-v="'+r.user_id+'">Rechazar</button><button class="btn sm pri" data-a="socYes" data-v="'+r.user_id+'">Aceptar</button></div>').join('')+'</div>':'')+
+     (sv.friends.length?'<h4 class="soc-h">Tus amigos ('+sv.friends.length+')</h4><div class="lb">'+sv.friends.map(r=>{const d=r.data||{};return '<div class="lb-r"><button class="row grow" style="gap:10px;text-align:left;min-width:0" data-a="socCard" data-v="'+r.user_id+'">'+badge(d.ovr?d.ovr.L:-1,36)+'<span class="grow"><b>'+esc(r.nick||'Atleta')+'</b><small class="mut">Activo '+dayAgo(String(r.updated_at).slice(0,10))+'</small></span></button><button class="btn sm line" data-a="socUser" data-v="'+r.user_id+'" data-x="'+esc(r.nick||'Atleta')+'">Opciones</button></div>';}).join('')+'</div>':nf0)+
      (rout.length?'<h4 class="soc-h">Enviadas</h4><div class="lb">'+rout.map(r=>'<div class="lb-r"><span class="grow"><b>'+esc(r.nick)+'</b><small class="mut">Esperando que acepte</small></span><button class="btn sm line" data-a="socCancel" data-v="'+r.user_id+'">Cancelar</button></div>').join('')+'</div>':'');
-    body+='<button class="btn line wide bad" style="margin-top:14px" data-a="socOff">Dejar de compartir</button>';
+    body+='<h4 class="soc-h">Privacidad</h4><div class="g2"><button class="btn sm" data-a="socNewCode">Cambiar mi código</button><button class="btn sm" data-a="blockedOpen">Bloqueados</button></div><p class="mut sm-t" style="margin-top:6px">Si tu código llegó a alguien que no querés, cambialo: el viejo deja de andar.</p>'+
+     '<button class="btn line wide bad" style="margin-top:14px" data-a="socOff">Dejar de compartir</button>';
   }
-  return head+tabs+reqBox+body;
+  return head+teen+tabs+reqBox+body;
 }
 /* torneos entre amigos */
 /* lo que tenés pendiente con amigos: solicitudes, invitaciones, torneos terminados y quién te pasó */
@@ -824,7 +845,7 @@ function postHTML(p,full){
   const ago=agoTxt(new Date(p.created_at).getTime());
   const likers=p.likes.map(u=>u===me?'vos':((S.social.friends.find(f=>f.user_id===u)||{}).nick||'')).filter(Boolean);
   const cm=open?p.cmts:p.cmts.slice(-2);
-  return '<article class="post" id="post-'+p.id+'"><header class="post-h">'+avatar(mine?'Vos':p.nick,p.user_id)+'<span class="grow"><b>'+esc(mine?'Vos':p.nick)+'</b><small>'+ago+'</small></span>'+(mine?'<button class="ib flat" data-a="postDel" data-v="'+p.id+'" aria-label="Borrar publicación">'+ic('trash',16)+'</button>':'')+'</header>'+
+  return '<article class="post" id="post-'+p.id+'"><header class="post-h">'+avatar(mine?'Vos':p.nick,p.user_id)+'<span class="grow"><b>'+esc(mine?'Vos':p.nick)+'</b><small>'+ago+'</small></span>'+(mine?'<button class="ib flat" data-a="postDel" data-v="'+p.id+'" aria-label="Borrar publicación">'+ic('trash',16)+'</button>':'<button class="ib flat" data-a="socUser" data-v="'+p.user_id+'" data-x="'+esc(p.nick)+'" data-e="post|'+p.id+'" aria-label="Bloquear o denunciar">'+ic('flag',16)+'</button>')+'</header>'+
    '<h4 class="post-t">'+esc(d.n||'Entrenamiento')+'</h4>'+
    '<div class="post-s"><span>'+ic('timer',14)+' '+(+d.dur||0)+' min</span><span>'+(+d.sets||0)+' series</span>'+(+d.vol?'<span>'+nf(+d.vol)+' kg</span>':'')+'</div>'+
    ((d.prs||[]).length||(d.ups||[]).length?'<div class="post-pr">'+(d.ups||[]).map(u=>'<span class="up" style="--c:'+lvlColor(u.L)+'">'+ic('up',13)+' '+esc(u.n)+': '+lvlName(u.L)+'</span>').join('')+(d.prs||[]).map(n=>'<span>'+ic('trophy',13)+' Récord en '+esc(n)+'</span>').join('')+'</div>':'')+
@@ -832,7 +853,7 @@ function postHTML(p,full){
    '<div class="post-a"><button class="fire'+(liked?' on':'')+'" data-a="postFire" data-v="'+p.id+'" aria-pressed="'+liked+'" aria-label="Dar fuego">'+ic('flame',18)+'<b>'+(p.likes.length||'')+'</b></button>'+
    '<button data-a="postCmt" data-v="'+p.id+'" aria-label="Comentar">'+ic('chat',18)+'<b>'+(p.cmts.length||'')+'</b></button>'+
    (likers.length?'<span class="post-lk">'+ic('flame',12)+' '+esc(likers.slice(0,3).join(', '))+(likers.length>3?' y '+(likers.length-3)+' más':'')+'</span>':'')+'</div>'+
-   (cm.length?'<div class="cmts">'+(p.cmts.length>cm.length?'<button class="cm-more" data-a="postCmt" data-v="'+p.id+'">Ver los '+p.cmts.length+' comentarios</button>':'')+cm.map(c=>'<div class="cm"><b>'+esc(c.user_id===me?'Vos':c.nick)+'</b> <span class="sel-ok">'+esc(c.body)+'</span>'+(c.user_id===me||mine?'<button class="cm-x" data-a="cmtDel" data-v="'+p.id+'|'+c.id+'" aria-label="Borrar comentario">'+ic('x',12)+'</button>':'')+'</div>').join('')+'</div>':'')+
+   (cm.length?'<div class="cmts">'+(p.cmts.length>cm.length?'<button class="cm-more" data-a="postCmt" data-v="'+p.id+'">Ver los '+p.cmts.length+' comentarios</button>':'')+cm.map(c=>'<div class="cm"><b>'+esc(c.user_id===me?'Vos':c.nick)+'</b> <span class="sel-ok">'+esc(c.body)+'</span>'+(c.user_id===me||mine?'<button class="cm-x" data-a="cmtDel" data-v="'+p.id+'|'+c.id+'" aria-label="Borrar comentario">'+ic('x',12)+'</button>':'')+(c.user_id!==me?'<button class="cm-x" data-a="socUser" data-v="'+c.user_id+'" data-x="'+esc(c.nick)+'" data-e="comment|'+c.id+'" aria-label="Denunciar comentario">'+ic('flag',12)+'</button>':'')+'</div>').join('')+'</div>':'')+
    (open?'<div class="cm-in"><input id="cmt-'+p.id+'" maxlength="200" placeholder="Escribí algo (¡bien ahí!, ¿cuánto levantaste?…)" data-i="cmt" data-e="'+p.id+'" autocomplete="off"><button class="ib" data-a="cmtSend" data-v="'+p.id+'" aria-label="Enviar">'+ic('send',18)+'</button></div>':'')+
    '</article>';
 }
@@ -896,3 +917,27 @@ function seasonCard(){
   return '<button class="card soc-mini" data-a="socOpen" data-v="season"><span class="lh-k">Temporada de '+MESES[new Date().getMonth()]+'</span><span class="row" style="gap:10px;margin-top:6px"><b class="soc-pos">'+(i+1)+'º</b><span class="grow">de '+rows.length+' · <b>'+rows[i].v+'</b> pts'+(i>0?'<br><span class="mut sm-t">'+(rows[i-1].v-rows[i].v)+' pts para pasar a '+esc(rows[i-1].r.nick||'Atleta')+'</span>':'<br><span class="mut sm-t">Vas primero</span>')+'</span>'+ic('right',18)+'</span></button>';
 }
 
+
+/* seguridad: opciones sobre otra persona, denuncia y bloqueados */
+const REP_R=[['acoso','Me molesta, insulta o acosa'],['menor','Pide fotos, datos personales o verse en persona'],['sexual','Contenido o mensajes sexuales'],['odio','Odio o discriminación'],['peligro','Algo peligroso (dietas extremas, sustancias, lesiones)'],['spam','Spam o cuenta falsa'],['otro','Otra cosa']];
+function socUserHTML(m){
+  const isF=S.social&&S.social.friends.some(f=>f.user_id===m.id),k=m.ctx||'';
+  const b=(a,icn,l,s)=>'<button class="fd-row" data-a="'+a+'"><span class="fd-ic">'+ic(icn,18)+'</span><span class="grow"><b>'+l+'</b>'+(s?'<small class="mut">'+s+'</small>':'')+'</span></button>';
+  return '<div class="gap">'+(isF?b('socDelU','x','Sacar de amigos','Dejan de verse los dos. No recibe aviso.'):'')+
+   b('blockAsk','flag','Bloquear','Deja de ser tu amigo, no te puede volver a agregar y no se entera.')+
+   b('reportOpen','info',k.startsWith('comment')?'Denunciar este comentario':k.startsWith('post')?'Denunciar esta publicación':'Denunciar','Lo revisamos nosotros. No se entera de quién lo denunció.')+'</div>';
+}
+function reportHTML(d){
+  const other=d.kind==='other';
+  return (other?'<p class="sm-t">Pedí lo que necesites: ver o borrar tus datos, corregir algo, avisarnos de un problema o contarnos algo que te preocupa. Te respondemos al mail de tu cuenta.</p>'
+    :'<p class="sm-t">¿Qué pasa con <b>'+esc(d.nick||'esta persona')+'</b>?</p><div class="rep-r">'+REP_R.map(([k,l])=>'<button class="chip '+(d.reason===k?'on':'')+'" data-a="repReason" data-v="'+k+'" aria-pressed="'+(d.reason===k)+'">'+l+'</button>').join('')+'</div>')+
+   '<label class="field">'+(other?'Tu mensaje':'Contanos más (opcional)')+'<textarea maxlength="500" rows="4" data-i="d" data-f="note" placeholder="'+(other?'Escribí acá':'Qué pasó, cuándo…')+'">'+esc(d.note||'')+'</textarea></label>'+
+   (other?'':'<label class="auto-post"><input type="checkbox" data-a="repBlk"'+(d.blk?' checked':'')+'><span>Bloquear también a '+esc(d.nick||'esta persona')+'</span></label>')+
+   (isTeen()&&!other?'<p class="mut sm-t">Si te sentís en peligro, contáselo ya a un adulto de confianza. Si es urgente, llamá a la emergencia de tu país.</p>':'')+
+   '<button class="btn pri wide" data-a="reportGo"'+(d.busy?' disabled':'')+'>'+(d.busy?'Mandando…':'Mandar')+'</button>';
+}
+function blockedHTML(m){
+  if(!m.list)return '<p class="mut tc" style="padding:24px 0">Cargando…</p>';
+  return m.list.length?'<div class="lb">'+m.list.map(r=>'<div class="lb-r"><span class="grow"><b>'+esc(r.nick)+'</b><small class="mut">Bloqueado '+dayAgo(String(r.created_at).slice(0,10))+'</small></span><button class="btn sm line" data-a="unblock" data-v="'+r.user_id+'">Desbloquear</button></div>').join('')+'</div><p class="mut sm-t" style="margin-top:8px">Desbloquear no los vuelve amigos: tendrían que agregarse de nuevo.</p>'
+   :'<div class="card empty" style="margin:0">'+ic('flag',30)+'<b>No bloqueaste a nadie</b>Si alguien te molesta, tocá la bandera al lado de su nombre.</div>';
+}

@@ -159,6 +159,8 @@ const Sync=(()=>{
     const d=S.m2&&S.m2.d;if(!d||d.busy)return;
     const email=(d.email||'').trim().toLowerCase(),pw=d.pw||'';
     if(d.mode!=='newpw'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return toast('Revisá el email');
+    if(d.mode==='up'&&tooYoung())return toast('Para crear una cuenta tenés que tener '+MIN_AGE+' años o más. Podés seguir usando Swole en este dispositivo sin cuenta.');
+    if(d.mode==='up'&&!d.ok)return toast('Marcá la casilla de edad y términos para seguir');
     if(d.mode!=='forgot'&&d.mode!=='resend'&&pw.length<6)return toast('La contraseña tiene que tener al menos 6 caracteres');
     d.email=d.mode==='newpw'?d.email:email;d.busy=true;renderModal();
     try{

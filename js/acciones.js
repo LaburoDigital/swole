@@ -372,6 +372,26 @@ const ACTIONS={
   socOffGo(){S.m2=null;Social.disable().then(()=>{render();toast('Ya no compartís nada');}).catch(e=>toast(Social.errTxt(e)));},
   socAdd(){const i=$('#socCode');const c=i?i.value:'';if(!c.trim())return toast('Escribí el código de tu amigo');
     Social.add(c).then(r=>{if(i)i.value='';renderModal();toast(addMsg(r));if(r==='friends')confetti(30);}).catch(e=>toast(/code_len/.test(e.message)?'El código tiene 6 letras y números':Social.errTxt(e)));},
+  socUser(v,el){S.m2={t:'socuser',id:v,nick:el&&el.dataset.x||'',ctx:(el&&el.dataset.e)||''};render();},
+  socDelU(){ACTIONS.socDel(S.m2.id);},
+  blockAsk(){const m=S.m2;S.m2={t:'confirm',title:'Bloquear a '+(m.nick||'esta persona'),msg:'Dejan de ser amigos, se borran las solicitudes y los torneos que comparten, y no te puede volver a agregar. No recibe ningún aviso.',act:'blockGo',arg:m.id,ok:'Bloquear'};render();},
+  blockGo(v,el){const id=el&&el.dataset.v||v;S.m2=null;Social.block(id).then(()=>{render();toast('Bloqueado');}).catch(e=>toast(Social.errTxt(e)));},
+  reportOpen(){const m=S.m2,[kind,ref]=(m.ctx||'').split('|');S.m2={t:'report',d:{target:m.id,nick:m.nick,kind:kind==='post'||kind==='comment'?kind:'user',ref:ref||null,reason:'',note:'',blk:true}};render();},
+  contactOpen(){S.m2={t:'report',d:{kind:'other',reason:'otro',note:''}};render();},
+  repReason(v){S.m2.d.reason=v;renderModal();},
+  repBlk(v,el){S.m2.d.blk=!!(el&&el.checked);},
+  reportGo(){const d=S.m2&&S.m2.d;if(!d||d.busy)return;
+    if(!d.reason)return toast('Elegí qué pasa');
+    if(d.kind==='other'&&!String(d.note||'').trim())return toast('Escribí tu mensaje');
+    d.busy=true;renderModal();
+    Social.report(d).then(()=>d.blk&&d.target?Social.block(d.target):null).then(()=>{S.m2=null;render();
+      toast(d.kind==='other'?'Mensaje enviado. Te respondemos al mail de tu cuenta.':'Denuncia enviada. Gracias por avisar'+(d.blk?': también lo bloqueaste':''));})
+     .catch(e=>{d.busy=false;renderModal();toast(Social.errTxt(e));});},
+  blockedOpen(){S.m2={t:'blocked',list:null};render();Social.blocked().then(l=>{if(S.m2&&S.m2.t==='blocked'){S.m2.list=l;renderModal();}}).catch(e=>toast(Social.errTxt(e)));},
+  unblock(v){Social.unblock(v).then(()=>{if(S.m2&&S.m2.list)S.m2.list=S.m2.list.filter(r=>r.user_id!==v);renderModal();toast('Desbloqueado');}).catch(e=>toast(Social.errTxt(e)));},
+  socNewCode(){S.m2={t:'confirm',title:'Cambiar mi código',msg:'Tu código y tu link de invitación actuales dejan de andar. Tus amigos siguen siendo tus amigos.',act:'socNewCodeGo',ok:'Cambiar'};render();},
+  socNewCodeGo(){S.m2=null;Social.newCode().then(c=>{render();toast('Tu código nuevo: '+c);}).catch(e=>toast(Social.errTxt(e)));},
+  termsTog(v,el){if(S.m2&&S.m2.d)S.m2.d.ok=!!(el&&el.checked);},
   socDel(v){const r=S.social&&S.social.friends.find(x=>x.user_id===v);S.m2={t:'confirm',title:'Sacar amigo',msg:'Dejan de verse los dos. '+(r?r.nick:'')+' no recibe ningún aviso.',act:'socDelGo',arg:v,ok:'Sacar'};render();},
   socDelGo(v,el){const id=el&&el.dataset.v||v;S.m2=null;Social.remove(id).then(()=>{render();toast('Listo');}).catch(e=>toast(Social.errTxt(e)));},
   socCard(v){S.m2={t:'fcard',id:v};render();},

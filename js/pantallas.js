@@ -652,8 +652,13 @@ function profileHTML(d){
    '<label class="field">Actividad física<select data-i="d" data-f="activity">'+ACT.map((a,i)=>'<option value="'+i+'"'+(+d.activity===i?' selected':'')+'>'+a.l+'</option>').join('')+'</select></label>'+
    '<div class="field"><span>Objetivo</span><div class="seg">'+Object.keys(GOALS).map(k=>'<button class="'+(d.goal===k?'on':'')+'" data-a="pfGoal" data-v="'+k+'">'+GOALS[k]+'</button>').join('')+'</div></div>'+
    '<button class="btn pri wide" data-a="pfSave">Guardar perfil</button>'+
-   (first?'<button class="btn line wide" data-a="loginOpen">'+ic('cloud',18)+' Ya uso Swole: entrar con mi cuenta</button>':'<div class="div" style="margin:0"></div>'+accountHTML())+
+   (first?'<button class="btn line wide" data-a="loginOpen">'+ic('cloud',18)+' Ya uso Swole: entrar con mi cuenta</button>':'<div class="div" style="margin:0"></div>'+accountHTML()+privHTML())+
    (first?'':'<div class="div" style="margin:0"></div><p class="mut sm-t">'+(Sync.user()?'También podés guardar una copia en un archivo.':'Tus datos viven solo en este dispositivo. Hacé una copia cada tanto.')+' Última copia: <b>'+(db.settings.lastBackup?esc(longDate(db.settings.lastBackup)):'nunca')+'</b></p><div class="g2"><button class="btn sm" data-a="export">Exportar datos</button><button class="btn sm" data-a="importOpen">Importar datos</button></div><button class="btn sm wide" data-a="exportCSV" style="margin-top:8px">'+ic('list',15)+' Bajar mis entrenos para Excel (CSV)</button><button class="btn sm bad line" data-a="wipeAsk">Borrar todos los datos</button><p class="mut tc" style="font-size:11px">Figura anatómica adaptada de react-body-highlighter (MIT).</p>');
+}
+function privHTML(){
+  return '<div class="div" style="margin:0"></div><div><h4 style="margin-bottom:4px">Privacidad y ayuda</h4><p class="mut sm-t" style="margin-bottom:10px">Nadie puede buscarte en Swole: solo te ven los amigos que aceptás. Tu mail, peso, edad, medidas, fotos y comidas no se comparten nunca.</p>'+
+   '<div class="g2"><a class="btn sm" href="info/privacidad.html" target="_blank" rel="noopener">Privacidad</a><a class="btn sm" href="info/terminos.html" target="_blank" rel="noopener">Términos</a></div>'+
+   (Sync.user()?'<button class="btn sm wide" style="margin-top:8px" data-a="contactOpen">Contacto y pedidos (ver o borrar mis datos)</button>':'')+'</div>';
 }
 function accountHTML(){
   const u=Sync.user(),st=Sync.state;
@@ -677,6 +682,7 @@ function loginHTML(d){
   const up=d.mode==='up';
   return '<p class="mut sm-t">'+(up?'Guardá todo en la nube y usá Swole en el celular y la compu a la vez.':'Lo que ya tenés en este dispositivo se une con lo de la nube.')+'</p>'+
    em+pw('Contraseña','pw',up?'new-password':'current-password')+
+   (up?'<label class="terms-ok"><input type="checkbox" data-a="termsTog"'+(d.ok?' checked':'')+'><span>Tengo '+MIN_AGE+' años o más y acepto los <a href="info/terminos.html" target="_blank" rel="noopener">Términos</a> y la <a href="info/privacidad.html" target="_blank" rel="noopener">Política de privacidad</a>. Si tengo menos de 18, mi madre, padre o tutor está de acuerdo.</span></label>':'')+
    '<button class="btn pri wide" data-a="loginGo"'+dis+'>'+(d.busy?(up?'Creando…':'Entrando…'):(up?'Crear cuenta':'Entrar'))+'</button>'+
    (d.unconf&&!up?'<div class="warn">Tu cuenta todavía no está confirmada. Buscá el email de Swole (fijate en spam) o pedí otro.</div><button class="btn wide" data-a="loginResend">Reenviar email de confirmación</button>':'')+
    (up?'':'<button class="btn line wide" data-a="loginMode" data-v="forgot">Me olvidé la contraseña</button>')+
@@ -800,6 +806,9 @@ function modalBody(m,l2){
     case 'phcmp':return sheet('Antes y después',photoCmpHTML(m));
     case 'phview':return sheet('Foto de progreso',photoViewHTML(m),{l2:true});
     case 'friends':return sheet('Amigos',friendsHTML(m));
+    case 'socuser':return sheet(m.nick||'Opciones',socUserHTML(m),{l2:true});
+    case 'report':return sheet(m.d.kind==='other'?'Contacto y pedidos':'Denunciar',reportHTML(m.d),{l2:true});
+    case 'blocked':return sheet('Bloqueados',blockedHTML(m),{l2:true});
     case 'delacc':return sheet('Eliminar mi cuenta','<p>Se borra <b>para siempre</b>: tu cuenta, todos tus datos en la nube, tus amigos, solicitudes, torneos y recordatorios. También se borra lo que hay en este dispositivo.</p><p class="mut sm-t">No se puede deshacer. Si querés conservar algo, antes hacé una copia en Perfil → Copia de seguridad. Después podés crear una cuenta nueva con el mismo mail.</p><label class="field">Escribí <b>ELIMINAR</b> para confirmar<input id="delAccIn" type="text" autocomplete="off" autocapitalize="characters" placeholder="ELIMINAR"></label><div class="g2"><button class="btn" data-a="close" data-v="m2">Cancelar</button><button class="btn bad" data-a="delAccGo"'+(m.busy?' disabled':'')+'>'+(m.busy?'Borrando…':'Eliminar para siempre')+'</button></div>',{l2:true});
     case 'progs':return sheet('Programas',progsHTML(m.d||{}),{l2:true});
     case 'music':return sheet('Música',musicPickHTML(),{l2:true});
