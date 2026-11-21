@@ -1,6 +1,8 @@
 'use strict';
 /* ============ Sincronización con Supabase ============ */
-function mergeDb(L,R){
+/* o.remoteFirst: primera vez que este celu se une con la cuenta (instalación nueva): lo que se eligió en la
+   bienvenida antes de entrar no pisa el perfil, el calendario ni los ajustes que ya estaban en la nube. */
+function mergeDb(L,R,o){
   const cl={},dl={},clone=x=>x==null?x:JSON.parse(JSON.stringify(x));
   [L.clock,R.clock].forEach(o=>{for(const k in o)cl[k]=Math.max(cl[k]||0,+o[k]||0);});
   [L.del,R.del].forEach(o=>{for(const k in o)dl[k]=Math.max(dl[k]||0,+o[k]||0);});
@@ -28,6 +30,7 @@ function mergeDb(L,R){
   SYNC_FIELDS.forEach(c=>{
     const A=L[c]&&typeof L[c]==='object'?L[c]:null,B=R[c]&&typeof R[c]==='object'?R[c]:null;
     if(!A&&!B){out[c]=c==='profile'?null:{};return;}
+    if(o&&o.remoteFirst&&B&&c!=='settings'&&Object.keys(B).length){out[c]=clone(B);return;}
     const m={},ks=new Set(Object.keys(A||{}).concat(Object.keys(B||{})));
     ks.forEach(f=>{
       const a=A?A[f]:undefined,b=B?B[f]:undefined;
@@ -35,7 +38,7 @@ function mergeDb(L,R){
       if(c==='settings'&&LOCAL_SET.includes(f)){if(a!==undefined)m[f]=clone(a);return;}
       const k=c+':'+f,ta=a!==undefined?ck(L,k,c):-1,tb=b!==undefined?ck(R,k,c):-1,d=dl[k]||0;
       /* empate (datos de antes de sincronizar): gana la nube, salvo que venga vacía */
-      const v=tb>ta||(tb===ta&&b!==undefined&&!empty(b))?b:(a!==undefined?a:b);
+      const v=tb>ta||(tb===ta||o&&o.remoteFirst)&&b!==undefined&&!empty(b)?b:(a!==undefined?a:b);
       if(v!==undefined&&!(d&&d>=Math.max(ta,tb)))m[f]=clone(v);
     });
     out[c]=c==='profile'&&!Object.keys(m).length?null:m;
@@ -56,7 +59,10 @@ const Sync=(()=>{
   const URL_='https://couuuvckplstgksanzgr.supabase.co',KEY='sb_publishable_labsOx_gAy1Njn6mHAuhuw_jWBRPkgB',AK='swole.auth';
   let sess=null,refreshing=null,timer=null,running=false,again=false,pendingRender=false;
   const st={s:'idle',at:0,msg:''};
+  const OW='swole.owner',owner=()=>{try{return localStorage.getItem(OW);}catch(e){return null;}},setOwner=u=>{try{localStorage.setItem(OW,u);}catch(e){}};
   try{sess=JSON.parse(localStorage.getItem(AK)||'null');}catch(e){}
+  /* celus que ya estaban conectados antes de este cambio: sus datos son de esa cuenta */
+  if(sess&&sess.user&&!owner())setOwner(sess.user.id);
   const keep=()=>{try{sess?localStorage.setItem(AK,JSON.stringify(sess)):localStorage.removeItem(AK);}catch(e){}};
   const setSess=j=>{
     if(!j||!j.access_token)throw new Error('Respuesta inválida');
@@ -107,11 +113,14 @@ const Sync=(()=>{
     if(!navigator.onLine){set('off');return;}
     running=true;clearTimeout(timer);set('busy');
     try{
-      const uid=sess.user.id;
+      const uid=sess.user.id,ow=owner(),first=ow!==uid;
+      /* los datos de este celu son de OTRA cuenta: no se mezclan (esa cuenta ya los tiene en su nube) */
+      if(ow&&first){const keep={};['theme','accent','big'].forEach(f=>{if(db.settings[f]!==undefined)keep[f]=db.settings[f];});
+        db=normalize({settings:keep});snap=syncKeys(db);Store.save(db);setOwner(uid);render();}
       for(let i=0;i<4;i++){
         const rows=await req('/rest/v1/swole_data?select=data,rev&user_id=eq.'+uid,{auth:true});
         const row=rows&&rows[0];
-        if(row)applyRemote(mergeDb(db,normalize(row.data)));
+        if(row)applyRemote(mergeDb(db,normalize(row.data),{remoteFirst:first}));
         const data=syncPayload(db);
         if(!row){
           try{await req('/rest/v1/swole_data',{method:'POST',auth:true,headers:{Prefer:'return=minimal'},body:{user_id:uid,data}});break;}
@@ -122,7 +131,7 @@ const Sync=(()=>{
         const up=await req('/rest/v1/swole_data?user_id=eq.'+uid+'&rev=eq.'+row.rev,{method:'PATCH',auth:true,headers:{Prefer:'return=representation'},body:{data}});
         if(up&&up.length)break;
       }
-      set('ok');if(manual)toast('Todo sincronizado');
+      setOwner(uid);set('ok');if(manual)toast('Todo sincronizado');
     }catch(e){
       if(!sess){set('idle');}
       else if(!navigator.onLine||e instanceof TypeError)set('off');

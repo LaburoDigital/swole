@@ -151,7 +151,7 @@ const Store=(()=>{
   return{
     load(){try{const r=localStorage.getItem(K);if(r)return JSON.parse(r);}catch(e){}return mem?JSON.parse(mem):null;},
     save(d){const s=JSON.stringify(d);mem=s;try{localStorage.setItem(K,s);this.full=0;}catch(e){if(!this.full){this.full=1;setTimeout(()=>{try{toast('No se pudo guardar en este celu (sin espacio). Bajá una copia desde Perfil para no perder nada.');}catch(x){}},60);}}},
-    wipe(){mem=null;try{localStorage.removeItem(K);}catch(e){}}
+    wipe(){mem=null;try{localStorage.removeItem(K);localStorage.removeItem('swole.owner');}catch(e){}}
   };
 })();
 const defaults=()=>({v:1,profile:null,routines:[],customEx:[],plan:{},logs:[],weights:[],creatine:{},water:{},settings:{theme:'dark',rest:90,remind:{on:false,time:'09:00'},lastRemind:''},active:null,clock:{},del:{},ach:{},tests:[],goals:[],meas:[],meals:[],foods:[]});
@@ -191,8 +191,13 @@ function syncKeys(d){
   return m;
 }
 let snap=syncKeys(db);
+/* Hora de un cambio: la del celu, pero nunca menor ni igual a la última que ya vio (de él o de otro celu).
+   Así un cambio hecho después de ver los datos del otro le gana siempre, aunque este reloj esté atrasado. */
+function stampNow(){let t=Date.now();[db.clock,db.del].forEach(o=>{for(const k in o)if(+o[k]>=t)t=+o[k]+1;});return t;}
 function stamp(){
-  const now=Date.now(),cur=syncKeys(db);let ch=false;
+  const cur=syncKeys(db);let ch=false,now=0;
+  for(const k in cur)if(snap[k]!==cur[k]){now=now||stampNow();break;}
+  if(!now)for(const k in snap)if(!(k in cur)){now=stampNow();break;}
   for(const k in cur)if(snap[k]!==cur[k]){db.clock[k]=now;delete db.del[k];ch=true;}
   for(const k in snap)if(!(k in cur)){db.del[k]=now;delete db.clock[k];ch=true;}
   snap=cur;return ch;

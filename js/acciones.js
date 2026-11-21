@@ -65,8 +65,24 @@ function exportCSV(){
   a.href=URL.createObjectURL(blob);a.download='swole-entrenos-'+today()+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
   toast('Listo: '+(rows.length-1)+' series exportadas');
 }
+/* Copia completa de lo que viaja a la nube (entrenos, marcas, rutinas, comidas, peso, medidas, perfil, ajustes…).
+   No lleva lo que es solo de este celu (entreno en curso, avisos, fotos y videos de progreso) ni la sesión. */
+function exportJSON(){const o=JSON.parse(JSON.stringify(syncPayload(db)));delete o.clock;delete o.del;o.app='swole';o.exported=new Date().toISOString();return o;}
+/* Restaurar una copia SUMA: agrega lo que falta (aunque se haya borrado después) y no borra ni pisa nada de lo que hay.
+   Devuelve cuántas cosas agregó. Tira error si no es una copia de Swole. */
+function importData(o){
+  if(!o||typeof o!=='object'||!Array.isArray(o.logs))throw new Error('formato');
+  const x=normalize(JSON.parse(JSON.stringify(o))),def=defaults().settings,same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);let n=0;
+  for(const c in SYNC_COLL){const k=SYNC_COLL[c],have=new Set(db[c].map(i=>String(i&&i[k])));
+    x[c].forEach(i=>{if(i&&i[k]!=null&&!have.has(String(i[k]))){db[c].push(i);have.add(String(i[k]));n++;}});}
+  SYNC_MAP.forEach(c=>{for(const k in x[c])if(!(k in db[c])){db[c][k]=x[c][k];n++;}});
+  if(x.profile&&typeof x.profile==='object'){if(!db.profile){db.profile=x.profile;n++;}else for(const f in x.profile)if(db.profile[f]==null||db.profile[f]===''){db.profile[f]=x.profile[f];n++;}}
+  for(const k in x.plan)if(!(k in db.plan)){db.plan[k]=x.plan[k];n++;}
+  for(const f in x.settings)if(!LOCAL_SET.includes(f)&&(db.settings[f]===undefined||same(db.settings[f],def[f]))&&!same(db.settings[f],x.settings[f])){db.settings[f]=x.settings[f];n++;}
+  save();return n;
+}
 async function exportData(){
-  const json=JSON.stringify(db,null,1),name='swole-'+today()+'.json';
+  const json=JSON.stringify(exportJSON(),null,1),name='swole-'+today()+'.json';
   /* En celular (sobre todo iPhone instalado) la descarga directa no anda: uso el menú de compartir */
   try{
     if(matchMedia('(pointer:coarse)').matches&&navigator.canShare&&window.File){
@@ -590,9 +606,8 @@ const ACTIONS={
   csvGo(){const m=S.m2;if(!m||!m.csv||!m.csv.ws)return;const n=csvImport(m.csv);S.m2=null;save();checkAch(true);render();toast(n?'Listo: '+n+(n===1?' entreno importado':' entrenos importados'):'No había entrenos nuevos para importar');if(n)confetti(40);},
   importGo(){
     try{
-      const o=JSON.parse(($('#impTxt')||{}).value||'');
-      if(!o||typeof o!=='object'||!Array.isArray(o.logs)||!Array.isArray(o.routines))throw new Error('formato');
-      db=normalize(o);save();S.m2=null;S.modal=null;render();toast('Datos importados');
+      const n=importData(JSON.parse(($('#impTxt')||{}).value||''));
+      S.m2=null;S.modal=null;render();toast(n?'Copia restaurada: '+n+(n===1?' cosa recuperada':' cosas recuperadas'):'Ya tenías todo lo de esa copia');checkAch(true);
       if(!db.profile)ACTIONS.startOnb();
     }catch(e){toast('Ese texto no parece un archivo de Swole');}
   },

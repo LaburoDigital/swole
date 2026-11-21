@@ -831,7 +831,7 @@ function modalBody(m,l2){
     case 'logedit':return sheet('Editar entrenamiento',logEditHTML(m.d));
     case 'welcome':return welcomeHTML(m);
     case 'login':return sheet(LOGIN_T[m.d.mode]||'Tu cuenta',loginHTML(m.d),{l2:true,noClose:m.d.mode==='newpw'});
-    case 'import':return sheet('Importar datos',csvHTML(m)+'<h4 style="margin:4px 0 6px">Desde una copia de Swole</h4><p class="mut sm-t">Pegá el contenido de un archivo exportado de Swole o elegí el archivo. Esto reemplaza lo que tenés ahora.</p><label class="field">Archivo<input type="file" accept=".json,application/json" data-i="file"></label><label class="field">O pegá el texto<textarea id="impTxt" spellcheck="false">'+esc(m.text||'')+'</textarea></label><button class="btn pri wide" data-a="importGo">Importar</button>',{l2:true});
+    case 'import':return sheet('Importar datos',csvHTML(m)+'<h4 style="margin:4px 0 6px">Desde una copia de Swole</h4><p class="mut sm-t">Elegí el archivo exportado de Swole o pegá su contenido. Se suma lo que te falte: no se borra nada de lo que tenés.</p><label class="field">Archivo<input type="file" accept=".json,application/json" data-i="file"></label><label class="field">O pegá el texto<textarea id="impTxt" spellcheck="false">'+esc(m.text||'')+'</textarea></label><button class="btn pri wide" data-a="importGo">Importar</button>',{l2:true});
   }
   return '';
 }

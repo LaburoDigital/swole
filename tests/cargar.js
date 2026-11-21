@@ -46,7 +46,9 @@ function scriptsDeIndex() {
   return out;
 }
 
-function cargarApp() {
+/* opts.antes(sandbox): se llama antes de cargar los js/ (para poner sesión, red de mentira, reloj). */
+function cargarApp(opts) {
+  opts = opts || {};
   const document = comodin();
   document.querySelector = () => comodin();
   document.querySelectorAll = () => [];
@@ -75,7 +77,10 @@ function cargarApp() {
   sandbox.window = sandbox;
   sandbox.self = sandbox;
   sandbox.globalThis = sandbox;
+  sandbox.__reloj = 0; // corrimiento del reloj de este "celu", en ms
+  if (opts.antes) opts.antes(sandbox);
   const ctx = vm.createContext(sandbox);
+  vm.runInContext('{const real=Date.now;Date.now=()=>real()+(globalThis.__reloj||0);}', ctx);
 
   for (const rel of scriptsDeIndex()) {
     const code = fs.readFileSync(path.join(RAIZ, rel), 'utf8');

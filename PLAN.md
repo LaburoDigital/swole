@@ -6,7 +6,7 @@ App web instalable (PWA) en español rioplatense para entrenar (gym o calistenia
 
 **Terminado para la versión actual (v1 "pública"):** la PWA funciona entera en un Android y un iPhone reales (entreno en vivo, niveles, nutrición, sync, sin conexión), hay pruebas automáticas que cubren niveles, sync y generador, la sync no puede borrar historiales, y hay términos/privacidad aptos para menores. Las tiendas (Play / App Store) son la versión siguiente.
 
-Publicada en https://laburodigital.github.io/swole/ · versión v83 · repo LaburoDigital/swole (main).
+Publicada en https://laburodigital.github.io/swole/ · versión v84 · repo LaburoDigital/swole (main).
 
 ## Estado
 **Hecho y probado en el preview (casi nada en celu real desde v60):**
@@ -33,7 +33,8 @@ Publicada en https://laburodigital.github.io/swole/ · versión v83 · repo Labu
 - Figuras de técnica: las de pie se parecen; solo dominadas tiene vista de espaldas.
 - Foto de comida: no estima porción, falla con asado y la tercera cosa; lo aprendido queda solo en ese celu.
 - Lesiones: cambiar a mano un ejercicio por uno que carga la zona no avisa.
-- Pruebas automáticas (Etapa 2): 131 pruebas en `npm test` y en GitHub Actions ("Pruebas", cada push). Cubren niveles, generador y técnica/detalle de los 116 ejercicios. Todavía no cubren: sync, nutrición, pantallas fuera del detalle de ejercicio, ni humo con navegador.
+- Pruebas automáticas: 151 en `npm test` y en GitHub Actions ("Pruebas", cada push). Cubren niveles, generador, técnica/detalle de los 116 ejercicios y, desde la Etapa 3, la sync y las copias: 20 pruebas con nube y celus de mentira (`tests/nube.js`). Todavía no cubren nutrición, pantallas fuera del detalle de ejercicio ni humo con navegador.
+- Backups de Supabase: **sin verificar**. El plan gratis no tendría backups descargables [Probable]: hoy la copia en archivo es el único respaldo fuera de la nube.
 - Puede quedar algún dato de prueba en el navegador del preview.
 
 ## Aspectos
@@ -126,13 +127,14 @@ Publicada en https://laburodigital.github.io/swole/ · versión v83 · repo Labu
 - Depende de: nada (puede ir en paralelo con la 1).
 - Resultado: tests/cargar.js levanta los js/ en el orden de index.html con un DOM de mentira; niveles.test.js (6), generador.test.js (8), ejercicios.test.js (1 + uno por ejercicio). CI verde en main (run 44925404636); rotura a propósito en la rama prueba-rotura (sacar las claves de técnica de dominadas) → CI rojo (run 44925479298), rama borrada.
 
-### Etapa 3 — Sync segura  [pendiente]
+### Etapa 3 — Sync segura  [en curso · pruebas y arreglos hechos, falta CI y celu real]
 - Objetivo: que la sync no pueda borrar historiales.
 - Tareas: pruebas de la sync (dos dispositivos, sin red, borrado, reinstalación, reloj desfasado); arreglar lo que falle; exportación/importación completa de datos del usuario; verificar backups de Supabase.
 - Archivos: js/sync.js, js/datos.js, tests/.
 - Terminado cuando: pruebas de sync pasando y una restauración probada de punta a punta en celu real.
 - Te toca a vos: probar en 2 celus.
 - Depende de: 2.
+- Prueba de restauración en el celu (v84): 1) Perfil → Exportar datos y guardar el archivo. 2) Anotar cuántos entrenos hay. 3) Perfil → Borrar todos los datos. 4) Perfil → Importar datos → elegir el archivo. 5) Mismos entrenos, perfil y comidas que antes. 6) Entrar con la cuenta y, en otro celu o en otro navegador, ver que esté todo.
 
 ### Etapa 4 — Menores, privacidad y social  [pendiente]
 - Objetivo: poder abrir la app a gente fuera de tu círculo sin riesgo.
@@ -184,10 +186,15 @@ Publicada en https://laburodigital.github.io/swole/ · versión v83 · repo Labu
 | 2026-11-21 | Congelar features nuevas hasta cerrar Etapas 1–4 | Calidad y menores son los riesgos mayores | — |
 | 2026-11-21 | Pruebas con `node:test` y `vm`, sin dependencias; el cargador lee el orden de scripts de index.html | Nada que instalar ni mantener; un js/ nuevo entra solo en las pruebas | — |
 | 2026-11-21 | La prueba de técnica exige claves propias de la figura (no acepta el respaldo con la descripción) | Es lo que falló en v83; el respaldo esconde el error | — |
+| 2026-11-21 | Hora de cada cambio = la del celu, pero nunca menor que la última que ya vio (reloj lógico) | Con un reloj atrasado, un cambio o borrado hecho después de sincronizar perdía (3 pruebas fallaban) | Hora del celu sola |
+| 2026-11-21 | Importar una copia **suma** lo que falta y no borra ni pisa nada | Importar una copia vieja reemplazaba todo y borraba en todos los celus lo cargado después | "Importar reemplaza lo que tenés" |
+| 2026-11-21 | La primera vez que un celu se une a la cuenta, perfil, calendario y ajustes vienen de la nube (los entrenos se suman) | Hacer la bienvenida antes de entrar pisaba el perfil y el calendario de la nube | — |
+| 2026-11-21 | Cada celu recuerda de qué cuenta son sus datos (`swole.owner`); si entra otra cuenta, arranca vacío | Los entrenos de una cuenta se subían a la otra | — |
+| 2026-11-21 | La copia lleva lo que viaja a la nube; no lleva entreno en curso, avisos, fotos ni videos de progreso | Las fotos y videos son solo de ese celu (decisión v55) y pesan mucho | — |
 | 2026-11-21 | Etapa 1 se da por cerrada con iPhone; la prueba en Android pasa a la Etapa 5 y es obligatoria antes de la 7 (Play) | Juan no tiene Android; no frenar el plan por eso | Etapa 1 "en los dos celus" |
 
 ## Después / fuera de alcance
-App Store (necesita Mac + cuenta Apple); widget de inicio; Apple Health y Google Fit; comparar dos entrenos cualquiera; lector de pantalla; capturas reales para info/; estimar porción en la foto; vista de espaldas para más ejercicios; desafíos 1 contra 1 (PLAN-v5, no hecho); ciclo menstrual opcional (PLAN-v5, no hecho); que lo aprendido por la foto se comparta entre celus.
+App Store (necesita Mac + cuenta Apple); widget de inicio; Apple Health y Google Fit; comparar dos entrenos cualquiera; lector de pantalla; capturas reales para info/; estimar porción en la foto; vista de espaldas para más ejercicios; desafíos 1 contra 1 (PLAN-v5, no hecho); incluir fotos y videos de progreso en la copia; historial de versiones en el servidor (red de seguridad si la sync falla); ciclo menstrual opcional (PLAN-v5, no hecho); que lo aprendido por la foto se comparta entre celus.
 
 ## Bitácora de sesiones
 | Fecha | Etapa | Qué se hizo | Qué quedó |
@@ -196,3 +203,4 @@ App Store (necesita Mac + cuenta Apple); widget de inicio; Apple Health y Google
 | 2026-11-21 | 1 | Checklist de 12 ítems en docs/checklist-celu.md; Etapa 1 en curso. | Juan corre el checklist en Android y iPhone; anotar ✓/✗ en Estado. |
 | 2026-11-21 | 1 | iPhone: 12/12 ✓ según Juan (sin detalle). No hay Android disponible. Etapa cerrada; Android pasa a la Etapa 5. | Etapa 2: pruebas automáticas. |
 | 2026-11-21 | 2 | tests/ + package.json + .github/workflows/test.yml; 131 pruebas verdes; CI verde en main y rojo con rotura a propósito (rama borrada). Sin cambios en la app. | Etapa 3: sync segura (sumar pruebas de sync al mismo cargador). Humo con navegador sigue pendiente (Etapa 6). |
+| 2026-11-21 | 3 | 20 pruebas de sync y copias (tests/nube.js: nube y celus de mentira con su reloj). Fallaban 11: reloj desfasado (3), bienvenida antes de entrar, otra cuenta, copias (5) y 1 del entorno de prueba. Arreglado en js/datos.js, js/sync.js y js/acciones.js; 151/151 en local; v84. | Push (CI) y la restauración en celu real. Backups de Supabase sin verificar. |
