@@ -1,5 +1,5 @@
 # Swole — Plan
-Última actualización: 2026-11-21 · Etapa actual: 1
+Última actualización: 2026-11-21 · Etapa actual: 2
 
 ## Visión
 App web instalable (PWA) en español rioplatense para entrenar (gym o calistenia) y saber qué tan fuerte sos: registrás entrenos y tus marcas se convierten en un rango de Bronce a Élite comparado con gente de tu sexo, edad y peso. Además: rutinas generadas, nutrición, árbol de calistenia, amigos y rankings. Público: gente que entrena, sobre todo adolescentes y jóvenes que hacen deporte.
@@ -24,12 +24,12 @@ Publicada en https://laburodigital.github.io/swole/ · versión v83 · repo Labu
 - Capturas reales para info/.
 - PLAN-v5: **no existen** en el código el ciclo menstrual opcional ni los desafíos 1 contra 1 (verificado con búsqueda). Pasan a "Después".
 
-**Resultados celu real (Etapa 1, v83):** pendiente — Juan corre docs/checklist-celu.md en Android y iPhone.
+**Resultados celu real (Etapa 1, v83, 2026-11-21):**
+- iPhone: los 12 ítems de docs/checklist-celu.md ✓ ("todo anda", según Juan). Sin detalle por ítem: no quedaron anotados ni el modelo ni la versión de iOS, ni con qué segundo dispositivo se probó la sync.
+- Android: **sin probar**, porque Juan no tiene uno. Queda pendiente (ver Decisiones).
 
 **Bugs conocidos / sin verificar:**
-- iPhone sin confirmar: tocar la barra de abajo scrolleando, temblor Rutinas/Calendario, rebote, fluidez, ícono de "Agregar a inicio".
-- Sin confirmar: abrir sin internet después de partir el archivo (v60), teclado al cargar marcas, atrás de Android dos veces.
-- Descanso con pantalla bloqueada: en iPhone el aviso puede llegar tarde o no llegar.
+- Android sin probar en celu real: atrás dos veces, sin conexión, fluidez en un Android medio, foto de comida.
 - Figuras de técnica: las de pie se parecen; solo dominadas tiene vista de espaldas.
 - Foto de comida: no estima porción, falla con asado y la tercera cosa; lo aprendido queda solo en ese celu.
 - Lesiones: cambiar a mano un ejercicio por uno que carga la zona no avisa.
@@ -108,7 +108,7 @@ Publicada en https://laburodigital.github.io/swole/ · versión v83 · repo Labu
 
 ## Etapas
 
-### Etapa 1 — Prueba en celu real  [en curso]
+### Etapa 1 — Prueba en celu real  [hecha en iPhone · Android pendiente]
 - Objetivo: saber qué anda y qué no en un Android y un iPhone reales.
 - Checklist: docs/checklist-celu.md (12 ítems, armado 2026-11-21). Resultados van a "Resultados celu real" en Estado.
 - Tareas: armar checklist corto (arranque, sin conexión, entreno en vivo completo, descanso con pantalla bloqueada, teclado al cargar marca, barra de abajo, atrás de Android, Agregar a inicio, sync entre 2 celus, foto de comida); Juan lo corre; anotar resultados en Estado y bugs.
@@ -142,9 +142,10 @@ Publicada en https://laburodigital.github.io/swole/ · versión v83 · repo Labu
 - Depende de: 1.
 
 ### Etapa 5 — Arreglos del celu  [pendiente]
-- Objetivo: arreglar lo que falló en la Etapa 1 (+ aviso de lesiones al cambiar ejercicio).
+- Objetivo: arreglar lo que falle en Android cuando se pruebe (en iPhone no falló nada) + aviso de lesiones al cambiar ejercicio.
 - Archivos: según resultados.
-- Terminado cuando: ítems ✗ del checklist pasan a ✓ en celu real; revisar-web (diseño) sin problemas graves.
+- Terminado cuando: checklist corrido en un Android real (prestado) con todo ✓; revisar-web (diseño) sin problemas graves.
+- Te toca a vos: conseguir un Android prestado ~20 min.
 - Depende de: 1, 2.
 
 ### Etapa 6 — Ordenar app.css  [pendiente]
@@ -180,6 +181,7 @@ Publicada en https://laburodigital.github.io/swole/ · versión v83 · repo Labu
 | nov 2026 (v14) | Perfil se abre desde el avatar | Barra con 4 zonas | PLAN-v2 (Perfil en la barra) |
 | nov 2026 | "Deshacer" en vez de confirmar; barra de abajo fija; sin pull-to-refresh ni rebote; sin emojis; tutorial con foco sobre la pantalla real | Más rápido y menos errores en el celu | v26 (pull-to-refresh) |
 | 2026-11-21 | Congelar features nuevas hasta cerrar Etapas 1–4 | Calidad y menores son los riesgos mayores | — |
+| 2026-11-21 | Etapa 1 se da por cerrada con iPhone; la prueba en Android pasa a la Etapa 5 y es obligatoria antes de la 7 (Play) | Juan no tiene Android; no frenar el plan por eso | Etapa 1 "en los dos celus" |
 
 ## Después / fuera de alcance
 App Store (necesita Mac + cuenta Apple); widget de inicio; Apple Health y Google Fit; comparar dos entrenos cualquiera; lector de pantalla; capturas reales para info/; estimar porción en la foto; vista de espaldas para más ejercicios; desafíos 1 contra 1 (PLAN-v5, no hecho); ciclo menstrual opcional (PLAN-v5, no hecho); que lo aprendido por la foto se comparta entre celus.
@@ -189,3 +191,4 @@ App Store (necesita Mac + cuenta Apple); widget de inicio; Apple Health y Google
 |---|---|---|---|
 | 2026-11-21 | 0 | Se armó este plan desde el resumen del chat original + verificación del repo (v83, git limpio). | Arrancar Etapa 1 y 2. |
 | 2026-11-21 | 1 | Checklist de 12 ítems en docs/checklist-celu.md; Etapa 1 en curso. | Juan corre el checklist en Android y iPhone; anotar ✓/✗ en Estado. |
+| 2026-11-21 | 1 | iPhone: 12/12 ✓ según Juan (sin detalle). No hay Android disponible. Etapa cerrada; Android pasa a la Etapa 5. | Etapa 2: pruebas automáticas. |
