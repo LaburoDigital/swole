@@ -185,6 +185,7 @@ const ACTIONS={
   stallFix(v,el){const id=el.dataset.e,s=db.settings;s.fix=Object.assign({},s.fix||{});if(v==='off'){delete s.fix[id];save();render();toast('Plan quitado');return;}
     s.fix[id]={k:v,from:today(),until:addDays(today(),v==='deload'?7:21)};save();render();buzz(10);
     toast(v==='deload'?'Esta semana vas al 90 %: la meta del entreno ya lo tiene en cuenta':v==='reps'?'3 semanas con otras repeticiones: la meta del entreno te guía':'Probá una de las variantes parecidas en tu próximo entreno');},
+  ntab(v){S.ntab=v;render();window.scrollTo({top:0});},
   exMet(v){S.exM=v;renderModal();},
   rankTog(v){const s=db.settings,l=(s.noRank||[]).slice(),i=l.indexOf(v);if(i>=0)l.splice(i,1);else l.push(v);s.noRank=l;save();render();toast(i>=0?'Vuelve a contar para tu nivel':'Ya no cuenta para tu nivel');},
   delTest(v){S.m2={t:'confirm',title:'Borrar marca',msg:'Se borra esta marca. Tu nivel en este ejercicio se recalcula.',act:'delTestGo',arg:v,ok:'Borrar'};render();},
@@ -559,7 +560,10 @@ const ACTIONS={
     S.m2=null;S.modal=null;save();render();toast('Rutina eliminada');
   },
   addTpl(v){const t=TPL[+v];newRoutineFrom(t.name,t.items);render();toast('Rutina agregada: '+t.name);},
-  exInfo(v){S.modal={t:'ex',id:v};render();},
+  exInfo(v){if(S.picker){S.picker.view=v;renderPicker();return;}S.modal={t:'ex',id:v};render();},
+  pickView(v){S.picker.view=v;renderPicker();},
+  pickBack(){S.picker.view=null;renderPicker();},
+  genView(v){const[ri,ii]=v.split('|').map(Number),d=S.m2&&S.m2.d,it=d&&d.plan&&d.plan[ri]&&d.plan[ri].items[ii];if(!it)return;S.picker={target:'gen',ri,ii,q:'',g:'',view:it.ex};renderPicker();},
   newEx(){S.m2={t:'excreate',d:{n:'',p:'pecho',s:[],type:'w'}};render();},
   cxS(v){const d=S.m2.d;d.s=d.s.includes(v)?d.s.filter(x=>x!==v):d.s.concat(v);renderModal();},
   cxT(v){S.m2.d.type=v;renderModal();},

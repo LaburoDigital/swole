@@ -15,6 +15,12 @@ function navTo(v,dir){
   const t=document.startViewTransition(()=>{go();});
   t.finished.finally(()=>{S.vt=false;document.documentElement.classList.remove('vt-back');});
 }
+/* barra de abajo: responde al levantar el dedo, aunque la página venga deslizándose (en iPhone ese toque solo la frenaba) */
+(()=>{let b=null,x0=0,y0=0;
+  document.addEventListener('touchstart',e=>{b=e.target.closest('.nav button[data-a]');if(b){x0=e.touches[0].clientX;y0=e.touches[0].clientY;}},{passive:true});
+  document.addEventListener('touchend',e=>{if(!b)return;const t=e.changedTouches[0],el=b;b=null;if(Math.hypot(t.clientX-x0,t.clientY-y0)>14)return;
+    if(document.elementFromPoint(t.clientX,t.clientY)?.closest('.nav button')!==el)return;e.preventDefault();S.layT=0;el.click();},{passive:false});
+})();
 /* deslizar a los costados cambia de pestaña (en el celu) */
 (()=>{let x0=0,y0=0,t0=0,ok=false,dx=0,lock=null;
   const blocked=t=>t.closest('.scroll-x,.tb-row,.carta,.cmp,input,textarea,select,.set,.week,.chips,.seg,.heat,.qgrid.big,.ptiles,[data-noswipe]');
@@ -513,13 +519,27 @@ const NEWTQ={
 };
 Object.keys(NEWTQ).forEach(k=>{if(!TECH[k])TECH[k]=NEWTQ[k];});
 Object.keys(POSE).forEach(k=>{const T=TECH[k];if(!T)return;T.A=PZ(POSE[k].A);T.B=PZ(POSE[k].B);});
+/* figura de espaldas: hombros y cadera con ancho, brazos y piernas de los dos lados (para los ejercicios que de costado no se distinguen) */
+const FZ=(()=>{const L={ua:14,fa:13,th:20,sh:19},dir=a=>[Math.cos(a*Math.PI/180),Math.sin(a*Math.PI/180)],go=(p,a,l)=>{const d=dir(a);return[p[0]+d[0]*l,p[1]+d[1]*l];};
+  return s=>{const P={n:[0,0],h:[0,-9],p:[0,30],sL:[-9,3],sR:[9,3],hL:[-5,30],hR:[5,30]};
+    P.eL=go(P.sL,s.uaL,L.ua);P.aL=go(P.eL,s.faL,L.fa);P.eR=go(P.sR,s.uaR,L.ua);P.aR=go(P.eR,s.faR,L.fa);
+    P.kL=go(P.hL,s.thL,L.th);P.fL=go(P.kL,s.shL,L.sh);P.kR=go(P.hR,s.thR,L.th);P.fR=go(P.kR,s.shR,L.sh);
+    const an=P[s.at[0]],dx=s.at[1]-an[0],dy=s.at[2]-an[1],o={},r=v=>Math.round(v*10)/10;for(const k in P)o[k]=[r(P[k][0]+dx),r(P[k][1]+dy)];return o;};})();
+const BK_LEGS={thL:96,shL:92,thR:84,shR:88};
+const BK={
+  pullup:{A:Object.assign({uaL:232,faL:252,uaR:308,faR:288,at:['aL',41,12]},BK_LEGS),B:Object.assign({uaL:168,faL:282,uaR:12,faR:258,at:['aL',41,12]},BK_LEGS)},
+  hang:{A:Object.assign({uaL:232,faL:252,uaR:308,faR:288,at:['aL',41,12]},BK_LEGS),B:Object.assign({uaL:234,faL:254,uaR:306,faR:286,at:['aL',41,12]},BK_LEGS)},
+  archerpull:{A:Object.assign({uaL:224,faL:224,uaR:316,faR:316,at:['aL',36,12]},BK_LEGS),B:Object.assign({uaL:168,faL:282,uaR:350,faR:352,at:['aL',36,12]},BK_LEGS)},
+  oapull:{A:Object.assign({uaL:262,faL:268,uaR:80,faR:88,at:['aL',58,12]},BK_LEGS),B:Object.assign({uaL:205,faL:300,uaR:60,faR:95,at:['aL',58,12]},BK_LEGS)}
+};
+Object.keys(BK).forEach(k=>{const T=TECH[k];if(!T)return;T.front=1;T.A=FZ(BK[k].A);T.B=FZ(BK[k].B);});
 function techSVG(k,stat){
   const T=TECH[k];if(!T)return '';
   /* que la figura se lea: el brazo que cae sobre el cuerpo se corre un poco adelante, y si la pose no trae el brazo y la pierna de atrás, se dibujan levemente corridos */
   const A0=Object.assign({},T.A),B0=Object.assign({},T.A,T.B),dseg=(q,a,b)=>{const dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((q[0]-a[0])*dx+(q[1]-a[1])*dy)/L));return Math.hypot(q[0]-a[0]-t*dx,q[1]-a[1]-t*dy);};
   const armOn=A0.e&&A0.n&&A0.p&&(dseg(A0.e,A0.n,A0.p)<5||(A0.a&&dseg(A0.a,A0.n,A0.p)<5)),mv=(p,dx)=>p&&[p[0]+dx,p[1]];
   const fix=P=>{if(armOn){P.e=mv(P.e,5);P.a=mv(P.a,5);}if(!T.A.k2&&P.k&&P.f&&P.p){P.k2=mv(P.k,-4);P.f2=mv(P.f,-4);}if(!T.A.e2&&P.e&&P.a&&P.n){P.e2=mv(P.e,-4);P.a2=mv(P.a,-4);}return P;};
-  const A=fix(A0),B=fix(B0),D='2.8s',ks='keyTimes="0;.45;.55;1" calcMode="spline" keySplines=".45 0 .3 1;0 0 1 1;.45 0 .3 1"';
+  const A=T.front?A0:fix(A0),B=T.front?B0:fix(B0),D='2.8s',ks='keyTimes="0;.45;.55;1" calcMode="spline" keySplines=".45 0 .3 1;0 0 1 1;.45 0 .3 1"';
   const an=(attr,a,b)=>stat||a===b?'':'<animate attributeName="'+attr+'" values="'+a+';'+b+';'+b+';'+a+'" dur="'+D+'" repeatCount="indefinite" '+ks+'/>';
   const bone=(p,q,w,cls)=>A[p]&&A[q]?'<line class="'+(cls||'')+'" style="stroke-width:'+w+'" x1="'+A[p][0]+'" y1="'+A[p][1]+'" x2="'+A[q][0]+'" y2="'+A[q][1]+'">'+an('x1',A[p][0],B[p][0])+an('y1',A[p][1],B[p][1])+an('x2',A[q][0],B[q][0])+an('y2',A[q][1],B[q][1])+'</line>':'';
   const dot=(p,r,cls)=>A[p]?'<circle class="'+cls+'" cx="'+A[p][0]+'" cy="'+A[p][1]+'" r="'+r+'">'+an('cx',A[p][0],B[p][0])+an('cy',A[p][1],B[p][1])+'</circle>':'';
@@ -529,7 +549,7 @@ function techSVG(k,stat){
   if(has('bench')){const th=k==='thrust',sp=k==='sideplank';const x=th?8:sp?82:16,w=th?26:sp?30:62;eq+='<rect class="tq-eq" x="'+x+'" y="'+(th?92:sp?84:83)+'" width="'+w+'" height="6" rx="3"/><line class="tq-eq" x1="'+(x+5)+'" y1="88" x2="'+(x+5)+'" y2="110"/><line class="tq-eq" x1="'+(x+w-5)+'" y1="88" x2="'+(x+w-5)+'" y2="110"/>'+fl;}
   if(has('seat'))eq+='<rect class="tq-eq" x="36" y="85" width="40" height="6" rx="3"/><rect class="tq-eq" x="34" y="44" width="6" height="44" rx="3"/><line class="tq-eq" x1="56" y1="91" x2="56" y2="110"/>'+fl;
   const lv=/^(fl|bl|skincat)/.test(k),ls=/^(lsit|vsit)/.test(k);
-  if(has('pullbar'))eq+='<line class="tq-eq" x1="'+(lv?24:36)+'" y1="11" x2="'+(lv?62:84)+'" y2="11"/>';
+  if(has('pullbar'))eq+='<line class="tq-eq" x1="'+(T.front?20:lv?24:36)+'" y1="11" x2="'+(T.front?100:lv?62:84)+'" y2="11"/>';
   if(has('lowbar'))eq+='<line class="tq-eq" x1="20" y1="46" x2="54" y2="46"/><line class="tq-eq" x1="24" y1="46" x2="24" y2="111"/>'+fl;
   if(has('wall'))eq+='<line class="tq-eq" x1="70" y1="4" x2="70" y2="111"/>';
   if(has('bars'))eq+='<line class="tq-eq" x1="'+(ls?40:44)+'" y1="'+(ls?93:63)+'" x2="'+(ls?66:76)+'" y2="'+(ls?93:63)+'"/><line class="tq-eq" x1="'+(ls?46:70)+'" y1="'+(ls?93:63)+'" x2="'+(ls?46:70)+'" y2="111"/>'+fl;
@@ -542,8 +562,9 @@ function techSVG(k,stat){
   const shadow=A.f&&!lv&&!/^(legraise|pullup|flag|vflag|hang|lpullup|archerpull|oapull|muscleup|ringdip)/.test(k)?'<ellipse class="tq-sh" cx="'+A.f[0]+'" cy="111" rx="16" ry="2.5">'+an('cx',A.f[0],B.f[0])+'</ellipse>':'';
   const plate=A.b?(k==='slam'?'<circle class="tq-ball" cx="'+A.b[0]+'" cy="'+A.b[1]+'" r="7">'+an('cx',A.b[0],B.b[0])+an('cy',A.b[1],B.b[1])+'</circle>':dot('b',6.5,'tq-plate')+dot('b',2,'tq-hub')):'';
   return '<svg class="tq'+(stat?' st':'')+'" viewBox="0 0 120 120" role="img" aria-label="Cómo se hace">'+eq+shadow+cab+
+   (T.front?'<g class="tq-b">'+bone('n','p',11)+bone('sL','sR',8)+bone('hL','hR',8)+bone('sL','eL',5.5)+bone('eL','aL',5)+bone('sR','eR',5.5)+bone('eR','aR',5)+bone('hL','kL',7)+bone('kL','fL',6)+bone('hR','kR',7)+bone('kR','fR',6)+dot('eL',2,'tq-j')+dot('eR',2,'tq-j')+'</g>':
    '<g class="tq-b2">'+bone('p','k2',6.5)+bone('k2','f2',5.5)+bone('n','e2',5)+bone('e2','a2',4.5)+'</g>'+
-   '<g class="tq-b">'+bone('n','p',10)+bone('p','k',7.5)+bone('k','f',6)+bone('n','e',5.5)+bone('e','a',5)+dot('k',2.2,'tq-j')+dot('e',2,'tq-j')+'</g>'+
+   '<g class="tq-b">'+bone('n','p',10)+bone('p','k',7.5)+bone('k','f',6)+bone('n','e',5.5)+bone('e','a',5)+dot('k',2.2,'tq-j')+dot('e',2,'tq-j')+'</g>')+
    dot('h',7.5,'tq-h')+plate+'</svg>';
 }
 /* tu video de cada ejercicio queda solo en este dispositivo (IndexedDB), no se sube a ningún lado */

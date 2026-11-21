@@ -1658,3 +1658,39 @@ svg.chart{touch-action:pan-y;cursor:crosshair}
 .chart .tr{fill:none;stroke:var(--acc);stroke-width:2.5;stroke-linecap:round;opacity:.9}
 .w-trend{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:6px 0 10px;font-size:14px}
 .chart.has-tr .ln{opacity:.35}.chart.has-tr circle{opacity:.5}
+
+/* v78: encabezado de las ventanas sin caja, avisos de vidrio, fondo quieto, sin temblor */
+.mh-bar{margin:0 -18px;padding:16px 18px 10px;background:color-mix(in srgb,var(--surf) 84%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.2);backdrop-filter:blur(16px) saturate(1.2);border-radius:28px 28px 0 0}
+.toast{background:color-mix(in srgb,var(--surf) 82%,transparent);color:var(--text);border:1px solid color-mix(in srgb,var(--text) 10%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.3);backdrop-filter:blur(18px) saturate(1.3);box-shadow:0 14px 34px -12px rgba(0,0,0,.55);font-weight:650;border-radius:16px}
+.toast-u{background:color-mix(in srgb,var(--acc) 22%,transparent);color:var(--text)}
+/* el fondo de color queda quieto: animado obligaba a re-desenfocar el encabezado y la barra a cada cuadro */
+.bgfx i{animation:none!important;filter:none}
+/* las pestañas fijas de arriba: sin desenfoque (temblaban al scrollear) */
+.zone-seg,.nv-seg{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--raise);transform:translateZ(0)}
+.nv-seg{position:sticky;top:calc(66px + env(safe-area-inset-top,0px));z-index:5;margin-bottom:14px}
+.nav button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+
+/* v79: ver un ejercicio desde el selector */
+.pk-view .pick-top .row{gap:10px}.pk-body{display:grid;gap:14px;padding-top:4px}
+.gen-n{font:inherit;color:inherit;text-align:left;text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--text) 25%,transparent);text-underline-offset:3px}
+/* v80: tutorial guiado */
+#tour{position:fixed;inset:0;z-index:300;opacity:0;transition:opacity .3s ease}
+#tour.on{opacity:1}
+.t-spot{position:fixed;border-radius:20px;box-shadow:0 0 0 200vmax rgba(6,7,16,.74),0 0 0 2px color-mix(in srgb,var(--acc) 70%,#fff),0 0 26px 4px color-mix(in srgb,var(--acc) 45%,transparent);transition:left .5s var(--e-sheet),top .5s var(--e-sheet),width .5s var(--e-sheet),height .5s var(--e-sheet),border-radius .5s var(--e-sheet);pointer-events:none;animation:tPulse 2.4s ease-in-out infinite}
+.t-spot.none{box-shadow:0 0 0 200vmax rgba(6,7,16,.74);animation:none}
+@keyframes tPulse{50%{box-shadow:0 0 0 200vmax rgba(6,7,16,.74),0 0 0 3px color-mix(in srgb,var(--acc) 85%,#fff),0 0 38px 8px color-mix(in srgb,var(--acc) 55%,transparent)}}
+.t-card{position:fixed;background:color-mix(in srgb,var(--surf) 92%,transparent);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border:1px solid color-mix(in srgb,var(--text) 12%,transparent);border-radius:22px;padding:18px 18px 14px;box-shadow:0 24px 60px -18px rgba(0,0,0,.7);transition:top .45s var(--e-sheet)}
+.t-card.in{animation:tIn .45s var(--e-out) both}
+@keyframes tIn{from{opacity:0;transform:translateY(10px) scale(.97)}}
+.t-h{display:block;font:800 21px/1.15 var(--f-d);letter-spacing:-.02em;margin-bottom:6px}
+.t-card p{color:var(--mut);font-size:15px;line-height:1.45}
+.t-big{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;margin-bottom:12px;color:#fff;background:linear-gradient(135deg,var(--acc),color-mix(in srgb,var(--acc) 50%,var(--hot)))}
+.t-dots{display:flex;gap:5px;margin:14px 0 2px}.t-dots i{height:5px;flex:1;max-width:22px;border-radius:9px;background:var(--line);transition:background .3s}.t-dots i.done{background:color-mix(in srgb,var(--acc) 45%,var(--line))}.t-dots i.on{background:var(--acc)}
+.t-btns{display:flex;align-items:center;gap:8px;margin-top:12px}
+.t-topics{display:grid;gap:6px;margin-top:12px}
+.t-topics button{display:flex;align-items:center;gap:10px;text-align:left;padding:10px;border-radius:14px;background:var(--raise);border:1px solid var(--line)}
+.t-topics b{display:block;font-size:15px}.t-topics small{display:block;color:var(--mut);font-size:12.5px}
+.t-ti{width:34px;height:34px;flex:none;border-radius:11px;display:grid;place-items:center;background:color-mix(in srgb,var(--acc) 18%,var(--raise));color:var(--acc)}
+html.touring .nav,html.touring .top{z-index:auto}
+/* etiquetas que bajan de renglón sin pisarse */
+.tag{display:inline-flex;align-items:center;line-height:1.3;max-width:100%;vertical-align:middle;margin:2px 0}

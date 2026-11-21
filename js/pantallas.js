@@ -222,30 +222,32 @@ function tierLegend(){return '<div class="tiers">'+TIERS.map((t,i)=>'<span><i st
 function viewNiveles(){
   let h='<h1 class="pg">Nivel</h1>';
   if(!db.profile)return h+'<div class="card empty">'+emptyArt()+'<b>Completá tu perfil</b>Necesito sexo, edad y peso para calcular tus niveles.<button class="btn pri e-cta" data-a="tab" data-v="perfil">Completar perfil</button></div>';
-  const r=rankedList(),ov=overall(),ml=muscleLevels();
-  h+=caminosCard();
-  h+='<button class="gen-cta soc-cta" data-a="socOpen"><span class="gen-ic">'+ic('user',22)+'</span><span class="grow"><b>Amigos</b><span>'+(Social.on()?(S.social&&S.social.friends.length?S.social.friends.length+(S.social.friends.length===1?' amigo':' amigos')+' · ranking y temporada':'Invitá a tus amigos con tu código'):'Rankings justos y una temporada por mes')+'</span></span>'+ic('right',18)+'</button>';
-  h+='<button class="gen-cta mark-cta" data-a="markOpen"><span class="gen-ic">'+ic('bolt',22)+'</span><span class="grow"><b>Cargar marca</b><span>Poné tu peso y reps, y mirá tu nivel al instante</span></span>'+ic('right',18)+'</button>';
+  const r=rankedList(),ov=overall(),ml=muscleLevels(),T=S.ntab||'res';
+  /* cuatro secciones: menos para leer de una y la pantalla se arma más rápido */
+  h+='<div class="seg nv-seg" role="tablist">'+[['res','Resumen'],['ej','Ejercicios'],['prog','Progreso'],['carta','Carta']].map(([k,n])=>'<button role="tab" class="'+(T===k?'on':'')+'" aria-selected="'+(T===k)+'" data-a="ntab" data-v="'+k+'">'+n+'</button>').join('')+'</div>';
+  if(T==='res')h+=caminosCard();
+  if(T==='res')h+='<button class="gen-cta soc-cta" data-a="socOpen"><span class="gen-ic">'+ic('user',22)+'</span><span class="grow"><b>Amigos</b><span>'+(Social.on()?(S.social&&S.social.friends.length?S.social.friends.length+(S.social.friends.length===1?' amigo':' amigos')+' · ranking y temporada':'Invitá a tus amigos con tu código'):'Rankings justos y una temporada por mes')+'</span></span>'+ic('right',18)+'</button>';
+  if(T==='res')h+='<button class="gen-cta mark-cta" data-a="markOpen"><span class="gen-ic">'+ic('bolt',22)+'</span><span class="grow"><b>Cargar marca</b><span>Poné tu peso y reps, y mirá tu nivel al instante</span></span>'+ic('right',18)+'</button>';
   /* rango de cada grupo muscular */
   const gl=groupLevels();
-  h+='<div class="card"><div class="hd"><div><h3>Por grupo muscular</h3><span class="mut sm-t">Manda tu mejor ejercicio de cada grupo; los demás ajustan poco. El general pesa más piernas y espalda.</span></div></div><div class="glist">'+
+  if(T==='res')h+='<div class="card"><div class="hd"><div><h3>Por grupo muscular</h3><span class="mut sm-t">Manda tu mejor ejercicio de cada grupo; los demás ajustan poco. El general pesa más piernas y espalda.</span></div></div><div class="glist">'+
    Object.keys(GROUPS).map(g=>{const x=gl[g],L=x?Math.min(18,Math.floor(x.v)):-1;return '<div class="grow-row">'+badge(x?L:-1,40)+'<div class="grow"><div class="row" style="justify-content:space-between"><b>'+g+'</b>'+(x?lvlSpan(L):'<span class="mut sm-t">Sin datos</span>')+'</div>'+
     '<div class="bar" style="margin:6px 0 3px"><i style="width:'+(x?Math.round((L>=18?1:x.v-L)*100):0)+'%;background:'+lvlColor(L)+'"></i></div>'+(x?'<span class="g-used"><span class="mut sm-t">Según </span>'+x.used.map(e=>'<button class="chip sm" data-a="exInfo" data-v="'+e.id+'">'+esc(e.n)+'</button>').join('')+'</span>':'<span class="mut sm-t">Cargá un ejercicio de '+g.toLowerCase()+' para ver tu rango</span>')+'</div></div>';}).join('')+'</div></div>';
-  {const zl=zoneLevels();if(Object.values(zl).some(v=>v!=null))h+='<div class="card"><div class="hd"><div><h3>Por zona</h3><span class="mut sm-t">Tren superior, inferior y core</span></div></div><div class="zones">'+
+  if(T==='res'){const zl=zoneLevels();if(Object.values(zl).some(v=>v!=null))h+='<div class="card"><div class="hd"><div><h3>Por zona</h3><span class="mut sm-t">Tren superior, inferior y core</span></div></div><div class="zones">'+
     Object.keys(zl).map(z=>{const v=zl[z],L=v==null?-1:Math.min(18,Math.floor(v));return '<div class="zone">'+badge(L,46)+'<b>'+z+'</b>'+(v==null?'<span class="mut sm-t">Sin datos</span>':lvlSpan(L))+'</div>';}).join('')+'</div></div>';}
-  h+=goalsCard(false)+improveCard()+recordsCard()+heatCard();
+  if(T==='prog')h+=goalsCard(false)+improveCard()+recordsCard()+heatCard();
   /* tu carta */
-  h+='<div class="card carta-card">'+cartaHTML(false)+'<div class="carta-side"><h3>Tu carta</h3><p class="mut sm-t">'+(cardStats().OVR==null?'Todavía está vacía: cargá marcas o entrená para que se llene con tus números reales.':'Tu rango, tu cuerpo y 6 atributos del 40 al 99. Movela con el dedo.')+'</p>'+
+  if(T==='carta')h+='<div class="card carta-card">'+cartaHTML(false)+'<div class="carta-side"><h3>Tu carta</h3><p class="mut sm-t">'+(cardStats().OVR==null?'Todavía está vacía: cargá marcas o entrená para que se llene con tus números reales.':'Tu rango, tu cuerpo y 6 atributos del 40 al 99. Movela con el dedo.')+'</p>'+
    '<div class="attr-list">'+(()=>{const s=cardStats();return ATTRS.map(([k,n])=>'<div><span>'+n+'</span><b>'+(s[k]==null?'--':s[k])+'</b><i style="width:'+(s[k]==null?0:Math.round((s[k]-40)/59*100))+'%"></i></div>').join('');})()+'</div>'+
    '<div class="row" style="margin-top:12px;gap:8px"><button class="btn pri sm grow" data-a="cardOpen">Ver grande</button><button class="btn sm grow" data-a="cardShare">Compartir</button></div></div></div>';
   /* el cuerpo pintado por nivel */
-  h+='<div class="card" style="padding-bottom:18px"><div class="hd"><div><h3>Tu cuerpo</h3><span class="mut sm-t">Cada músculo con el color de su mejor ejercicio. Tocá uno.</span></div>'+(ov?badge(ov.L,48):'')+'</div>'+
+  if(T==='res')h+='<div class="card" style="padding-bottom:18px"><div class="hd"><div><h3>Tu cuerpo</h3><span class="mut sm-t">Cada músculo con el color de su mejor ejercicio. Tocá uno.</span></div>'+(ov?badge(ov.L,48):'')+'</div>'+
    '<div class="body-hero">'+bodyMap(null,{levels:ml,labels:1,cls:'live',tap:1})+'</div>'+tierLegend()+
    (ov?'<p class="tc" style="margin-top:12px"><span class="mut sm-t">Rango general </span>'+lvlSpan(ov.L)+'</p>':'')+'</div>';
-  if(!r.length){
+  if(T==='ej'&&!r.length){
     h+='<div class="card empty">'+emptyArt()+'<b>Todavía no hay series registradas</b>Cargá una marca y ves tu nivel al instante, o entrená y se calcula solo.<div class="g2 e-cta"><button class="btn pri" data-a="markOpen">Cargar una marca</button><button class="btn" data-a="startFree">Entrenar ahora</button></div></div>';
-  }else{
-    h+='<h3 style="font:800 19px var(--f-d);margin:22px 0 10px">Tus ejercicios</h3><div class="gap" style="margin-bottom:14px">'+r.map(x=>{
+  }else if(T==='ej'){
+    h+='<h3 style="font:800 19px var(--f-d);margin:6px 0 10px">Tus ejercicios</h3><div class="gap" style="margin-bottom:14px">'+r.map(x=>{
       const i=x.info;
       return '<button class="ex" data-a="exInfo" data-v="'+x.ex.id+'" style="align-items:flex-start">'+badge(i.L,52)+'<span class="grow"><h4>'+esc(x.ex.n)+'</h4><span class="sm-t">'+lvlSpan(i.L)+'<span class="mut"> · '+bestTxt(x.ex,x.b)+'</span></span>'+
        '<div class="bar" style="margin:8px 0 4px"><i style="width:'+Math.round(clamp(i.pct,0,1)*100)+'%;background:'+lvlColor(i.L)+'"></i></div>'+
@@ -253,7 +255,7 @@ function viewNiveles(){
     }).join('')+'</div>';
   }
   /* calistenia: progresiones */
-  h+='<div class="card"><div class="hd"><div><h3>Calistenia</h3><span class="mut sm-t">Tu nivel sale de la variante que dominás, no de los kilos.</span></div><button class="btn sm" data-a="treeOpen">'+ic('tree',16)+' Árbol</button></div><div class="gap">'+
+  if(T==='ej')h+='<div class="card"><div class="hd"><div><h3>Calistenia</h3><span class="mut sm-t">Tu nivel sale de la variante que dominás, no de los kilos.</span></div><button class="btn sm" data-a="treeOpen">'+ic('tree',16)+' Árbol</button></div><div class="gap">'+
    Object.keys(SKFAM).map(f=>{
      const vs=skFam(f);let best=-1,bestEx=null;
      vs.forEach(e=>{const b=bestE1(e.id);if(b){const v=levelVal(e,b.e);if(v>best){best=v;bestEx=e;}}});
@@ -264,13 +266,13 @@ function viewNiveles(){
    }).join('')+'</div></div>';
   /* logros */
   const got=ACH.filter(a=>db.ach[a.id]).length,nw=S.newAch||[];
-  h+='<div class="card"><div class="hd"><h3>Logros</h3><span class="tag">'+got+' de '+ACH.length+'</span></div><div class="ach">'+
+  if(T==='carta')h+='<div class="card"><div class="hd"><h3>Logros</h3><span class="tag">'+got+' de '+ACH.length+'</span></div><div class="ach">'+
    ACH.map(a=>'<div class="'+(db.ach[a.id]?(nw.includes(a.id)?'new':''):'off')+'" title="'+esc(a.n)+(db.ach[a.id]?' · '+esc(longDate(db.ach[a.id])):'')+'">'+achBadge(a,!!db.ach[a.id])+'<span>'+esc(a.n)+'</span></div>').join('')+'</div></div>';
   S.newAch=null;
   const prs=[];
   db.logs.slice().sort((a,b)=>a.date<b.date?1:-1).forEach(l=>(l.prs||[]).forEach(id=>{const ex=exById(id);if(ex&&prs.length<5)prs.push({ex,l});}));
-  if(prs.length)h+='<div class="card"><h3 style="margin-bottom:6px">Récords recientes</h3>'+prs.map(p=>'<div class="rowline"><span>'+esc(p.ex.n)+'</span><span class="mut">'+shortDate(parseK(p.l.date).getTime())+'</span></div>').join('')+'</div>';
-  h+='<div class="card"><h3 style="margin-bottom:8px">Cómo se calcula</h3><p class="mut sm-t">En pesas estimo tu 1RM (la fuerza máxima en una repetición) y lo comparo con una tabla de cada ejercicio que depende de tu peso, tu edad y tu sexo: Bronce 1 es un principiante, Oro 1 alguien intermedio (por ejemplo, press banca con tu propio peso) y Élite es nivel de competencia. En calistenia cuenta la variante que dominás y cuántas repeticiones o segundos hacés, así no te comparan con los kilos de nadie. Tu rango general toma tu mejor ejercicio de cada grupo muscular y los promedia: probar uno nuevo nunca te baja.</p></div>';
+  if(T==='prog'&&prs.length)h+='<div class="card"><h3 style="margin-bottom:6px">Récords recientes</h3>'+prs.map(p=>'<div class="rowline"><span>'+esc(p.ex.n)+'</span><span class="mut">'+shortDate(parseK(p.l.date).getTime())+'</span></div>').join('')+'</div>';
+  if(T==='ej')h+='<div class="card"><h3 style="margin-bottom:8px">Cómo se calcula</h3><p class="mut sm-t">En pesas estimo tu 1RM (la fuerza máxima en una repetición) y lo comparo con una tabla de cada ejercicio que depende de tu peso, tu edad y tu sexo: Bronce 1 es un principiante, Oro 1 alguien intermedio (por ejemplo, press banca con tu propio peso) y Élite es nivel de competencia. En calistenia cuenta la variante que dominás y cuántas repeticiones o segundos hacés, así no te comparan con los kilos de nadie. Tu rango general toma tu mejor ejercicio de cada grupo muscular y los promedia: probar uno nuevo nunca te baja.</p></div>';
   return h;
 }
 
@@ -894,6 +896,10 @@ function revealSoon(v){if(!REV||db.settings.calm)return;requestAnimationFrame(()
 function renderPicker(){
   const el=$('#picker');syncLayers();
   if(!S.picker){leaveLayer(el,'.pick',()=>!S.picker);return;}
+  /* un ejercicio abierto: su figura, su nivel y todo lo que sabemos de él, con "Elegir este" a mano */
+  if(S.picker.view){const ex=exById(S.picker.view);if(ex){const had0=el.querySelector('.pick:not(.leaving)');clearTimeout(el._lv);const lbl=pickCtx()?'Elegir este':'Agregar';
+    el.innerHTML='<div class="pick pk-view'+(S.picker.target==='gen'?' ptop':'')+(had0?' stay':'')+'"><div class="pick-in"><div class="pick-top"><div class="row"><button class="ib" data-a="pickBack" aria-label="Volver a la lista">'+ic('left',20)+'</button><h2 class="grow" style="font:800 22px var(--f-d)">'+esc(ex.n)+'</h2><button class="btn pri sm" data-a="pickAdd" data-v="'+ex.id+'">'+lbl+'</button></div></div><div class="pk-body">'+exDetail(ex.id)+'</div></div></div>';
+    const pk=el.querySelector('.pick');if(pk)pk.scrollTop=0;return;}S.picker.view=null;}
   const had=el.querySelector('.pick:not(.leaving)');clearTimeout(el._lv);
   keepScroll(el,()=>{el.innerHTML='<div class="pick'+(S.picker.target==='gen'?' ptop':'')+'"><div class="pick-in"><div class="pick-top"><div class="row"><h2 class="grow" style="font:800 24px var(--f-d)">'+(pickCtx()?'Cambiar ejercicio':'Elegir ejercicios')+'</h2><button class="btn pri sm" data-a="pickDone">Listo</button></div>'+
    '<div class="field"><input id="pq" type="search" placeholder="Buscar ejercicio" value="'+esc(S.picker.q)+'" data-i="pq" aria-label="Buscar ejercicio"></div><div class="scroll-x" id="pg">'+pickChips()+'</div></div>'+pickSimilar()+'<div class="gap" id="pres">'+pickResults()+'</div>'+(S.picker.target==='gen'||S.picker.target==='rswap'?'':'<button class="btn wide" style="margin-top:14px" data-a="newEx">'+ic('plus',18)+' Crear ejercicio propio</button>')+'</div></div>';});
@@ -907,8 +913,8 @@ function pickCtx(){const P=S.picker;if(!P)return null;
   return null;}
 function pickSimilar(){const c=pickCtx();if(!c)return '';const src=exById(c.id),l=similarEx(c.id,c);if(!src||!l.length)return '';
   return '<div class="psim"><h3>Trabajan lo mismo que '+esc(src.n)+'</h3><span class="mut sm-t">Mismos músculos y movimiento, con lo que tenés a mano</span><div class="gap" style="margin-top:10px">'+
-    l.map((e,i)=>exRow(e,'pickAdd',(i===0?'<span class="tag rec">Recomendado</span>':'')+'<span class="chip on">'+ic('swap',14)+'</span>')).join('')+'</div><h3 style="margin-top:18px">Todos los ejercicios</h3></div>';}
-function pickResults(){const l=filterEx(S.picker.q,S.picker.g);return l.length?l.map(e=>exRow(e,'pickAdd','<span class="chip on">'+ic('plus',14)+'</span>')).join(''):'<div class="empty">Ningún ejercicio coincide.</div>';}
+    l.map((e,i)=>exRow(e,'pickView',(i===0?'<span class="tag rec">Recomendado</span>':'')+'<span class="chip on" data-a="pickAdd" data-v="'+e.id+'" role="button" aria-label="Elegir '+esc(e.n)+'">'+ic('swap',14)+'</span>')).join('')+'</div><h3 style="margin-top:18px">Todos los ejercicios</h3></div>';}
+function pickResults(){const l=filterEx(S.picker.q,S.picker.g);return l.length?l.map(e=>exRow(e,'pickView','<span class="chip on" data-a="pickAdd" data-v="'+e.id+'" role="button" aria-label="Agregar '+esc(e.n)+'">'+ic('plus',14)+'</span>')).join(''):'<div class="empty">Ningún ejercicio coincide.</div>';}
 
 /* ============ Render principal ============ */
 const SUBV={rutinas:viewRutinas,cal:viewCal};
@@ -923,7 +929,7 @@ function prefsCard(){
   return '<div class="card"><div class="hd"><div><h3>Preferencias</h3><span class="mut sm-t">Cómo se siente la app</span></div></div>'+
     row('haptics','Vibración','Al marcar series, terminar el descanso y subir de rango',s.haptics!==false)+
     row('oneHand','Modo una mano','Guardar y terminar quedan fijos abajo, al alcance del pulgar',s.oneHand!==false)+
-    row('calm','Menos animaciones','Para celulares lentos o si te marean',!!s.calm)+'</div>';
+    row('calm','Menos animaciones','Para celulares lentos o si te marean',!!s.calm)+'<button class="btn wide" style="margin-top:12px" data-a="tourOpen">'+ic('spark',16)+' Ver el tutorial</button></div>';
 }
 function applyPrefs(){const r=document.documentElement,s=db.settings||{};r.classList.toggle('oneh',s.oneHand!==false);r.classList.toggle('calm',!!s.calm);}
 function viewPerfil(){
