@@ -578,10 +578,30 @@ function vidSlot(ex){
     else el.innerHTML='<label class="btn wide">'+ic('camera',16)+' Grabar mi técnica<input type="file" accept="video/*" capture="environment" data-i="vid" data-e="'+ex.id+'" hidden></label><p class="mut sm-t tc" style="margin-top:6px">Grabá una serie de costado y comparala con la figura. El video queda solo en tu celu.</p>';}).catch(()=>{}),30);
   return '<div id="vidSlot" data-ex="'+ex.id+'"></div>';
 }
+/* claves propias de cada variante de habilidad (antes no tenían y su detalle no abría) */
+const VAR_CUES={
+  invrow:[['Cuerpo recto de los talones a la cabeza','Tirá del pecho hacia la barra','Juntá las escápulas arriba','Más horizontal = más difícil'],'Dejar caer la cadera'],
+  airsq:[['Pies al ancho de hombros','Bajá con el pecho arriba','Rodillas en la línea de los pies','Bajá al menos a la altura de las rodillas'],'Levantar los talones'],
+  lsittuck:[['Brazos rectos, hombros bien abajo','Rodillas al pecho','Sostené sin balancearte','Respirá tranquilo'],'Encoger los hombros'],
+  lsitone:[['Una pierna estirada, la otra al pecho','Brazos rectos','Alterná las piernas en cada serie','Hombros abajo'],'Doblar la pierna estirada'],
+  vsit:[['Piernas estiradas lo más arriba posible','Cadera adelante de las manos','Hombros muy deprimidos','Es un paso más allá del L-sit'],'Redondear la espalda sin empujar'],
+  wallhs:[['Manos a un palmo de la pared','Brazos estirados y trabados','Cuerpo recto, abdomen firme','Mirá entre las manos'],'Arquear la espalda baja'],
+  hspu:[['Arrancá en vertical contra la pared','Bajá la cabeza hasta casi tocar el piso','Codos un poco hacia adelante','Empujá hasta estirar los brazos'],'Abrir los codos hacia los costados'],
+  freehspu:[['Vertical sin pared, equilibrio en los dedos','Bajá controlado','Empujá derecho hacia arriba','Primero dominá la vertical libre'],'Perder la línea al bajar'],
+  pike:[['Cadera bien arriba, cuerpo en V invertida','Bajá la cabeza hacia adelante de las manos','Codos hacia atrás','Es la base para la vertical'],'Bajar con la cabeza entre las manos'],
+  skincat:[['Colgado, subí las rodillas al pecho','Pasá las piernas entre los brazos','Bajá lento hasta donde el hombro lo permita','Volvé por el mismo camino'],'Soltarte de golpe abajo'],
+  crow:[['Manos al ancho de hombros, dedos abiertos','Rodillas apoyadas arriba de los codos','Inclinate adelante hasta despegar los pies','Mirá un poco adelante'],'Tirar el peso atrás y no despegar'],
+  bltuck:[['Colgado boca abajo, brazos rectos detrás del cuerpo','Escápulas juntas y hombros abajo','Cuerpo horizontal, abdomen y glúteos firmes','Arrancá encogido y estirá de a poco'],'Doblar los codos o forzar el hombro'],bladv:[['Colgado boca abajo, brazos rectos detrás del cuerpo','Escápulas juntas y hombros abajo','Cuerpo horizontal, abdomen y glúteos firmes','Arrancá encogido y estirá de a poco'],'Doblar los codos o forzar el hombro'],blstr:[['Colgado boca abajo, brazos rectos detrás del cuerpo','Escápulas juntas y hombros abajo','Cuerpo horizontal, abdomen y glúteos firmes','Arrancá encogido y estirá de a poco'],'Doblar los codos o forzar el hombro'],blfull:[['Colgado boca abajo, brazos rectos detrás del cuerpo','Escápulas juntas y hombros abajo','Cuerpo horizontal, abdomen y glúteos firmes','Arrancá encogido y estirá de a poco'],'Doblar los codos o forzar el hombro'],
+  pllean:[['Posición de flexión con manos a la cintura','Llevá los hombros bien adelante de las manos','Brazos rectos y escápulas abiertas','Sostené'],'Doblar los codos']
+};
+[['fltuck','fl'],['fladv','fl'],['flone','fl'],['flstr','fl'],['flfull','fl'],['pltuck','planche'],['pladv','planche'],['plstr','planche'],['vflag','flag'],['flagtuck','flag'],['flagstr','flag']].forEach(([k,b])=>{if(TECH[k]&&!TECH[k].cues&&TECH[b]){TECH[k].cues=TECH[b].cues;TECH[k].err=TECH[b].err;}});
+Object.keys(VAR_CUES).forEach(k=>{if(TECH[k]&&!TECH[k].cues){TECH[k].cues=VAR_CUES[k][0];TECH[k].err=VAR_CUES[k][1];}});
 function techCard(ex){
   const k=techOf(ex),T=k&&TECH[k];if(!T)return '';
-  return '<div class="tech"><div class="tech-fig">'+techSVG(k)+'</div><div class="tech-txt"><h4>Cómo se hace</h4><ul>'+T.cues.map(c=>'<li>'+esc(c)+'</li>').join('')+'</ul>'+
-   '<p class="tech-err">'+ic('x',14)+'<span><b>Error común:</b> '+esc(T.err)+'</span></p></div></div>'+vidSlot(ex);
+  /* respaldo: si una figura no trae claves, se usa la descripción del ejercicio */
+  const cues=T.cues||(ex.d?[ex.d]:[]);
+  return '<div class="tech"><div class="tech-fig">'+techSVG(k)+'</div><div class="tech-txt"><h4>Cómo se hace</h4><ul>'+cues.map(c=>'<li>'+esc(c)+'</li>').join('')+'</ul>'+
+   (T.err?'<p class="tech-err">'+ic('x',14)+'<span><b>Error común:</b> '+esc(T.err)+'</span></p>':'')+'</div></div>'+vidSlot(ex);
 }
 
 /* ============ Recordatorios en el celular (notificaciones push) ============ */
