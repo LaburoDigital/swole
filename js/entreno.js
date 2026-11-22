@@ -143,6 +143,15 @@ function bodyMap(I,o){
 /* Emblema facetado de liga: borde de metal del tier, cara oscura con un toque de su color,
    número romano en metal y adornos finos que aparecen a medida que subís (barra, rombo, filete). */
 const MET_L=['#F0C29C','#F4F7FB','#FFE7A3','#C9FFF6','#D6EAFF','#EBDDFF','#FFD1DB'];
+/* Metal de cada rango (Bronce … Élite). Cada escudo lleva su propio degradado adentro, con un id único:
+   en el iPhone, los degradados compartidos (url(#bm4) en el <svg> oculto de index.html) a veces no se resolvían
+   y el escudo quedaba casi negro e igual en todos los rangos. */
+const BM_STOPS=[['#E9B48A','#B87A4B','#6A3E1F','#C98C5C'],['#F4F7FB','#B9C3D1','#6E7A8C','#D7DEE8'],['#FFE7A3','#D9A83B','#8C6012','#F0C766'],
+  ['#C9FFF6','#5FD3C2','#1C6E66','#8EEBDD'],['#D6EAFF','#6FA9FF','#1E4FB0','#A8CCFF'],['#EBDDFF','#A77BFF','#4B2398','#C9A8FF'],['#FFD1DB','#FF5A7E','#8A0F2E','#FF9CB0']];
+let BM_N=0;
+/* devuelve [ 'url(#id)', '<defs>…</defs>' ] con el metal del rango t */
+function bmGrad(t){const id='bmx'+(++BM_N),s=BM_STOPS[Math.max(0,Math.min(6,t|0))];
+  return ['url(#'+id+')','<defs><linearGradient id="'+id+'" x1="0" y1="0" x2="1" y2="1">'+[0,.38,.72,1].map((o,i)=>'<stop offset="'+o+'" stop-color="'+s[i]+'"/>').join('')+'</linearGradient></defs>'];}
 function badge(L,size){
   size=size||56;const h=Math.round(size*1.03);
   const wrap=(inner)=>'<svg class="badge" width="'+size+'" height="'+h+'" viewBox="0 0 64 66" aria-hidden="true">'+inner+'</svg>';
@@ -150,12 +159,13 @@ function badge(L,size){
   if(L==null||L<0)return wrap('<path d="'+OUT+'" fill="var(--raise)" stroke="var(--mut)" stroke-width="1.6" stroke-dasharray="3 3"/><path d="M26 34h12" stroke="var(--mut)" stroke-width="2.4" stroke-linecap="round"/>');
   /* los niveles de calistenia vienen con decimales (15.7): el escudo muestra el escalón entero (si no, dibujaba "undefined") */
   L=Math.floor(L);
-  const t=Math.min(6,Math.floor(L/3)),m='url(#bm'+t+')';
+  const t=Math.min(6,Math.floor(L/3)),[m,defs]=bmGrad(t);
   const num=L>=18?'<path d="M21 41l2.6-12 5.4 4.6L32 25l3 8.6 5.4-4.6L43 41z" fill="'+m+'" stroke="rgba(0,0,0,.35)" stroke-width=".8" stroke-linejoin="round"/>'
    :'<text x="32" y="42" text-anchor="middle" font-family="Archivo,system-ui,sans-serif" font-weight="800" font-size="'+(L%3===2?20:24)+'" letter-spacing=".5" fill="'+MET_L[t]+'" stroke="rgba(0,0,0,.55)" stroke-width="1.6" paint-order="stroke">'+['I','II','III'][L%3]+'</text>';
-  return wrap('<path d="'+OUT+'" fill="'+m+'"/>'+
+  /* el frente lleva el color del rango bien visible (antes .16: sobre fondo oscuro todos parecían iguales) */
+  return wrap(defs+'<path d="'+OUT+'" fill="'+m+'"/>'+
    '<path d="'+OUT+'" fill="none" stroke="rgba(0,0,0,.35)" stroke-width=".8"/>'+
-   '<path d="'+IN+'" fill="#10131E"/><path d="'+IN+'" fill="'+TCOL[t]+'" opacity=".16"/>'+
+   '<path d="'+IN+'" fill="#10131E"/><path d="'+IN+'" fill="'+TCOL[t]+'" opacity=".34"/>'+
    '<path d="M32 8L53 15V24L32 19L11 24V15Z" fill="#fff" opacity=".05"/>'+
    '<path d="'+IN+'" fill="none" stroke="'+m+'" stroke-width=".9" opacity=".8"/>'+
    (t>=2?'<rect x="25" y="45.5" width="14" height="1.4" rx=".7" fill="'+m+'" opacity=".9"/>':'')+
@@ -204,9 +214,18 @@ function exChart(ex,all,unit){
 }
 /* tendencia del peso: promedio exponencial que pesa más los últimos días (el peso diario salta por agua y comida) */
 function wTrend(ws){let v=null,lt=0;return ws.map(w=>{const t=parseK(w.date).getTime();if(v==null)v=w.kg;else{const days=Math.max(1,(t-lt)/864e5),k=1-Math.pow(.9,days);v=v+(w.kg-v)*k;}lt=t;return{t,y:v};});}
+/* marcas del eje Y: números "redondos" y siempre distintos (con 69,5 → 70 se repetía "70, 70, 69").
+   Con un rango chico usa medios o décimos de kilo y los muestra con decimales. Devuelve [[valor, etiqueta], …] */
+function chartTicks(lo,hi){
+  const span=hi-lo,steps=[.1,.2,.25,.5,1,2,2.5,5,10,20,25,50,100,200,250,500,1000];
+  let st=steps.find(s=>span/s<=3.5)||1000;
+  const dec=st<.25?1:st<1?(st===.25?2:1):0,out=[];
+  for(let v=Math.ceil(lo/st-1e-9)*st;v<=hi+1e-9;v+=st)out.push([+v.toFixed(4),num(v,dec)]);
+  return out;
+}
 function chart(pts,unit,trend){
   if(!pts.length)return '<p class="mut sm-t">Todavía no hay datos para graficar.</p>';
-  const W=320,H=150,pl=34,pr=12,pt=10,pb=24;
+  const W=320,H=150,pl=44,pr=12,pt=10,pb=24;
   const ys=pts.map(p=>p.y).concat((trend||[]).map(p=>p.y));let lo=Math.min.apply(null,ys),hi=Math.max.apply(null,ys);
   if(hi-lo<1){lo-=1;hi+=1;}
   const m=(hi-lo)*.15;lo-=m;hi+=m;
@@ -216,14 +235,17 @@ function chart(pts,unit,trend){
   const line=pts.map((p,i)=>(i?'L':'M')+X(p.t).toFixed(1)+' '+Y(p.y).toFixed(1)).join(' ');
   const area=line+' L'+X(t1).toFixed(1)+' '+(H-pb)+' L'+X(t0).toFixed(1)+' '+(H-pb)+'Z';
   let g='';
-  [lo+m,(lo+hi)/2,hi-m].forEach(v=>{g+='<line class="gl" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(v).toFixed(1)+'" y2="'+Y(v).toFixed(1)+'"/><text x="'+(pl-5)+'" y="'+(Y(v)+3).toFixed(1)+'" text-anchor="end">'+Math.round(v)+'</text>';});
+  /* la etiqueta queda a 10 px del borde del gráfico: el punto del primer día ya no la tapa */
+  chartTicks(lo,hi).forEach(([v,l])=>{g+='<line class="gl" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(v).toFixed(1)+'" y2="'+Y(v).toFixed(1)+'"/><text x="'+(pl-10)+'" y="'+(Y(v)+3).toFixed(1)+'" text-anchor="end">'+l+'</text>';});
   const dots=pts.length<=24?pts.map(p=>'<circle cx="'+X(p.t).toFixed(1)+'" cy="'+Y(p.y).toFixed(1)+'" r="3.5"/>').join(''):'';
   /* con tendencia: los puntos quedan tenues y manda la línea suavizada */
   const tl=trend&&trend.length>1?trend.map((p,i)=>(i?'L':'M')+X(p.t).toFixed(1)+' '+Y(p.y).toFixed(1)).join(' '):'';
   const tip=esc(JSON.stringify(pts.map((p,i)=>[+X(p.t).toFixed(1),+Y(p.y).toFixed(1),shortDate(p.t),num(p.y,1)+' '+unit+(trend&&trend[i]?' (tendencia '+num(trend[i].y,1)+')':'')])));
   return '<svg class="chart'+(tl?' has-tr':'')+'" data-pts="'+tip+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Gráfico de progreso en '+unit+'. Tocá el gráfico para ver cada día">'+g+
    (pts.length>1?'<path class="ar" d="'+area+'"/>':'')+'<path class="ln" d="'+line+'"/>'+(tl?'<path class="tr" d="'+tl+'"/>':'')+dots+
-   '<text x="'+pl+'" y="'+(H-6)+'">'+shortDate(t0)+'</text>'+(pts.length>1?'<text x="'+(W-pr)+'" y="'+(H-6)+'" text-anchor="end">'+shortDate(t1)+'</text>':'')+'</svg>';
+   '<text x="'+pl+'" y="'+(H-6)+'">'+shortDate(t0)+'</text>'+(pts.length>1?'<text x="'+(W-pr)+'" y="'+(H-6)+'" text-anchor="end">'+shortDate(t1)+'</text>':'')+'</svg>'+
+   /* con dos líneas, qué es cada una */
+   (tl?'<div class="ch-leg"><span><i class="ch-l"></i>Cada registro</span><span><i class="ch-l tr"></i>Tendencia</span></div>':'');
 }
 
 /* ============ Estado de interfaz ============ */

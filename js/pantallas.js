@@ -213,7 +213,9 @@ function confetti(n){
 /* medalla hexagonal del logro: color de su tier, ícono blanco adentro; gris si está bloqueado */
 function achBadge(a,on){
   const c=on?TCOL[a.t||0]:'var(--muscle)';
-  return '<svg class="medal" viewBox="0 0 48 52" aria-hidden="true"><path d="M24 2 44 13.5v25L24 50 4 38.5v-25z" fill="'+(on?'url(#bm'+(a.t||0)+')':c)+'"/>'+
+  /* el metal va adentro del dibujo (en el iPhone el degradado compartido a veces no se veía) */
+  const [mg,md]=on?bmGrad(a.t||0):['',''];
+  return '<svg class="medal" viewBox="0 0 48 52" aria-hidden="true">'+md+'<path d="M24 2 44 13.5v25L24 50 4 38.5v-25z" fill="'+(on?mg:c)+'"/>'+
    '<path d="M24 7 39.5 16v20L24 45 8.5 36V16z" fill="#10131E" opacity="'+(on?.55:0)+'"/><path d="M24 7 39.5 16v20L24 45 8.5 36V16z" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1.2"/>'+
    '<g transform="translate(12 14)" fill="none" stroke="'+(on?MET_L[a.t||0]:'#fff')+'" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+IC[a.i]+'</g></svg>';
 }
@@ -393,7 +395,7 @@ function entryHTML(en,i){
    '<button class="ib flat ex-x" data-a="delEntry" data-e="'+i+'" aria-label="Quitar ejercicio">'+ic('trash',18)+'</button>'+
    '<button class="ib flat ex-more'+(en.ss?' on-ss':'')+'" data-a="exMenu" data-e="'+i+'" aria-label="Más opciones" aria-haspopup="dialog">'+ic('more',20)+'</button></div>'+prev+
    goal+'<div class="sets">'+rows+'</div>'+
-   '<div class="field" style="margin-top:10px"><input type="text" maxlength="120" placeholder="Nota (agarre, máquina, cómo te sentiste…)" value="'+esc(en.note||'')+'" data-i="enote" data-e="'+i+'" aria-label="Nota del ejercicio" style="padding:9px 12px;font-size:14px"></div>'+
+   '<div class="field" style="margin-top:10px"><input type="text" maxlength="120" placeholder="Nota (agarre, máquina…)" value="'+esc(en.note||'')+'" data-i="enote" data-e="'+i+'" aria-label="Nota del ejercicio" style="padding:9px 12px;font-size:14px"></div>'+
    '<div class="row" style="margin-top:10px"><button class="btn sm grow" data-a="addSet" data-e="'+i+'">'+ic('plus',16)+' Serie</button><button class="btn sm grow" data-a="delSet" data-e="'+i+'">'+ic('minus',16)+' Serie</button>'+
    (isBarbell(ex)?'<button class="btn sm" data-a="plates" data-e="'+i+'" aria-label="Calculadora de discos">'+ic('disc',16)+'</button>':'')+'</div></div>';
 }
@@ -864,8 +866,28 @@ document.addEventListener('pointerdown',e=>{
 document.addEventListener('pointerdown',e=>{const a=document.activeElement;S.kbT=e.pointerType==='touch'&&a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&!/^(checkbox|radio|range|file|button|submit|date|time|color)$/.test(a.type||'')?performance.now():0;},{capture:true,passive:true});
 /* el teclado no tapa el botón de guardar: las hojas suben lo que ocupa el teclado */
 if(window.visualViewport){const vv=visualViewport,rt=document.documentElement;const kbUpd=()=>{const kb=Math.max(0,Math.round(innerHeight-vv.height-vv.offsetTop)),on=kb>90;rt.style.setProperty('--kb',(on?kb:0)+'px');
-  if(on!==rt.classList.contains('kb')){rt.classList.toggle('kb',on);if(on)setTimeout(()=>{const a=document.activeElement;if(a&&a.closest&&a.closest('.msheet,.pick'))try{a.scrollIntoView({block:'nearest'});}catch(x){}},80);}};
+  if(on!==rt.classList.contains('kb')){rt.classList.toggle('kb',on);if(on)setTimeout(()=>{const a=document.activeElement;if(a&&a.closest&&a.closest('.msheet,.pick'))try{a.scrollIntoView({block:'nearest'});}catch(x){}},80);
+    /* se cerró el teclado: que iOS vuelva a alinear la pantalla (ver vpFix) */
+    else vpFixSoon();}
+  /* sin teclado, la parte visible no puede quedar corrida respecto de donde se pegan la barra y el encabezado */
+  if(!on&&vv.offsetTop>1)vpFixSoon();};
   vv.addEventListener('resize',kbUpd);vv.addEventListener('scroll',kbUpd);}
+/* iPhone (app instalada): al cerrar el teclado o volver de segundo plano, iOS a veces deja la zona donde se pegan los
+   elementos fijos corrida respecto de lo que se ve. Resultado: la barra de abajo a mitad de pantalla, el fondo cortado a esa
+   altura, el encabezado fuera de pantalla y el contenido pasando por debajo de la hora. Volver a pedir el mismo scroll
+   obliga a iOS a realinearlas; no mueve nada de lo que ves. */
+function vpFix(){const rt=document.documentElement;if(rt.classList.contains('kb')||rt.classList.contains('locked'))return;
+  const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return;
+  try{window.scrollTo(window.scrollX,window.scrollY);}catch(e){}}
+let vpT=0;function vpFixSoon(){clearTimeout(vpT);vpT=setTimeout(()=>{vpFix();setTimeout(vpFix,250);},60);}
+document.addEventListener('focusout',()=>vpFixSoon());
+window.addEventListener('pageshow',()=>vpFixSoon());
+window.addEventListener('orientationchange',()=>setTimeout(vpFixSoon,300));
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')vpFixSoon();});
+/* lo que se pega debajo del encabezado (Rutinas/Calendario, pestañas de Nivel) usa su alto real, medido (antes 66 px fijos:
+   el encabezado mide 67, quedaban encimados y la costura temblaba al scrollear) */
+(()=>{const top=document.querySelector('.top');if(!top)return;const set=()=>{const h=top.getBoundingClientRect().height;if(h)document.documentElement.style.setProperty('--toph',h+'px');};
+  set();if('ResizeObserver' in window)new ResizeObserver(set).observe(top);else addEventListener('resize',set);})();
 /* al tocar un número se selecciona entero: escribís encima sin tener que borrar */
 document.addEventListener('focusin',e=>{const t=e.target;if(t&&t.tagName==='INPUT'&&t.type==='number'&&t.value!=='')setTimeout(()=>{try{if(document.activeElement===t)t.select();}catch(x){}},0);});
 /* si la ventana ya estaba abierta y solo cambió su contenido, no repite la animación de entrada (evita el parpadeo) */

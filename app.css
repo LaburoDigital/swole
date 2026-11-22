@@ -1394,7 +1394,8 @@ small{line-height:1.35}
 .push-at input{width:100%;min-width:0;font-size:17px}
 .w-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) auto;gap:8px;margin-top:12px}
 .w-row input{width:100%;min-width:0}
-@media (max-width:360px){.w-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.w-row .btn{grid-column:1/-1}}
+/* en celulares: peso y fecha arriba, Guardar abajo a lo ancho (en iPhone el campo de fecha tiene un ancho propio y quedaba debajo del botón) */
+@media (max-width:520px){.w-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.w-row .btn{grid-column:1/-1}}
 .rec-sug{flex-wrap:wrap}.rec-sug>.grow{min-width:150px}.rec-sug>.btn{max-width:100%;white-space:normal;text-align:center}
 .entry>.row{gap:4px}.entry>.row>.grow{min-width:0}.entry>.row h3{overflow-wrap:break-word;-webkit-hyphens:auto;hyphens:auto;line-height:1.15}
 /* ≤440 px (incluye Pixel, Galaxy S y iPhone Plus/Pro Max): Cambiar / Superserie / Quitar van dentro de "Más opciones" (el nombre necesita el lugar); arriba de 440 px, los 3 íconos */
@@ -1716,3 +1717,40 @@ html.touring .nav,html.touring .top{z-index:auto}
 .terms-ok a{color:var(--acc);text-decoration:underline}
 .rep-r{display:flex;flex-direction:column;gap:6px;margin:8px 0 12px}
 .rep-r .chip{text-align:left;white-space:normal;justify-content:flex-start}
+
+/* ===== SW-4: lo que se pega arriba queda quieto al scrollear (en toda la app) =====
+   Causa del temblor: el encabezado, la barra de las hojas y los segmentos pegados tenían fondo translúcido con desenfoque
+   (backdrop-filter), que el navegador vuelve a calcular en cada cuadro del scroll porque cambia lo que pasa por debajo;
+   en el iPhone eso se ve como temblor (ya se había sacado de las pestañas en v78 por lo mismo, pero quedaba en el
+   encabezado y en las hojas). Además los segmentos se pegaban a 66 px fijos y el encabezado mide 67: quedaban encimados.
+   Ahora: fondo sólido sin desenfoque (decisión v81) y los segmentos a la altura real del encabezado (--toph, medido). */
+.top,.mh-bar,.msheet.full .mh-bar,.zone-seg,.nv-seg,.sess-top,.pick-top{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.top{background:var(--bg)}
+.mh-bar,.msheet.full .mh-bar{background:var(--surf)}
+.carta-sheet .mh-bar{background:transparent}
+.zone-seg,.nv-seg{top:calc(var(--toph,66px) + env(safe-area-inset-top,0px))}
+/* SW-4: gráfico con tendencia: la tendencia va punteada y hay una leyenda chica */
+.chart .tr{stroke-dasharray:6 5}
+.ch-leg{display:flex;gap:16px;justify-content:center;margin:4px 0 2px;font-size:12px;color:var(--mut)}
+.ch-leg span{display:inline-flex;align-items:center;gap:6px}
+.ch-l{display:inline-block;width:18px;height:0;border-top:2.5px solid color-mix(in srgb,var(--acc) 45%,transparent)}
+.ch-l.tr{border-top:2.5px dashed var(--acc)}
+/* SW-4: fila de rangos (1RM para cada rango): sin partir palabras ("Diamant/e") y cuadros parejos.
+   En celulares va en 2 filas (4 + 3) con letra legible; en pantallas anchas sigue en una fila. */
+.ladder{grid-auto-rows:1fr}
+.ladder div{overflow-wrap:normal;white-space:nowrap;display:flex;flex-direction:column;justify-content:center;align-items:center}
+@media (max-width:480px){.ladder{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.ladder div{font-size:12px;padding:8px 2px}.ladder b{font-size:14px}}
+/* SW-4: las filas de 2 campos (.g2: Series/Repeticiones, Peso/Reps, etc.) nunca se salen de la pantalla en 320 px */
+.g2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.g2>*{min-width:0}
+/* la barra de Guardar que se pega abajo en las hojas tampoco lleva desenfoque (mismo temblor que arriba) */
+.oneh .msheet .g2.stick,.oneh .msheet .stick{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:var(--surf)}
+/* las listas que se reordenan (ejercicios de una rutina, del entreno) no pueden ser más anchas que la hoja */
+.dlist{grid-template-columns:minmax(0,1fr)}.dlist>*{min-width:0}
+/* SW-4 final: en el entreno, el selector y las hojas de pantalla completa, la zona del reloj la cubre su barra pegada
+   (antes el relleno estaba en la capa y lo que se scrolleaba pasaba por encima de la barra, debajo de la hora) */
+.sess,.pick,.msheet.full{padding-top:0}
+.sess-top{padding-top:calc(12px + env(safe-area-inset-top,0px))}
+.pick-top{padding-top:calc(12px + env(safe-area-inset-top,0px))}
+.msheet.full .mh-bar{padding-top:calc(12px + env(safe-area-inset-top,0px))}
+/* la hoja tiene el mismo fondo que su barra pegada: sin el degradado que dejaba un rectángulo más oscuro arriba */
+.msheet{background:var(--surf)}

@@ -1,6 +1,6 @@
 /* Service worker de Swole: hace que la app abra sin internet.
    Con cada cambio subí el número V (y el ?v= de index.html): lo hace solo  node tools/version.js N  */
-const V = 88;
+const V = 89;
 const VERSION = 'swole-v' + V;
 // Las fotos van en su propia caja, que NO se borra con cada versión (antes se bajaban de nuevo en cada actualización).
 const IMG = 'swole-img-1';
