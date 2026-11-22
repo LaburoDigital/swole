@@ -210,7 +210,8 @@ const ACTIONS={
   cardOpen(){S.cardBack=false;S.modal={t:'carta'};render();},
   cardFlip(){if(S.flipBlock)return;S.cardBack=!S.cardBack;const c=document.querySelector('.cflip');if(c)c.classList.toggle('flipped',S.cardBack);buzz(10);},
   cardShare(){shareCard();},
-  cardGyro(){try{DeviceOrientationEvent.requestPermission().then(r=>toast(r==='granted'?'Mové el celu para inclinarla':'Sin permiso de movimiento'));}catch(e){}},
+  /* la primera vez en iPhone; si acepta, desde la próxima se activa solo con el primer toque (Tilt) */
+  cardGyro(){Tilt.ask().then(r=>{toast(r==='granted'?'Mové el celu para inclinarla':'Sin permiso de movimiento');renderModal();});},
   quickOpen(){S.modal={t:'quick'};render();},
   /* comidas */
   foodOpen(v){S.m2={t:'food',d:{m:MEAL_N[v]?v:mealNow(),q:'',step:'list',date:S.tab==='nutri'&&S.fd?S.fd:today()}};render();setTimeout(()=>{const i=document.getElementById('foodQ');if(i&&matchMedia('(pointer:fine)').matches)i.focus();},300);},

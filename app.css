@@ -1754,3 +1754,8 @@ html.touring .nav,html.touring .top{z-index:auto}
 .msheet.full .mh-bar{padding-top:calc(12px + env(safe-area-inset-top,0px))}
 /* la hoja tiene el mismo fondo que su barra pegada: sin el degradado que dejaba un rectángulo más oscuro arriba */
 .msheet{background:var(--surf)}
+/* SW-5: brillo del escudo-disco que sigue al celu (Tilt pone --gx/--gy en :root). Solo mueve un óvalo dentro del disco:
+   sin layout. Quieto con "reducir movimiento" (Tilt además deja de actualizar). */
+.badge .bdg-sh{transform:translate(calc(var(--gx,0) * -14px),calc(var(--gy,0) * -10px))}
+@media (prefers-reduced-motion:reduce){.badge .bdg-sh{transform:none}}
+.calm .badge .bdg-sh{transform:none}

@@ -141,6 +141,46 @@ async function shareCard(){
     toast('Imagen descargada: '+name);
   }catch(e){if(e&&e.name==='AbortError')return;toast('No se pudo crear la imagen');}
 }
+/* ===== Movimiento con el celu (giroscopio), en un solo lugar =====
+   - Android y compu: anda solo, sin permiso.
+   - iPhone: iOS pide permiso con un toque del usuario en CADA carga. La primera vez se pide con el botón de la carta;
+     si dijo que sí, queda anotado en este celu y desde entonces se vuelve a pedir solo en el primer toque en cualquier
+     parte de la app (sin botón). Si dijo que no, no se vuelve a pedir solo (el botón sigue para reintentar).
+   - "Reducir movimiento" (del celu o de Swole): no se mueve nada.
+   - Reparte el ángulo como --gx / --gy (de -1 a 1) en :root, una vez por cuadro, y a quien se suscriba con Tilt.on():
+     así la carta (y después los escudos) se inclinan sin recalcular nada más. */
+const Tilt=(()=>{
+  const K='swole.tilt';let st=null;try{st=localStorage.getItem(K);}catch(e){}
+  const need=()=>!!(window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==='function');
+  const still=()=>matchMedia('(prefers-reduced-motion: reduce)').matches||!!(db.settings&&db.settings.calm);
+  const subs=new Set();let on=false,armed=false,raf=0,gx=0,gy=0;
+  function ori(e){if(!e||e.beta==null||still())return;gx=clamp((e.gamma||0)/25,-1,1);gy=clamp(((e.beta||0)-45)/25,-1,1);if(!raf)raf=requestAnimationFrame(flush);}
+  /* Antes ponía --gx/--gy en :root en cada cuadro: eso recalculaba los estilos de TODO el documento mientras el celu se
+     movía (~14 ms por cuadro con la lista de ejercicios). Ahora:
+     - a ~30 por segundo (el brillo no necesita más),
+     - solo si el ángulo cambió de verdad (umbral),
+     - y las variables van solo en los escudos que se ven en pantalla (cada uno recalcula su propio dibujo chico). */
+  let last=0,lx=9,ly=9;
+  function flush(t){raf=0;const now=t||performance.now();
+    if(now-last<32){raf=requestAnimationFrame(flush);return;}
+    if(Math.abs(gx-lx)<.02&&Math.abs(gy-ly)<.02)return;
+    last=now;lx=gx;ly=gy;
+    try{const vh=innerHeight,on=[];document.querySelectorAll('svg.badge').forEach(b=>{const r=b.getBoundingClientRect();if(r.bottom>0&&r.top<vh&&r.width)on.push(b);});
+      const x=gx.toFixed(2),y=gy.toFixed(2);on.forEach(b=>{b.style.setProperty('--gx',x);b.style.setProperty('--gy',y);});}catch(e){}
+    subs.forEach(f=>{try{f(gx,gy);}catch(e){}});}
+  function start(){if(on)return;on=true;window.addEventListener('deviceorientation',ori);}
+  function keep(v){st=v;try{localStorage.setItem(K,v);}catch(e){}}
+  /* pedir el permiso: tiene que llamarse dentro de un toque */
+  function ask(){if(!need()){start();return Promise.resolve('granted');}
+    let p;try{p=DeviceOrientationEvent.requestPermission();}catch(e){return Promise.resolve('error');}
+    return Promise.resolve(p).then(r=>{keep(r==='granted'?'granted':'denied');if(r==='granted')start();return r;},()=>'error');}
+  function tap(){if(!armed)return;armed=false;document.removeEventListener('pointerdown',tap,true);ask();}
+  if(!need())start();
+  else if(st==='granted'){armed=true;document.addEventListener('pointerdown',tap,{capture:true,passive:true});}
+  return{on:f=>{subs.add(f);return()=>subs.delete(f);},ask,
+    needsButton:()=>need()&&st!=='granted',
+    state:()=>({need:need(),st,on,armed,gx,gy}),_tap:tap,_ori:e=>{ori(e);last=0;flush();}};
+})();
 /* la carta se inclina con el dedo, el mouse o el giroscopio */
 (()=>{
   const setV=(el,px,py)=>{el.style.setProperty('--rx',((.5-py)*22).toFixed(1)+'deg');el.style.setProperty('--ry',((px-.5)*26).toFixed(1)+'deg');el.style.setProperty('--mx',(px*100).toFixed(0)+'%');el.style.setProperty('--my',(py*100).toFixed(0)+'%');};
@@ -149,7 +189,8 @@ async function shareCard(){
   document.addEventListener('pointerup',e=>{if(fx==null)return;const dx=e.clientX-fx;fx=null;if(Math.abs(dx)>50){ACTIONS.cardFlip();S.flipBlock=true;setTimeout(()=>S.flipBlock=false,350);}},{passive:true});
   document.addEventListener('pointermove',e=>{const c=e.target.closest&&e.target.closest('.carta');if(!c)return;const r=c.getBoundingClientRect();c.classList.add('live');setV(c,clamp((e.clientX-r.left)/r.width,0,1),clamp((e.clientY-r.top)/r.height,0,1));},{passive:true});
   document.addEventListener('pointerout',e=>{const c=e.target.closest&&e.target.closest('.carta');if(c&&!c.contains(e.relatedTarget)){c.classList.remove('live');['--rx','--ry','--mx','--my'].forEach(k=>c.style.removeProperty(k));}});
-  window.addEventListener('deviceorientation',e=>{if(e.beta==null)return;const px=clamp(.5+(e.gamma||0)/50,0,1),py=clamp(.5+((e.beta||0)-45)/50,0,1);document.querySelectorAll('.carta').forEach(c=>{c.classList.add('live','gyro');setV(c,px,py);});});
+  /* con el celu: la carta es una de las cosas que escuchan a Tilt */
+  Tilt.on((gx,gy)=>{const cs=document.querySelectorAll('.carta');if(!cs.length)return;const px=clamp(.5+gx/2,0,1),py=clamp(.5+gy/2,0,1);cs.forEach(c=>{c.classList.add('live','gyro');setV(c,px,py);});});
 })();
 /* ============ Escena de subida de rango ============ */
 function checkRankUp(delay){
@@ -353,7 +394,7 @@ function nodeDetail(id){
   const f=findNode(id);if(!f)return '';
   const s=nodeState(f.b,f.i),ex=s.n.ex,u=s.n.time?' s':' reps',prev=f.i>0?f.b.nodes[f.i-1]:null;
   const req=(prev&&!s.best&&!nodeDone(f.b,f.i-1)?[{id:prev.id,t:prev.t,best:bestRep(prev.id),ok:false}]:[]).concat(s.reqs);
-  return '<div class="td-det" id="tdDet"><div class="row" style="gap:12px"><div class="td-fig">'+(techOf(ex)?techSVG(techOf(ex)):badge(ex.sk?ex.sk.b:3,46))+'</div><div class="grow">'+badge(ex.sk?ex.sk.b:3,26).replace('<svg class="badge"','<svg class="badge td-b"')+' <b style="font:800 18px var(--f-d)">'+esc(shortN(ex.n))+'</b><br>'+
+  return '<div class="td-det" id="tdDet"><div class="row" style="gap:12px"><div class="td-fig">'+(techOf(ex)?techSVG(techOf(ex)):badge(ex.sk?ex.sk.b:3,46))+'</div><div class="grow">'+badge(ex.sk?ex.sk.b:3,32).replace('<svg class="badge"','<svg class="badge td-b"')+' <b style="font:800 18px var(--f-d)">'+esc(shortN(ex.n))+'</b><br>'+
    '<span class="mut sm-t">Meta: '+s.n.t+u+' seguid'+(s.n.time?'os':'as')+' · Tu mejor: '+(s.best?s.best+u+(s.est?' (estimado por una variante más difícil)':''):'sin registrar')+'</span></div></div>'+
    '<div class="bar" style="margin:10px 0 4px"><i style="width:'+Math.round(s.pct*100)+'%;background:'+TCOL[nodeTier(ex)]+'"></i></div>'+
    '<p class="sm-t" style="margin-top:8px">'+esc(ex.d)+'</p>'+

@@ -22,7 +22,7 @@ test('escudo: un nivel con decimales (calistenia) muestra su número romano, nun
   for (const L of [0.2, 2.2, 5.7, 13.2, 15.7, 17.8]) {
     const h = run('badge(' + L + ',44)');
     assert.ok(!h.includes('undefined'), 'badge(' + L + ')');
-    const sinId = s => s.replace(/bmx\d+/g, 'bmx');
+    const sinId = s => s.replace(/b[ms]x\d+/g, 'id');
     assert.equal(sinId(h), sinId(run('badge(' + Math.floor(L) + ',44)')));
   }
   // la tarjeta de Inicio y el detalle de un nodo del árbol

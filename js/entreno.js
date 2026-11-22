@@ -152,26 +152,35 @@ let BM_N=0;
 /* devuelve [ 'url(#id)', '<defs>…</defs>' ] con el metal del rango t */
 function bmGrad(t){const id='bmx'+(++BM_N),s=BM_STOPS[Math.max(0,Math.min(6,t|0))];
   return ['url(#'+id+')','<defs><linearGradient id="'+id+'" x1="0" y1="0" x2="1" y2="1">'+[0,.38,.72,1].map((o,i)=>'<stop offset="'+o+'" stop-color="'+s[i]+'"/>').join('')+'</linearGradient></defs>'];}
+/* Escudo de nivel = disco de pesas (opción A de swole-escudos.html, elegida por Juan el 2026-11-22).
+   Borde de metal del rango, frente oscuro con el color del rango, un aro grabado más por rango, el número romano en el
+   centro y la división también como muescas arriba (1, 2 o 3). Élite lleva la barra en S del logo en el centro.
+   El brillo del metal sigue al celu (Tilt → --gx/--gy): solo mueve un óvalo dentro del disco, sin tocar el layout;
+   con "reducir movimiento" queda quieto. */
+const S_PATH='M80 24 H50 C35 24 28 31 28 39.5 C28 48 38 50 50 50 C62 50 72 52 72 60.5 C72 69 65 76 50 76 H20';
+const sGlyph=(cx,cy,k,fill)=>'<g transform="translate('+cx+' '+cy+') scale('+k+') translate(-50 -50)"><path d="'+S_PATH+'" fill="none" stroke="'+fill+'" stroke-width="12" stroke-linecap="round"/><rect x="79.5" y="11" width="10" height="26" rx="3.5" fill="'+fill+'"/><rect x="90.5" y="15" width="6" height="18" rx="2.3" fill="'+fill+'"/><rect x="10.5" y="63" width="10" height="26" rx="3.5" fill="'+fill+'"/><rect x="3.5" y="67" width="6" height="18" rx="2.3" fill="'+fill+'"/></g>';
 function badge(L,size){
-  size=size||56;const h=Math.round(size*1.03);
-  const wrap=(inner)=>'<svg class="badge" width="'+size+'" height="'+h+'" viewBox="0 0 64 66" aria-hidden="true">'+inner+'</svg>';
-  const OUT='M32 2L59 11V37L32 64L5 37V11Z',IN='M32 8L53 15V35.5L32 56.5L11 35.5V15Z';
-  if(L==null||L<0)return wrap('<path d="'+OUT+'" fill="var(--raise)" stroke="var(--mut)" stroke-width="1.6" stroke-dasharray="3 3"/><path d="M26 34h12" stroke="var(--mut)" stroke-width="2.4" stroke-linecap="round"/>');
-  /* los niveles de calistenia vienen con decimales (15.7): el escudo muestra el escalón entero (si no, dibujaba "undefined") */
+  size=size||56;
+  const wrap=inner=>'<svg class="badge" width="'+size+'" height="'+size+'" viewBox="0 0 100 100" aria-hidden="true">'+inner+'</svg>';
+  /* sin rango: disco vacío punteado */
+  if(L==null||L<0)return wrap('<circle cx="50" cy="50" r="45" fill="var(--raise)" stroke="var(--mut)" stroke-width="2.4" stroke-dasharray="5 5"/><path d="M40 52h20" stroke="var(--mut)" stroke-width="4" stroke-linecap="round"/>');
+  /* los niveles de calistenia vienen con decimales (15.7): el escalón entero */
   L=Math.floor(L);
-  const t=Math.min(6,Math.floor(L/3)),[m,defs]=bmGrad(t);
-  const num=L>=18?'<path d="M21 41l2.6-12 5.4 4.6L32 25l3 8.6 5.4-4.6L43 41z" fill="'+m+'" stroke="rgba(0,0,0,.35)" stroke-width=".8" stroke-linejoin="round"/>'
-   :'<text x="32" y="42" text-anchor="middle" font-family="Archivo,system-ui,sans-serif" font-weight="800" font-size="'+(L%3===2?20:24)+'" letter-spacing=".5" fill="'+MET_L[t]+'" stroke="rgba(0,0,0,.55)" stroke-width="1.6" paint-order="stroke">'+['I','II','III'][L%3]+'</text>';
-  /* el frente lleva el color del rango bien visible (antes .16: sobre fondo oscuro todos parecían iguales) */
-  return wrap(defs+'<path d="'+OUT+'" fill="'+m+'"/>'+
-   '<path d="'+OUT+'" fill="none" stroke="rgba(0,0,0,.35)" stroke-width=".8"/>'+
-   '<path d="'+IN+'" fill="#10131E"/><path d="'+IN+'" fill="'+TCOL[t]+'" opacity=".34"/>'+
-   '<path d="M32 8L53 15V24L32 19L11 24V15Z" fill="#fff" opacity=".05"/>'+
-   '<path d="'+IN+'" fill="none" stroke="'+m+'" stroke-width=".9" opacity=".8"/>'+
-   (t>=2?'<rect x="25" y="45.5" width="14" height="1.4" rx=".7" fill="'+m+'" opacity=".9"/>':'')+
-   (t>=3?'<path d="M32 11.5l2.4 3-2.4 3-2.4-3z" fill="'+m+'"/>':'')+
-   (t>=5?'<path d="M14 18.5L18 17M50 18.5L46 17" stroke="'+m+'" stroke-width="1.1" stroke-linecap="round"/>':'')+
-   (L>=18?'<path d="'+OUT+'" fill="none" stroke="'+m+'" stroke-width="1.2" transform="translate(32 33) scale(1.06) translate(-32 -33)" opacity=".55"/>':'')+num);
+  /* ≤30 px: el número sin contorno (si no, "III" se empasta) */
+  const t=Math.min(6,Math.floor(L/3)),d=L%3,elite=L>=18,sm=size<=48,tiny=size<=30,[m,defs]=bmGrad(t),id='bsx'+(++BM_N);
+  let s=defs+'<defs><clipPath id="'+id+'c"><circle cx="50" cy="50" r="46"/></clipPath><radialGradient id="'+id+'g"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>';
+  s+='<circle cx="50" cy="50" r="46" fill="'+m+'"/><circle cx="50" cy="50" r="46" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="1"/>';
+  /* brillo del metal: se mueve con el celu, recortado al disco */
+  s+='<g clip-path="url(#'+id+'c)"><ellipse class="bdg-sh" cx="36" cy="26" rx="30" ry="18" fill="url(#'+id+'g)" opacity=".5"/></g>';
+  s+='<circle cx="50" cy="50" r="38" fill="#10131E"/><circle cx="50" cy="50" r="38" fill="'+TCOL[t]+'" opacity=".34"/>';
+  for(let i=0;i<=t;i++)s+='<circle cx="50" cy="50" r="'+(36-i*2.4).toFixed(1)+'" fill="none" stroke="'+m+'" stroke-width=".9" opacity="'+(.35+i*.06).toFixed(2)+'"/>'; /* un aro más por rango */
+  s+='<circle cx="50" cy="50" r="19" fill="#0C0E16" stroke="'+m+'" stroke-width="2"/>';
+  for(let i=0;i<3;i++){if(elite&&i>0)break;const a=(-90+(i-1)*22)*Math.PI/180,x=50+42*Math.cos(a),y=50+42*Math.sin(a);
+    s+='<rect x="'+(x-2.6).toFixed(2)+'" y="'+(y-4.5).toFixed(2)+'" width="5.2" height="9" rx="1.6" transform="rotate('+((i-1)*22)+' '+x.toFixed(2)+' '+y.toFixed(2)+')" fill="'+(i<=d||elite?'#0C0E16':'rgba(12,14,22,.25)')+'"/>';} /* muescas = división */
+  /* Élite: la S (no tiene divisiones); el resto: número romano, un poco más grande en chico para que se lea a 40 px */
+  s+=elite?sGlyph(50,50,sm?.36:.3,BM_STOPS[6][1])
+    :'<text x="50" y="'+(tiny?63:sm?62:61)+'" text-anchor="middle" font-family="Archivo,system-ui,sans-serif" font-weight="800" font-size="'+(tiny?35:sm?33:30)+'" letter-spacing=".5" fill="'+MET_L[t]+'"'+(tiny?'':' stroke="rgba(0,0,0,.6)" stroke-width="'+(sm?2.3:2.1)+'" paint-order="stroke"')+'>'+['I','II','III'][d]+'</text>';
+  return wrap(s);
 }
 const lvlColor=L=>L==null||L<0?'var(--mut)':TCOL[Math.min(6,Math.floor(L/3))];
 const lvlSpan=L=>'<span class="lvl-t" style="color:'+lvlColor(L)+'">'+lvlName(L)+'</span>';
