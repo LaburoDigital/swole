@@ -1,12 +1,12 @@
 # Swole — Plan
-Última actualización: 2026-11-21 · Etapa actual: 4 (cerrando)
+Última actualización: 2026-11-22 · Etapa actual: 4 (cerrando: faltan tus OK)
 
 ## Visión
 App web instalable (PWA) en español rioplatense para entrenar (gym o calistenia) y saber qué tan fuerte sos: registrás entrenos y tus marcas se convierten en un rango de Bronce a Élite comparado con gente de tu sexo, edad y peso. Además: rutinas generadas, nutrición, árbol de calistenia, amigos y rankings. Público: gente que entrena, sobre todo adolescentes y jóvenes que hacen deporte.
 
 **Terminado para la versión actual (v1 "pública"):** la PWA funciona entera en un Android y un iPhone reales (entreno en vivo, niveles, nutrición, sync, sin conexión), hay pruebas automáticas que cubren niveles, sync y generador, la sync no puede borrar historiales, y hay términos/privacidad aptos para menores. Las tiendas (Play / App Store) son la versión siguiente.
 
-Publicada en https://laburodigital.github.io/swole/ · versión v84 (v85 lista en local, sin publicar) · repo LaburoDigital/swole (main).
+Publicada en https://laburodigital.github.io/swole/ · versión v86 (2026-11-22) · repo LaburoDigital/swole (main).
 
 ## Estado
 **Hecho y probado en el preview (casi nada en celu real desde v60):**
@@ -33,9 +33,10 @@ Publicada en https://laburodigital.github.io/swole/ · versión v84 (v85 lista e
 - Figuras de técnica: las de pie se parecen; solo dominadas tiene vista de espaldas.
 - Foto de comida: no estima porción, falla con asado y la tercera cosa; lo aprendido queda solo en ese celu.
 - Lesiones: cambiar a mano un ejercicio por uno que carga la zona no avisa.
-- Pruebas automáticas: 158 en `npm test` (7 nuevas de la Etapa 4: edad, casilla de términos, hojas de seguridad) y en GitHub Actions ("Pruebas", cada push). Cubren niveles, generador, técnica/detalle de los 116 ejercicios y, desde la Etapa 3, la sync y las copias: 20 pruebas con nube y celus de mentira (`tests/nube.js`). Todavía no cubren nutrición, pantallas fuera del detalle de ejercicio ni humo con navegador.
+- Pruebas automáticas: 177 en `npm test` (7 de la Etapa 4: edad, casilla de términos, hojas de seguridad; 19 de SW-1: copias mal formadas o con código inyectado, editar rutina 5/3/1, velocidad) y en GitHub Actions ("Pruebas", cada push). Cubren niveles, generador, técnica/detalle de los 116 ejercicios y, desde la Etapa 3, la sync y las copias: 20 pruebas con nube y celus de mentira (`tests/nube.js`). Todavía no cubren nutrición, pantallas fuera del detalle de ejercicio ni humo con navegador.
 - Backups de Supabase: **sin verificar**. El plan gratis no tendría backups descargables [Probable]: hoy la copia en archivo es el único respaldo fuera de la nube.
 - Puede quedar algún dato de prueba en el navegador del preview.
+- Pendientes de la revisión SW-1 (Medios y Bajos, los elige Juan; detalle en .equipo/SW-1/paquete-cierre.md): el escudo de nivel dice "undefined" en Inicio y en 47/52 nodos del árbol; corregir peso/edad volviendo atrás en la bienvenida no se guarda; el peso del calentamiento se copia a las series; la hoja del entreno se rearma entera en cada toque; palabras cortadas (Caminos, botones a 320 px, entre 401 y 440 px); sin Content-Security-Policy; con mala señal espera 3 s antes de abrir.
 
 ## Aspectos
 
@@ -136,7 +137,7 @@ Publicada en https://laburodigital.github.io/swole/ · versión v84 (v85 lista e
 - Depende de: 2.
 - Prueba de restauración en el celu (v84): 1) Perfil → Exportar datos y guardar el archivo. 2) Anotar cuántos entrenos hay. 3) Perfil → Borrar todos los datos. 4) Perfil → Importar datos → elegir el archivo. 5) Mismos entrenos, perfil y comidas que antes. 6) Entrar con la cuenta y, en otro celu o en otro navegador, ver que esté todo.
 
-### Etapa 4 — Menores, privacidad y social  [hecha en código · falta publicar v85 y tus OK]
+### Etapa 4 — Menores, privacidad y social  [publicada (v85, v86) · faltan tus OK]
 - Objetivo: poder abrir la app a gente fuera de tu círculo sin riesgo.
 - Tareas: términos y privacidad; edad mínima; bloquear/denunciar; revisar RLS con advisors; social limitado para menores.
 - Archivos: info/, js/sync.js, js/progreso.js, migraciones de Supabase.
@@ -151,7 +152,7 @@ Publicada en https://laburodigital.github.io/swole/ · versión v84 (v85 lista e
   - Prueba "un menor no puede ser encontrado": con 3 usuarios de mentira en una transacción deshecha, el desconocido ve 0 perfiles, 0 posts, 0 comentarios y 0 amistades; no puede comentar; el código 16 inexistente se frena; si el menor lo bloquea, su solicitud no llega. El amigo sí ve todo. No existe buscador ni lista de usuarios: solo se llega con el código exacto.
   - Advisors: quedan 12 funciones con permisos elevados que la app usa a propósito, swole_vapid_public pública a propósito (clave pública), swole_report sin políticas a propósito. Falta "Leaked password protection" (ajuste de Auth, lo prende Juan; puede requerir plan pago).
   - Las denuncias se leen en Supabase → Table editor → swole_report (status nueva/vista/resuelta). No hay aviso automático a Juan.
-  - Falta: mail de soporte en info/legal.js (SOPORTE_MAIL), que Juan lea y apruebe los textos, publicar v85 y probarlo en el celu.
+  - Falta: mail de soporte en info/legal.js (SOPORTE_MAIL), que Juan lea y apruebe los textos, y probarlo en el celu. (v85 ya está publicada; v86 suma la revisión SW-1.)
 
 ### Etapa 5 — Arreglos del celu  [pendiente]
 - Objetivo: arreglar lo que falle en Android cuando se pruebe (en iPhone no falló nada) + aviso de lesiones al cambiar ejercicio.
@@ -219,3 +220,4 @@ App Store (necesita Mac + cuenta Apple); widget de inicio; Apple Health y Google
 | 2026-11-21 | 3 | 20 pruebas de sync y copias (tests/nube.js: nube y celus de mentira con su reloj). Fallaban 11: reloj desfasado (3), bienvenida antes de entrar, otra cuenta, copias (5) y 1 del entorno de prueba. Arreglado en js/datos.js, js/sync.js y js/acciones.js; 151/151 en local; v84. | CI verde en b893ba2 (v84 publicada). Backups de Supabase sin verificar. |
 | 2026-11-21 | 3 | Restauración probada en celu real con v84 (exportar → borrar todo → importar → entrar con la cuenta): "anduvo bien", según Juan (sin detalle de modelo ni de cantidades). Etapa cerrada. | Etapa 4: menores, privacidad y social. Backups de Supabase siguen sin verificar. |
 | 2026-11-21 | 4 | Edad 13+, términos y privacidad enlazados desde el registro, bloquear/denunciar/cambiar código, tope a probar códigos, RLS revisado con advisors y probado con usuarios de mentira (un desconocido no ve nada). La prueba encontró 2 errores, ya arreglados: los avisos de fuego y comentarios usaban una función movida, y el tope de códigos no frenaba. 158/158 pruebas; v85 en local. | Mail de soporte; Juan lee los textos; publicar v85 (el servidor ya cambió: la v84 publicada dice "ya son amigos" ante un código inexistente hasta que salga la v85); prueba en el celu. |
+| 2026-11-22 | 4 (SW-1) | Primera mejora con el equipo de sesiones: revisión general de v85 (programación, diseño, QA, rendimiento, seguridad). 0 Críticos, 7 Altos arreglados y re-revisados: toque de serie y abrir Inicio rápidos aunque haya mucho historial; fondo quieto (v81); copias mal formadas se reparan; copias con código inyectado se limpian; editar rutina conserva pesos 5/3/1/powerlifting y calentamientos; "Tu semana" no salta; entreno en vivo a ≤400 px con "Más opciones". 177/177; v86 publicada (d8f8b50, CI verde). | Medios/Bajos para que elija Juan (ver Estado → Bugs); mail de soporte y OK de los textos de la Etapa 4. |
