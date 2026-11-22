@@ -258,8 +258,8 @@ body.sessopen .dock{bottom:calc(14px + env(safe-area-inset-bottom,0px))}
 .bm.live .breath{animation:breath 5s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
 @keyframes breath{0%,100%{transform:scale(1,1)}50%{transform:scale(1.012,1.02)}}
 .bm.live .mh,.bm.live .ml{animation:mIn .8s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--d,0ms)}
-.bm.live .ml{animation:mIn .8s cubic-bezier(.2,.8,.2,1) var(--d,0ms) both,beat 3.6s ease-in-out calc(var(--d,0ms) + .8s) infinite}
-.bm.live .ml.elite{animation:mIn .8s cubic-bezier(.2,.8,.2,1) var(--d,0ms) both,glow 2.2s ease-in-out infinite}
+.bm.live .ml{animation:mIn .8s cubic-bezier(.2,.8,.2,1) var(--d,0ms) both,beat 3.6s ease-in-out calc(var(--d,0ms) + .8s) 2}
+.bm.live .ml.elite{animation:mIn .8s cubic-bezier(.2,.8,.2,1) var(--d,0ms) both,glow 2.2s ease-in-out 2}
 @keyframes mIn{from{opacity:0}to{opacity:1}}
 @keyframes beat{0%,100%{filter:brightness(1)}50%{filter:brightness(1.18)}}
 @keyframes glow{0%,100%{filter:brightness(1) drop-shadow(0 0 0 currentColor)}50%{filter:brightness(1.35) drop-shadow(0 0 2.5px currentColor)}}
@@ -515,6 +515,8 @@ details.why p{margin-top:8px}
 .onb-bars{display:flex;gap:5px}.onb-bars i{flex:1;height:4px;border-radius:9px;background:rgba(127,127,127,.25);transition:background .3s}.onb-bars i.on{background:linear-gradient(90deg,var(--acc),var(--hot))}
 .onb-back{position:absolute;margin-top:12px}
 .onb-c{flex:1;display:flex;flex-direction:column;justify-content:center;padding:24px 0}
+/* con flecha de atrás, el contenido arranca debajo de ella (antes la flecha quedaba encima del título) */
+.onb-back+.onb-c{padding-top:64px}
 .onb-c>*{animation:rise .55s cubic-bezier(.2,.8,.2,1) both}.onb-c>*:nth-child(2){animation-delay:.08s}.onb-c>*:nth-child(3){animation-delay:.16s}.onb-c>*:nth-child(4){animation-delay:.24s}
 .onb-art{height:min(42vh,340px);display:grid;place-items:center}
 .onb-t{font:800 36px/1.05 var(--f-d);letter-spacing:-.04em;text-align:center;margin-top:10px}.onb-t.left,.onb-p.left{text-align:left}
@@ -748,7 +750,7 @@ h1,h2,h3,.pg,.onb-t{text-wrap:balance}
 .qtile>span:last-child{line-height:1.2}
 .qgrid.big .qtile{min-height:70px}
 @media (min-width:900px){
-  .qtile{padding:14px 16px;min-height:68px}
+  .qtile{padding:14px 10px;gap:10px;min-height:68px} /* en compu van 3 por fila en una columna angosta: "Habilidades" entra entera */
   .nav .fab{background:var(--raise);color:var(--text);border:1px solid var(--line);justify-content:flex-start;padding:0 14px}
   .nav .fab .ic{color:var(--acc)}
   .nav .fab:hover{border-color:color-mix(in srgb,var(--acc) 50%,var(--line))}
@@ -760,7 +762,7 @@ h1,h2,h3,.pg,.onb-t{text-wrap:balance}
 
 .qgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
 @media (min-width:560px){.qgrid:not(.big){grid-template-columns:repeat(3,minmax(0,1fr))}}
-.qtile>span:last-child{min-width:0;overflow-wrap:anywhere}
+.qtile>span:last-child{min-width:0;overflow-wrap:break-word}
 @media (max-width:520px){.lvl-hero{padding:18px 16px;gap:14px}.lh-txt h2{font-size:30px}}
 
 /* entreno de hoy */
@@ -1255,12 +1257,16 @@ rect.tq-eq{stroke-width:1.5}
 #rtSvg.rt-layer,#rtSky.rt-layer{width:2000px;height:2000px;max-width:none}
 
 /* textos en celulares chicos */
-.cam-t{min-width:0;overflow-wrap:anywhere}.cam b{font-size:15px;line-height:1.15}
+.cam-t{min-width:0;overflow-wrap:break-word}.cam b{font-size:15px;line-height:1.15}
 .ladder{grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
 .ladder div{min-width:0;padding:8px 1px;font-size:10.5px;overflow-wrap:anywhere}
 .ladder b{font-size:13px}
 @media (max-width:360px){.ladder{grid-template-columns:repeat(4,minmax(0,1fr))}.cams{gap:8px}.cam{height:100px;padding:10px}.cam b{font-size:14px}.jt-block .btn,.g2 .btn{font-size:13.5px;padding:10px 8px}}
-.btn{overflow-wrap:anywhere}
+/* ≤360 px: que las palabras largas entren enteras ("Articulaciones", "Powerlifting", "Habilidades", "Nutrición"):
+   la flecha de Caminos pasa a la esquina (no le quita ancho al nombre) y los accesos rápidos ganan unos píxeles */
+@media (max-width:360px){.cam>.ic{position:absolute;top:10px;right:10px}.cam b{font-size:13.5px}
+  .qgrid .qtile{gap:8px;padding:12px 8px}.qgrid .qtile>span:last-child{font-size:13px}}
+.btn{overflow-wrap:break-word}
 .hd>.btn,.hd>.chip,.hd>button.btn{flex:none;white-space:nowrap}
 /* v41: semana de entreno, cuenta en la bienvenida */
 .wdays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
@@ -1391,9 +1397,9 @@ small{line-height:1.35}
 @media (max-width:360px){.w-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.w-row .btn{grid-column:1/-1}}
 .rec-sug{flex-wrap:wrap}.rec-sug>.grow{min-width:150px}.rec-sug>.btn{max-width:100%;white-space:normal;text-align:center}
 .entry>.row{gap:4px}.entry>.row>.grow{min-width:0}.entry>.row h3{overflow-wrap:break-word;-webkit-hyphens:auto;hyphens:auto;line-height:1.15}
-/* ≤400 px: Cambiar / Superserie / Quitar van dentro de "Más opciones" (el nombre necesita el lugar); arriba de 400 px, los 3 íconos */
-@media (min-width:401px){.entry>.row .ex-more{display:none}}
-@media (max-width:400px){.entry>.row .ex-x{display:none}}
+/* ≤440 px (incluye Pixel, Galaxy S y iPhone Plus/Pro Max): Cambiar / Superserie / Quitar van dentro de "Más opciones" (el nombre necesita el lugar); arriba de 440 px, los 3 íconos */
+@media (min-width:441px){.entry>.row .ex-more{display:none}}
+@media (max-width:440px){.entry>.row .ex-x{display:none}}
 .entry>.row .ib.flat{width:34px;height:34px;flex:none}
 .fd-mac .row{gap:4px}.fd-mac .row .grow{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* las filas que se deslizan de costado muestran que hay más */

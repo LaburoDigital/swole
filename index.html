@@ -2,6 +2,13 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<!-- Seguridad (CSP): la página solo puede cargar y hablar con lo que la app usa. Si se suma un servicio nuevo, hay que agregarlo acá.
+     script: los js/ propios + jsdelivr (ZXing y transformers.js) + WebAssembly del modelo de la foto. Sin scripts inline ni eval.
+       blob: lo necesita el motor del modelo (ONNX) para cargar su propio WebAssembly; un blob: solo lo crea código que ya corre acá.
+     style: 'unsafe-inline' porque la app usa style="" en el HTML que arma (no ejecuta código).
+     connect: Supabase del proyecto, Open Food Facts, Spotify, jsdelivr y Hugging Face (el modelo de la foto de comida).
+       data:/blob: porque el modelo lee la foto del plato (una data: del canvas) con fetch; no salen a la red. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'wasm-unsafe-eval' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://i.scdn.co https://*.scdn.co https://*.spotifycdn.com; media-src 'self' blob:; connect-src 'self' data: blob: https://couuuvckplstgksanzgr.supabase.co https://world.openfoodfacts.org https://api.spotify.com https://accounts.spotify.com https://cdn.jsdelivr.net https://huggingface.co https://*.huggingface.co https://*.hf.co; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <title>Swole</title>
@@ -11,8 +18,8 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/logo.svg" type="image/svg+xml">
 <link rel="alternate icon" href="icons/icon-192.png" type="image/png">
-<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png?v=86">
-<link rel="apple-touch-icon-precomposed" sizes="180x180" href="icons/apple-touch-icon.png?v=86">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png?v=87">
+<link rel="apple-touch-icon-precomposed" sizes="180x180" href="icons/apple-touch-icon.png?v=87">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -20,7 +27,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="app.css?v=86">
+<link rel="stylesheet" href="app.css?v=87">
 <style>
 .rt-neb.a{fill:url(#rtNebA);animation:neb 18s ease-in-out infinite alternate}
 .rt-neb.b{fill:url(#rtNebB);animation:neb 22s ease-in-out infinite alternate-reverse}
@@ -74,13 +81,13 @@
 <div id="modal"></div>
 <div id="modal2"></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<script src="js/datos.js?v=86"></script>
-<script src="js/entreno.js?v=86"></script>
-<script src="js/progreso.js?v=86"></script>
-<script src="js/extras.js?v=86"></script>
-<script src="js/pantallas.js?v=86"></script>
-<script src="js/acciones.js?v=86"></script>
-<script src="js/tour.js?v=86"></script>
-<script src="js/sync.js?v=86"></script>
+<script src="js/datos.js?v=87"></script>
+<script src="js/entreno.js?v=87"></script>
+<script src="js/progreso.js?v=87"></script>
+<script src="js/extras.js?v=87"></script>
+<script src="js/pantallas.js?v=87"></script>
+<script src="js/acciones.js?v=87"></script>
+<script src="js/tour.js?v=87"></script>
+<script src="js/sync.js?v=87"></script>
 </body>
 </html>

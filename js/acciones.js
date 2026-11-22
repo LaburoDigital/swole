@@ -266,8 +266,11 @@ const ACTIONS={
     if(q===3&&!(d.goals||[]).length)return toast('Elegí al menos un objetivo');
     if(q===4&&weekPend().length)return toast(weekPendMsg());
     if(q===3&&!db.profile){const g=d.goals,goal=g.includes('grasa')?(g.some(x=>x==='hip'||x==='fuerza')?'recomp':'cut'):(g.includes('hip')||g.includes('fuerza'))?'bulk':'recomp';
-      db.profile={sex:d.sex,age:Math.round(+d.age),height:Math.round(+d.height),weight:+d.weight,goal,nick:String(d.nick).trim().slice(0,20),sports:[],week:{},activity:'auto'};setWeight(+d.weight);db.settings.welcomed=1;db.settings.gen={goals:g.slice(),eq:'gym',lvl:'beg'};save();}
-    else if(q===3&&db.profile){db.settings.gen=Object.assign({},db.settings.gen||{eq:'gym',lvl:'beg'},{goals:d.goals.slice()});save();}
+      db.profile={sex:d.sex,age:Math.round(+d.age),height:Math.round(+d.height),weight:+d.weight,goal,nick:String(d.nick).trim().slice(0,20),sports:[],week:{},activity:'auto'};setWeight(+d.weight);db.settings.welcomed=1;db.settings.gen={goals:g.slice(),eq:'gym',lvl:'beg'};m.made=1;save();}
+    else if(q===3&&db.profile){
+      /* volviste atrás y corregiste algo: si el perfil lo creó esta bienvenida, se actualiza (si vino de la nube al entrar, no se pisa) */
+      if(m.made){const p=db.profile,w=+d.weight;Object.assign(p,{sex:d.sex,age:Math.round(+d.age),height:Math.round(+d.height),nick:String(d.nick).trim().slice(0,20)});if(w!==p.weight)setWeight(w);}
+      db.settings.gen=Object.assign({},db.settings.gen||{eq:'gym',lvl:'beg'},{goals:d.goals.slice()});save();}
     m.step++;renderModal();const i=document.querySelector('#modal .onb-in');if(i)setTimeout(()=>i.focus(),350);
   },
   onbBack(){const m=S.modal;if(m.step>0&&!(db.profile&&m.step>=ONB_SLIDES.length+6)){m.step--;renderModal();}},
@@ -326,20 +329,22 @@ const ACTIONS={
     if(s.done){
       S.justDone=el.dataset.e+':'+el.dataset.s;buzz(18);
       /* la primera vez: el peso de esta serie pasa a las que siguen */
-      const j=+el.dataset.s;en.sets.forEach((x,k)=>{if(k>j&&!x.done&&!x.w&&(x.kg===''||x.kg==null)&&s.kg!=='')x.kg=s.kg;});
+      /* (el peso de un calentamiento no pasa a las series de trabajo) */
+      const j=+el.dataset.s;if(!s.w)en.sets.forEach((x,k)=>{if(k>j&&!x.done&&!x.w&&(x.kg===''||x.kg==null)&&s.kg!=='')x.kg=s.kg;});
       if(!s.w&&!ex.time)S.rirAsk=ei+':'+j;
       if(db.settings.big&&en.sets.every(x=>x.done))S.bigE=null;
       if(!s.w&&!en.hit&&hitGoal(en.goal,s)){en.hit=1;setTimeout(()=>{toast('¡Meta cumplida en '+(ex?ex.n:'')+'!');confetti(24);},150);}
       if(en.ss&&nx){endRest(false);const nxe=exById(nx.ex);toast('Superserie: ahora '+(nxe?nxe.n:'el siguiente'));}
-      else startRest(restFor(ex));
+      else startRest(s.w?Math.min(45,restFor(ex)):restFor(ex)); /* después de un calentamiento, descanso corto */
     }
     save();
-    render();S.justDone=null;
+    /* solo la tarjeta de este ejercicio (antes se rearmaba toda la hoja en cada toque) */
+    sessPatch([ei]);renderPill();renderRest();S.justDone=null;
   },
   stepKg(v,el){buzz(5);const en=db.active.entries[+el.dataset.e],j=+el.dataset.s,s=en.sets[j],old=s.kg;s.kg=Math.max(0,Math.round(((+s.kg||0)+(+v))*4)/4);
-    en.sets.forEach((x,k)=>{if(k>j&&!x.done&&!x.w&&String(x.kg)===String(old))x.kg=s.kg;});save();renderSess();},
-  stepRep(v,el){buzz(5);const s=db.active.entries[+el.dataset.e].sets[+el.dataset.s];s.reps=Math.max(0,(+s.reps||0)+(+v));save();renderSess();},
-  rirSet(v,el){const s=db.active.entries[+el.dataset.e].sets[+el.dataset.s];s.rir=+v;S.rirAsk=null;save();renderSess();},
+    en.sets.forEach((x,k)=>{if(k>j&&!x.done&&!x.w&&String(x.kg)===String(old))x.kg=s.kg;});save();sessPatch([+el.dataset.e]);},
+  stepRep(v,el){buzz(5);const s=db.active.entries[+el.dataset.e].sets[+el.dataset.s];s.reps=Math.max(0,(+s.reps||0)+(+v));save();sessPatch([+el.dataset.e]);},
+  rirSet(v,el){const s=db.active.entries[+el.dataset.e].sets[+el.dataset.s];s.rir=+v;S.rirAsk=null;save();sessPatch([+el.dataset.e]);},
   measSave(){
     const o={date:today()};let n=0;
     document.querySelectorAll('[data-mk]').forEach(i=>{const v=parseFloat(String(i.value).replace(',','.'));if(v>=10&&v<=250){o[i.dataset.mk]=Math.round(v*10)/10;n++;}});
@@ -502,10 +507,10 @@ const ACTIONS={
     db.settings.skillGoal={id:v,since:today()};S.m2=null;S.modal=null;goTab('rutinas');S.rtab='rut';save();render();confetti(30);toast('Listo: Camino a '+shortN(p.tg.n)+' en tu semana');},
   addSet(v,el){
     const en=db.active.entries[+el.dataset.e],l=en.sets[en.sets.length-1]||{kg:'',reps:10};
-    en.sets.push({kg:l.kg,reps:l.reps,done:false});save();renderSess();
+    en.sets.push({kg:l.kg,reps:l.reps,done:false});save();sessPatch([+el.dataset.e]);
   },
-  delSet(v,el){const en=db.active.entries[+el.dataset.e];if(en.sets.length<2)return;if(en.sets[en.sets.length-1].done)return toast('La última serie ya está hecha: destildala si la querés borrar');const gone=en.sets.pop();save();renderSess();buzz(6);toast('Serie quitada',()=>{en.sets.push(gone);save();renderSess();});},
-  goalUse(v,el){const en=db.active.entries[+el.dataset.e];const g=en.goal;if(!g)return;en.sets.forEach(s=>{if(!s.done&&!s.w){if(g.kg)s.kg=g.kg;s.reps=g.reps;}});save();renderSess();toast('Meta puesta en las series que faltan');},
+  delSet(v,el){const en=db.active.entries[+el.dataset.e];if(en.sets.length<2)return;if(en.sets[en.sets.length-1].done)return toast('La última serie ya está hecha: destildala si la querés borrar');const ei=+el.dataset.e,gone=en.sets.pop();save();sessPatch([ei]);buzz(6);toast('Serie quitada',()=>{en.sets.push(gone);save();sessPatch([ei]);});},
+  goalUse(v,el){const en=db.active.entries[+el.dataset.e];const g=en.goal;if(!g)return;en.sets.forEach(s=>{if(!s.done&&!s.w){if(g.kg)s.kg=g.kg;s.reps=g.reps;}});save();sessPatch([+el.dataset.e]);toast('Meta puesta en las series que faltan');},
   ssTog(v,el){const en=db.active.entries[+el.dataset.e];en.ss=en.ss?0:1;save();renderSess();if(en.ss)toast('Superserie: alternás este ejercicio con el siguiente, sin descanso entre medio');},
   recapOpen(){openRecap();},
   recapNext(){const m=S.modal;if(m.i<RECAP_N-1){m.i++;renderModal();recapTimer();countUp($('#modal'));}else ACTIONS.recapClose();},
@@ -516,7 +521,7 @@ const ACTIONS={
     toast('Quitaste '+(ex?ex.n:'el ejercicio'),()=>{if(db.active!==Ac)return;Ac.entries.splice(Math.min(i,Ac.entries.length),0,en);save();renderSess();});},
   moveDown(v,el){const Es=db.active.entries,i=+el.dataset.e;if(i<Es.length-1){Es.splice(i+1,0,Es.splice(i,1)[0]);save();renderSess();}},
   delEntryGo(v){S.m2=null;if(db.active&&db.active.entries[+v]){db.active.entries.splice(+v,1);save();}render();},
-  setW(v,el){const s=db.active.entries[+el.dataset.e].sets[+el.dataset.s];s.w=s.w?0:1;save();renderSess();},
+  setW(v,el){const s=db.active.entries[+el.dataset.e].sets[+el.dataset.s];s.w=s.w?0:1;save();sessPatch([+el.dataset.e]);},
   moveEntry(v,el){const a=db.active.entries,i=+el.dataset.e;if(i>0){const t=a[i];a[i]=a[i-1];a[i-1]=t;save();renderSess();}},
   replEx(v,el){S.picker={target:'replace',idx:+el.dataset.e,q:'',g:''};renderPicker();},
   plates(v,el){const en=db.active.entries[+el.dataset.e],s=en.sets.find(x=>!x.done)||en.sets[en.sets.length-1]||{};S.m2={t:'plates',d:{kg:s.kg||'',bar:20,e:+el.dataset.e}};render();},
@@ -550,7 +555,7 @@ const ACTIONS={
   undo(){const f=S.undo;S.undo=null;clearTimeout(toastT);$('#toast').classList.remove('on','act');if(f){f();buzz(10);}},
   setCopy(v,el){const en=db.active.entries[+el.dataset.e],j=+el.dataset.s,s=en.sets[j],ex=exById(en.ex);
     const src=v==='prev'?en.sets[j-1]:(lastSets(en.ex)||[]).filter(x=>!x.w)[en.sets.slice(0,j).filter(x=>!x.w).length];if(!s||!src)return;
-    if(!ex.time)s.kg=src.kg;s.reps=src.reps;save();renderSess();buzz(6);},
+    if(!ex.time)s.kg=src.kg;s.reps=src.reps;save();sessPatch([+el.dataset.e]);buzz(6);},
   exMenu(v,el){S.m2={t:'exmenu',d:{e:+el.dataset.e}};render();},
   exMenuGo(v,el){const e=el.dataset.e;S.m2=null;if(v==='exInfo'){render();ACTIONS.exInfo(el.dataset.x);return;}const f=ACTIONS[v];if(f)f('',{dataset:{e}});render();},
   wkPick(v){S.wkSel=S.wkSel===v?null:v;render();if(S.wkSel)toast('Ahora tocá el día al que la querés pasar');},

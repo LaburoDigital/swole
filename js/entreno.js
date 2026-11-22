@@ -148,6 +148,8 @@ function badge(L,size){
   const wrap=(inner)=>'<svg class="badge" width="'+size+'" height="'+h+'" viewBox="0 0 64 66" aria-hidden="true">'+inner+'</svg>';
   const OUT='M32 2L59 11V37L32 64L5 37V11Z',IN='M32 8L53 15V35.5L32 56.5L11 35.5V15Z';
   if(L==null||L<0)return wrap('<path d="'+OUT+'" fill="var(--raise)" stroke="var(--mut)" stroke-width="1.6" stroke-dasharray="3 3"/><path d="M26 34h12" stroke="var(--mut)" stroke-width="2.4" stroke-linecap="round"/>');
+  /* los niveles de calistenia vienen con decimales (15.7): el escudo muestra el escalón entero (si no, dibujaba "undefined") */
+  L=Math.floor(L);
   const t=Math.min(6,Math.floor(L/3)),m='url(#bm'+t+')';
   const num=L>=18?'<path d="M21 41l2.6-12 5.4 4.6L32 25l3 8.6 5.4-4.6L43 41z" fill="'+m+'" stroke="rgba(0,0,0,.35)" stroke-width=".8" stroke-linejoin="round"/>'
    :'<text x="32" y="42" text-anchor="middle" font-family="Archivo,system-ui,sans-serif" font-weight="800" font-size="'+(L%3===2?20:24)+'" letter-spacing=".5" fill="'+MET_L[t]+'" stroke="rgba(0,0,0,.55)" stroke-width="1.6" paint-order="stroke">'+['I','II','III'][L%3]+'</text>';

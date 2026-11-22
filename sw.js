@@ -1,6 +1,6 @@
 /* Service worker de Swole: hace que la app abra sin internet.
    Con cada cambio subí el número V (y el ?v= de index.html): lo hace solo  node tools/version.js N  */
-const V = 86;
+const V = 87;
 const VERSION = 'swole-v' + V;
 // Las fotos van en su propia caja, que NO se borra con cada versión (antes se bajaban de nuevo en cada actualización).
 const IMG = 'swole-img-1';
@@ -10,7 +10,9 @@ const CORE = ['./', './index.html'].concat(APP, ['./data/comida-ia.json', './man
 
 self.addEventListener('install', e => {
   e.waitUntil(Promise.all([
-    caches.open(VERSION).then(c => c.addAll(CORE)),
+    // cache:'reload' = directo de la red, sin pasar por la caché del navegador (Pages guarda 10 min):
+    // así una versión nueva nunca se arma con el index.html de la anterior
+    caches.open(VERSION).then(c => c.addAll(CORE.map(u => new Request(u, { cache: 'reload' })))),
     caches.open(IMG).then(c => c.addAll(PICS)).catch(() => {})
   ]).then(() => self.skipWaiting()));
 });
@@ -28,26 +30,14 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // La página: primero la red (para tener siempre la última versión). Si no hay internet,
-  // o la red tarda más de 3 segundos (señal mala en el gym), abre la copia guardada y la
-  // versión nueva se guarda por detrás para la próxima vez.
+  // La página: SIEMPRE la copia guardada de esta versión, al instante (antes esperaba hasta 3 s a la red:
+  // con señal mala en el gym se veía la pantalla de carga). La versión nueva llega sola: cada vez que abrís,
+  // el navegador revisa sw.js; si cambió, el SW nuevo guarda TODO lo suyo (index + archivos ?v=N), toma el control
+  // y la app se recarga (controllerchange en js/sync.js). Como cada SW sirve solo su propia caja, nunca se mezclan
+  // archivos de dos versiones. Sin copia guardada (primera vez), va a la red.
   if (url.pathname.includes('/info/')) return; // la página de presentación no pasa por la caché de la app
   if (req.mode === 'navigate') {
-    const net = fetch(req).then(res => {
-      if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put('./index.html', copy)); }
-      return res;
-    });
-    e.waitUntil(net.catch(() => {}));
-    e.respondWith(new Promise(resolve => {
-      let done = false;
-      const fallback = () => caches.match('./index.html').then(hit => {
-        if (hit && !done) { done = true; resolve(hit); }
-        return hit;
-      });
-      const t = setTimeout(fallback, 3000);
-      net.then(res => { clearTimeout(t); if (!done) { done = true; resolve(res); } })
-        .catch(() => { clearTimeout(t); fallback().then(hit => { if (!hit && !done) { done = true; resolve(Response.error()); } }); });
-    }));
+    e.respondWith(caches.open(VERSION).then(c => c.match('./index.html')).then(hit => hit || fetch(req)).catch(() => Response.error()));
     return;
   }
 
@@ -61,6 +51,13 @@ self.addEventListener('fetch', e => {
   const sameOrigin = url.origin === self.location.origin;
   const fonts = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
   if (!sameOrigin && !fonts) return;
+
+  // Archivos con ?v=N (css, js, íconos): no cambian dentro de una versión, así que salen de la caja sin volver
+  // a pedirlos (antes se bajaban los ~260 KB en cada apertura). Si faltan, se bajan una vez y se guardan.
+  if (sameOrigin && url.searchParams.has('v')) {
+    e.respondWith(caches.open(VERSION).then(cache => cache.match(req).then(hit => hit || fetch(req).then(res => { if (res.ok) cache.put(req, res.clone()); return res; }))));
+    return;
+  }
 
   e.respondWith(
     caches.open(VERSION).then(cache =>

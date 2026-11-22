@@ -387,7 +387,7 @@ function entryHTML(en,i){
     (j===aj?'<div class="stepr">'+(ex.time?'':'<button data-a="stepKg" data-e="'+i+'" data-s="'+j+'" data-v="-'+inc+'">−'+num(inc,2)+' kg</button><button data-a="stepKg" data-e="'+i+'" data-s="'+j+'" data-v="'+inc+'">+'+num(inc,2)+' kg</button><i></i>')+
       '<button data-a="stepRep" data-e="'+i+'" data-s="'+j+'" data-v="-'+(ex.time?5:1)+'">−'+(ex.time?'5 s':'1')+'</button><button data-a="stepRep" data-e="'+i+'" data-s="'+j+'" data-v="'+(ex.time?5:1)+'">+'+(ex.time?'5 s':'1 rep')+'</button></div>'+quickSet(en,ex,i,j):'')).join('');
   return (ssNext&&!ssPrev?'<p class="ss-tag">'+ic('swap',14)+' Superserie</p>':'')+'<div class="card entry'+(ssNext?' ss-a':'')+(ssPrev?' ss-b':'')+'" data-di="'+i+'" data-lp="'+i+'"><div class="row"><span class="dh" role="button" aria-label="Arrastrar '+esc(ex.n)+' para cambiarlo de lugar">'+ic('list',18)+'</span>'+miniMap(mapOf(ex)).replace('mini','mini" style="width:52px')+'<button class="grow" style="text-align:left" data-a="exInfo" data-v="'+ex.id+'"><h3 style="font-size:17px">'+esc(ex.n)+'</h3><span class="mut sm-t">'+esc(ex.eq)+'</span></button>'+
-   /* en celulares angostos (≤400 px) los 3 íconos se juntan en "Más opciones" para que el nombre del ejercicio tenga lugar */
+   /* en celulares (≤440 px) los 3 íconos se juntan en "Más opciones" para que el nombre del ejercicio tenga lugar */
    '<button class="ib flat ex-x" data-a="replEx" data-e="'+i+'" aria-label="Cambiar por otro ejercicio">'+ic('swap',18)+'</button>'+
    (i<n-1?'<button class="ib flat ex-x'+(en.ss?' on-ss':'')+'" data-a="ssTog" data-e="'+i+'" aria-pressed="'+!!en.ss+'" aria-label="Superserie con el siguiente">'+ic('link',18)+'</button>':'')+
    '<button class="ib flat ex-x" data-a="delEntry" data-e="'+i+'" aria-label="Quitar ejercicio">'+ic('trash',18)+'</button>'+
@@ -884,12 +884,35 @@ function renderModal(){syncLayers();
 const calmMotion=()=>!!(db.settings&&db.settings.calm)||matchMedia('(prefers-reduced-motion: reduce)').matches;
 function leaveLayer(el,sel,still){const x=el.querySelector(sel);if(!x||calmMotion()){el.innerHTML='';return;}if(x.classList.contains('leaving'))return;x.classList.remove('stay','same');x.classList.add('leaving');clearTimeout(el._lv);el._lv=setTimeout(()=>{if(still())el.innerHTML='';},280);}
 function enterLayer(el,sel,draw){const had=el.querySelector(sel+':not(.leaving)');clearTimeout(el._lv);draw();const x=el.querySelector(sel);if(x&&had)x.classList.add('stay');}
+/* ejercicios dibujados con algo pasajero (la serie recién tildada, la pregunta "¿cuántas más podías?"):
+   en el próximo parche se vuelven a dibujar para que no les quede puesto */
+const sessTransient=()=>[S.justDone,S.rirAsk].filter(Boolean).map(k=>+String(k).split(':')[0]);
 function renderSess(){
-  const el=$('#sess');
+  const el=$('#sess');S._sessTr=sessTransient();
   if(db.active&&S.sessOpen){enterLayer(el,'.sess',()=>keepScroll(el,()=>{el.innerHTML=sessHTML();}));document.body.classList.add('sessopen');}
   else{leaveLayer(el,'.sess',()=>!(db.active&&S.sessOpen));document.body.classList.remove('sessopen');
     /* si el entreno se cerró por un camino que no pasa por render(), la pestaña de atrás se pone al día ahora */
     if(S.viewDirty)render();}
+}
+/* Toque de serie (tildar, ±, calentamiento, agregar/quitar serie…): en vez de rearmar la hoja entera (~1.250 elementos),
+   se vuelven a dibujar solo las tarjetas de esos ejercicios, con la MISMA entryHTML que usa la hoja completa
+   (así el resultado es idéntico). Lo que depende de varios ejercicios o de la hoja entera (superserie, mover, quitar,
+   modo grande, aparecer el botón Terminar) sigue usando renderSess(). */
+/* qué hay que redibujar: null = la hoja entera; si no, la lista de ejercicios (los tocados + los que tenían algo pasajero) */
+function sessPatchPlan(idx,nCards,finNow){
+  const a=db.active,finWant=!!a&&a.entries.some(en=>en.sets.some(s=>s.done));
+  if(!a||!S.sessOpen||db.settings.big||nCards!==a.entries.length||finNow!==finWant)return null;
+  const tr=sessTransient(),all=[...new Set(idx.concat(S._sessTr||[],tr))].filter(i=>a.entries[i]);S._sessTr=tr;
+  return all;
+}
+function sessPatch(idx){
+  const el=$('#sess'),sh=el&&el.querySelector('.sess:not(.leaving)'),list=sh&&sh.querySelector('.dlist[data-dl="sess"]');
+  const cards=list?[...list.children].filter(c=>c.classList.contains('entry')):[];
+  const plan=list?sessPatchPlan(idx,cards.length,!!sh.querySelector('.sess-fin')):null;
+  if(!plan){renderSess();return;}
+  const top=sh.scrollTop;
+  plan.forEach(i=>{const t=document.createElement('template');t.innerHTML=entryHTML(db.active.entries[i],i);const nc=t.content.querySelector('.card.entry');if(nc)cards[i].replaceWith(nc);});
+  sh.scrollTop=top;
 }
 /* en Inicio, la rutina planeada de hoy queda abajo, al alcance del pulgar */
 function todayGoHTML(){
