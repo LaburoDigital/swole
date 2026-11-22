@@ -1679,6 +1679,8 @@ svg.chart{touch-action:pan-y;cursor:crosshair}
 /* las pestañas fijas de arriba: sin desenfoque (temblaban al scrollear) */
 .zone-seg,.nv-seg{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--raise);transform:translateZ(0)}
 .nv-seg{position:sticky;top:calc(66px + env(safe-area-inset-top,0px));z-index:5;margin-bottom:14px}
+/* ≤340 px: las 4 pestañas de Nivel (Resumen, Ejercicios, Progreso, Carta) entran enteras (antes "Carta" quedaba cortada) */
+@media (max-width:340px){.nv-seg{gap:2px}.nv-seg button{padding:9px 4px;font-size:13px}}
 .nav button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 
 /* v79: ver un ejercicio desde el selector */
