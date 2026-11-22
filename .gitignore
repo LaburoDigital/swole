@@ -3,3 +3,5 @@ index.bak*.html
 native/node_modules/
 native/www/
 tools/ia/node_modules/
+.equipo/
+.claude/

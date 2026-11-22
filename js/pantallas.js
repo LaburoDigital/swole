@@ -387,9 +387,11 @@ function entryHTML(en,i){
     (j===aj?'<div class="stepr">'+(ex.time?'':'<button data-a="stepKg" data-e="'+i+'" data-s="'+j+'" data-v="-'+inc+'">−'+num(inc,2)+' kg</button><button data-a="stepKg" data-e="'+i+'" data-s="'+j+'" data-v="'+inc+'">+'+num(inc,2)+' kg</button><i></i>')+
       '<button data-a="stepRep" data-e="'+i+'" data-s="'+j+'" data-v="-'+(ex.time?5:1)+'">−'+(ex.time?'5 s':'1')+'</button><button data-a="stepRep" data-e="'+i+'" data-s="'+j+'" data-v="'+(ex.time?5:1)+'">+'+(ex.time?'5 s':'1 rep')+'</button></div>'+quickSet(en,ex,i,j):'')).join('');
   return (ssNext&&!ssPrev?'<p class="ss-tag">'+ic('swap',14)+' Superserie</p>':'')+'<div class="card entry'+(ssNext?' ss-a':'')+(ssPrev?' ss-b':'')+'" data-di="'+i+'" data-lp="'+i+'"><div class="row"><span class="dh" role="button" aria-label="Arrastrar '+esc(ex.n)+' para cambiarlo de lugar">'+ic('list',18)+'</span>'+miniMap(mapOf(ex)).replace('mini','mini" style="width:52px')+'<button class="grow" style="text-align:left" data-a="exInfo" data-v="'+ex.id+'"><h3 style="font-size:17px">'+esc(ex.n)+'</h3><span class="mut sm-t">'+esc(ex.eq)+'</span></button>'+
-   '<button class="ib flat" data-a="replEx" data-e="'+i+'" aria-label="Cambiar por otro ejercicio">'+ic('swap',18)+'</button>'+
-   (i<n-1?'<button class="ib flat'+(en.ss?' on-ss':'')+'" data-a="ssTog" data-e="'+i+'" aria-pressed="'+!!en.ss+'" aria-label="Superserie con el siguiente">'+ic('link',18)+'</button>':'')+
-   '<button class="ib flat" data-a="delEntry" data-e="'+i+'" aria-label="Quitar ejercicio">'+ic('trash',18)+'</button></div>'+prev+
+   /* en celulares angostos (≤400 px) los 3 íconos se juntan en "Más opciones" para que el nombre del ejercicio tenga lugar */
+   '<button class="ib flat ex-x" data-a="replEx" data-e="'+i+'" aria-label="Cambiar por otro ejercicio">'+ic('swap',18)+'</button>'+
+   (i<n-1?'<button class="ib flat ex-x'+(en.ss?' on-ss':'')+'" data-a="ssTog" data-e="'+i+'" aria-pressed="'+!!en.ss+'" aria-label="Superserie con el siguiente">'+ic('link',18)+'</button>':'')+
+   '<button class="ib flat ex-x" data-a="delEntry" data-e="'+i+'" aria-label="Quitar ejercicio">'+ic('trash',18)+'</button>'+
+   '<button class="ib flat ex-more'+(en.ss?' on-ss':'')+'" data-a="exMenu" data-e="'+i+'" aria-label="Más opciones" aria-haspopup="dialog">'+ic('more',20)+'</button></div>'+prev+
    goal+'<div class="sets">'+rows+'</div>'+
    '<div class="field" style="margin-top:10px"><input type="text" maxlength="120" placeholder="Nota (agarre, máquina, cómo te sentiste…)" value="'+esc(en.note||'')+'" data-i="enote" data-e="'+i+'" aria-label="Nota del ejercicio" style="padding:9px 12px;font-size:14px"></div>'+
    '<div class="row" style="margin-top:10px"><button class="btn sm grow" data-a="addSet" data-e="'+i+'">'+ic('plus',16)+' Serie</button><button class="btn sm grow" data-a="delSet" data-e="'+i+'">'+ic('minus',16)+' Serie</button>'+
@@ -845,7 +847,7 @@ function modalBody(m,l2){
   return '';
 }
 /* al redibujar, cada hoja mantiene su scroll (antes volvía arriba de todo) */
-function keepScroll(el,fn){const q='.msheet,.sess,.pick',k=[...el.querySelectorAll(q)].map(x=>x.scrollTop);keepX(el,fn);el.querySelectorAll(q).forEach((x,i)=>{if(k[i])x.scrollTop=k[i];});}
+function keepScroll(el,fn){const q='.msheet,.sess,.pick,.mback.onb',k=[...el.querySelectorAll(q)].map(x=>x.scrollTop);keepX(el,fn);el.querySelectorAll(q).forEach((x,i)=>{if(k[i])x.scrollTop=k[i];});}
 /* las tiras que se deslizan de costado (filtros) tampoco vuelven al principio, y el filtro elegido queda a la vista */
 function keepX(el,fn,fresh){const q='.scroll-x',k=fresh?[]:[...el.querySelectorAll(q)].map(x=>[x.scrollLeft,x.children.length]);fn();
   el.querySelectorAll(q).forEach((x,i)=>{if(k[i]&&k[i][0]&&k[i][1]===x.children.length)x.scrollLeft=k[i][0];
@@ -885,7 +887,9 @@ function enterLayer(el,sel,draw){const had=el.querySelector(sel+':not(.leaving)'
 function renderSess(){
   const el=$('#sess');
   if(db.active&&S.sessOpen){enterLayer(el,'.sess',()=>keepScroll(el,()=>{el.innerHTML=sessHTML();}));document.body.classList.add('sessopen');}
-  else{leaveLayer(el,'.sess',()=>!(db.active&&S.sessOpen));document.body.classList.remove('sessopen');}
+  else{leaveLayer(el,'.sess',()=>!(db.active&&S.sessOpen));document.body.classList.remove('sessopen');
+    /* si el entreno se cerró por un camino que no pasa por render(), la pestaña de atrás se pone al día ahora */
+    if(S.viewDirty)render();}
 }
 /* en Inicio, la rutina planeada de hoy queda abajo, al alcance del pulgar */
 function todayGoHTML(){
@@ -951,18 +955,25 @@ function viewPerfil(){
   return h+'<div class="card"><div class="hd"><div><h3>Deportes y semana</h3><span class="mut sm-t">Lo usan tus rutinas, la recuperación y las calorías</span></div></div><div class="mbody">'+(db.profile?weekEditor():'')+'</div></div><div class="card"><div class="mbody">'+profileHTML(S.pf)+'</div></div><div class="card row"><div class="grow"><b>Tema</b><br><span class="mut sm-t">'+(effTheme()==='dark'?'Oscuro':'Claro')+'</span></div><button class="btn sm" data-a="theme">'+ic(effTheme()==='dark'?'sun':'moon',16)+' Cambiar</button></div>';
 }
 const VIEWS={inicio:viewInicio,entrenar:viewEntrenar,niveles:viewNiveles,nutri:viewNutri,perfil:viewPerfil};
-function render(){
+function render(){RC={};try{render0();}finally{RC=null;}}
+function render0(){
   const tb=t=>'<button class="'+(S.tab===t.id?'on':'')+'" data-a="tab" data-v="'+t.id+'" '+(S.tab===t.id?'aria-current="page"':'')+'>'+ic(t.i,22)+'<span>'+t.l+'</span></button>';
   const ti=TABS.findIndex(t=>t.id===S.tab),slot=ti<0?-1:ti<2?ti:ti+1;
   $('#nav').innerHTML='<span class="nav-ind" style="--s:'+slot+';opacity:'+(slot<0?0:1)+'"></span>'+tb(TABS[0])+tb(TABS[1])+'<button class="fab'+(db.active?' live':'')+'" data-a="'+(db.active?'sessOpen':'quickOpen')+'" aria-label="'+(db.active?'Volver al entreno':'Acción rápida')+'">'+ic(db.active?'timer':'plus',26)+'<span class="fab-l">'+(db.active?'Volver al entreno':'Acción rápida')+'</span></button>'+tb(TABS[2])+tb(TABS[3]);
-  const av=$('#avatarSlot');if(av)av.innerHTML=avatarHTML();
+  /* el encabezado también queda protegido: si falla, se ve el avatar sin color y se puede llegar a Perfil */
+  const av=$('#avatarSlot');if(av){try{av.innerHTML=avatarHTML();}catch(err){console.error(err);av.innerHTML='<button class="avatar" data-a="tab" data-v="perfil" aria-label="Perfil">'+ic('user',20)+'</button>';}}
   const v=$('#view'),key=S.tab+'/'+(S.tab==='entrenar'?S.etab||'hoy':''),changed=S.lastTab!==key;
   if(changed&&S.lastTab&&!db.settings.calm){const nb=document.querySelector('#nav button.on');if(nb)nb.classList.add('pop');}
   const order=['inicio/','entrenar/rutinas','entrenar/cal','niveles/','nutri/','perfil/'],dir=order.indexOf(key)>=order.indexOf(S.lastTab||'')?'fwd':'back';S.lastTab=key;
+  /* con el entreno abierto la pestaña de atrás no se ve (la hoja ocupa toda la pantalla): no se rearma en cada toque de serie,
+     queda marcada y se rearma cuando el entreno se cierra o termina */
+  if(db.active&&S.sessOpen&&!changed&&S.viewOk){S.viewDirty=true;}
+  else{S.viewDirty=false;S.viewOk=true;
   try{keepX(v,()=>{v.innerHTML=VIEWS[S.tab]();},changed);}
   catch(err){console.error(err);v.innerHTML='<div class="card"><h3>Algo falló en esta pantalla</h3><p class="mut sm-t" style="margin-top:6px">Tus datos siguen guardados. Probá recargar; si vuelve a pasar, bajá una copia y avisanos.</p><div class="g2" style="margin-top:12px"><button class="btn" data-a="export">Bajar una copia</button><button class="btn pri" data-a="reload">Recargar</button></div></div>';}
   revealSoon(v);
   if(changed&&!S.vt){v.classList.remove('enter','fwd','back');void v.offsetWidth;v.classList.add('enter',dir);countUp(v);clearTimeout(S.enterT);S.enterT=setTimeout(()=>v.classList.remove('enter'),1400);}
+  }
   applyTheme();applyPrefs();renderModal();renderSess();renderPicker();renderPill();renderRest();syncLayers();
   /* el fondo toma el color de tu rango general */
   try{const ov=db.profile?overall():null;document.documentElement.style.setProperty('--tier',ov?TCOL[Math.min(6,Math.floor(ov.L/3))]:'#5B43F0');}catch(e){}

@@ -40,6 +40,7 @@ const weightNow=()=>db.profile?db.profile.weight:null;
 function waterGoal(){return Math.max(6,Math.round((weightNow()||70)*35/250));}
 /* ============ Iconos ============ */
 const IC={
+  more:'<circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/>',
   chat:'<path d="M5 18l-2 3V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H8z"/>',
   send:'<path d="M4 12l16-8-6 16-2-7z"/>',
   music:'<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',

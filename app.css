@@ -1390,7 +1390,10 @@ small{line-height:1.35}
 .w-row input{width:100%;min-width:0}
 @media (max-width:360px){.w-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.w-row .btn{grid-column:1/-1}}
 .rec-sug{flex-wrap:wrap}.rec-sug>.grow{min-width:150px}.rec-sug>.btn{max-width:100%;white-space:normal;text-align:center}
-.entry>.row{gap:4px}.entry>.row>.grow{min-width:0}.entry>.row h3{overflow-wrap:anywhere;line-height:1.15}
+.entry>.row{gap:4px}.entry>.row>.grow{min-width:0}.entry>.row h3{overflow-wrap:break-word;-webkit-hyphens:auto;hyphens:auto;line-height:1.15}
+/* ≤400 px: Cambiar / Superserie / Quitar van dentro de "Más opciones" (el nombre necesita el lugar); arriba de 400 px, los 3 íconos */
+@media (min-width:401px){.entry>.row .ex-more{display:none}}
+@media (max-width:400px){.entry>.row .ex-x{display:none}}
 .entry>.row .ib.flat{width:34px;height:34px;flex:none}
 .fd-mac .row{gap:4px}.fd-mac .row .grow{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* las filas que se deslizan de costado muestran que hay más */
@@ -1665,6 +1668,8 @@ svg.chart{touch-action:pan-y;cursor:crosshair}
 .toast-u{background:color-mix(in srgb,var(--acc) 22%,transparent);color:var(--text)}
 /* el fondo de color queda quieto: animado obligaba a re-desenfocar el encabezado y la barra a cada cuadro */
 .bgfx i{animation:none!important;filter:none}
+/* el fondo que sí se ve (la aurora de .bgfx::before) también queda quieto, en su posición de reposo (decisión v81) */
+.bgfx::before{animation:none!important}
 /* las pestañas fijas de arriba: sin desenfoque (temblaban al scrollear) */
 .zone-seg,.nv-seg{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--raise);transform:translateZ(0)}
 .nv-seg{position:sticky;top:calc(66px + env(safe-area-inset-top,0px));z-index:5;margin-bottom:14px}

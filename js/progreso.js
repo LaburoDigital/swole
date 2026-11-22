@@ -764,7 +764,7 @@ function friendsHTML(m){
     (isTeen()?'<p class="soc-teen">'+ic('info',16)+'<span>Pasá tu código solo a gente que conocés en persona. Nadie te puede buscar: solo te encuentra quien tiene tu código.</span></p>':'')+'<h4 style="margin:10px 0 6px">Qué NO ven</h4><p class="sm-t">Tu mail, tu peso, tu edad, tus medidas, tus fotos ni tus comidas. Solo te ven las personas que agregás (o que te agregan con tu código).</p></div>'+
     '<button class="btn pri wide" style="margin-top:12px" data-a="socOn">Activar amigos</button>';
   const sc=db.settings.social.code,sv=S.social;
-  const head='<div class="soc-code"><div><span class="mut sm-t">Tu código</span><b>'+sc+'</b></div><button class="btn sm" data-a="socShare">'+ic('share',16)+' Invitar</button></div>'+
+  const head='<div class="soc-code"><div><span class="mut sm-t">Tu código</span><b>'+esc(sc)+'</b></div><button class="btn sm" data-a="socShare">'+ic('share',16)+' Invitar</button></div>'+
     '<div class="row" style="gap:8px;margin:10px 0 4px"><input class="soc-in" id="socCode" maxlength="7" placeholder="Código de un amigo" autocomplete="off" autocapitalize="characters" aria-label="Código de un amigo"><button class="btn pri" data-a="socAdd">Agregar</button></div>';
   const rin=sv?(sv.req||[]).filter(r=>r.dir==='in'):[],cinv=sv?(sv.comps||[]).filter(c=>{const me=(c.swole_comp_member||[]).find(x=>sv.me&&x.user_id===sv.me.user_id);return me&&!me.joined&&c.end_day>=today();}):[];
   const dot=n=>n?' <span class="soc-dot">'+n+'</span>':'';

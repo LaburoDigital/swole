@@ -78,7 +78,8 @@ function importData(o){
   SYNC_MAP.forEach(c=>{for(const k in x[c])if(!(k in db[c])){db[c][k]=x[c][k];n++;}});
   if(x.profile&&typeof x.profile==='object'){if(!db.profile){db.profile=x.profile;n++;}else for(const f in x.profile)if(db.profile[f]==null||db.profile[f]===''){db.profile[f]=x.profile[f];n++;}}
   for(const k in x.plan)if(!(k in db.plan)){db.plan[k]=x.plan[k];n++;}
-  for(const f in x.settings)if(!LOCAL_SET.includes(f)&&(db.settings[f]===undefined||same(db.settings[f],def[f]))&&!same(db.settings[f],x.settings[f])){db.settings[f]=x.settings[f];n++;}
+  /* el código de amigo es de la cuenta: nunca viene de una copia */
+  for(const f in x.settings)if(!LOCAL_SET.includes(f)&&f!=='social'&&(db.settings[f]===undefined||same(db.settings[f],def[f]))&&!same(db.settings[f],x.settings[f])){db.settings[f]=x.settings[f];n++;}
   save();return n;
 }
 async function exportData(){
@@ -550,6 +551,7 @@ const ACTIONS={
   setCopy(v,el){const en=db.active.entries[+el.dataset.e],j=+el.dataset.s,s=en.sets[j],ex=exById(en.ex);
     const src=v==='prev'?en.sets[j-1]:(lastSets(en.ex)||[]).filter(x=>!x.w)[en.sets.slice(0,j).filter(x=>!x.w).length];if(!s||!src)return;
     if(!ex.time)s.kg=src.kg;s.reps=src.reps;save();renderSess();buzz(6);},
+  exMenu(v,el){S.m2={t:'exmenu',d:{e:+el.dataset.e}};render();},
   exMenuGo(v,el){const e=el.dataset.e;S.m2=null;if(v==='exInfo'){render();ACTIONS.exInfo(el.dataset.x);return;}const f=ACTIONS[v];if(f)f('',{dataset:{e}});render();},
   wkPick(v){S.wkSel=S.wkSel===v?null:v;render();if(S.wkSel)toast('Ahora tocá el día al que la querés pasar');},
   wkDrop(v){if(!S.wkSel)return;const[id,from]=S.wkSel.split('|');S.wkSel=null;wkMove(id,+from,+v);},
@@ -581,7 +583,8 @@ const ACTIONS={
     const d=S.modal.d,name=(d.name||'').trim();
     if(!name)return toast('Ponele un nombre a la rutina');
     if(!d.items.length)return toast('Agregá al menos un ejercicio');
-    const items=d.items.map(i=>({ex:i.ex,sets:clamp(parseInt(i.sets)||3,1,12),reps:clamp(parseInt(i.reps)||10,1,200)}));
+    /* se conservan los datos internos de cada ejercicio (calentamiento, 5/3/1, powerlifting, bloques): solo se corrigen series y reps */
+    const items=d.items.map(i=>Object.assign({},i,{sets:clamp(parseInt(i.sets)||3,1,12),reps:clamp(parseInt(i.reps)||10,1,200)}));
     if(d.id){
       const r=db.routines.find(x=>x.id===d.id);
       if(r){const same=JSON.stringify((r.days||[]).slice().sort())===JSON.stringify(d.days.slice().sort());r.name=name;r.items=items;if(!same){r.days=d.days;r.since=today();}}
@@ -625,11 +628,15 @@ const ACTIONS={
   importOpen(){S.m2={t:'import',text:''};render();},
   csvGo(){const m=S.m2;if(!m||!m.csv||!m.csv.ws)return;const n=csvImport(m.csv);S.m2=null;save();checkAch(true);render();toast(n?'Listo: '+n+(n===1?' entreno importado':' entrenos importados'):'No había entrenos nuevos para importar');if(n)confetti(40);},
   importGo(){
-    try{
-      const n=importData(JSON.parse(($('#impTxt')||{}).value||''));
-      S.m2=null;S.modal=null;render();toast(n?'Copia restaurada: '+n+(n===1?' cosa recuperada':' cosas recuperadas'):'Ya tenías todo lo de esa copia');checkAch(true);
-      if(!db.profile)ACTIONS.startOnb();
-    }catch(e){toast('Ese texto no parece un archivo de Swole');}
+    /* leer la copia y dibujar van por separado: si algo falla al dibujar, no se dice que el archivo era malo (ya se importó) */
+    let n;
+    try{n=importData(JSON.parse(($('#impTxt')||{}).value||''));}
+    catch(e){return toast('Ese texto no parece un archivo de Swole');}
+    S.m2=null;S.modal=null;
+    try{render();}catch(e){console.error(e);}
+    toast(n?'Copia restaurada: '+n+(n===1?' cosa recuperada':' cosas recuperadas'):'Ya tenías todo lo de esa copia');
+    try{checkAch(true);}catch(e){console.error(e);}
+    if(!db.profile)ACTIONS.startOnb();
   },
   delAccAsk(){S.m2={t:'delacc',busy:false};render();},
   delAccGo(){const i=$('#delAccIn'),v=(i?i.value:'').trim().toUpperCase();if(v!=='ELIMINAR')return toast('Escribí ELIMINAR para confirmar');

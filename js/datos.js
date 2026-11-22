@@ -146,12 +146,14 @@ const TPL=[
 ];
 
 /* ============ Almacenamiento (capa separada: acá se enchufa Firebase/Google más adelante) ============ */
+/* sube cada vez que se guardan datos (save, sync, importar, borrar): vacía lo calculado en memoria (récords, niveles) */
+let DATA_V=0;
 const Store=(()=>{
   const K='swole.v1';let mem=null;
   return{
     load(){try{const r=localStorage.getItem(K);if(r)return JSON.parse(r);}catch(e){}return mem?JSON.parse(mem):null;},
-    save(d){const s=JSON.stringify(d);mem=s;try{localStorage.setItem(K,s);this.full=0;}catch(e){if(!this.full){this.full=1;setTimeout(()=>{try{toast('No se pudo guardar en este celu (sin espacio). Bajá una copia desde Perfil para no perder nada.');}catch(x){}},60);}}},
-    wipe(){mem=null;try{localStorage.removeItem(K);localStorage.removeItem('swole.owner');}catch(e){}}
+    save(d){DATA_V++;const s=JSON.stringify(d);mem=s;try{localStorage.setItem(K,s);this.full=0;}catch(e){if(!this.full){this.full=1;setTimeout(()=>{try{toast('No se pudo guardar en este celu (sin espacio). Bajá una copia desde Perfil para no perder nada.');}catch(x){}},60);}}},
+    wipe(){DATA_V++;mem=null;try{localStorage.removeItem(K);localStorage.removeItem('swole.owner');}catch(e){}}
   };
 })();
 const defaults=()=>({v:1,profile:null,routines:[],customEx:[],plan:{},logs:[],weights:[],creatine:{},water:{},settings:{theme:'dark',rest:90,remind:{on:false,time:'09:00'},lastRemind:''},active:null,clock:{},del:{},ach:{},tests:[],goals:[],meas:[],meals:[],foods:[]});
@@ -161,9 +163,27 @@ function normalize(x){const d=defaults();const o=Object.assign(d,x||{});o.settin
   /* los IDs van dentro de atributos HTML: si vienen de un archivo importado raro, los limpio
      (siempre igual, así las referencias entre rutinas, entrenos y ejercicios siguen coincidiendo) */
   const sid=x=>String(x==null?'':x).replace(/[^\w-]/g,'');
+  /* una copia editada a mano, cortada o vieja puede traer entrenos, rutinas o comidas sin sus listas:
+     se reparan (listas vacías, números en 0) en vez de borrarse, para que nada rompa las pantallas ni se pierda lo que sí sirve */
+  const isO=v=>v&&typeof v==='object'&&!Array.isArray(v),arr=v=>Array.isArray(v)?v.filter(isO):[];
+  ['customEx','routines','logs','tests','meals','foods','weights','goals'].forEach(k=>{o[k]=o[k].filter(isO);});
   o.customEx.forEach(e=>{e.id=sid(e.id);});
-  o.routines.forEach(r=>{r.id=sid(r.id);(r.items||[]).forEach(i=>{i.ex=sid(i.ex);});});
-  o.logs.forEach(l=>{l.id=sid(l.id);if(l.routineId)l.routineId=sid(l.routineId);(l.entries||[]).forEach(en=>{en.ex=sid(en.ex);});l.prs=(l.prs||[]).map(sid);});
+  o.routines.forEach(r=>{r.id=sid(r.id);r.items=arr(r.items);r.items.forEach(i=>{i.ex=sid(i.ex);});});
+  o.logs.forEach(l=>{l.id=sid(l.id);if(l.routineId)l.routineId=sid(l.routineId);l.entries=arr(l.entries);l.entries.forEach(en=>{en.ex=sid(en.ex);en.sets=arr(en.sets);});l.prs=(Array.isArray(l.prs)?l.prs:[]).map(sid);});
+  o.meals.forEach(m=>{['g','k','p','c','f'].forEach(f=>{if(m[f]!=null&&!isFinite(+m[f]))m[f]=0;});});
+  /* seguridad: todo ID que termina en un atributo HTML pasa por sid(), y toda fecha tiene que ser AAAA-MM-DD
+     (una copia preparada podía meter HTML en los IDs de objetivos, marcas, comidas o alimentos). La app siempre escribe
+     IDs de letras/números y fechas AAAA-MM-DD, así que lo que ya tenés no cambia (verificado en la nube: 0 cambios). */
+  const day=v=>{const m=typeof v==='string'&&v.match(/^\d{4}-\d{2}-\d{2}/);return m?m[0]:null;};
+  const dated=a=>a.filter(i=>{const dd=day(i.date);if(!dd)return false;i.date=dd;return true;});
+  ['logs','tests','meals','weights'].forEach(k=>{o[k]=dated(o[k]);});
+  if(Array.isArray(o.meas))o.meas=dated(o.meas.filter(isO));
+  o.tests.forEach(t=>{t.id=sid(t.id);if(t.ex!=null)t.ex=sid(t.ex);});
+  o.goals.forEach(g=>{g.id=sid(g.id);if(g.ex!=null)g.ex=sid(g.ex);if(g.since!=null&&!day(g.since))delete g.since;});
+  o.meals.forEach(m=>{m.id=sid(m.id);if(m.fid!=null)m.fid=sid(m.fid);if(m.m!=null)m.m=sid(m.m);});
+  o.foods.forEach(f=>{f.id=sid(f.id);});
+  /* el código de amigo solo puede ser como los que crea la app (6 letras/números en mayúscula) */
+  const so=o.settings.social;if(so!=null&&!(isO(so)&&typeof so.code==='string'&&/^[A-Z0-9]{4,8}$/.test(so.code)))o.settings.social=null;
   Object.keys(o.plan).forEach(k=>{o.plan[k]=(Array.isArray(o.plan[k])?o.plan[k]:[]).map(sid);});
   if(o.active&&Array.isArray(o.active.entries))o.active.entries.forEach(en=>{en.ex=sid(en.ex);});
   /* antes había un solo deporte: pasa a la lista */
@@ -347,20 +367,39 @@ function equiv(ex,e){
 }
 /* las series de calentamiento (s.w) no cuentan para niveles ni récords */
 /* una marca cargada a mano cuenta como una serie suelta, pero no aparece en el calendario */
-const allSess=()=>db.logs.concat((db.tests||[]).map(t=>({id:t.id,date:t.date,test:1,entries:[{ex:t.ex,sets:[{kg:t.kg,reps:t.reps}]}]})));
-function bestE1(id){
-  const ex=exById(id);if(!ex)return null;
-  let best=null;
-  allSess().forEach(l=>l.entries.forEach(en=>{
-    if(en.ex!==id)return;
-    en.sets.forEach(s=>{if(s.w)return;const e=e1(ex,s.kg,s.reps);if(e>0&&(!best||e>best.e))best={e,kg:s.kg,reps:s.reps,date:l.date};});
-  }));
-  return best;
+/* Lo que sale de todo el historial se calcula una vez y queda en memoria hasta que cambian los datos
+   (antes Inicio recorría el historial entero ~900 veces por dibujo y cada toque de serie se trababa).
+   Se vacía si: se guardó algo (DATA_V), cambió la lista de entrenos o marcas (otra lista o otro largo), o cambió tu perfil o tu peso. */
+let MEMO=null;
+function dataMemo(){
+  const p=db.profile,k=DATA_V+'|'+db.logs.length+'|'+(db.tests||[]).length+'|'+(p?p.weight:'')+'|'+(db.customEx||[]).length;
+  if(!MEMO||MEMO.k!==k||MEMO.l!==db.logs||MEMO.t!==db.tests||MEMO.p!==p||MEMO.c!==db.customEx)MEMO={k,l:db.logs,t:db.tests,p,c:db.customEx,all:null,best:null,last:null};
+  return MEMO;
 }
+function allSess(){const m=dataMemo();
+  if(!m.all)m.all=db.logs.concat((db.tests||[]).map(t=>({id:t.id,date:t.date,test:1,entries:[{ex:t.ex,sets:[{kg:t.kg,reps:t.reps}]}]})));
+  return m.all.slice();}
+/* el mejor 1RM estimado de cada ejercicio, todos en una sola pasada */
+function bestE1(id){
+  const m=dataMemo();
+  if(!m.best){const B=new Map(),X=new Map();
+    allSess().forEach(l=>l.entries.forEach(en=>{
+      let ex=X.get(en.ex);if(ex===undefined){ex=exById(en.ex)||null;X.set(en.ex,ex);}if(!ex)return;
+      let best=B.get(en.ex)||null;
+      en.sets.forEach(s=>{if(s.w)return;const e=e1(ex,s.kg,s.reps);if(e>0&&(!best||e>best.e))best={e,kg:s.kg,reps:s.reps,date:l.date};});
+      if(best)B.set(en.ex,best);
+    }));
+    m.best=B;}
+  if(!exById(id))return null;
+  const b=m.best.get(id);return b?Object.assign({},b):null;
+}
+/* las series de la última vez que hiciste cada ejercicio: también en memoria (el entreno en vivo lo pide en cada toque) */
 function lastSets(id){
+  const m=dataMemo();if(!m.last)m.last=new Map();
+  if(m.last.has(id))return m.last.get(id);
   const ls=db.logs.filter(l=>l.entries.some(en=>en.ex===id)).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
-  if(!ls.length)return null;
-  return ls[ls.length-1].entries.find(en=>en.ex===id).sets;
+  const r=ls.length?ls[ls.length-1].entries.find(en=>en.ex===id).sets:null;
+  m.last.set(id,r);return r;
 }
 /* ejercicios que elegiste no contar para tus niveles */
 const noRank=id=>(db.settings.noRank||[]).includes(id);
@@ -381,7 +420,13 @@ function rankedList(){
 /* v61: el ejercicio cuenta en cada grupo donde es principal (la diamante suma a pecho y a brazos).
    Tu mejor ejercicio del grupo manda; los otros (hasta 2, si no están 3 niveles abajo) restan como mucho medio nivel.
    Antes era un promedio parejo y un ejercicio flojo o recién empezado te hundía el grupo. */
+/* mientras dura un mismo render(), niveles por grupo y rango general se calculan una sola vez */
+let RC=null;
 function groupLevels(){
+  if(RC&&RC.gl)return RC.gl;
+  const out=groupLevels0();if(RC)RC.gl=out;return out;
+}
+function groupLevels0(){
   const by={};
   rankedList().filter(x=>x.info.L>=0).forEach(x=>{const v=x.info.L+clamp(x.info.pct,0,.999),gs=new Set(x.ex.p.map(k=>Object.keys(GROUPS).find(g=>GROUPS[g].includes(k))).filter(Boolean));
     if(!gs.size)gs.add(groupOf(x.ex));gs.forEach(g=>(by[g]=by[g]||[]).push({ex:x.ex,v}));});
@@ -397,6 +442,10 @@ const ZONES={'Tren superior':['Pecho','Espalda','Hombros','Brazos'],'Tren inferi
 function zoneLevels(){const gl=groupLevels(),out={};Object.keys(ZONES).forEach(z=>{const l=ZONES[z].filter(g=>gl[g]);out[z]=l.length?l.reduce((s,g)=>s+gl[g].v*GROUP_W[g],0)/l.reduce((s,g)=>s+GROUP_W[g],0):null;});return out;}
 /* Rango general: promedio de los grupos que tienen datos */
 function overall(){
+  if(RC&&'ov' in RC)return RC.ov;
+  const r=overall0();if(RC)RC.ov=r;return r;
+}
+function overall0(){
   const gl=groupLevels(),ks=Object.keys(gl).filter(g=>gl[g]),vals=ks.map(g=>gl[g].v);
   if(!vals.length)return null;
   const avg=ks.reduce((s,g)=>s+gl[g].v*GROUP_W[g],0)/ks.reduce((s,g)=>s+GROUP_W[g],0);
