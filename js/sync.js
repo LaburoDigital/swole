@@ -66,7 +66,7 @@ const Sync=(()=>{
   const keep=()=>{try{sess?localStorage.setItem(AK,JSON.stringify(sess)):localStorage.removeItem(AK);}catch(e){}};
   const setSess=j=>{
     if(!j||!j.access_token)throw new Error('Respuesta inválida');
-    sess={access_token:j.access_token,refresh_token:j.refresh_token,expires_at:j.expires_at||Math.floor(Date.now()/1000)+(j.expires_in||3600),user:{id:j.user.id,email:j.user.email}};
+    sess={access_token:j.access_token,refresh_token:j.refresh_token,expires_at:j.expires_at||Math.floor(Date.now()/1000)+(j.expires_in||3600),user:{id:j.user.id,email:j.user.email,app_metadata:j.user.app_metadata||{}}};
     keep();
   };
   async function req(path,o){
@@ -220,8 +220,15 @@ const Sync=(()=>{
   window.addEventListener('online',()=>schedule(300));
   document.addEventListener('visibilitychange',()=>{if(!sess)return;if(document.visibilityState==='visible')schedule(300);else if(timer)run(false);});
   setInterval(()=>{if(sess&&document.visibilityState==='visible')run(false);},120000);
-  return{run,schedule,loginGo,logout,fromLink,req,forget:logout,user:()=>sess&&sess.user,state:st};
+  return{run,schedule,loginGo,logout,fromLink,req,forget:logout,user:()=>sess&&sess.user,token:()=>sess&&sess.access_token,state:st};
 })();
+/* Cuenta VIP: la marca vive en el servidor (app_metadata.vip en Supabase: el usuario no la puede cambiar y viaja en el token).
+   Se lee del usuario de la sesión o, si la sesión guardada es vieja y no la trae, del token. Sin cuenta o sin la marca: false.
+   Hoy desbloquea los colores Oro y Élite; queda lista para lo VIP que venga. */
+function isVip(){try{const u=Sync.user();if(!u)return false;if(u.app_metadata&&u.app_metadata.vip===true)return true;
+  const t=Sync.token();if(!t)return false;const p=t.split('.')[1];if(!p)return false;
+  const j=JSON.parse(decodeURIComponent(escape(atob(p.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((p.length+3)%4)))));
+  return !!(j&&j.app_metadata&&j.app_metadata.vip===true);}catch(e){return false;}}
 
 /* ============ Inicio ============ */
 applyTheme();

@@ -427,7 +427,7 @@ const ACTIONS={
     if(!items.length)return toast('La rutina no trae ejercicios válidos');
     db.routines.push({id:uid(),name:o.n,days:[],since:today(),items,rest:Math.min(600,Math.max(30,+o.r||90))});
     S.modal=null;goTab('rutinas');save();render();confetti(30);toast('Rutina agregada: elegí qué días hacerla en Editar');},
-  accent(v){const a=ACCENTS.find(x=>x[0]===v);if(a&&a[4]&&frCount()<a[4])return toast('Se desbloquea con '+a[4]+(a[4]===1?' amigo':' amigos')+' en Swole. Tocá "Invitá amigos".');db.settings.accent=v;save();applyTheme();render();},
+  accent(v){const a=ACCENTS.find(x=>x[0]===v);if(a&&a[4]&&!isVip()&&frCount()<a[4])return toast('Se desbloquea con '+a[4]+(a[4]===1?' amigo':' amigos')+' en Swole. Tocá "Invitá amigos".');db.settings.accent=v;save();applyTheme();render();},
   invite(){if(Social.on())return ACTIONS.socShare();ACTIONS.socOpen('list');toast('Activá Amigos y compartí tu código');},
   plOpen(){S.modal={t:'pl'};render();},
   plPlanGo(){S.modal=null;ACTIONS.genOpen();const d=S.m2&&S.m2.d;if(d){d.goals=['pl'];d.step=1;renderModal();}},
