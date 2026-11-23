@@ -1,12 +1,12 @@
 # Swole — Plan
-Última actualización: 2026-11-22 · Etapa actual: 4 (cerrando: faltan tus OK)
+Última actualización: 2026-11-23 · Etapa actual: 4 (cerrando: faltan tus OK)
 
 ## Visión
 App web instalable (PWA) en español rioplatense para entrenar (gym o calistenia) y saber qué tan fuerte sos: registrás entrenos y tus marcas se convierten en un rango de Bronce a Élite comparado con gente de tu sexo, edad y peso. Además: rutinas generadas, nutrición, árbol de calistenia, amigos y rankings. Público: gente que entrena, sobre todo adolescentes y jóvenes que hacen deporte.
 
 **Terminado para la versión actual (v1 "pública"):** la PWA funciona entera en un Android y un iPhone reales (entreno en vivo, niveles, nutrición, sync, sin conexión), hay pruebas automáticas que cubren niveles, sync y generador, la sync no puede borrar historiales, y hay términos/privacidad aptos para menores. Las tiendas (Play / App Store) son la versión siguiente.
 
-Publicada en https://laburodigital.github.io/swole/ · versión v91 (2026-11-22) · repo LaburoDigital/swole (main).
+Publicada en https://laburodigital.github.io/swole/ · versión v92 (2026-11-23) · repo LaburoDigital/swole (main).
 
 ## Estado
 **Hecho y probado en el preview (casi nada en celu real desde v60):**
@@ -30,10 +30,10 @@ Publicada en https://laburodigital.github.io/swole/ · versión v91 (2026-11-22)
 
 **Bugs conocidos / sin verificar:**
 - Android sin probar en celu real: atrás dos veces, sin conexión, fluidez en un Android medio, foto de comida.
-- Figuras de técnica: las de pie se parecen; solo dominadas tiene vista de espaldas.
+- Figuras de técnica (SW-7: las 154 revisadas, ninguna repetida). Pendientes: aperturas de costado se parecen al press con mancuernas (propuesta: vista desde los pies del banco); el curl martillo roza 1,2 la cabeza; la zona del tibial queda siempre gris en Nivel (su único ejercicio no tiene niveles).
 - Foto de comida: no estima porción, falla con asado y la tercera cosa; lo aprendido queda solo en ese celu.
 - Lesiones: cambiar a mano un ejercicio por uno que carga la zona no avisa.
-- Pruebas automáticas: 192 en `npm test` (11 de SW-2; 1 de SW-3: existen todos los archivos de CORE/PICS del SW; 3 de SW-4; 9 de SW-5: escudo y Tilt; 6 de SW-6: VIP) (7 de la Etapa 4: edad, casilla de términos, hojas de seguridad; 19 de SW-1: copias mal formadas o con código inyectado, editar rutina 5/3/1, velocidad) y en GitHub Actions ("Pruebas", cada push). Cubren niveles, generador, técnica/detalle de los 116 ejercicios y, desde la Etapa 3, la sync y las copias: 20 pruebas con nube y celus de mentira (`tests/nube.js`). Todavía no cubren nutrición, pantallas fuera del detalle de ejercicio ni humo con navegador.
+- Pruebas automáticas: 192 en `npm test` (11 de SW-2; 1 de SW-3: existen todos los archivos de CORE/PICS del SW; 3 de SW-4; 9 de SW-5: escudo y Tilt; 6 de SW-6: VIP; SW-7: figura única por ejercicio y QA del catálogo; total 251) (7 de la Etapa 4: edad, casilla de términos, hojas de seguridad; 19 de SW-1: copias mal formadas o con código inyectado, editar rutina 5/3/1, velocidad) y en GitHub Actions ("Pruebas", cada push). Cubren niveles, generador, técnica/detalle de los 154 ejercicios y, desde la Etapa 3, la sync y las copias: 20 pruebas con nube y celus de mentira (`tests/nube.js`). Todavía no cubren nutrición, pantallas fuera del detalle de ejercicio ni humo con navegador.
 - Backups de Supabase: **sin verificar**. El plan gratis no tendría backups descargables [Probable]: hoy la copia en archivo es el único respaldo fuera de la nube.
 - Puede quedar algún dato de prueba en el navegador del preview.
 - iPhone (SW-4, v89): la barra de abajo y el encabezado se vuelven a acomodar tras cerrar el teclado o volver a la app (vpFix), **sin probar en iPhone real**. Bajos: con una hoja abierta, si iOS corre la vista al cerrar el teclado se corrige recién al cerrar la hoja; contraste bajo (2,6–2,9) de Diamante/Campeón/Élite en la fila de rangos.
@@ -214,8 +214,6 @@ Publicada en https://laburodigital.github.io/swole/ · versión v91 (2026-11-22)
 | 2026-11-22 | La cuenta del dueño tiene todo lo VIP; se marca en el servidor (app_metadata.vip en su fila de auth.users), nunca en el código | No exponer datos del dueño en el repo público; el usuario no puede cambiar app_metadata | — |
 
 ## Después / fuera de alcance
-**Idea guardada (Juan dice cuándo, NO hacer antes):** revisión ejercicio por ejercicio de los 116: mejorar todos los dibujos (hay feos y repetidos, ej. press de pecho e inclinado iguales), ubicar bien el equipo (la barra), agregar máquinas que faltan (extensión de cuádriceps) y más ejercicios con y sin máquina, revisar músculos y datos. Detalle en .equipo/ideas/ejercicios-dibujos.md. Es grande: pasarla primero por planificar-proyecto y repartir por grupos musculares.
-
 App Store (necesita Mac + cuenta Apple); widget de inicio; Apple Health y Google Fit; comparar dos entrenos cualquiera; lector de pantalla; capturas reales para info/; estimar porción en la foto; vista de espaldas para más ejercicios; desafíos 1 contra 1 (PLAN-v5, no hecho); incluir fotos y videos de progreso en la copia; historial de versiones en el servidor (red de seguridad si la sync falla); ciclo menstrual opcional (PLAN-v5, no hecho); que lo aprendido por la foto se comparta entre celus; aviso automático a Juan cuando entra una denuncia (push o mail); pantalla de moderación dentro de la app; verificación de edad real; aviso en la app cuando cambien los términos.
 
 ## Bitácora de sesiones
@@ -234,3 +232,4 @@ App Store (necesita Mac + cuenta Apple); widget de inicio; Apple Health y Google
 | 2026-11-22 | 4 (SW-4) | Modo ahorro. Arreglos de las capturas del iPhone de Juan en toda la app: barra/encabezado se reacomodan tras teclado o volver (vpFix, sin probar en iPhone real), nada tiembla al scrollear (sin desenfoque en encabezado y hojas), ningún botón sobre un campo (320/390/430/1280), gráfico de peso con eje y leyenda, rangos en 2 filas, escudos con color de su rango, nada bajo la hora/batería. Revisaron qa y diseno (0 Críticos/Altos; el Medio de diseno arreglado). 192/192; v89 publicada (9cd18ac, CI verde). | Probar en iPhone; 2 Bajos nuevos; idea guardada de revisión ejercicio por ejercicio (en "Después"). |
 | 2026-11-22 | 4 (SW-5) | Modo ahorro. Escudo propio "disco de pesas" en toda la app (31 lugares vía badge(), incluida la carta compartida), brillo que sigue el celu (solo visibles, ~30 fps, 1,5 ms por cuadro). Movimiento con el celu siempre (Tilt): en iPhone se activa solo tras el primer "sí"; respeta reducir movimiento. Revisó diseno (0 Críticos/Altos; Bajo y nota de rendimiento arreglados). 201/201; v90 publicada (dadaf9d, CI verde). | Probar Tilt en iPhone real. |
 | 2026-11-22 | 4 (SW-6) | Modo ahorro. Cuenta del dueño VIP: app_metadata.vip=true en una sola fila de auth.users (con OK de Juan); isVip() en el cliente; colores Oro/Élite desbloqueados con VIP. Revisó seg (0 Críticos/Altos, 2 Bajos). 207/207; v91 publicada (483e88c, CI verde). | 2 Bajos de VIP (ver Estado → Bugs). |
+| 2026-11-23 | 4 (SW-7) | Revisión ejercicio por ejercicio (la idea guardada): 116 revisados + 38 nuevos = 154, cada uno con nombre, equipo, músculos, técnica y figura propia (bancos con su ángulo, barra/mancuernas/máquinas/poleas en su lugar; extensión de cuádriceps en su máquina). Buscador por palabras y sinónimos; músculo nuevo tibial anterior; extensión de cuádriceps recalibrada (puede bajar un poco ese nivel). Revisaron diseno por lote y qa (0 Críticos/Altos; Medios arreglados). 251/251; v92 publicada (f1103c0, CI verde); en la publicada los 154 detalles se arman sin errores y las hojas reales abren con figura. | 3 pendientes de figuras/tibial (ver Estado → Bugs). |
