@@ -6,7 +6,7 @@ App web instalable (PWA) en español rioplatense para entrenar (gym o calistenia
 
 **Terminado para la versión actual (v1 "pública"):** la PWA funciona entera en un Android y un iPhone reales (entreno en vivo, niveles, nutrición, sync, sin conexión), hay pruebas automáticas que cubren niveles, sync y generador, la sync no puede borrar historiales, y hay términos/privacidad aptos para menores. Las tiendas (Play / App Store) son la versión siguiente.
 
-Publicada en https://laburodigital.github.io/swole/ · versión v92 (2026-11-23) · repo LaburoDigital/swole (main).
+Publicada en https://laburodigital.github.io/swole/ · versión v93 (2026-11-23) · repo LaburoDigital/swole (main).
 
 ## Estado
 **Hecho y probado en el preview (casi nada en celu real desde v60):**
@@ -30,7 +30,7 @@ Publicada en https://laburodigital.github.io/swole/ · versión v92 (2026-11-23)
 
 **Bugs conocidos / sin verificar:**
 - Android sin probar en celu real: atrás dos veces, sin conexión, fluidez en un Android medio, foto de comida.
-- Figuras de técnica (SW-7: las 154 revisadas, ninguna repetida). Pendientes: aperturas de costado se parecen al press con mancuernas (propuesta: vista desde los pies del banco); el curl martillo roza 1,2 la cabeza; la zona del tibial queda siempre gris en Nivel (su único ejercicio no tiene niveles).
+- Figuras de técnica (SW-7: las 154 revisadas, ninguna repetida). Aperturas (vista desde los pies) y curl martillo arreglados en SW-8. Pendiente: la zona del tibial queda siempre gris en Nivel (su único ejercicio no tiene niveles).
 - Foto de comida: no estima porción, falla con asado y la tercera cosa; lo aprendido queda solo en ese celu.
 - Lesiones: cambiar a mano un ejercicio por uno que carga la zona no avisa.
 - Pruebas automáticas: 192 en `npm test` (11 de SW-2; 1 de SW-3: existen todos los archivos de CORE/PICS del SW; 3 de SW-4; 9 de SW-5: escudo y Tilt; 6 de SW-6: VIP; SW-7: figura única por ejercicio y QA del catálogo; total 251) (7 de la Etapa 4: edad, casilla de términos, hojas de seguridad; 19 de SW-1: copias mal formadas o con código inyectado, editar rutina 5/3/1, velocidad) y en GitHub Actions ("Pruebas", cada push). Cubren niveles, generador, técnica/detalle de los 154 ejercicios y, desde la Etapa 3, la sync y las copias: 20 pruebas con nube y celus de mentira (`tests/nube.js`). Todavía no cubren nutrición, pantallas fuera del detalle de ejercicio ni humo con navegador.
@@ -233,3 +233,4 @@ App Store (necesita Mac + cuenta Apple); widget de inicio; Apple Health y Google
 | 2026-11-22 | 4 (SW-5) | Modo ahorro. Escudo propio "disco de pesas" en toda la app (31 lugares vía badge(), incluida la carta compartida), brillo que sigue el celu (solo visibles, ~30 fps, 1,5 ms por cuadro). Movimiento con el celu siempre (Tilt): en iPhone se activa solo tras el primer "sí"; respeta reducir movimiento. Revisó diseno (0 Críticos/Altos; Bajo y nota de rendimiento arreglados). 201/201; v90 publicada (dadaf9d, CI verde). | Probar Tilt en iPhone real. |
 | 2026-11-22 | 4 (SW-6) | Modo ahorro. Cuenta del dueño VIP: app_metadata.vip=true en una sola fila de auth.users (con OK de Juan); isVip() en el cliente; colores Oro/Élite desbloqueados con VIP. Revisó seg (0 Críticos/Altos, 2 Bajos). 207/207; v91 publicada (483e88c, CI verde). | 2 Bajos de VIP (ver Estado → Bugs). |
 | 2026-11-23 | 4 (SW-7) | Revisión ejercicio por ejercicio (la idea guardada): 116 revisados + 38 nuevos = 154, cada uno con nombre, equipo, músculos, técnica y figura propia (bancos con su ángulo, barra/mancuernas/máquinas/poleas en su lugar; extensión de cuádriceps en su máquina). Buscador por palabras y sinónimos; músculo nuevo tibial anterior; extensión de cuádriceps recalibrada (puede bajar un poco ese nivel). Revisaron diseno por lote y qa (0 Críticos/Altos; Medios arreglados). 251/251; v92 publicada (f1103c0, CI verde); en la publicada los 154 detalles se arman sin errores y las hojas reales abren con figura. | 3 pendientes de figuras/tibial (ver Estado → Bugs). |
+| 2026-11-23 | 4 (SW-8) | Modo ahorro. Aperturas con mancuernas vistas desde los pies del banco (ya no se parecen al press ni a las laterales); curl martillo sin tocar la cabeza. Revisó diseno (ok). 251/251; v93 publicada (CI verde). | Zona del tibial siempre gris en Nivel (decide Juan). |
