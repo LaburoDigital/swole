@@ -641,7 +641,8 @@ const P7={
   x_dbpress:{eq:['tbench','floor'],x:{db:1},A:{t:0,th:30,sh:95,ua:270,fa:266,at:['n',32,79],b:'a'},B:{t:0,th:30,sh:95,ua:49.4,fa:270,ls:{ua:.66},at:['n',32,79],b:'a'}},
   x_incdbpress:{eq:['tbench','floor'],x:{db:1},A:{t:30,th:10,sh:92,ua:266,fa:268,at:['p',66,88],b:'a'},B:{t:30,th:10,sh:92,ua:118,fa:288,ls:{ua:.7},at:['p',66,88],b:'a'}},
   /* aperturas: el brazo se abre hacia el costado (se ve corto, en perspectiva) con el codo apenas doblado */
-  x_dbfly:{eq:['tbench','floor'],x:{hold:['a','a2']},A:{t:0,th:30,sh:95,ua:270,fa:268,ua2:272,fa2:270,at:['n',32,79]},B:{t:0,th:30,sh:95,ua:92,fa:96,ua2:268,fa2:264,ls:{ua:.16,fa:.12},at:['n',32,79]}},
+  /* SW-8: vistas desde los pies del banco: acostado (torso en escorzo), arriba las mancuernas juntas sobre el pecho, abajo los brazos abiertos en arco con los codos apenas doblados, sin pasar la línea del banco */
+  x_dbfly:{fr:1,eq:['floor'],x:{hold:['aL','aR'],blocks:[[46,79,28,6],[57,85,6,25]]},A:{tk:.45,uaL:264,faL:292,uaR:276,faR:248,thL:115,shL:95,thR:65,shR:85,ls:{th:.6,sh:.85},at:['n',60,70]},B:{tk:.45,uaL:205,faL:162,uaR:335,faR:18,thL:115,shL:95,thR:65,shR:85,ls:{th:.6,sh:.85},at:['n',60,70]}},
   /* cruces en polea, de frente: de brazos abiertos a juntar las manos adelante */
   x_cablefly:{fr:1,eq:['floor','cables'],x:{cy:14},A:Object.assign({uaL:205,faL:200,uaR:335,faR:340,at:['p',60,71]},BK_LEGS),B:Object.assign({uaL:60,faL:20,uaR:120,faR:160,at:['p',60,71]},BK_LEGS)},
   /* pec deck, de frente y sentado: codos a la altura de los hombros, se cierran adelante */
@@ -691,7 +692,7 @@ const P7={
   /* curl con mancuernas: alternado, mientras una sube la otra baja */
   x_dbcurl:{eq:['floor'],x:{hold:['a','a2']},A:Object.assign({},ST,{ua:96,fa:92,ua2:94,fa2:304}),B:Object.assign({},ST,{ua:96,fa:304,ua2:94,fa2:92})},
   /* martillo: la mancuerna parada (palmas enfrentadas) */
-  x_hammer:{eq:['floor'],x:{db:1,dbRot:90},A:Object.assign({},ST,{ua:95,fa:90,b:'a'}),B:Object.assign({},ST,{ua:95,fa:299,b:'a'})},
+  x_hammer:{eq:['floor'],x:{db:1,dbRot:90},A:Object.assign({},ST,{ua:95,fa:90,b:'a'}),B:Object.assign({},ST,{ua:90,fa:310,b:'a'})} /* SW-8: arriba el antebrazo un poco adelante: la mancuerna queda a 2,4 de la cabeza */,
   /* curl en polea baja: igual de prolijo que con barra, el cable sale de abajo adelante */
   x_cablecurl:{eq:['floor'],A:Object.assign({},ST,{ua:95,fa:88,at:['f',50,108],c:[60,108]}),B:Object.assign({},ST,{ua:95,fa:300,at:['f',50,108],c:[60,108]})},
   /* banco Scott: sentado, el brazo apoyado en la almohadilla inclinada; solo se mueve el antebrazo */
