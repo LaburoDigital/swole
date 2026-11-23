@@ -1759,3 +1759,13 @@ html.touring .nav,html.touring .top{z-index:auto}
 .badge .bdg-sh{transform:translate(calc(var(--gx,0) * -14px),calc(var(--gy,0) * -10px))}
 @media (prefers-reduced-motion:reduce){.badge .bdg-sh{transform:none}}
 .calm .badge .bdg-sh{transform:none}
+/* SW-7: equipo nuevo de las figuras (banco que sigue al torso, palancas y rodillos de máquinas, mancuernas) */
+.tq-pad{stroke:color-mix(in srgb,var(--mut) 70%,transparent);stroke-width:6;stroke-linecap:round}
+.tq-lv{stroke:var(--mut);stroke-width:3.5;stroke-linecap:round}
+.tq-roll{fill:color-mix(in srgb,var(--mut) 55%,transparent);stroke:var(--mut);stroke-width:1.5}
+/* los cables de poleas y anillas no tenían estilo y no se veían */
+.tq-cab{stroke:color-mix(in srgb,var(--mut) 85%,transparent);stroke-width:1.6;stroke-linecap:round}
+.tq-dbh{fill:var(--mut)}
+.tq-kb{fill:var(--acc);stroke:color-mix(in srgb,var(--acc) 60%,#000);stroke-width:1.5}
+.tq-ball{fill:var(--acc);stroke:color-mix(in srgb,var(--acc) 60%,#000);stroke-width:1.5}
+.tq-wall{fill:var(--text);opacity:.09}

@@ -16,7 +16,7 @@ function cardStats(){
     FUE:top3.length?top3.reduce((s,x)=>s+x,0)/top3.length:null,
     EMP:best(x=>has(x,['pecho','hombros','triceps'])),
     TIR:best(x=>has(x,['dorsales','biceps','trapecio','antebrazos'])),
-    PIE:best(x=>has(x,['cuadriceps','gluteos','isquios','gemelos','aductores'])),
+    PIE:best(x=>has(x,['cuadriceps','gluteos','isquios','gemelos','tibial','aductores'])),
     COR:best(x=>has(x,['abs','oblicuos','lumbar'])),
     CAL:best(x=>!!x.ex.sk)
   };
@@ -221,7 +221,7 @@ function recovery(){
   db.logs.forEach(l=>{const t=parseK(l.date).getTime()+18*36e5;l.entries.forEach(en=>{const ex=exById(en.ex);if(!ex)return;const n=en.sets.filter(s=>!s.w).length;if(n<2)return;ex.p.forEach(k=>{if(!last[k]||t>last[k])last[k]=t;});});});
   /* tu semana: partido de ayer = piernas recién trabajadas; práctica = carga media */
   [1,2].forEach(back=>{const dk=addDays(today(),-back),di=dayInfo(parseK(dk).getDay());if(!di.type)return;
-    const t=parseK(dk).getTime()+20*36e5-(di.type==='prac'?24*36e5:0),ms=['cuadriceps','isquios','gluteos','gemelos','aductores'].concat(['rugby','combate'].includes(di.sport)&&di.type==='match'?['trapecio','hombros','pecho','dorsales']:[]);
+    const t=parseK(dk).getTime()+20*36e5-(di.type==='prac'?24*36e5:0),ms=['cuadriceps','isquios','gluteos','gemelos','tibial','aductores'].concat(['rugby','combate'].includes(di.sport)&&di.type==='match'?['trapecio','hombros','pecho','dorsales']:[]);
     ms.forEach(k=>{if(!last[k]||t>last[k])last[k]=t;});});
   const st={},hrs={};
   Object.keys(MUSC).forEach(k=>{const hh=last[k]?Math.max(0,(now-last[k])/36e5):Infinity;hrs[k]=hh;st[k]=hh<30?'red':hh<54?'yellow':'green';});

@@ -87,7 +87,7 @@ function cmdItems(){
     {g:'Pantallas',i:'user',n:'Perfil y cuenta',a:'tab',v:'perfil',k:'perfil cuenta ajustes sincronizar'}
   ];
   db.routines.forEach(r=>A.push({g:'Rutinas',i:'play',n:'Empezar '+r.name,a:'startR',v:r.id,k:'rutina '+r.name}));
-  allEx().filter(e=>!e.hidden).forEach(e=>A.push({g:'Ejercicios',i:e.sk?'acro':'dumb',n:shortN(e.n),a:'exInfo',v:e.id,k:e.eq+' '+e.p.map(k=>MUSC[k]||k).join(' '),ex:e}));
+  allEx().filter(e=>!e.hidden).forEach(e=>A.push({g:'Ejercicios',i:e.sk?'acro':'dumb',n:shortN(e.n),a:'exInfo',v:e.id,k:e.eq+' '+e.p.map(k=>MUSC[k]||k).join(' ')+(e.kw?' '+e.kw:''),ex:e}));
   return A;
 }
 function cmdFilter(q){
@@ -298,17 +298,17 @@ function csvHTML(m){
    h cabeza, n cuello/hombro, p cadera, k rodilla, f pie, e codo, a mano; k2/f2 y e2/a2 = la otra pierna/brazo (más tenue); b = barra */
 const TECH={
   invrow:{eq:['lowbar'],A:{h:[30,66],n:[40,63],p:[72,86],k:[88,97],f:[104,108],e:[38,55],a:[36,46]},B:{h:[29,53],n:[39,52],p:[71,79],k:[88,94],e:[52,53]}},
-  flfull:{eq:['pullbar'],A:{h:[32,36],n:[42,34],p:[76,35],k:[94,36],f:[110,37],e:[41,23],a:[40,12]},B:{p:[76,36],k:[94,37],f:[110,39]}},
+  flfull:{eq:['pullbar'],A:{h:[32,36],n:[42,34],p:[76,35],k:[94,36],f:[110,37],e:[45,23],a:[48,12]},B:{p:[76,36],k:[94,37],f:[110,39]}},
   /* variantes de habilidades: cada una con su postura (encogida, avanzada, abierta...) */
-  fltuck:{eq:['pullbar'],A:{h:[32,36],n:[42,34],p:[72,36],k:[58,23],f:[74,25],e:[41,23],a:[40,12]},B:{p:[72,37],k:[58,24],f:[74,26]}},
-  fladv:{eq:['pullbar'],A:{h:[32,36],n:[42,34],p:[76,35],k:[78,20],f:[94,21],e:[41,23],a:[40,12]},B:{p:[76,36],k:[78,21],f:[94,22]}},
-  flone:{eq:['pullbar'],A:{h:[32,36],n:[42,34],p:[76,35],k:[94,35],f:[110,35],k2:[78,21],f2:[94,22],e:[41,23],a:[40,12]},B:{p:[76,36],k:[94,37],f:[110,38]}},
-  flstr:{eq:['pullbar'],A:{h:[32,36],n:[42,34],p:[76,35],k:[94,36],f:[110,37],k2:[92,29],f2:[107,24],e:[41,23],a:[40,12]},B:{p:[76,36],k:[94,37],f:[110,39]}},
+  fltuck:{eq:['pullbar'],A:{h:[32,36],n:[42,34],p:[72,36],k:[58,23],f:[74,25],e:[45,23],a:[48,12]},B:{p:[72,37],k:[58,24],f:[74,26]}},
+  fladv:{eq:['pullbar'],A:{h:[32,36],n:[42,34],p:[76,35],k:[78,20],f:[94,21],e:[45,23],a:[48,12]},B:{p:[76,36],k:[78,21],f:[94,22]}},
+  flone:{eq:['pullbar'],A:{h:[32,36],n:[42,34],p:[76,35],k:[94,35],f:[110,35],k2:[78,21],f2:[94,22],e:[45,23],a:[48,12]},B:{p:[76,36],k:[94,37],f:[110,38]}},
+  flstr:{eq:['pullbar'],A:{h:[32,36],n:[42,34],p:[76,35],k:[94,36],f:[110,37],k2:[92,29],f2:[107,24],e:[45,23],a:[48,12]},B:{p:[76,36],k:[94,37],f:[110,39]}},
   skincat:{eq:['pullbar'],A:{h:[60,30],n:[60,40],p:[60,70],k:[56,86],f:[66,98],e:[60,26],a:[60,12]},B:{h:[40,44],n:[48,40],p:[74,44],k:[58,56],f:[74,60],e:[54,26],a:[60,12]}},
-  bltuck:{eq:['pullbar'],A:{h:[30,40],n:[40,37],p:[70,39],k:[56,51],f:[72,53],e:[46,24],a:[48,12]},B:{p:[70,40],k:[56,52],f:[72,54]}},
-  bladv:{eq:['pullbar'],A:{h:[30,40],n:[40,37],p:[76,38],k:[76,53],f:[92,53],e:[46,24],a:[48,12]},B:{p:[76,39],k:[76,54],f:[92,54]}},
-  blstr:{eq:['pullbar'],A:{h:[30,40],n:[40,37],p:[76,38],k:[94,38],f:[110,38],k2:[92,45],f2:[106,50],e:[46,24],a:[48,12]},B:{p:[76,39],k:[94,39],f:[110,40]}},
-  blfull:{eq:['pullbar'],A:{h:[30,40],n:[40,37],p:[76,38],k:[94,38],f:[110,38],e:[46,24],a:[48,12]},B:{p:[76,39],k:[94,40],f:[110,41]}},
+  bltuck:{eq:['pullbar'],A:{h:[30,29],n:[40,26],p:[70,28],k:[56,40],f:[72,42],e:[48.5,19],a:[57,12]},B:{p:[70,29],k:[56,41],f:[72,43]}},
+  bladv:{eq:['pullbar'],A:{h:[30,29],n:[40,26],p:[76,27],k:[76,42],f:[92,42],e:[48.5,19],a:[57,12]},B:{p:[76,28],k:[76,43],f:[92,43]}},
+  blstr:{eq:['pullbar'],A:{h:[30,29],n:[40,26],p:[76,27],k:[94,27],f:[110,27],k2:[92,34],f2:[106,39],e:[48.5,19],a:[57,12]},B:{p:[76,28],k:[94,28],f:[110,29]}},
+  blfull:{eq:['pullbar'],A:{h:[30,29],n:[40,26],p:[76,27],k:[94,27],f:[110,27],e:[48.5,19],a:[57,12]},B:{p:[76,28],k:[94,29],f:[110,30]}},
   crow:{eq:['floor'],A:{h:[28,98],n:[38,92],p:[60,78],k:[47,92],f:[66,96],e:[44,100],a:[42,110]},B:{h:[27,99],p:[60,77],k:[47,91],f:[66,95]}},
   pllean:{eq:['floor'],A:{h:[22,82],n:[31,86],p:[66,96],k:[84,102],f:[102,108],e:[37,98],a:[42,110]},B:{h:[18,81],n:[27,85],e:[35,97]}},
   pltuck:{eq:['floor'],A:{h:[34,90],n:[44,92],p:[70,90],k:[56,100],f:[72,102],e:[43,101],a:[42,110]},B:{p:[70,91],k:[56,101],f:[72,103]}},
@@ -399,7 +399,7 @@ Object.assign(TECH,{
     cues:['Subí la pelota bien arriba','Tirala al piso con todo el cuerpo','Doblá las piernas al lanzar','Agarrala del rebote y repetí'],err:'Lanzar solo con los brazos'},
   carry:{eq:['floor'],A:{h:[61,26],n:[60,36],p:[60,66],k:[66,88],f:[70,110],k2:[54,88],f2:[50,110],e:[60,51],a:[60,66],b:[60,68]},B:{h:[61,28],n:[60,38],p:[60,68],k:[54,88],f:[50,110],k2:[66,88],f2:[70,110],e:[60,53],a:[60,68],b:[60,70]},
     cues:['Peso pesado en cada mano','Pecho arriba y hombros atrás','Pasos cortos y firmes','Abdomen apretado'],err:'Encorvarse o inclinarse para un lado'},
-  vjump:{eq:['floor'],A:{h:[64,46],n:[62,56],p:[48,80],k:[64,92],f:[58,110],e:[52,70],a:[44,82]},B:{h:[61,14],n:[60,24],p:[59,54],k:[60,74],f:[60,94],e:[62,12],a:[63,2]},
+  vjump:{eq:['floor'],A:{h:[64,46],n:[62,56],p:[48,80],k:[64,92],f:[58,110],e:[52,70],a:[44,82]},B:{h:[61,14],n:[60,24],p:[59,54],k:[60,74],f:[60,94],e:[70,18],a:[80,10]},
     cues:['Bajada rápida a un cuarto de sentadilla','Usá los brazos: tiralos hacia arriba','Extendé tobillos, rodillas y cadera juntos','Caé suave, con las rodillas dobladas'],err:'Bajar demasiado lento (se pierde el rebote)'},
   broad:{eq:['floor'],A:{h:[44,54],n:[38,62],p:[22,84],k:[38,94],f:[30,110],e:[28,74],a:[20,82]},B:{h:[98,54],n:[92,62],p:[78,86],k:[96,94],f:[88,110],e:[100,72],a:[108,66]},
     cues:['Balanceá los brazos atrás y adelante','Empujá con todo hacia adelante y arriba','Caé con los dos pies y aguantá la posición','Descansá bien entre saltos'],err:'Caer con las rodillas hacia adentro'},
@@ -413,6 +413,8 @@ Object.assign(TECH,{
 /* qué figura usa cada ejercicio */
 function techOf(ex){
   if(!ex)return null;const id=ex.id,f=ex.sk&&ex.sk.f;
+  /* SW-7: cada ejercicio con su propia figura (XT, más abajo) */
+  if(XT[id]&&XT[id].k&&TECH[XT[id].k])return XT[id].k;
   const SKX={tuckfl:'fltuck',advfl:'fladv',onelegfl:'flone',straddlefl:'flstr',fullfl:'flfull',austrow:'invrow',airsquat:'airsq',skincat:'skincat',tuckbl:'bltuck',advbl:'bladv',straddlebl:'blstr',fullbl:'blfull',
     crow:'crow',pllean:'pllean',tuckpl:'pltuck',advpl:'pladv',straddlepl:'plstr',fullpl:'planche',tucklsit:'lsittuck',onelegl:'lsitone',lsit:'lsit',vsit:'vsit',
     pikepush:'pike',wallhs:'wallhs',freehs:'hs',hspu:'hspu',freehspu:'freehspu',vflag:'vflag',tuckflag:'flagtuck',straddleflag:'flagstr',flag:'flag',russiandip:'russiandip',impdip:'russiandip',boxpistol:'boxpistol',
@@ -430,7 +432,7 @@ function techOf(ex){
     russian:'russian',flag:'flag',spansq:'squat',tibraise:'calf',slcalf:'calf',slbal:'calf',kneewall:'lunge',slbridge:'thrust',sidepl:'sideplank',birddog:'plank',curlup:'crunch',biering:'hinge',deadhang:'hang',extrot:'pallof',wallslide:'press',cmj:'vjump',broadjump:'broad',pogo:'calf',skater:'lunge',sprint:'sprint',boxjump:'jump',nordic:'nordic',copenhagen:'sideplank',pallof:'pallof',medslam:'slam',farmer:'carry',neckiso:'neck'};
   if(M[id])return M[id];
   /* ejercicios propios: la figura del músculo principal */
-  const BYM={pecho:'bench',dorsales:'row',trapecio:'shrug',hombros:'press',biceps:'curl',triceps:'pushdown',antebrazos:'wrist',cuadriceps:'squat',isquios:'legcurl',gluteos:'thrust',gemelos:'calf',aductores:'sideplank',lumbar:'hinge',abs:'crunch',oblicuos:'russian'};
+  const BYM={pecho:'bench',dorsales:'row',trapecio:'shrug',hombros:'press',biceps:'curl',triceps:'pushdown',antebrazos:'wrist',cuadriceps:'squat',isquios:'legcurl',gluteos:'thrust',gemelos:'calf',tibial:'x_tibraise',aductores:'sideplank',lumbar:'hinge',abs:'crunch',oblicuos:'russian'};
   return (ex.p&&BYM[ex.p[0]])||'plank';
 }
 /* sentadilla sin peso: la misma postura pero sin la barra */
@@ -441,11 +443,15 @@ if(TECH.squat&&!TECH.airsq){const nb=o=>{const c=Object.assign({},o);delete c.b;
    la mano en la barra...). t torso (cuello→cadera), th muslo, sh pierna, ua brazo, fa antebrazo; th2/sh2/ua2/fa2 la otra pierna o brazo.
    b: dónde va el peso (disco o mancuerna); c: anclaje de la polea. */
 const PZ=(()=>{
-  const L={t:30,hd:9,th:20,sh:19,ua:14,fa:13},dir=a=>[Math.cos(a*Math.PI/180),Math.sin(a*Math.PI/180)],go=(p,a,l)=>{const d=dir(a);return[p[0]+d[0]*l,p[1]+d[1]*l];};
+  const LB={t:30,hd:9,th:20,sh:19,ua:14,fa:13,ft:8},dir=a=>[Math.cos(a*Math.PI/180),Math.sin(a*Math.PI/180)],go=(p,a,l)=>{const d=dir(a);return[p[0]+d[0]*l,p[1]+d[1]*l];};
   return s=>{
-    const P={n:[0,0]};P.h=go(P.n,s.t+180,L.hd);P.p=go(P.n,s.t,L.t);P.k=go(P.p,s.th,L.th);P.f=go(P.k,s.sh,L.sh);P.e=go(P.n,s.ua,L.ua);P.a=go(P.e,s.fa,L.fa);
-    if(s.th2!=null){P.k2=go(P.p,s.th2,L.th);P.f2=go(P.k2,s.sh2!=null?s.sh2:s.th2,L.sh);}
-    if(s.ua2!=null){P.e2=go(P.n,s.ua2,L.ua);P.a2=go(P.e2,s.fa2!=null?s.fa2:s.ua2,L.fa);}
+    /* ls: escala de un tramo para dibujar en perspectiva (ej. el brazo que se abre hacia el costado en las aperturas) */
+    const L=s.ls?Object.fromEntries(Object.entries(LB).map(([k,v])=>[k,v*(s.ls[k]||1)])):LB,L2=k=>s.ls&&s.ls[k+'2']!=null?LB[k]*s.ls[k+'2']:L[k]; /* L2: largo propio del brazo o la pierna de atrás */
+    const P={n:[0,0]};P.h=go(P.n,s.hd!=null?s.hd:s.t+180,L.hd); /* hd: ángulo propio de la cabeza */P.p=go(P.n,s.t,L.t);P.k=go(P.p,s.th,L.th);P.f=go(P.k,s.sh,L.sh);P.e=go(P.n,s.ua,L.ua);P.a=go(P.e,s.fa,L.fa);
+    if(s.th2!=null){P.k2=go(P.p,s.th2,L2('th'));P.f2=go(P.k2,s.sh2!=null?s.sh2:s.th2,L2('sh'));}
+    /* ft: el pie (tobillo → punta), para que se vea apoyado en el piso o en el borde del escalón */
+    if(s.ft!=null)P.t=go(P.f,s.ft,L.ft);if(s.ft2!=null&&P.f2)P.t2=go(P.f2,s.ft2,L.ft);
+    if(s.ua2!=null){P.e2=go(P.n,s.ua2,L2('ua'));P.a2=go(P.e2,s.fa2!=null?s.fa2:s.ua2,L2('fa'));}
     const an=P[s.at[0]],dx=s.at[1]-an[0],dy=s.at[2]-an[1],o={},r=v=>Math.round(v*10)/10;
     for(const k in P)o[k]=[r(P[k][0]+dx),r(P[k][1]+dy)];
     if(s.b){const q=typeof s.b==='string'?o[s.b]:s.b,bd=s.bd||[0,0];o.b=[r(q[0]+bd[0]),r(q[1]+bd[1])];}
@@ -460,7 +466,7 @@ const DIP_A={t:95,th:100,sh:150,ua:95,fa:90,at:['a',60,63]},DIP_B={t:75,th:95,sh
 const HS_A={t:270,th:270,sh:270,ua:90,fa:90,at:['a',60,108]};
 const POSE={
   squat:{A:Object.assign({},ST,{ua:150,fa:300,b:'n',bd:[-3,-2]}),B:{t:125,th:5,sh:100,ua:150,fa:300,at:['f',60,108],b:'n',bd:[-3,-2]}},
-  airsq:{A:ST,B:{t:125,th:5,sh:100,ua:10,fa:0,at:['f',60,108]}},
+  airsq:{A:Object.assign({},ST,{ft:0}),B:{t:125,th:5,sh:100,ft:0,ua:10,fa:0,at:['f',60,108]}},
   hinge:{A:Object.assign({},ST,{ua:92,fa:90,b:'a',bd:[0,2]}),B:{t:150,th:75,sh:100,ua:90,fa:90,at:['f',62,108],b:'a',bd:[0,2]}},
   thrust:{A:{t:28,th:-28,sh:95,ua:180,fa:170,at:['n',28,88],b:'p',bd:[0,-6]},B:{t:0,th:-3,sh:110,ua:180,fa:170,at:['n',28,88],b:'p',bd:[0,-6]}},
   bench:{A:{t:0,th:10,sh:85,ua:275,fa:270,at:['n',32,79],b:'a'},B:{t:0,th:10,sh:85,ua:110,fa:290,at:['n',32,79],b:'a'}},
@@ -481,7 +487,7 @@ const POSE={
   wallhs:{A:Object.assign({},HS_A,{t:274,th:276,sh:276,at:['a',54,108]}),B:Object.assign({},HS_A,{t:275,th:277,sh:278,at:['a',54,108]})},
   hspu:{A:Object.assign({},HS_A,{t:274,th:276,sh:276,at:['a',54,108]}),B:{t:276,th:277,sh:278,ua:40,fa:130,at:['a',54,108]}},
   freehspu:{A:HS_A,B:{t:272,th:272,sh:272,ua:40,fa:130,at:['a',60,108]}},
-  pistol:{A:Object.assign({},ST,{th2:65,sh2:80}),B:{t:115,th:20,sh:110,th2:-5,sh2:-5,ua:0,fa:0,at:['f',58,108]}},
+  pistol:{A:Object.assign({},ST,{th2:65,sh2:80,ft:0,ft2:10}),B:{t:115,th:20,sh:110,th2:-5,sh2:-5,ft:0,ft2:-70,ua:0,fa:0,at:['f',58,108]}},
   /* variantes del árbol: cada una con su dibujo */
   kneepush:{A:{t:30,th:30,sh:-25,ua:90,fa:90,at:['a',28,108]},B:{t:20,th:22,sh:-25,ua:45,fa:125,at:['a',28,108]}},
   diamond:{A:PU_A,B:Object.assign({},PU_B,{ua:70,fa:112})},
@@ -495,15 +501,15 @@ const POSE={
   benchdip:{A:{t:88,th:0,sh:90,ua:100,fa:95,at:['a',30,83]},B:{t:88,th:-8,sh:95,ua:150,fa:60,at:['a',30,83]}},
   ringdip:{A:DIP_A,B:DIP_B},
   russiandip:{A:DIP_A,B:{t:80,th:100,sh:150,ua:110,fa:0,at:['a',72,63]}},
-  shrimp:{A:Object.assign({},ST,{th2:100,sh2:200,ua:20,fa:10}),B:{t:110,th:25,sh:105,th2:110,sh2:190,ua:15,fa:5,at:['f',60,108]}},
-  dragon:{A:Object.assign({},ST,{th2:110,sh2:120,ua:10,fa:0}),B:{t:115,th:20,sh:110,th2:120,sh2:175,ua:0,fa:0,at:['f',60,108]}},
-  boxpistol:{A:Object.assign({},ST,{th2:65,sh2:80,ua:0,fa:0}),B:{t:105,th:10,sh:105,th2:-5,sh2:-5,ua:0,fa:0,at:['f',64,108]}}
+  shrimp:{A:Object.assign({},ST,{th2:100,sh2:200,ft:0,ua:20,fa:10}),B:{t:110,th:25,sh:105,ft:0,th2:110,sh2:190,ua:15,fa:5,at:['f',60,108]}},
+  dragon:{A:Object.assign({},ST,{th2:110,sh2:120,ft:0,ua:10,fa:0}),B:{t:115,th:20,sh:110,ft:0,th2:120,sh2:175,ua:0,fa:0,at:['f',60,108]}},
+  boxpistol:{A:Object.assign({},ST,{th2:65,sh2:80,ft:0,ft2:10,ua:0,fa:0}),B:{t:105,th:10,sh:105,ft:0,ft2:-70,th2:-5,sh2:-5,ua:0,fa:0,at:['f',64,108]}}
 };
 /* figuras nuevas: equipo y claves propias */
 const NEWTQ={
   kneepush:{eq:['floor'],cues:['Rodillas apoyadas, cuerpo recto de rodillas a cabeza','Manos un poco más abiertas que los hombros','Bajá el pecho hasta casi tocar el piso','Empujá sin aflojar la cadera'],err:'Sacar la cola para arriba'},
   diamond:{eq:['floor'],cues:['Manos juntas formando un rombo','Codos pegados al cuerpo al bajar','Cuerpo en línea recta','Empujá con los tríceps'],err:'Abrir los codos hacia afuera'},
-  archerpush:{eq:['floor'],cues:['Manos bien abiertas','Bajás hacia un lado, el otro brazo queda estirado','Cuerpo recto, sin rotar','Alterná los lados'],err:'Doblar el brazo que tiene que quedar estirado'},
+  archerpush:{eq:['floor'],cues:['Manos bien abiertas','Bajá hacia un lado, el otro brazo queda estirado','Cuerpo recto, sin rotar','Alterná los lados'],err:'Doblar el brazo que tiene que quedar estirado'},
   pppush:{eq:['floor'],cues:['Manos a la altura de la cintura, dedos hacia atrás','Hombros bien adelante de las manos','Cuerpo rígido como una tabla','Bajá sin perder la inclinación'],err:'Volver los hombros atrás de las manos'},
   oapush:{eq:['floor'],cues:['Piernas abiertas para equilibrar','La otra mano en la espalda','Bajá sin rotar la cadera','Empujá con el pecho y el tríceps'],err:'Girar el cuerpo para ayudarte'},
   lpullup:{eq:['pullbar'],cues:['Piernas rectas a 90° todo el recorrido','Subí hasta pasar el mentón','Sin balancear las piernas','Bajá controlado'],err:'Dejar caer las piernas al subir'},
@@ -520,11 +526,13 @@ const NEWTQ={
 Object.keys(NEWTQ).forEach(k=>{if(!TECH[k])TECH[k]=NEWTQ[k];});
 Object.keys(POSE).forEach(k=>{const T=TECH[k];if(!T)return;T.A=PZ(POSE[k].A);T.B=PZ(POSE[k].B);});
 /* figura de espaldas: hombros y cadera con ancho, brazos y piernas de los dos lados (para los ejercicios que de costado no se distinguen) */
-const FZ=(()=>{const L={ua:14,fa:13,th:20,sh:19},dir=a=>[Math.cos(a*Math.PI/180),Math.sin(a*Math.PI/180)],go=(p,a,l)=>{const d=dir(a);return[p[0]+d[0]*l,p[1]+d[1]*l];};
-  return s=>{const P={n:[0,0],h:[0,-9],p:[0,30],sL:[-9,3],sR:[9,3],hL:[-5,30],hR:[5,30]};
-    P.eL=go(P.sL,s.uaL,L.ua);P.aL=go(P.eL,s.faL,L.fa);P.eR=go(P.sR,s.uaR,L.ua);P.aR=go(P.eR,s.faR,L.fa);
-    P.kL=go(P.hL,s.thL,L.th);P.fL=go(P.kL,s.shL,L.sh);P.kR=go(P.hR,s.thR,L.th);P.fR=go(P.kR,s.shR,L.sh);
-    const an=P[s.at[0]],dx=s.at[1]-an[0],dy=s.at[2]-an[1],o={},r=v=>Math.round(v*10)/10;for(const k in P)o[k]=[r(P[k][0]+dx),r(P[k][1]+dy)];return o;};})();
+const FZ=(()=>{const LB={ua:14,fa:13,th:20,sh:19},dir=a=>[Math.cos(a*Math.PI/180),Math.sin(a*Math.PI/180)],go=(p,a,l)=>{const d=dir(a);return[p[0]+d[0]*l,p[1]+d[1]*l];};
+  return s=>{const L=s.ls?Object.fromEntries(Object.entries(LB).map(([k,v])=>[k,v*(s.ls[k]||1)])):LB,S=(k,sd)=>s.ls&&s.ls[k+sd]!=null?LB[k]*s.ls[k+sd]:L[k]; /* S: largo por lado (ls.faR, ls.thR) */ /* ls: perspectiva (muslos hacia adelante al estar sentado) */
+    const tw=s.tw||0,sw=s.sw||1,tk=s.tk||1; /* tw/sw: el torso que gira (giro ruso); tk: torso inclinado atrás, se ve más corto */
+    const P={n:[tw,0],h:[tw,-9],p:[0,30*tk],sL:[-9*sw+tw,3],sR:[9*sw+tw,3],hL:[-5,30*tk],hR:[5,30*tk]};
+    P.eL=go(P.sL,s.uaL,S('ua','L'));P.aL=go(P.eL,s.faL,S('fa','L'));P.eR=go(P.sR,s.uaR,S('ua','R'));P.aR=go(P.eR,s.faR,S('fa','R'));
+    P.kL=go(P.hL,s.thL,S('th','L'));P.fL=go(P.kL,s.shL,S('sh','L'));P.kR=go(P.hR,s.thR,S('th','R'));P.fR=go(P.kR,s.shR,S('sh','R'));
+    const an=P[s.at[0]],dx=s.at[1]-an[0],dy=s.at[2]-an[1],o={},r=v=>Math.round(v*10)/10;for(const k in P)o[k]=[r(P[k][0]+dx),r(P[k][1]+dy)];if(s.b)o.b=typeof s.b==='string'?o[s.b]:s.b;return o;};})();
 const BK_LEGS={thL:96,shL:92,thR:84,shR:88};
 const BK={
   pullup:{A:Object.assign({uaL:232,faL:252,uaR:308,faR:288,at:['aL',41,12]},BK_LEGS),B:Object.assign({uaL:168,faL:282,uaR:12,faR:258,at:['aL',41,12]},BK_LEGS)},
@@ -537,8 +545,9 @@ function techSVG(k,stat){
   const T=TECH[k];if(!T)return '';
   /* que la figura se lea: el brazo que cae sobre el cuerpo se corre un poco adelante, y si la pose no trae el brazo y la pierna de atrás, se dibujan levemente corridos */
   const A0=Object.assign({},T.A),B0=Object.assign({},T.A,T.B),dseg=(q,a,b)=>{const dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((q[0]-a[0])*dx+(q[1]-a[1])*dy)/L));return Math.hypot(q[0]-a[0]-t*dx,q[1]-a[1]-t*dy);};
-  const armOn=A0.e&&A0.n&&A0.p&&(dseg(A0.e,A0.n,A0.p)<5||(A0.a&&dseg(A0.a,A0.n,A0.p)<5)),mv=(p,dx)=>p&&[p[0]+dx,p[1]];
-  const fix=P=>{if(armOn){P.e=mv(P.e,5);P.a=mv(P.a,5);}if(!T.A.k2&&P.k&&P.f&&P.p){P.k2=mv(P.k,-4);P.f2=mv(P.f,-4);}if(!T.A.e2&&P.e&&P.a&&P.n){P.e2=mv(P.e,-4);P.a2=mv(P.a,-4);}return P;};
+  /* el brazo se corre adelante solo en la posición donde de verdad tapa el torso (antes se decidía con A y se aplicaba también a B) */
+  const armOver=P=>P.e&&P.n&&P.p&&(dseg(P.e,P.n,P.p)<5||(P.a&&dseg(P.a,P.n,P.p)<5)),mv=(p,dx)=>p&&[p[0]+dx,p[1]];
+  const fix=P=>{if(armOver(P)){const inHand=P.b&&P.a&&Math.hypot(P.b[0]-P.a[0],P.b[1]-P.a[1])<10;P.e=mv(P.e,5);P.a=mv(P.a,5);if(inHand)P.b=mv(P.b,5);} /* el peso que va en la mano se corre con ella */if(!T.A.k2&&P.k&&P.f&&P.p){P.k2=mv(P.k,-4);P.f2=mv(P.f,-4);if(P.t)P.t2=mv(P.t,-4);}if(!T.A.e2&&P.e&&P.a&&P.n){P.e2=mv(P.e,-4);P.a2=mv(P.a,-4);}return P;};
   const A=T.front?A0:fix(A0),B=T.front?B0:fix(B0),D='2.8s',ks='keyTimes="0;.45;.55;1" calcMode="spline" keySplines=".45 0 .3 1;0 0 1 1;.45 0 .3 1"';
   const an=(attr,a,b)=>stat||a===b?'':'<animate attributeName="'+attr+'" values="'+a+';'+b+';'+b+';'+a+'" dur="'+D+'" repeatCount="indefinite" '+ks+'/>';
   const bone=(p,q,w,cls)=>A[p]&&A[q]?'<line class="'+(cls||'')+'" style="stroke-width:'+w+'" x1="'+A[p][0]+'" y1="'+A[p][1]+'" x2="'+A[q][0]+'" y2="'+A[q][1]+'">'+an('x1',A[p][0],B[p][0])+an('y1',A[p][1],B[p][1])+an('x2',A[q][0],B[q][0])+an('y2',A[q][1],B[q][1])+'</line>':'';
@@ -549,23 +558,63 @@ function techSVG(k,stat){
   if(has('bench')){const th=k==='thrust',sp=k==='sideplank';const x=th?8:sp?82:16,w=th?26:sp?30:62;eq+='<rect class="tq-eq" x="'+x+'" y="'+(th?92:sp?84:83)+'" width="'+w+'" height="6" rx="3"/><line class="tq-eq" x1="'+(x+5)+'" y1="88" x2="'+(x+5)+'" y2="110"/><line class="tq-eq" x1="'+(x+w-5)+'" y1="88" x2="'+(x+w-5)+'" y2="110"/>'+fl;}
   if(has('seat'))eq+='<rect class="tq-eq" x="36" y="85" width="40" height="6" rx="3"/><rect class="tq-eq" x="34" y="44" width="6" height="44" rx="3"/><line class="tq-eq" x1="56" y1="91" x2="56" y2="110"/>'+fl;
   const lv=/^(fl|bl|skincat)/.test(k),ls=/^(lsit|vsit)/.test(k);
-  if(has('pullbar'))eq+='<line class="tq-eq" x1="'+(T.front?20:lv?24:36)+'" y1="11" x2="'+(T.front?100:lv?62:84)+'" y2="11"/>';
+  if(has('pullbar')){const by=T.barY||11;eq+='<line class="tq-eq" x1="'+(T.front?20:lv?24:36)+'" y1="'+by+'" x2="'+(T.front?100:lv?62:84)+'" y2="'+by+'"/>';} /* barY: barra más baja para que arriba entre la cabeza sobre la barra */
   if(has('lowbar'))eq+='<line class="tq-eq" x1="20" y1="46" x2="54" y2="46"/><line class="tq-eq" x1="24" y1="46" x2="24" y2="111"/>'+fl;
-  if(has('wall'))eq+='<line class="tq-eq" x1="70" y1="4" x2="70" y2="111"/>';
+  if(has('wall')){const wx=T.wallX||70;eq+='<line class="tq-eq" x1="'+wx+'" y1="4" x2="'+wx+'" y2="111"/>';}
   if(has('bars'))eq+='<line class="tq-eq" x1="'+(ls?40:44)+'" y1="'+(ls?93:63)+'" x2="'+(ls?66:76)+'" y2="'+(ls?93:63)+'"/><line class="tq-eq" x1="'+(ls?46:70)+'" y1="'+(ls?93:63)+'" x2="'+(ls?46:70)+'" y2="111"/>'+fl;
   if(has('pole'))eq+='<line class="tq-eq" x1="28" y1="6" x2="28" y2="111"/>'+fl;
   if(has('boxl'))eq+='<rect class="tq-eq" x="20" y="90" width="30" height="20" rx="3"/>';
-  if(has('rings'))eq+='<line class="tq-cab" x1="'+(A.a[0]-2)+'" y1="0" x2="'+A.a[0]+'" y2="'+A.a[1]+'">'+an('x2',A.a[0],B.a[0])+an('y2',A.a[1],B.a[1])+'</line><circle class="tq-eq" cx="'+A.a[0]+'" cy="'+A.a[1]+'" r="3.5">'+an('cx',A.a[0],B.a[0])+an('cy',A.a[1],B.a[1])+'</circle>';
+  if(has('rings'))eq+='<line class="tq-cab" x1="'+(A.a[0]-2)+'" y1="0" x2="'+A.a[0]+'" y2="'+(A.a[1]-7)+'">'+an('x2',A.a[0],B.a[0])+an('y2',A.a[1]-7,B.a[1]-7)+'</line><circle class="tq-eq" cx="'+A.a[0]+'" cy="'+(A.a[1]-3.5)+'" r="3.5">'+an('cx',A.a[0],B.a[0])+an('cy',A.a[1]-3.5,B.a[1]-3.5)+'</circle>'; /* la mano agarra el borde de abajo de la anilla */
   if(has('box'))eq+='<rect class="tq-eq" x="64" y="82" width="38" height="28" rx="3"/>'+fl;
-  if(has('cables'))eq+='<line class="tq-cab" x1="8" y1="8" x2="'+A.a[0]+'" y2="'+A.a[1]+'">'+an('x2',A.a[0],B.a[0])+an('y2',A.a[1],B.a[1])+'</line><line class="tq-cab" x1="112" y1="8" x2="'+A.a2[0]+'" y2="'+A.a2[1]+'">'+an('x2',A.a2[0],B.a2[0])+an('y2',A.a2[1],B.a2[1])+'</line>';
+  if(has('cables')){const p1=A.aL?'aL':'a',p2=A.aR?'aR':'a2',cy=T.cy||8;
+    eq+='<line class="tq-cab" x1="8" y1="'+cy+'" x2="'+A[p1][0]+'" y2="'+A[p1][1]+'">'+an('x2',A[p1][0],B[p1][0])+an('y2',A[p1][1],B[p1][1])+'</line><line class="tq-cab" x1="112" y1="'+cy+'" x2="'+A[p2][0]+'" y2="'+A[p2][1]+'">'+an('x2',A[p2][0],B[p2][0])+an('y2',A[p2][1],B[p2][1])+'</line>';}
+  /* SW-7: equipo de cada ejercicio */
+  /* banco que sigue al torso (plano, inclinado o declinado): respaldo bajo la espalda, asiento bajo la cola y patas al piso */
+  if(has('tbench')&&A.n&&A.p){const dx=A.p[0]-A.n[0],dy=A.p[1]-A.n[1],l=Math.hypot(dx,dy)||1,ux=dx/l,uy=dy/l;let nx=-uy,ny=ux;if(ny<0){nx=-nx;ny=-ny;}
+    const o=6.5,x1=A.n[0]-ux*9+nx*o,y1=A.n[1]-uy*9+ny*o,x2=A.p[0]+nx*o,y2=A.p[1]+ny*o,sx=A.p[0]+nx*o,sy=A.p[1]+ny*o;
+    eq+='<line class="tq-pad" x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'"/>'+
+      (Math.abs(uy)>.15?'<line class="tq-pad" x1="'+(sx-2).toFixed(1)+'" y1="'+sy.toFixed(1)+'" x2="'+(sx+14).toFixed(1)+'" y2="'+sy.toFixed(1)+'"/>':'')+
+      '<line class="tq-eq" x1="'+(sx+4).toFixed(1)+'" y1="'+(sy+3).toFixed(1)+'" x2="'+(sx+4).toFixed(1)+'" y2="110"/><line class="tq-eq" x1="'+((x1+x2)/2-6).toFixed(1)+'" y1="'+((y1+y2)/2+3).toFixed(1)+'" x2="'+((x1+x2)/2-6).toFixed(1)+'" y2="110"/>'+fl;}
+  /* pared vista de frente, detrás del cuerpo: [x, y, ancho, alto] */
+  if(T.wallRect){const w=T.wallRect;eq='<rect class="tq-wall" x="'+w[0]+'" y="'+w[1]+'" width="'+w[2]+'" height="'+w[3]+'" rx="2"/>'+eq;}
+  /* bloques fijos (cajón, banco, soporte): [x, y, ancho, alto] */
+  (T.blocks||[]).forEach(b=>{eq+='<rect class="tq-eq" x="'+b[0]+'" y="'+b[1]+'" width="'+b[2]+'" height="'+b[3]+'" rx="2.5"/>';});
+  /* almohadillas y soportes en cualquier ángulo: [x1,y1,x2,y2, 'pad'|'eq'] (ej. el banco Scott) */
+  (T.lines||[]).forEach(l=>{eq+='<line class="tq-'+(l[4]||'pad')+'" x1="'+l[0]+'" y1="'+l[1]+'" x2="'+l[2]+'" y2="'+l[3]+'"/>';});
+  /* respaldo de máquina visto de frente (pec deck) */
+  if(has('backrest'))eq+='<rect class="tq-eq" x="47" y="26" width="26" height="54" rx="4"/><line class="tq-eq" x1="60" y1="80" x2="60" y2="110"/>'+fl;
+  /* palanca de máquina: va de su eje a la mano o al pie y se mueve con ellos; rodillo/agarre en la punta */
+  if(T.lv){const j=T.lv.to||'a',pv=T.lv.pv;eq+='<line class="tq-lv" x1="'+pv[0]+'" y1="'+pv[1]+'" x2="'+A[j][0]+'" y2="'+A[j][1]+'">'+an('x2',A[j][0],B[j][0])+an('y2',A[j][1],B[j][1])+'</line><circle class="tq-eq" cx="'+pv[0]+'" cy="'+pv[1]+'" r="3.5"/>'+
+    (T.lv.stand?'<line class="tq-eq" x1="'+pv[0]+'" y1="'+pv[1]+'" x2="'+T.lv.stand[0]+'" y2="110"/>':'');}
+  /* cable que va a cualquier articulación (ej. tobillera en la patada de glúteo) */
+  if(T.cable&&A[T.cable.to]){const j=T.cable.to,pv=T.cable.pv;eq+='<line class="tq-cab" x1="'+pv[0]+'" y1="'+pv[1]+'" x2="'+A[j][0]+'" y2="'+A[j][1]+'">'+an('x2',A[j][0],B[j][0])+an('y2',A[j][1],B[j][1])+'</line><circle class="tq-eq" cx="'+pv[0]+'" cy="'+pv[1]+'" r="3"/>';}
+  /* plataforma que sigue al pie con el ángulo del riel (prensa, hack) */
+  if(T.plat&&A[T.plat.j]){const j=T.plat.j,d=[Math.cos(T.plat.ang*Math.PI/180),Math.sin(T.plat.ang*Math.PI/180)],L=T.plat.len||9,e=(P,s)=>[(P[j][0]+s*d[0]*L).toFixed(1),(P[j][1]+s*d[1]*L).toFixed(1)],a1=e(A,-1),a2=e(A,1),b1=e(B,-1),b2=e(B,1);
+    eq+='<line class="tq-pad" x1="'+a1[0]+'" y1="'+a1[1]+'" x2="'+a2[0]+'" y2="'+a2[1]+'">'+an('x1',a1[0],b1[0])+an('y1',a1[1],b1[1])+an('x2',a2[0],b2[0])+an('y2',a2[1],b2[1])+'</line>';}
   const cab=A.c?'<line class="tq-cab" x1="'+A.c[0]+'" y1="'+A.c[1]+'" x2="'+A.a[0]+'" y2="'+A.a[1]+'">'+an('x2',A.a[0],B.a[0])+an('y2',A.a[1],B.a[1])+'</line><circle class="tq-eq" cx="'+A.c[0]+'" cy="'+A.c[1]+'" r="3"/>':'';
   const shadow=A.f&&!lv&&!/^(legraise|pullup|flag|vflag|hang|lpullup|archerpull|oapull|muscleup|ringdip)/.test(k)?'<ellipse class="tq-sh" cx="'+A.f[0]+'" cy="111" rx="16" ry="2.5">'+an('cx',A.f[0],B.f[0])+'</ellipse>':'';
-  const plate=A.b?(k==='slam'?'<circle class="tq-ball" cx="'+A.b[0]+'" cy="'+A.b[1]+'" r="7">'+an('cx',A.b[0],B.b[0])+an('cy',A.b[1],B.b[1])+'</circle>':dot('b',6.5,'tq-plate')+dot('b',2,'tq-hub')):'';
-  return '<svg class="tq'+(stat?' st':'')+'" viewBox="0 0 120 120" role="img" aria-label="Cómo se hace">'+eq+shadow+cab+
+  /* mancuerna dibujada como mancuerna (manija con un disco chico en cada punta), que se mueve con la mano: así no se confunde con la barra (disco grande) */
+  const dbAt=j=>A[j]?'<g transform="translate('+A[j][0]+' '+A[j][1]+')">'+(stat||(A[j][0]===B[j][0]&&A[j][1]===B[j][1])?'':'<animateTransform attributeName="transform" type="translate" values="'+A[j][0]+' '+A[j][1]+';'+B[j][0]+' '+B[j][1]+';'+B[j][0]+' '+B[j][1]+';'+A[j][0]+' '+A[j][1]+'" dur="'+D+'" repeatCount="indefinite" '+ks+'/>')+
+    (T.dbRot?'<g transform="rotate('+T.dbRot+')"><rect class="tq-dbh" x="-5.5" y="-1.1" width="11" height="2.2" rx="1.1"/><rect class="tq-plate" x="-8.5" y="-4.6" width="3.6" height="9.2" rx="1.3"/><rect class="tq-plate" x="4.9" y="-4.6" width="3.6" height="9.2" rx="1.3"/></g>'
+      :'<polygon class="tq-plate" points="4.6,0 2.3,4 -2.3,4 -4.6,0 -2.3,-4 2.3,-4"/><circle class="tq-hub" r="1.4"/>')+'</g>':'';
+  /* de costado la mancuerna se ve de punta (hexágono chico, distinto del disco redondo de la barra); a lo largo solo cuando se ve así: dbRot (martillo, goblet, sobre la cabeza) */
+  const plate=A.b?(k==='slam'||T.ball?'<circle class="tq-ball" cx="'+A.b[0]+'" cy="'+A.b[1]+'" r="7">'+an('cx',A.b[0],B.b[0])+an('cy',A.b[1],B.b[1])+'</circle>':(T.db?dbAt('b'):dot('b',6.5,'tq-plate')+dot('b',2,'tq-hub'))):'',back=T.behind?plate:''; /* behind: el peso se dibuja detrás del cuerpo (detrás de la nuca) */
+  /* rodillo de máquina (extensión, femoral) o agarre: sigue al pie o a la mano */
+  /* padOff: el rodillo va delante de la canilla (del lado del empeine), no en el tobillo */
+  const rollAt=P=>{const j=T.pad,q=P[j];if(!T.padOff||!P.k)return q;const dx=q[0]-P.k[0],dy=q[1]-P.k[1],l=Math.hypot(dx,dy)||1;return[+(q[0]+dy/l*T.padOff).toFixed(1),+(q[1]-dx/l*T.padOff).toFixed(1)];};
+  const roll=T.pad&&A[T.pad]?(()=>{const p=rollAt(A),q=rollAt(B);return '<circle class="tq-roll" cx="'+p[0]+'" cy="'+p[1]+'" r="4.6">'+an('cx',p[0],q[0])+an('cy',p[1],q[1])+'</circle>';})():'';
+  /* mancuernas en las dos manos (vistas de frente: laterales, curl de frente...) */
+  const hold=(T.hold||[]).map(dbAt).join('');
+  /* almohadillas en varias articulaciones (rodillas en abductores/aductores) */
+  const pads=(T.pads||[]).map(j=>dot(j,4,'tq-roll')).join('');
+  /* fists: puños que crecen y bajan cuando las manos se acercan a quien mira (empuje al frente en vista de frente) */
+  const rope=T.rope&&A.aL?(()=>{const d=(P,y)=>'M'+P.aL[0]+' '+P.aL[1]+' Q60 '+y+' '+P.aR[0]+' '+P.aR[1];return '<path class="tq-cab" fill="none" d="'+d(A,T.rope[0])+'">'+an('d',d(A,T.rope[0]),d(B,T.rope[1]))+'</path>';})():'';
+  const fists=T.fists?['aL','aR'].filter(j=>A[j]).map(j=>'<circle class="tq-h" cx="'+A[j][0]+'" cy="'+A[j][1]+'" r="'+T.fists[0]+'">'+an('cx',A[j][0],B[j][0])+an('cy',A[j][1],B[j][1])+an('r',T.fists[0],T.fists[1])+'</circle>').join(''):'';
+  return '<svg class="tq'+(stat?' st':'')+'" viewBox="0 0 120 120" role="img" aria-label="Cómo se hace">'+eq+shadow+cab+back+
    (T.front?'<g class="tq-b">'+bone('n','p',11)+bone('sL','sR',8)+bone('hL','hR',8)+bone('sL','eL',5.5)+bone('eL','aL',5)+bone('sR','eR',5.5)+bone('eR','aR',5)+bone('hL','kL',7)+bone('kL','fL',6)+bone('hR','kR',7)+bone('kR','fR',6)+dot('eL',2,'tq-j')+dot('eR',2,'tq-j')+'</g>':
-   '<g class="tq-b2">'+bone('p','k2',6.5)+bone('k2','f2',5.5)+bone('n','e2',5)+bone('e2','a2',4.5)+'</g>'+
-   '<g class="tq-b">'+bone('n','p',10)+bone('p','k',7.5)+bone('k','f',6)+bone('n','e',5.5)+bone('e','a',5)+dot('k',2.2,'tq-j')+dot('e',2,'tq-j')+'</g>')+
-   dot('h',7.5,'tq-h')+plate+'</svg>';
+   '<g class="tq-b2">'+bone('p','k2',6.5)+bone('k2','f2',5.5)+bone('f2','t2',4.5)+bone('n','e2',5)+bone('e2','a2',4.5)+'</g>'+
+   '<g class="tq-b">'+bone('n','p',10)+bone('p','k',7.5)+bone('k','f',6)+bone('f','t',5)+bone('n','e',5.5)+bone('e','a',5)+dot('k',2.2,'tq-j')+dot('e',2,'tq-j')+'</g>')+
+   dot('h',7.5,'tq-h')+(T.behind?'':plate)+roll+hold+pads+fists+rope+(T.kb&&A.b?dot('b',6,'tq-kb'):'')+'</svg>';
 }
 /* tu video de cada ejercicio queda solo en este dispositivo (IndexedDB), no se sube a ningún lado */
 const VidDB=(()=>{let p=null;const open=()=>p||(p=new Promise((ok,bad)=>{const r=indexedDB.open('swole-vid',1);r.onupgradeneeded=()=>r.result.createObjectStore('v');r.onsuccess=()=>ok(r.result);r.onerror=()=>bad(r.error);}));
@@ -578,6 +627,344 @@ function vidSlot(ex){
     else el.innerHTML='<label class="btn wide">'+ic('camera',16)+' Grabar mi técnica<input type="file" accept="video/*" capture="environment" data-i="vid" data-e="'+ex.id+'" hidden></label><p class="mut sm-t tc" style="margin-top:6px">Grabá una serie de costado y comparala con la figura. El video queda solo en tu celu.</p>';}).catch(()=>{}),30);
   return '<div id="vidSlot" data-ex="'+ex.id+'"></div>';
 }
+/* ============ SW-7: ficha propia de cada ejercicio ============
+   XT[id] = { k: su figura (pose en TECH/POSE), cues: cómo se hace (3–4 claves), err: el error común }.
+   Se va completando por grupo muscular (ver .equipo/SW-7/progreso.md). */
+const XT={};
+/* Poses propias (SW-7). Cada una: eq (equipo), A y B (las dos posiciones entre las que se mueve; ángulos como en POSE),
+   fr:1 = vista de frente (FZ), x = extras de TECH (db: mancuernas, lv: palanca de máquina, pad: rodillo, blocks: cajones, cy: altura de las poleas). */
+const P7={
+  /* ---- Lote 1: pecho ---- */
+  x_bench:{eq:['tbench','floor'],A:{t:0,th:30,sh:95,ua:272,fa:270,at:['n',32,79],b:'a'},B:{t:0,th:30,sh:95,ua:33.7,fa:270,ls:{ua:.77},at:['n',32,79],b:'a'}},
+  x_incbench:{eq:['tbench','floor'],A:{t:30,th:10,sh:92,ua:268,fa:270,at:['p',66,88],b:'a'},B:{t:30,th:10,sh:92,ua:115,fa:285,ls:{ua:.55},at:['p',66,88],b:'a'}},
+  x_declbench:{eq:['tbench','floor'],x:{blocks:[[74,98,12,5]]},A:{t:-22,th:20,sh:100,ua:272,fa:270,at:['p',64,78],b:'a'},B:{t:-22,th:20,sh:100,ua:26,fa:270,ls:{ua:.62},at:['p',64,78],b:'a'}},
+  x_dbpress:{eq:['tbench','floor'],x:{db:1},A:{t:0,th:30,sh:95,ua:270,fa:266,at:['n',32,79],b:'a'},B:{t:0,th:30,sh:95,ua:49.4,fa:270,ls:{ua:.66},at:['n',32,79],b:'a'}},
+  x_incdbpress:{eq:['tbench','floor'],x:{db:1},A:{t:30,th:10,sh:92,ua:266,fa:268,at:['p',66,88],b:'a'},B:{t:30,th:10,sh:92,ua:118,fa:288,ls:{ua:.7},at:['p',66,88],b:'a'}},
+  /* aperturas: el brazo se abre hacia el costado (se ve corto, en perspectiva) con el codo apenas doblado */
+  x_dbfly:{eq:['tbench','floor'],x:{hold:['a','a2']},A:{t:0,th:30,sh:95,ua:270,fa:268,ua2:272,fa2:270,at:['n',32,79]},B:{t:0,th:30,sh:95,ua:92,fa:96,ua2:268,fa2:264,ls:{ua:.16,fa:.12},at:['n',32,79]}},
+  /* cruces en polea, de frente: de brazos abiertos a juntar las manos adelante */
+  x_cablefly:{fr:1,eq:['floor','cables'],x:{cy:14},A:Object.assign({uaL:205,faL:200,uaR:335,faR:340,at:['p',60,71]},BK_LEGS),B:Object.assign({uaL:60,faL:20,uaR:120,faR:160,at:['p',60,71]},BK_LEGS)},
+  /* pec deck, de frente y sentado: codos a la altura de los hombros, se cierran adelante */
+  x_pecdeck:{fr:1,eq:['backrest'],A:{uaL:180,faL:270,uaR:0,faR:270,thL:100,shL:92,thR:80,shR:88,ls:{th:.4},at:['p',60,78]},B:{uaL:15,faL:275,uaR:165,faR:265,thL:100,shL:92,thR:80,shR:88,ls:{th:.4},at:['p',60,78]}},
+  /* press de pecho en máquina: sentado, empuja los agarres al frente (la palanca baja del eje de arriba) */
+  x_chestpress:{eq:['seat','floor'],x:{lv:{pv:[100,24],to:'a',stand:[100]}},A:{t:90,th:8,sh:95,ua:0,fa:0,at:['p',44,82]},B:{t:90,th:8,sh:95,ua:125.5,fa:0,ls:{ua:.61},at:['p',44,82]}},
+  x_pushup:{eq:['floor'],A:{t:22,th:22,sh:22,ua:90,fa:90,at:['a',26,108]},B:{t:14,th:15,sh:15,ua:45,fa:125,at:['a',26,108]}},
+  /* flexiones con pies en un cajón: manos y pies quietos, baja el pecho */
+  x_declpushup:{eq:['floor'],x:{blocks:[[88,80,24,30]]},A:{t:-2.5,th:-2.5,sh:-2.5,ua:90,fa:90,at:['a',30,108]},B:{t:-14.3,th:-14.3,sh:-14.3,ua:41.7,fa:163.4,at:['a',30,108]}},
+  /* ---- Lote 2: espalda ---- */
+  /* jalón: sentado con las rodillas trabadas bajo el apoyo, el cable baja de la polea de arriba */
+  x_latpull:{eq:['floor'],x:{blocks:[[34,86,32,5],[48,91,4,19],[66,76,14,4]]},A:{t:80,th:0,sh:90,ua:292,fa:286,at:['p',54,84],c:[63,3]},B:{t:80,th:0,sh:90,ua:95,fa:310,at:['p',54,84],c:[63,3]}},
+  x_row:{eq:['floor'],A:{t:140,th:80,sh:100,ua:90,fa:90,at:['f',64,108],b:'a',bd:[0,2]},B:{t:140,th:80,sh:100,ua:165,fa:80,at:['f',64,108],b:'a',bd:[0,2]}},
+  /* remo con mancuerna: rodilla y mano del mismo lado en el banco, la otra tira hacia la cadera */
+  x_dbrow:{eq:['floor'],x:{db:1,blocks:[[16,93,62,5],[22,98,3,12],[72,98,3,12]]},A:{t:175,th:95,sh:92,th2:88,sh2:180,ua:90,fa:90,ls:{ua:1.15,fa:1.15},ua2:80.9,fa2:80.9,at:['p',40,70],b:'a'},B:{t:175,th:95,sh:92,th2:88,sh2:180,ua:170,fa:95,ua2:80.9,fa2:80.9,at:['p',40,70],b:'a'}},
+  /* remo en polea baja: sentado, pies en la plataforma, el cable sale de abajo adelante */
+  x_cablerow:{eq:['floor'],x:{blocks:[[22,90,30,5],[35,95,4,15],[80,80,4,22]]},A:{t:90,th:-8,sh:15,ua:20,fa:15,at:['p',40,88],c:[108,96]},B:{t:90,th:-8,sh:15,ua:150,fa:10,at:['p',40,88],c:[108,96]}},
+  /* peso muerto: arranca con la barra en el piso (sobre el medio del pie), cadera arriba de las rodillas */
+  x_deadlift:{eq:['floor'],A:Object.assign({},ST,{ua:92,fa:90,at:['f',56,108],b:'a',bd:[0,2]}),B:{t:160,th:9,sh:85,ua:90,fa:90,at:['f',56,108],b:'a',bd:[0,1]}},
+  /* hiperextensiones en banco romano a 45°: piernas fijas, el torso baja y vuelve a alinearse */
+  x_hyper:{eq:['floor'],x:{lv:{pv:[26,110],to:'p'},blocks:[[24,90,12,5],[58,64,9,7]]},A:{t:135,th:135,sh:135,ua:150,fa:330,ls:{ua:.55,fa:.55},at:['f',30,90]},B:{t:255,th:135,sh:135,ua:255,fa:75,ls:{ua:.55,fa:.55},at:['f',30,90]}},
+  /* dominadas supinas, de costado (las pronas se ven de espalda) */
+  x_chinup:{eq:['pullbar'],A:HANG,B:PUTOP},
+  /* dominadas asistidas: de rodillas en la plataforma que empuja hacia arriba */
+  x_assistpull:{eq:['pullbar'],x:{pad:'k',lv:{pv:[44,110],to:'k'}},A:Object.assign({},HANG,{th:100,sh:200}),B:Object.assign({},PUTOP,{th:100,sh:200})},
+  /* remo en máquina: pecho apoyado, tira de los agarres hacia atrás */
+  x_machrow:{eq:['floor'],x:{blocks:[[28,86,30,5],[41,91,4,19],[48,60,4,22]],lv:{pv:[100,60],to:'a',stand:[100]}},A:{t:85,th:0,sh:92,ua:8,fa:4,at:['p',44,84]},B:{t:85,th:0,sh:92,ua:141.4,fa:351.3,ls:{ua:.68},at:['p',44,84]}},
+  /* pullover en polea: brazos casi rectos, de arriba adelante hasta los muslos */
+  x_pullover:{eq:['floor'],A:Object.assign({},ST,{t:100,ua:300,fa:298,at:['f',52,108],c:[104,6]}),B:Object.assign({},ST,{t:100,ua:80,fa:82,at:['f',52,108],c:[104,6]})},
+  /* ---- Lote 3: hombros ---- */
+  /* press militar: de pie, la barra sale del frente de los hombros y termina arriba de la cabeza */
+  x_ohp:{eq:['floor'],A:Object.assign({},ST,{ua:70,fa:280,b:'a'}),B:Object.assign({},ST,{ua:275,fa:272,b:'a'})},
+  /* press con mancuernas: sentado con respaldo, desde los costados de los hombros hasta arriba */
+  x_dbohp:{eq:['seat','floor'],x:{db:1},A:{t:90,th:8,sh:95,ua:36.9,fa:285.3,ls:{ua:.71,fa:.88},at:['p',44,82],b:'a'},B:{t:90,th:8,sh:95,ua:272,fa:268,at:['p',44,82],b:'a'}},
+  /* press de hombros en máquina: sentado, la palanca va desde atrás de la cabeza a las manos */
+  x_machpress:{eq:['seat','floor'],x:{lv:{pv:[22,30],to:'a',stand:[22]}},A:{t:90,th:8,sh:95,ua:85,fa:280,ls:{ua:.6},at:['p',44,82]},B:{t:90,th:8,sh:95,ua:272,fa:270,at:['p',44,82]}},
+  /* elevaciones frontales: brazo estirado desde el muslo hasta la altura del hombro */
+  x_frontraise:{eq:['floor'],x:{db:1},A:Object.assign({},ST,{ua:88,fa:88,b:'a'}),B:Object.assign({},ST,{ua:2,fa:0,b:'a'})},
+  /* vuelos posteriores: inclinado, los brazos se abren hacia los costados (cortos, en perspectiva) */
+  x_reardelt:{eq:['floor'],x:{db:1},A:{t:160,th:80,sh:100,ua:90,fa:92,at:['f',62,108],b:'a'},B:{t:160,th:80,sh:100,ua:120,fa:110,ls:{ua:.35,fa:.35},at:['f',62,108],b:'a'}},
+  /* face pull: de pie, cuerda desde la polea alta adelante hacia la cara, codos altos */
+  x_facepull:{eq:['floor'],A:Object.assign({},ST,{ua:338,fa:338,at:['f',46,108],c:[108,30]}),B:Object.assign({},ST,{ua:225,fa:337.4,ls:{ua:.2},at:['f',46,108],c:[108,30]})},
+  /* remo al mentón: la barra sube pegada al cuerpo con los codos altos y abiertos */
+  x_uprightrow:{eq:['floor'],A:Object.assign({},ST,{ua:90,fa:88,b:'a'}),B:Object.assign({},ST,{ua:180,fa:29.3,ls:{ua:.55,fa:.95},b:'a'})},
+  /* ---- Lote 4: brazos ---- */
+  x_curl:{eq:['floor'],A:Object.assign({},ST,{ua:95,fa:90,b:'a'}),B:Object.assign({},ST,{ua:95,fa:304,b:'a'})},
+  /* curl con mancuernas: alternado, mientras una sube la otra baja */
+  x_dbcurl:{eq:['floor'],x:{hold:['a','a2']},A:Object.assign({},ST,{ua:96,fa:92,ua2:94,fa2:304}),B:Object.assign({},ST,{ua:96,fa:304,ua2:94,fa2:92})},
+  /* martillo: la mancuerna parada (palmas enfrentadas) */
+  x_hammer:{eq:['floor'],x:{db:1,dbRot:90},A:Object.assign({},ST,{ua:95,fa:90,b:'a'}),B:Object.assign({},ST,{ua:95,fa:299,b:'a'})},
+  /* curl en polea baja: igual de prolijo que con barra, el cable sale de abajo adelante */
+  x_cablecurl:{eq:['floor'],A:Object.assign({},ST,{ua:95,fa:88,at:['f',50,108],c:[60,108]}),B:Object.assign({},ST,{ua:95,fa:300,at:['f',50,108],c:[60,108]})},
+  /* banco Scott: sentado, el brazo apoyado en la almohadilla inclinada; solo se mueve el antebrazo */
+  x_preacher:{eq:['floor'],x:{blocks:[[26,88,30,5],[39,93,4,17]],lines:[[35,66,48,79],[47,78,56,110,'eq']]},A:{t:95,th:-2,sh:92,ua:45,fa:55,at:['p',40,86],b:'a'},B:{t:95,th:-2,sh:92,ua:45,fa:296,at:['p',40,86],b:'a'}},
+  x_pushdown:{eq:['floor'],A:Object.assign({},ST,{ua:95,fa:330,at:['f',56,108],c:[70,6]}),B:Object.assign({},ST,{ua:95,fa:95,at:['f',56,108],c:[70,6]})},
+  /* tríceps sobre la cabeza: brazo vertical, la mancuerna baja detrás de la cabeza y sube */
+  x_ohtri:{eq:['floor'],x:{db:1,dbRot:90,behind:1},A:Object.assign({},ST,{ua:268,fa:268,b:'a'}),B:Object.assign({},ST,{ua:268,fa:127.7,ls:{fa:1.07},b:'a'})},
+  /* patada de tríceps: inclinado, el brazo pegado al cuerpo y el antebrazo se estira hacia atrás */
+  x_kickback:{eq:['floor'],x:{db:1},A:{t:160,th:80,sh:100,ua:150,fa:90,at:['f',62,108],b:'a'},B:{t:160,th:80,sh:100,ua:150,fa:155,at:['f',62,108],b:'a'}},
+  /* press francés: acostado, la barra baja hacia la frente con los brazos fijos */
+  x_skull:{eq:['tbench','floor'],A:{t:0,th:30,sh:95,ua:282,fa:276,at:['n',32,79],b:'a'},B:{t:0,th:30,sh:95,ua:282,fa:190.3,ls:{fa:.77},at:['n',32,79],b:'a'}},
+  /* granjero: caminando con una mancuerna pesada en cada mano */
+  x_farmer:{eq:['floor'],x:{hold:['a','a2']},A:{t:90,th:75,sh:95,th2:105,sh2:85,ua:92,fa:90,ua2:88,fa2:90,at:['f',70,108]},B:{t:90,th:105,sh:85,th2:75,sh2:95,ua:88,fa:90,ua2:92,fa2:90,at:['f2',70,108]}},
+  /* ---- Lote 5: piernas, cuádriceps ---- */
+  x_squat:{eq:['floor'],A:Object.assign({},ST,{ua:150,fa:300,b:'n',bd:[-8,3]}),B:{t:125,th:5,sh:100,ua:150,fa:300,at:['f',60,108],b:'n',bd:[-8,3]}},
+  /* frontal: la barra adelante sobre los hombros, codos altos y el torso más derecho */
+  x_frontsquat:{eq:['floor'],A:Object.assign({},ST,{ua:345,fa:122.8,ls:{ua:.8,fa:.54},b:'a'}),B:{t:108,th:2,sh:104,ua:345,fa:122.8,ls:{ua:.8,fa:.54},at:['f',60,108],b:'a'}},
+  /* en Smith: igual que la sentadilla pero la barra corre por el riel vertical */
+  x_smithsquat:{eq:['floor'],x:{lines:[[49,6,49,110,'eq'],[55,6,55,110,'eq']]},A:Object.assign({},ST,{ua:150,fa:300,at:['f',62,108],b:'n',bd:[-8,3]}),B:{t:118,th:8,sh:96,ua:150,fa:300,at:['f',62,108],b:'n',bd:[-8,3]}},
+  /* prensa a 45°: recostado, los pies en la plataforma que corre por el riel */
+  x_legpress:{eq:['tbench','floor'],x:{plat:{j:'f',ang:135,len:10},lines:[[44,100,86,58,'eq']]},A:{t:40,th:-45,sh:-45,ua:80,fa:60,at:['p',40,90]},B:{t:40,th:-93.2,sh:7.3,ua:80,fa:60,at:['p',40,90]}},
+  /* hack: la espalda contra el respaldo inclinado, los pies adelante en la plataforma */
+  x_hacksquat:{eq:['tbench'],x:{blocks:[[68,104,22,5]]},A:{t:75,th:62.1,sh:62.1,ua:60,fa:300,at:['f',78.3,104.5]},B:{t:75,th:-2.4,sh:109.7,ua:60,fa:300,at:['f',78.3,104.5]}},
+  /* goblet: la mancuerna parada contra el pecho, bajada profunda con el torso derecho */
+  x_goblet:{eq:['floor'],x:{db:1,dbRot:90},A:Object.assign({},ST,{ua:70,fa:290.6,ls:{fa:.26},b:'a',bd:[0,2]}),B:{t:112,th:3,sh:103,ua:70,fa:290.6,ls:{fa:.26},at:['f',60,108],b:'a',bd:[0,2]}},
+  /* extensión de cuádriceps: sentado en la máquina, palanca desde la rodilla y rodillo en el tobillo; la cadera no se mueve */
+  x_legext:{eq:['floor'],x:{blocks:[[34,85,24,6],[33,44,6,44],[46,91,4,19]],lv:{pv:[62,82],to:'f'},pad:'f',padOff:4},A:{t:92,th:0,sh:90,ua:80,fa:85,at:['p',42,82]},B:{t:92,th:0,sh:2,ua:80,fa:85,at:['p',42,82]}},
+  x_lunge:{eq:['floor'],x:{hold:['a']},A:{t:90,th:80,sh:95,th2:100,sh2:95,ua:96,fa:92,at:['f',76,108]},B:{t:90,th:5,sh:95,th2:100,sh2:170,ua:96,fa:92,at:['f',76,108]}},
+  /* búlgara: el pie de atrás queda fijo en el banco; baja la cadera */
+  x_bulgarian:{eq:['floor'],x:{hold:['a'],blocks:[[30,92,24,6],[34,98,3,12],[48,98,3,12]]},A:{t:95,th:92,sh:95,th2:115,sh2:175,ua:92,fa:90,at:['f',72,108]},B:{t:100,th:5,sh:100,th2:100,sh2:255.4,ua:92,fa:90,at:['f',72,108]}},
+  /* subida al cajón: de un pie en el cajón a quedar parado arriba */
+  x_stepup:{eq:['floor'],x:{hold:['a'],blocks:[[62,94,32,16]]},A:{t:95,th:-5,sh:100,th2:84.2,sh2:144.2,ua:92,fa:90,at:['f',74,94]},B:{t:92,th:95,sh:95,th2:60,sh2:100,ua:92,fa:90,at:['f',74,94]}},
+  /* sentadilla con salto: abajo con los brazos atrás, arriba en el aire con los brazos arriba */
+  x_jumpsquat:{eq:['floor'],A:{t:125,th:5,sh:100,ua:120,fa:110,at:['f',60,108]},B:Object.assign({},ST,{ua:305,fa:300,at:['f',60,100]})},
+  /* ---- Lote 6: femoral y glúteo ---- */
+  /* curl femoral acostado en la máquina: boca abajo, palanca desde la rodilla, rodillo detrás del tobillo, manos en las manijas */
+  x_legcurl:{eq:['floor'],x:{blocks:[[18,83,64,5],[26,88,3,22],[70,88,3,22],[4,90,7,4]],lv:{pv:[80,78],to:'f'},pad:'f',padOff:4},A:{t:0,th:0,sh:0,ua:160,fa:130,at:['n',30,78]},B:{t:0,th:0,sh:-110,ua:160,fa:130,at:['n',30,78]}},
+  /* curl femoral sentado: la pierna estirada adelante baja hasta quedar bajo el asiento; rodillo detrás de la pierna */
+  x_seatlegcurl:{eq:['floor'],x:{blocks:[[34,85,28,6],[33,44,6,44],[46,91,4,19],[48,72,14,4]],lv:{pv:[62,82],to:'f'},pad:'f',padOff:-4},A:{t:92,th:0,sh:0,ua:80,fa:85,at:['p',42,82]},B:{t:92,th:0,sh:100,ua:80,fa:85,at:['p',42,82]}},
+  /* rumano: rodillas casi rectas, la cadera va atrás y la barra baja pegada a las piernas */
+  x_rdl:{eq:['floor'],A:Object.assign({},ST,{ua:92,fa:90,ft:0,at:['f',62,108],b:'a',bd:[0,1]}),B:{t:175,th:52.9,sh:71.8,ft:0,ua:126.9,fa:83.3,at:['f',62,108],b:'a',bd:[0,1]}},
+  /* swing: la pesa rusa pasa entre las piernas y sube con la cadera hasta la altura del pecho */
+  x_kbswing:{eq:['floor'],x:{kb:1},A:{t:145,th:80,sh:100,ua:128,fa:132,at:['f',62,108],b:'a'},B:Object.assign({},ST,{ua:2,fa:0,at:['f',62,108],b:'a'})},
+  /* hip thrust: espalda alta en el banco, la barra sobre la cadera sube hasta alinear el cuerpo */
+  x_hipthrust:{eq:['floor'],x:{blocks:[[8,92,26,6],[12,98,3,12],[28,98,3,12]]},A:{t:28,th:319.2,sh:88.8,ft:0,ua:0.8,fa:43.1,at:['n',28,88],b:'p',bd:[0,-6]},B:{t:0,th:7.7,sh:114.3,ft:0,ua:348,fa:351.1,at:['n',28,88],b:'p',bd:[0,-6]}},
+  /* abductores en máquina, de frente y sentado: las rodillas se abren contra las almohadillas */
+  x_hipabd:{fr:1,eq:['backrest'],x:{pads:['kL','kR']},A:{uaL:100,faL:90,uaR:80,faR:90,thL:95,shL:92,thR:85,shR:88,ls:{th:.6},at:['p',60,78]},B:{uaL:100,faL:90,uaR:80,faR:90,thL:130,shL:100,thR:50,shR:80,ls:{th:.6},at:['p',60,78]}},
+  /* aductores en máquina: al revés, las rodillas se cierran */
+  x_hipadd:{fr:1,eq:['backrest'],x:{pads:['kL','kR']},A:{uaL:100,faL:90,uaR:80,faR:90,thL:130,shL:100,thR:50,shR:80,ls:{th:.6},at:['p',60,78]},B:{uaL:100,faL:90,uaR:80,faR:90,thL:95,shL:92,thR:85,shR:88,ls:{th:.6},at:['p',60,78]}},
+  /* patada de glúteo en polea: parado en una pierna, la otra (con tobillera) se estira hacia atrás */
+  x_glutekick:{eq:['floor'],x:{lines:[[94,36,94,110,'eq']],cable:{pv:[98,104],to:'f2'}},A:{t:100,th:92,sh:92,th2:92,sh2:95,ua:18,fa:8,at:['f',56,108]},B:{t:100,th:92,sh:92,th2:128,sh2:120,ua:18,fa:8,at:['f',56,108]}},
+  /* ---- Lote 7: pantorrilla ---- */
+  /* de pie en la máquina: puntas en el escalón, las almohadillas suben con los hombros */
+  x_calf:{eq:['floor'],x:{blocks:[[66,104,22,6]],lv:{pv:[96,40],to:'n',stand:[96]}},A:Object.assign({},ST,{ft:-25,th2:90,sh2:90,ft2:-25,ua:78.2,fa:304.6,at:['t',67,103]}),B:Object.assign({},ST,{ft:40,th2:90,sh2:90,ft2:40,ua:81.9,fa:303.4,at:['t',67,103]})},
+  /* sentado: rodillas a 90°, la almohadilla sobre las rodillas sube cuando suben los talones */
+  x_seatedcalf:{eq:['floor'],x:{blocks:[[16,82,34,6],[30,88,4,22],[68,96,14,6],[74,102,4,8]],pads:['k']},A:{t:92,th:360,sh:75.5,ft:-25,th2:360,sh2:75.5,ft2:-25,ua:50,fa:10,at:['p',37,80]},B:{t:92,th:337.5,sh:67.1,ft:40,th2:337.5,sh2:67.1,ft2:40,ua:50,fa:10,at:['p',37,80]}},
+  /* en la prensa: piernas estiradas, solo se mueven los tobillos */
+  x_presscalf:{eq:['tbench','floor'],x:{plat:{j:'f',ang:135,len:10},lines:[[44,100,86,58,'eq']]},A:{t:40,th:-45,sh:-45,ua:80,fa:60,at:['p',40,90]},B:{t:40,th:-45,sh:-45,ls:{sh:1.18},ua:80,fa:60,at:['p',40,90]}},
+  /* lote 8: core */
+  x_crunch:{eq:['floor'],A:{t:0,th:-55,sh:65,ft:0,ua:-15,fa:190,at:['p',60,105]},B:{t:25,th:-55,sh:65,ft:0,ua:10,fa:215,at:['p',60,105]}},
+  x_legraise:{eq:['pullbar'],A:Object.assign({},HANG,{ft:80}),B:Object.assign({},HANG,{t:97,th:-5,sh:-5,ft:-20})},
+  x_plank:{eq:['floor'],A:{t:8,th:8,sh:8,ft:105,ua:90,fa:180,at:['e',32,106]},B:{t:7,th:8.5,sh:8.5,ft:104,ua:90,fa:180,at:['e',32,106]}},
+  /* de frente: el torso gira y las manos juntas van de un costado de la cadera al otro */
+  x_russian:{fr:1,eq:['floor'],A:{tw:-10,sw:.5,tk:.8,uaL:140,faL:67,uaR:97,faR:147,thL:242,shL:105,thR:298,shR:75,ls:{th:.8,sh:.7},at:['p',60,104]},B:{tw:10,sw:.5,tk:.8,uaL:83,faL:33,uaR:40,faR:113,thL:242,shL:105,thR:298,shR:75,ls:{th:.8,sh:.7},at:['p',60,104]}},
+  /* de frente: la polea al costado tira hacia ella; las manos salen del pecho al frente (brazos en escorzo) */
+  x_pallof:{fr:1,eq:['floor'],x:{fists:[2.6,4.6],lines:[[10,14,10,110,'eq']],cable:{pv:[10,56],to:'aL'}},A:Object.assign({uaL:120,faL:359,uaR:60,faR:181,at:['p',60,71]},BK_LEGS),B:Object.assign({uaL:95,faL:35,uaR:85,faR:145,ls:{ua:.7,fa:.7},at:['p',60,71]},BK_LEGS)},
+  x_medslam:{eq:['floor'],x:{ball:1},A:{t:84,th:90,sh:90,ft:0,ua:278,fa:280,at:['f',58,108],b:'a',bd:[0,-5]},B:{t:155,th:20,sh:100,ft:0,ua:80,fa:80,at:['f',58,108],b:'a',bd:[3,6]}},
+  x_cablecrunch:{eq:['floor'],x:{lines:[[108,4,108,110,'eq']],cable:{pv:[104,8],to:'a'}},A:{t:105,th:90,sh:180,ft:180,ua:30,fa:270,at:['k',60,107]},B:{t:140,th:90,sh:180,ft:180,ua:65,fa:305,at:['k',60,107]}},
+  x_abwheel:{eq:['floor'],A:{t:160,th:80,sh:180,ft:180,ua:90,fa:90,at:['k',34,107],b:'a'},B:{t:175,th:150,sh:180,ft:180,ua:20,fa:25,at:['k',34,107],b:'a'}},
+  x_mtclimb:{eq:['floor'],A:{t:18,th:150,sh:15,ft:160,th2:18,sh2:18,ft2:110,ua:90,fa:90,at:['a',26,108]},B:{t:18,th:18,sh:18,ft:110,th2:150,sh2:15,ft2:160,ua:90,fa:90,at:['a',26,108]}},
+  /* lote 9: calistenia */
+  x_archerpush:{eq:['floor'],A:Object.assign({},PU_A,{ua2:165,fa2:180,at:['a',36,108]}),B:Object.assign({},PU_B,{ua2:160,fa2:178,at:['a',36,108]})},
+  x_oapush:{eq:['floor'],A:Object.assign({},PU_A,{ua2:10,fa2:4,th2:26,sh2:26}),B:Object.assign({},PU_B,{ua2:4,fa2:0,th2:20,sh2:20})},
+  /* fondo imposible: de antebrazos apoyados en las paralelas (cuerpo vertical) a brazos estirados, sin pasar por el fondo */
+  x_impdip:{eq:['bars'],A:{t:92,th:100,sh:190,ua:90,fa:0,at:['a',65,63]},B:{t:92,th:100,sh:190,ua:90,fa:90,at:['a',65,63]}},
+  x_negpull:{eq:['pullbar'],x:{barY:21},A:Object.assign({},PUTOP,{sh:150,at:['a',64,21]}),B:Object.assign({},HANG,{sh:120,at:['a',64,21]})},
+  x_deadhang:{fr:1,eq:['pullbar'],A:Object.assign({uaL:232,faL:252,uaR:308,faR:288,at:['aL',41,12]},BK_LEGS),B:Object.assign({uaL:236,faL:250,uaR:304,faR:290,at:['aL',41,12]},BK_LEGS)},
+  x_hollow:{eq:['floor'],A:{t:16,th:-15,sh:-15,ft:-15,ua:-20,fa:-20,at:['p',64,104]},B:{t:19,th:-20,sh:-20,ft:-20,ua:-22,fa:-22,at:['p',64,104]}},
+  x_clappush:{eq:['floor'],A:{t:14,th:15,sh:15,ua:45,fa:125,at:['a',26,108]},B:{t:27,th:22,sh:22,ua:105,fa:60,at:['f',89.9,106.8]}},
+  x_sissy:{eq:['floor'],A:{t:90,th:90,sh:90,ft:70,ua:20,fa:10,at:['t',66,109]},B:{t:62,th:62,sh:125,ft:20,ua:0,fa:0,at:['t',66,109]}},
+  /* lote 10: articulaciones y atleta */
+  x_kneewall:{eq:['floor'],x:{lines:[[92,8,92,110,'eq']]},A:{t:95,th:60,sh:90,ft:0,th2:102.8,sh2:145,ft2:60,ua:57.8,fa:342.8,at:['f',78,108]},B:{t:95,th:50,sh:115,ft:0,th2:113.9,sh2:154,ft2:60,ua:77.6,fa:334.1,at:['f',78,108]}},
+  x_slbridge:{eq:['floor'],A:{t:0,th:311.6,sh:93.9,ft:0,th2:311.6,sh2:311.6,ft2:231.6,ua:0,fa:0,at:['n',30,103]},B:{t:-25,th:355.4,sh:105.6,ft:0,th2:355.4,sh2:355.4,ft2:275.4,ua:0,fa:0,hd:180,at:['n',30,103]}},
+  x_curlup:{eq:['floor'],A:{t:0,th:0,sh:0,ft:-90,th2:-55,sh2:65,ft2:0,ua:348,fa:29.6,at:['p',60,105]},B:{t:8,th:0,sh:0,ft:-90,th2:-55,sh2:65,ft2:0,ua:1.3,fa:34.5,at:['p',60,105]}},
+  x_slcalf:{eq:['floor'],x:{blocks:[[66,104,22,6]],lines:[[84,24,84,104,'eq']]},A:{t:90,th:90,sh:90,ft:-25,th2:95,sh2:210,ft2:200,ua:41.7,fa:349.8,at:['t',67,103]},B:{t:90,th:90,sh:90,ft:40,th2:95,sh2:210,ft2:200,ua:47,fa:345.5,at:['t',67,103]}},
+  x_bearcrawl:{eq:['floor'],A:{t:4,th:90,sh:0,ft:70,th2:90,sh2:0,ft2:70,ua:90,fa:90,ua2:90,fa2:90,at:['a2',34,108]},B:{t:4,th:356.7,sh:108.1,ft:60,th2:90,sh2:0,ft2:70,ua:132.9,fa:78.7,ua2:90,fa2:90,at:['a2',34,108]}},
+  x_spansq:{eq:['floor'],x:{lines:[[104,50,104,110,'eq']],cable:{pv:[104,90],to:'k'}},A:{t:95,th:35,sh:92,ft:0,ua:5,fa:0,at:['f',60,108]},B:{t:97,th:25,sh:95,ft:0,ua:5,fa:0,at:['f',60,108]}},
+  x_tibraise:{eq:['floor'],x:{lines:[[24.5,4,24.5,110,'eq']]},A:{t:77,th:71,sh:71,ft:0,ua:100,fa:95,at:['f',54,108]},B:{t:77,th:71,sh:71,ft:-35,ua:100,fa:95,at:['f',54,108]}},
+  x_slbal:{fr:1,eq:['floor'],A:{uaL:180,faL:180,uaR:0,faR:0,thL:92,shL:90,thR:84,shR:92,ls:{thR:.4},at:['p',60,69.6]},B:{tw:1.5,uaL:172,faL:176,uaR:6,faR:4,thL:92,shL:90,thR:82,shR:94,ls:{thR:.4},at:['p',60,69.6]}},
+  x_sidepl:{eq:['floor'],A:{t:13,th:13,sh:13,ft:13,ua:90,fa:180,ua2:270,fa2:270,ls:{fa:.4,fa2:1},at:['e',32,106]},B:{t:16,th:11,sh:11,ft:11,ua:90,fa:180,ua2:268,fa2:268,ls:{fa:.4,fa2:1},at:['e',32,106]}},
+  x_birddog:{eq:['floor'],A:{t:11.5,th:90,sh:0,ft:0,th2:90,sh2:0,ft2:0,ua:90,fa:90,ua2:90,fa2:90,at:['a',34,108]},B:{t:11.5,th:0,sh:0,ft:0,th2:90,sh2:0,ft2:0,ua:90,fa:90,ua2:180,fa2:180,at:['a',34,108]}},
+  x_biering:{eq:['floor'],x:{blocks:[[56,75,52,6],[62,81,4,29],[100,81,4,29]],pads:['f']},A:{t:0,th:0,sh:0,ft:30,ua:60,fa:180,at:['p',56,70]},B:{t:-3,th:0,sh:0,ft:30,ua:57,fa:177,at:['p',56,70]}},
+  x_extrot:{fr:1,eq:['floor'],x:{lines:[[10,20,10,110,'eq']],cable:{pv:[10,58],to:'aR'}},A:Object.assign({uaL:95,faL:90,uaR:90,faR:180,at:['p',60,71]},BK_LEGS),B:Object.assign({uaL:95,faL:90,uaR:90,faR:0,at:['p',60,71]},BK_LEGS)},
+  x_wallslide:{fr:1,eq:['floor'],x:{wallRect:[26,4,68,107]},A:Object.assign({uaL:160,faL:258,uaR:20,faR:282,at:['p',60,71]},BK_LEGS),B:Object.assign({uaL:242,faL:242,uaR:298,faR:298,at:['p',60,71]},BK_LEGS)},
+  x_pogo:{eq:['floor'],A:{t:90,th:90,sh:90,ft:70,ua:100,fa:80,at:['t',62,109]},B:{t:90,th:90,sh:90,ft:82,ua:96,fa:84,at:['t',62,100]}},
+  x_skater:{fr:1,eq:['floor'],A:{tw:-3,uaL:15,faL:25,uaR:60,faR:70,thL:95,shL:80,thR:112,shR:132,at:['p',44,69.4]},B:{tw:3,uaL:120,faL:110,uaR:165,faR:155,thL:68,shL:48,thR:85,shR:100,at:['p',76,69.4]}},
+  x_burpee:{eq:['floor'],A:{t:22,th:22,sh:22,ua:90,fa:90,at:['a',30,108]},B:{t:90,th:88,sh:92,ft:80,ua:265,fa:268,at:['f',52,100]}},
+  x_jumprope:{fr:1,eq:['floor'],x:{rope:[152,-40]},A:Object.assign({uaL:110,faL:170,uaR:70,faR:10,at:['p',60,69]},BK_LEGS),B:Object.assign({uaL:110,faL:172,uaR:70,faR:8,at:['p',60,62]},BK_LEGS)},
+  x_highknees:{eq:['floor'],A:{t:88,th:0,sh:90,ft:20,th2:90,sh2:90,ft2:70,ua:120,fa:70,ua2:60,fa2:290,at:['t2',62,109]},B:{t:88,th:90,sh:90,ft:70,th2:0,sh2:90,ft2:20,ua:60,fa:290,ua2:120,fa2:70,at:['t',62,109]}},
+  /* arreglos lote 9 */
+  x_muscleup:{eq:['pullbar'],x:{barY:50},A:{t:95,th:140,sh:220,ft:230,ua:4,fa:270,at:['a',64,50]},B:{t:100,th:100,sh:95,ft:20,ua:90,fa:90,at:['a',64,50]}},
+  x_diamond:{eq:['floor'],A:{t:21.2,th:21.2,sh:21.2,ua:70.8,fa:79.3,at:['a',37,108]},B:{t:16.8,th:16.8,sh:16.8,ua:36.1,fa:101.2,at:['a',37,108]}},
+  x_russiandip:{eq:['bars'],A:Object.assign({},DIP_A,{sh:175}),B:{t:80,th:100,sh:195,ua:110,fa:0,at:['a',72,63]}},
+  x_lpullup:{eq:['pullbar'],x:{barY:21},A:Object.assign({},HANG,{th:-3,sh:-3,at:['a',64,21]}),B:Object.assign({},PUTOP,{th:-3,sh:-3,at:['a',64,21]})},
+  x_oapull:{fr:1,eq:['pullbar'],x:{barY:21},A:Object.assign({uaL:270,faL:270,uaR:95,faR:92,at:['aL',58,21]},BK_LEGS),B:Object.assign({uaL:202.6,faL:6.1,uaR:80,faR:150,at:['aL',58,21]},BK_LEGS)},
+  x_archerpull:{fr:1,eq:['pullbar'],x:{barY:21},A:Object.assign({uaL:235.3,faL:238.4,uaR:306,faR:299.8,at:['aL',30,21]},BK_LEGS),B:Object.assign({uaL:164.9,faL:324,uaR:358.1,faR:344.2,at:['aL',30,21]},BK_LEGS)},
+  x_deadbug:{eq:['floor'],A:{t:0,th:270,sh:0,ft:-30,th2:270,sh2:0,ft2:-30,ua:270,fa:270,ua2:270,fa2:270,at:['p',60,105]},B:{t:0,th:270,sh:0,ft:-30,th2:-8,sh2:-8,ft2:-20,ua:245,fa:245,ua2:270,fa2:270,at:['p',60,105]}}
+};
+Object.keys(P7).forEach(k=>{const p=P7[k],T=TECH[k]=Object.assign({eq:p.eq},p.x||{});const Z=p.fr?FZ:PZ;if(p.fr)T.front=1;T.A=Z(p.A);T.B=Z(p.B);});
+/* laterales: la figura de frente que ya había, ahora con una mancuerna en cada mano */
+/* laterales, de frente (la figura vieja venía con puntos de costado y no dibujaba brazos ni piernas) */
+/* nórdico: la figura que ya había, con el apoyo que sostiene los tobillos */
+TECH.x_nordic=Object.assign({},TECH.nordic,{blocks:[[78,98,14,6]]});
+TECH.x_lateral={eq:['floor'],front:1,hold:['aL','aR'],A:FZ(Object.assign({uaL:101,faL:98,uaR:79,faR:82,at:['p',60,71]},BK_LEGS)),B:FZ(Object.assign({uaL:182,faL:178,uaR:358,faR:2,at:['p',60,71]},BK_LEGS))};
+Object.assign(XT,{
+  bench:{k:'x_bench',cues:['Acostado con los ojos debajo de la barra y los pies firmes en el piso','Omóplatos juntos y hacia abajo, con un leve arco en la espalda','Bajá la barra controlada hasta tocar la parte baja del pecho','Empujá hacia arriba y un poco hacia atrás hasta estirar los brazos'],err:'Rebotar la barra en el pecho o despegar la cola del banco'},
+  incbench:{k:'x_incbench',cues:['Banco a 30–45°, la cola bien atrás en el asiento','Agarre un poco más abierto que los hombros','Bajá la barra a la parte alta del pecho, debajo de la clavícula','Empujá en línea recta hacia arriba'],err:'Inclinar demasiado el banco: se vuelve un press de hombros'},
+  declbench:{k:'x_declbench',cues:['Banco declinado, con las piernas trabadas en el soporte','Bajá la barra a la parte baja del pecho','Codos a unos 45° del cuerpo','Empujá hasta estirar los brazos'],err:'Bajar la barra hacia el cuello'},
+  dbpress:{k:'x_dbpress',cues:['Sentate con las mancuernas en los muslos y acostate llevándolas al pecho','Codos a unos 45° del cuerpo, no abiertos en cruz','Bajá hasta sentir el pecho estirado','Empujá juntándolas arriba sin chocarlas'],err:'Abrir los codos a 90° y cargar el hombro'},
+  incdbpress:{k:'x_incdbpress',cues:['Banco a 30°, mancuernas a la altura de los hombros','Codos un poco por debajo de los hombros','Empujá hacia arriba y adentro hasta casi juntarlas','Bajá lento hasta sentir el pecho estirado'],err:'Arquear de más la espalda para empujar'},
+  dbfly:{k:'x_dbfly',cues:['Mancuernas arriba con los codos apenas doblados','Abrí los brazos en arco sin cambiar el ángulo del codo','Bajá hasta la altura del pecho, sin pasarte','Volvé apretando el pecho, como abrazando un árbol'],err:'Doblar los codos y convertirlo en un press'},
+  cablefly:{k:'x_cablefly',cues:['Poleas altas, un paso adelante y el torso apenas inclinado','Codos levemente doblados y fijos','Juntá las manos adelante, a la altura del pecho o un poco más abajo','Volvé lento hasta sentir el estiramiento'],err:'Tirar doblando los codos en vez de cerrar con el pecho'},
+  pecdeck:{k:'x_pecdeck',cues:['Asiento a la altura justa: codos a la altura de los hombros','Antebrazos o manos en las almohadillas','Juntá adelante apretando el pecho y pausá un segundo','Volvé lento sin que el peso golpee'],err:'Empujar con las manos en vez de cerrar con el pecho'},
+  chestpress:{k:'x_chestpress',cues:['Regulá el asiento: los agarres a la altura del medio del pecho','Espalda apoyada en el respaldo todo el recorrido','Empujá hasta estirar los brazos sin trabar los codos','Volvé lento hasta que las manos lleguen al pecho'],err:'Despegar la espalda del respaldo para empujar'},
+  pushup:{k:'x_pushup',cues:['Manos un poco más abiertas que los hombros','Cuerpo recto de la cabeza a los talones, abdomen firme','Bajá hasta que el pecho casi toque el piso','Codos a unos 45° del cuerpo al bajar'],err:'Dejar caer la cadera o sacar la cola para arriba'},
+  declpushup:{k:'x_declpushup',cues:['Pies arriba de un banco o cajón, manos en el piso','Cuerpo recto, abdomen y glúteos firmes','Bajá hasta que el pecho casi toque el piso','Más alto el cajón, más trabajo de pecho alto y hombro'],err:'Doblar la cadera en vez de bajar el pecho'}
+});
+/* Lote 2: espalda */
+Object.assign(XT,{
+  pullup:{k:'pullup',cues:['Agarre un poco más abierto que los hombros, palmas hacia adelante','Arrancá colgado con los brazos estirados y los hombros activos','Tirá llevando los codos hacia abajo y atrás hasta pasar el mentón','Bajá controlado hasta estirar los brazos'],err:'Balancearse o hacer medio recorrido'},
+  chinup:{k:'x_chinup',cues:['Agarre al ancho de hombros, palmas hacia vos','Arrancá colgado con los brazos estirados','Tirá hasta pasar el mentón, con el pecho hacia la barra','Bajá lento, sin soltar de golpe'],err:'Patear o balancearse para subir'},
+  latpull:{k:'x_latpull',cues:['Sentado, con las rodillas trabadas bajo el apoyo','Agarre un poco más abierto que los hombros','Tirá la barra a la parte alta del pecho, con el torso apenas atrás','Subí lento hasta estirar los brazos'],err:'Tirar la barra detrás de la nuca o tirarse muy para atrás'},
+  assistpull:{k:'x_assistpull',cues:['Rodillas en la plataforma; más peso = más ayuda','Agarre un poco más abierto que los hombros','Tirá hasta pasar el mentón llevando los codos abajo','Bajá lento hasta estirar los brazos'],err:'Dejar que la plataforma haga todo el trabajo'},
+  row:{k:'x_row',cues:['Rodillas apenas dobladas y torso inclinado a unos 45°','Espalda neutra, la barra cuelga con los brazos estirados','Llevá la barra al abdomen juntando los omóplatos','Bajá controlado sin redondear la espalda'],err:'Redondear la espalda o pararse con el impulso'},
+  dbrow:{k:'x_dbrow',cues:['Rodilla y mano del mismo lado apoyadas en el banco','Espalda plana, paralela al piso','Tirá la mancuerna hacia la cadera, con el codo pegado al cuerpo','Bajá hasta estirar el brazo sin girar el torso'],err:'Girar el torso para subir más peso'},
+  cablerow:{k:'x_cablerow',cues:['Sentado, pies en la plataforma y rodillas apenas dobladas','Torso derecho, sin hamacarte','Tirá el agarre hacia el abdomen juntando los omóplatos','Volvé estirando los brazos sin redondear la espalda'],err:'Tirar con el cuerpo hacia atrás en cada repetición'},
+  machrow:{k:'x_machrow',cues:['Regulá el asiento para que el pecho quede contra el apoyo','Agarrá las manijas con los brazos estirados','Tirá hacia atrás juntando los omóplatos','Volvé lento sin despegar el pecho'],err:'Despegar el pecho del apoyo para tirar'},
+  pullover:{k:'x_pullover',cues:['Polea alta, un paso atrás y el torso apenas inclinado','Brazos casi rectos, codos apenas doblados','Bajá la barra en arco hasta los muslos con la espalda','Volvé lento hasta arriba de la cabeza'],err:'Doblar los codos y convertirlo en un tríceps'},
+  deadlift:{k:'x_deadlift',cues:['Barra sobre el medio del pie, canillas casi tocándola','Cadera arriba de las rodillas, espalda neutra y pecho arriba','Empujá el piso con las piernas y llevá la barra pegada al cuerpo','Terminá parado derecho, sin tirarte para atrás'],err:'Redondear la espalda o alejar la barra del cuerpo'},
+  shrug:{k:'shrug',cues:['Parado derecho, la barra colgando con los brazos estirados','Subí los hombros derecho hacia las orejas','Pausá un segundo arriba','Bajá lento, sin girar los hombros'],err:'Doblar los codos o hacer círculos con los hombros'},
+  hyper:{k:'x_hyper',cues:['Cadera apoyada en el borde del banco, pies trabados','Brazos cruzados en el pecho','Bajá el torso con la espalda recta','Subí hasta alinear el cuerpo, sin pasarte para atrás'],err:'Arquear de más la espalda arriba'},
+  neckiso:{k:'neck',cues:['Mano contra la frente, la nuca o el costado de la cabeza','Empujá con la cabeza contra la mano sin moverla','Sostené los segundos y cambiá de dirección','Fuerza media, sin dolor'],err:'Empujar de golpe o al máximo'}
+});
+/* Lote 3: hombros */
+Object.assign(XT,{
+  ohp:{k:'x_ohp',cues:['De pie, la barra apoyada adelante de los hombros','Abdomen y glúteos firmes, sin arquear la espalda','Empujá la barra derecho hacia arriba, corriendo la cabeza apenas atrás','Terminá con la barra arriba de la cabeza y los brazos estirados'],err:'Arquear la espalda baja para empujar'},
+  dbohp:{k:'x_dbohp',cues:['Sentado con la espalda apoyada en el respaldo','Mancuernas a los costados de los hombros, codos un poco adelante','Empujá hacia arriba hasta casi juntarlas','Bajá controlado hasta la altura de las orejas'],err:'Despegar la espalda del respaldo'},
+  machpress:{k:'x_machpress',cues:['Regulá el asiento: los agarres a la altura de los hombros','Espalda apoyada todo el recorrido','Empujá hacia arriba sin trabar los codos','Bajá lento hasta la altura de los hombros'],err:'Despegar la espalda o bajar de golpe'},
+  lateral:{k:'x_lateral',cues:['De pie, mancuernas al costado y codos apenas doblados','Subí los brazos hacia los costados hasta la altura de los hombros','Pensá en llevar los codos hacia afuera, no las manos','Bajá lento, sin balancear el cuerpo'],err:'Subir con impulso o encoger los hombros'},
+  frontraise:{k:'x_frontraise',cues:['De pie, mancuernas adelante de los muslos','Brazos casi estirados','Subí hacia adelante hasta la altura de los hombros','Bajá lento sin hamacarte'],err:'Tirarse para atrás para subir el peso'},
+  reardelt:{k:'x_reardelt',cues:['Inclinado con la espalda recta, casi paralela al piso','Mancuernas colgando, codos apenas doblados','Abrí los brazos hacia los costados apretando la parte de atrás del hombro','Bajá lento sin levantar el torso'],err:'Juntar los omóplatos y convertirlo en un remo'},
+  facepull:{k:'x_facepull',cues:['Polea alta con cuerda, un paso atrás','Tirá la cuerda hacia la cara separando las manos','Codos altos, a la altura de los hombros o más','Volvé lento estirando los brazos'],err:'Tirar hacia el pecho con los codos bajos'},
+  uprightrow:{k:'x_uprightrow',cues:['Barra adelante de los muslos, agarre al ancho de hombros','Subí la barra pegada al cuerpo hasta el pecho','Los codos van arriba y hacia afuera, por encima de las manos','Bajá controlado'],err:'Subir más allá del pecho si molesta el hombro'}
+});
+/* Lote 4: brazos */
+Object.assign(XT,{
+  dips:{k:'dip',cues:['Brazos estirados sobre las paralelas, hombros abajo','Bajá doblando los codos hasta unos 90°','Torso derecho para tríceps, un poco adelante para pecho','Subí hasta estirar los brazos sin balancearte'],err:'Bajar de más y forzar el hombro'},
+  curl:{k:'x_curl',cues:['De pie, la barra con las palmas hacia adelante','Codos pegados al costado del cuerpo','Subí la barra doblando solo los codos','Bajá lento hasta estirar los brazos'],err:'Balancear el cuerpo o adelantar los codos'},
+  dbcurl:{k:'x_dbcurl',cues:['De pie, una mancuerna en cada mano','Subí una girando la palma hacia vos','Codo quieto al costado del cuerpo','Bajá lento y alterná con la otra'],err:'Hamacar el cuerpo para subir'},
+  hammer:{k:'x_hammer',cues:['Palmas enfrentadas todo el recorrido (agarre martillo)','Codos pegados al cuerpo','Subí la mancuerna sin girar la muñeca','Bajá controlado'],err:'Adelantar los codos para ayudarte'},
+  cablecurl:{k:'x_cablecurl',cues:['Polea baja, de pie frente a la máquina','Codos pegados al cuerpo','Subí el agarre doblando solo los codos','Bajá lento: el cable tira todo el recorrido'],err:'Inclinarse atrás para subir'},
+  preacher:{k:'x_preacher',cues:['Sentado, la parte de atrás del brazo bien apoyada en la almohadilla','Arrancá con el brazo casi estirado','Subí doblando el codo sin despegar el brazo','Bajá lento, sin trabar el codo abajo'],err:'Levantar la cola o los codos de la almohadilla'},
+  pushdown:{k:'x_pushdown',cues:['Polea alta, codos pegados al cuerpo','Arrancá con los antebrazos a la altura del pecho','Empujá hacia abajo hasta estirar los brazos','Volvé lento sin que se muevan los codos'],err:'Abrir los codos o empujar con el cuerpo'},
+  ohtri:{k:'x_ohtri',cues:['Una mancuerna con las dos manos arriba de la cabeza','Brazos verticales, codos apuntando al techo','Bajá la mancuerna detrás de la cabeza doblando solo los codos','Estirá los brazos sin arquear la espalda'],err:'Abrir los codos hacia los costados'},
+  kickback:{k:'x_kickback',cues:['Inclinado con la espalda recta','Brazo pegado al cuerpo, paralelo al piso','Estirá el codo llevando la mancuerna hacia atrás','Volvé lento sin mover el brazo'],err:'Bajar el codo y hacer un péndulo'},
+  skull:{k:'x_skull',cues:['Acostado, la barra arriba con los brazos un poco hacia atrás','Bajá la barra hacia la frente doblando solo los codos','Codos cerrados, apuntando al techo','Estirá los brazos sin mover los hombros'],err:'Abrir los codos o mover los hombros'},
+  wrist:{k:'wrist',cues:['Sentado, antebrazos apoyados en los muslos','Las muñecas quedan por fuera de las rodillas','Subí la barra flexionando solo las muñecas','Bajá lento hasta estirar'],err:'Levantar los antebrazos de las piernas'},
+  farmer:{k:'x_farmer',cues:['Una mancuerna pesada en cada mano','Parado derecho, hombros atrás y abdomen firme','Caminá a pasos cortos sin que se balanceen','Anotá los segundos que aguantás'],err:'Inclinarse hacia un lado o encorvarse'}
+});
+/* Lote 5: piernas, cuádriceps */
+Object.assign(XT,{
+  squat:{k:'x_squat',cues:['Barra en la espalda alta, no en el cuello','Pies al ancho de hombros, puntas un poco afuera','Bajá sentándote atrás y abajo, rodillas en la línea de los pies','Subí empujando el piso, con el pecho arriba'],err:'Que las rodillas se vayan hacia adentro o levantar los talones'},
+  frontsquat:{k:'x_frontsquat',cues:['Barra adelante sobre los hombros, codos bien altos','Torso lo más derecho posible','Bajá profundo con las rodillas hacia adelante','Subí sin dejar caer los codos'],err:'Bajar los codos y que la barra se vaya para adelante'},
+  smithsquat:{k:'x_smithsquat',cues:['La barra del Smith en la espalda alta','Pies un poco adelante de la barra','Bajá controlado hasta que los muslos queden paralelos al piso','Subí empujando con todo el pie'],err:'Pies justo debajo de la barra: carga de más las rodillas'},
+  legpress:{k:'x_legpress',cues:['Espalda y cola bien apoyadas en el respaldo','Pies al ancho de hombros en el medio de la plataforma','Bajá hasta que las rodillas lleguen cerca del pecho sin despegar la cola','Empujá sin trabar las rodillas arriba'],err:'Despegar la cola del asiento al bajar'},
+  hacksquat:{k:'x_hacksquat',cues:['Espalda contra el respaldo, hombros bajo las almohadillas','Pies al ancho de hombros en la plataforma','Bajá profundo con las rodillas en la línea de los pies','Subí empujando sin trabar las rodillas'],err:'Levantar los talones de la plataforma'},
+  goblet:{k:'x_goblet',cues:['Una mancuerna parada contra el pecho','Codos adentro, entre las rodillas al bajar','Bajá profundo con el torso derecho','Subí empujando el piso'],err:'Inclinarse adelante y redondear la espalda'},
+  legext:{k:'x_legext',cues:['Sentado con la espalda apoyada y la rodilla en el borde del asiento','El rodillo apoyado en el tobillo, adelante','Estirá las rodillas y pausá un segundo arriba','Bajá lento sin que el peso golpee'],err:'Levantar la cola del asiento o patear con impulso'},
+  lunge:{k:'x_lunge',cues:['Da un paso largo adelante, torso derecho','Bajá la rodilla de atrás hasta casi tocar el piso','La rodilla de adelante, en la línea del pie','Empujá con la pierna de adelante para volver'],err:'Que la rodilla de adelante se vaya hacia adentro'},
+  bulgarian:{k:'x_bulgarian',cues:['El empeine del pie de atrás apoyado en el banco','El pie de adelante a un paso largo del banco','Bajá la cadera derecho hasta que el muslo de adelante quede paralelo','Subí empujando con la pierna de adelante'],err:'Pie de adelante demasiado cerca del banco'},
+  stepup:{k:'x_stepup',cues:['Pie entero arriba del cajón','Subí empujando con la pierna de arriba, sin impulsarte con la de abajo','Pará derecho arriba del cajón','Bajá controlado y alterná'],err:'Impulsarte con el pie de abajo'},
+  boxjump:{k:'jump',cues:['Pies al ancho de cadera frente al cajón','Bajá un poco y llevá los brazos atrás','Saltá con los dos pies y caé suave arriba, con las rodillas dobladas','Bajá caminando, no saltando'],err:'Caer con las piernas rectas'},
+  jumpsquat:{k:'x_jumpsquat',cues:['Bajá a media sentadilla con los brazos atrás','Saltá lo más alto que puedas llevando los brazos arriba','Caé suave en la punta de los pies','Amortiguá doblando las rodillas y repetí'],err:'Caer con las rodillas trabadas'}
+});
+/* Lote 6: femoral y glúteo */
+Object.assign(XT,{
+  legcurl:{k:'x_legcurl',cues:['Boca abajo, las rodillas justo pasando el borde del banco','El rodillo apoyado detrás de los tobillos','Llevá los talones hacia los glúteos sin levantar la cadera','Bajá lento hasta estirar casi del todo'],err:'Levantar la cadera del banco para ayudarte'},
+  seatlegcurl:{k:'x_seatlegcurl',cues:['Sentado con la espalda apoyada y el apoyo trabando los muslos','El rodillo detrás de los tobillos, piernas estiradas','Llevá los talones hacia abajo y atrás, debajo del asiento','Volvé lento sin que el peso golpee'],err:'Despegar la cola del asiento'},
+  rdl:{k:'x_rdl',cues:['De pie, la barra pegada a los muslos','Rodillas apenas dobladas y fijas','Llevá la cadera atrás bajando la barra pegada a las piernas hasta media canilla','Volvé empujando la cadera adelante, sin redondear la espalda'],err:'Doblar las rodillas y convertirlo en un peso muerto común'},
+  kbswing:{k:'x_kbswing',cues:['Pies un poco más abiertos que los hombros','Llevá la pesa atrás entre las piernas, con la cadera hacia atrás','Empujá la cadera adelante con fuerza: la pesa sube sola hasta el pecho','Los brazos solo acompañan, no levantan'],err:'Hacer una sentadilla o levantar la pesa con los brazos'},
+  hipthrust:{k:'x_hipthrust',cues:['Parte alta de la espalda apoyada en el banco','Barra sobre la cadera (con almohadilla), pies firmes en el piso','Subí la cadera hasta alinear rodillas, cadera y hombros','Apretá los glúteos arriba y bajá controlado'],err:'Arquear la espalda baja en vez de subir con la cadera'},
+  hipabd:{k:'x_hipabd',cues:['Sentado con la espalda apoyada, almohadillas por fuera de las rodillas','Abrí las piernas empujando hacia afuera','Pausá un segundo bien abierto','Volvé lento sin que se junten de golpe'],err:'Tirarse adelante para empujar'},
+  hipadd:{k:'x_hipadd',cues:['Sentado con la espalda apoyada, almohadillas por dentro de las rodillas','Arrancá con las piernas abiertas, sin forzar','Cerrá las piernas apretando la parte interna del muslo','Volvé lento'],err:'Abrir de más al volver y forzar la ingle'},
+  glutekick:{k:'x_glutekick',cues:['Tobillera en la polea baja, de frente a la máquina','Agarrate de la máquina con el torso apenas inclinado','Llevá la pierna estirada hacia atrás apretando el glúteo','Volvé lento sin arquear la espalda'],err:'Arquear la espalda baja para subir más la pierna'},
+  nordic:{k:'x_nordic',cues:['De rodillas, con los tobillos sujetos por un compañero o un apoyo','Cuerpo recto de las rodillas a la cabeza','Bajá lo más lento que puedas frenando con la parte de atrás de los muslos','Poné las manos al final y volvé empujando un poco'],err:'Doblar la cadera en vez de bajar con el cuerpo recto'},
+  copenhagen:{k:'sideplank',cues:['De costado, apoyado en el antebrazo','La pierna de arriba sobre un banco, a la altura de la rodilla o del tobillo','Subí la cadera hasta alinear el cuerpo','Sostené los segundos y cambiá de lado'],err:'Dejar caer la cadera'}
+});
+/* Lote 7: pantorrilla */
+Object.assign(XT,{
+  calf:{k:'x_calf',cues:['Las puntas de los pies en el borde del escalón, hombros bajo las almohadillas','Rodillas estiradas pero sin trabar','Subí lo más alto que puedas en puntas de pie y pausá arriba','Bajá lento hasta sentir el estiramiento abajo'],err:'Rebotar abajo o hacer medio recorrido'},
+  seatedcalf:{k:'x_seatedcalf',cues:['Sentado, rodillas a 90° y la almohadilla sobre los muslos','Las puntas de los pies en el escalón','Subí los talones lo más alto posible y pausá','Bajá lento hasta estirar'],err:'Rebotar con impulso'},
+  presscalf:{k:'x_presscalf',cues:['En la prensa, las puntas de los pies en el borde de abajo de la plataforma','Piernas estiradas sin trabar las rodillas','Empujá la plataforma solo con los tobillos','Volvé lento hasta sentir el estiramiento'],err:'Doblar las rodillas para empujar'}
+});
+/* lote 8: core */
+Object.assign(XT,{
+  crunch:{k:'x_crunch',cues:['Rodillas dobladas y pies apoyados','Brazos cruzados sobre el pecho (o manos en las sienes, sin tirar)','Despegá los hombros enrollando la parte alta de la espalda','La zona lumbar queda pegada al piso'],err:'Tirar de la cabeza con las manos o subir el torso entero con impulso'},
+  legraise:{k:'x_legraise',cues:['Colgado de la barra, hombros activos','Subí las piernas rectas hasta la altura de la cadera o más','Al final, llevá la pelvis hacia arriba','Bajá lento, sin balancearte'],err:'Balancearse y subir las piernas con impulso en vez de con el abdomen'},
+  plank:{k:'x_plank',cues:['Antebrazos en el piso, codos debajo de los hombros','Cuerpo en línea recta de la cabeza a los talones','Apretá glúteos y abdomen','Respirá parejo mientras sostenés'],err:'Dejar caer la cadera o subirla en pico'},
+  russian:{k:'x_russian',cues:['Sentado, torso inclinado atrás y pies despegados (apoyalos para hacerlo más fácil)','Manos juntas (o con un disco)','Girá el torso entero y llevá las manos al costado de la cadera','Espalda larga, sin encorvarte'],err:'Mover solo los brazos sin girar el torso'},
+  pallof:{k:'x_pallof',cues:['De costado a la polea, el agarre pegado al pecho','Empujá los brazos al frente y sostené un segundo','El torso no gira hacia la polea','Pies al ancho de los hombros y glúteos firmes'],err:'Dejar que la polea te gire o arquear la espalda'},
+  medslam:{k:'x_medslam',cues:['Subí el balón bien arriba, con el cuerpo estirado','Estrellalo contra el piso delante de los pies con todo el cuerpo','Flexioná cadera y rodillas al bajar','Levantalo con la espalda recta'],err:'Tirarlo solo con los brazos, sin usar el abdomen ni la cadera'},
+  cablecrunch:{k:'x_cablecrunch',cues:['De rodillas frente a la polea alta, la soga junto a la cara','La cadera queda quieta','Enrollá el torso llevando los codos hacia los muslos','Volvé lento sin soltar la tensión'],err:'Sentarse sobre los talones y tirar con los brazos en vez de enrollar el abdomen'},
+  abwheel:{k:'x_abwheel',cues:['De rodillas, la rueda debajo de los hombros','Rodá adelante estirando cadera y brazos a la vez','Llegá hasta donde puedas sin arquear la espalda','Volvé tirando con el abdomen'],err:'Hundir la zona lumbar al estirarse'},
+  mtclimb:{k:'x_mtclimb',cues:['Plancha alta, manos debajo de los hombros','Llevá una rodilla al pecho y cambiá de pierna rápido','La cadera queda baja y quieta','Mantené el ritmo respirando'],err:'Subir la cadera en pico o rebotar con todo el cuerpo'},
+  deadbug:{k:'x_deadbug',cues:['Boca arriba, brazos al techo y rodillas a 90°','Estirá un brazo hacia atrás y la pierna contraria hacia adelante','La zona lumbar pegada al piso todo el tiempo','Volvé y cambiá de lado, lento'],err:'Arquear la espalda al estirar la pierna'}
+});
+TECH.x_planchepush={eq:['floor'],A:{h:[37,88],n:[46,92],p:[78,92],k:[94,92],f:[110,92],e:[43,101],a:[40,110]},B:{h:[27,95],n:[36,97],p:[66,99],k:[84,100],f:[102,100],e:[49.4,101],a:[40,110]}};
+/* lote 9: calistenia y habilidades (las variantes de cada familia con su clave propia) */
+Object.assign(XT,{
+  archerpush:{k:'x_archerpush',cues:['Manos bien abiertas','Bajá hacia un lado, el otro brazo queda estirado','Cuerpo recto, sin rotar','Alterná los lados'],err:'Doblar el brazo que tiene que quedar estirado'},
+  oapush:{k:'x_oapush',cues:['Piernas abiertas para equilibrar','La otra mano en la espalda','Bajá sin rotar la cadera','Empujá con el pecho y el tríceps'],err:'Girar el cuerpo para ayudarte'},
+  planchepush:{k:'x_planchepush',cues:['Arrancá en planche con los brazos estirados','Bajá doblando los codos hacia atrás, pegados al cuerpo','Los hombros siguen adelante de las manos','Empujá hasta trabar los brazos sin apoyar los pies'],err:'Abrir los codos o bajar la cadera'},
+  impdip:{k:'x_impdip',cues:['Antebrazos apoyados en las paralelas, codos debajo de los hombros','Cuerpo vertical y firme','Empujá hasta estirar los brazos sin balancearte','Volvé lento a los antebrazos'],err:'Tirarte adelante para usar el impulso'},
+  tuckfl:{k:'fltuck',cues:['Brazos estirados y hombros bajos','Cuerpo rígido, boca arriba y horizontal','Empujá la barra hacia la cadera con los dorsales','Rodillas al pecho y la espalda plana'],err:'Doblar los codos o dejar caer la cadera'},
+  advfl:{k:'fladv',cues:['Brazos estirados y hombros bajos','Cuerpo rígido, boca arriba y horizontal','Empujá la barra hacia la cadera con los dorsales','Muslos a 90° del torso, espalda plana (no redonda)'],err:'Doblar los codos o dejar caer la cadera'},
+  straddlefl:{k:'flstr',cues:['Brazos estirados y hombros bajos','Cuerpo rígido, boca arriba y horizontal','Empujá la barra hacia la cadera con los dorsales','Piernas estiradas y bien abiertas para acortar la palanca'],err:'Doblar los codos o dejar caer la cadera'},
+  fullfl:{k:'flfull',cues:['Brazos estirados y hombros bajos','Cuerpo rígido, boca arriba y horizontal','Empujá la barra hacia la cadera con los dorsales','Piernas juntas y estiradas, en línea con el torso'],err:'Doblar los codos o dejar caer la cadera'},
+  onelegfl:{k:'flone',cues:['Brazos estirados y hombros bajos','Cuerpo rígido, boca arriba y horizontal','Empujá la barra hacia la cadera con los dorsales','Una pierna estirada y la otra al pecho; alterná'],err:'Doblar los codos o dejar caer la cadera'},
+  tuckbl:{k:'bltuck',cues:['Brazos rectos detrás del cuerpo, boca abajo','Escápulas juntas y hombros abajo','Abdomen y glúteos firmes','Rodillas al pecho, cadera a la altura de los hombros'],err:'Doblar los codos o forzar el hombro'},
+  advbl:{k:'bladv',cues:['Brazos rectos detrás del cuerpo, boca abajo','Escápulas juntas y hombros abajo','Abdomen y glúteos firmes','Muslos a 90° y espalda plana'],err:'Doblar los codos o forzar el hombro'},
+  straddlebl:{k:'blstr',cues:['Brazos rectos detrás del cuerpo, boca abajo','Escápulas juntas y hombros abajo','Abdomen y glúteos firmes','Piernas estiradas y abiertas'],err:'Doblar los codos o forzar el hombro'},
+  fullbl:{k:'blfull',cues:['Brazos rectos detrás del cuerpo, boca abajo','Escápulas juntas y hombros abajo','Abdomen y glúteos firmes','Piernas juntas, cuerpo en línea horizontal'],err:'Doblar los codos o forzar el hombro'},
+  tuckpl:{k:'pltuck',cues:['Brazos completamente estirados','Hombros bien adelante de las manos','Espalda alta redondeada, empujando el piso','Rodillas al pecho, cadera a la altura de los hombros'],err:'Doblar los codos'},
+  advpl:{k:'pladv',cues:['Brazos completamente estirados','Hombros bien adelante de las manos','Espalda alta redondeada, empujando el piso','Espalda plana y rodillas detrás de la cadera'],err:'Doblar los codos'},
+  straddlepl:{k:'plstr',cues:['Brazos completamente estirados','Hombros bien adelante de las manos','Espalda alta redondeada, empujando el piso','Piernas estiradas y abiertas, cuerpo horizontal'],err:'Doblar los codos'},
+  fullpl:{k:'planche',cues:['Brazos completamente estirados','Hombros bien adelante de las manos','Espalda alta redondeada, empujando el piso','Piernas juntas, el cuerpo entero horizontal'],err:'Doblar los codos'},
+  vflag:{k:'vflag',cues:['Mano de arriba tira, mano de abajo empuja','Brazos estirados','Cuerpo vertical y apretado, piernas juntas arriba','Es el paso previo a bajar a la bandera'],err:'Doblar el brazo de abajo'},
+  tuckflag:{k:'flagtuck',cues:['Mano de arriba tira, mano de abajo empuja','Brazos estirados','Cuerpo horizontal con las rodillas al pecho','Hombros firmes, sin girar'],err:'Doblar el brazo de abajo'},
+  straddleflag:{k:'flagstr',cues:['Mano de arriba tira, mano de abajo empuja','Brazos estirados','Piernas estiradas y abiertas','Cuerpo horizontal'],err:'Doblar el brazo de abajo'},
+  flag:{k:'flag',cues:['Mano de arriba tira, mano de abajo empuja','Brazos estirados','Piernas juntas y estiradas','Cuerpo horizontal y rígido'],err:'Doblar el brazo de abajo'},
+  negpull:{k:'x_negpull',cues:['Subí saltando o desde un cajón, con el mentón arriba de la barra','Bajá lo más lento que puedas (3 a 5 segundos)','Hombros activos hasta abajo','Volvé arriba sin tirar'],err:'Dejarte caer en la última parte'},
+  deadhang:{k:'x_deadhang',cues:['Agarre al ancho de los hombros, brazos estirados','Hombros activos, lejos de las orejas','Cuerpo quieto, sin balancearte','Respirá parejo'],err:'Colgarte flojo con los hombros en las orejas'},
+  hollow:{k:'x_hollow',cues:['Boca arriba, la zona lumbar pegada al piso','Despegá los hombros y las piernas estiradas','Brazos estirados hacia los pies (atrás de la cabeza es más difícil)','Sostené sin arquear'],err:'Despegar la zona lumbar del piso'},
+  clappush:{k:'x_clappush',cues:['Bajá como en una flexión común','Empujá explosivo para despegar las manos','Aplaudí rápido y volvé a apoyar','Caé con los codos blandos'],err:'Caer con los brazos trabados o hundir la cadera'},
+  sissy:{k:'x_sissy',cues:['En puntas de pie, brazos adelante para el equilibrio (o agarrate de algo)','Llevá las rodillas adelante y el cuerpo atrás','Línea recta de las rodillas a la cabeza','Bajá hasta donde controles y volvé'],err:'Doblar la cadera y sentarte atrás'}});
+/* lote 10: articulaciones y atleta */
+Object.assign(XT,{
+  spansq:{k:'x_spansq',cues:['Banda detrás de las rodillas, atada a algo firme adelante','Sentate atrás: las canillas quedan verticales','Torso derecho y el peso en los talones','Sostené a media sentadilla respirando'],err:'Dejar que las rodillas se vayan adelante con la banda'},
+  tibraise:{k:'x_tibraise',cues:['Espalda contra la pared y los talones un paso adelante','Piernas estiradas','Subí las puntas de los pies lo más que puedas','Bajá lento sin apoyar del todo'],err:'Despegar la espalda de la pared o doblar las rodillas'},
+  slcalf:{k:'x_slcalf',cues:['La punta de un pie en el borde del escalón','La otra pierna doblada atrás; apoyá una mano para el equilibrio','Subí bien alto en puntas','Bajá lento hasta que el talón pase el borde'],err:'Rebotar abajo sin recorrido completo'},
+  slbal:{k:'x_slbal',cues:['Parado en una pierna, la rodilla apenas flexionada','La otra rodilla arriba, a la altura de la cadera','Brazos a los costados y la mirada en un punto fijo','Cuando sea fácil, cerrá los ojos'],err:'Trabar la rodilla de apoyo o dejar caer la cadera'},
+  kneewall:{k:'x_kneewall',cues:['El pie de adelante a unos centímetros de la pared','Llevá la rodilla a tocar la pared','El talón no se despega del piso','Alejá el pie de a poco cuando llegues fácil'],err:'Levantar el talón para llegar a la pared'},
+  slbridge:{k:'x_slbridge',cues:['Boca arriba, un pie apoyado cerca de la cola','La otra pierna estirada en línea con el muslo','Subí la cadera con el glúteo hasta alinear el cuerpo','Sostené sin que la cadera se incline'],err:'Arquear la espalda baja en vez de usar el glúteo'},
+  sidepl:{k:'x_sidepl',cues:['De costado sobre el antebrazo, codo debajo del hombro','Pies juntos y la cadera arriba, cuerpo en línea','El otro brazo arriba o en la cintura','Aguantá respirando normal; hacé los dos lados'],err:'Dejar caer la cadera'},
+  birddog:{k:'x_birddog',cues:['En cuatro patas: manos debajo de los hombros, rodillas debajo de la cadera','Estirá un brazo adelante y la pierna contraria atrás','La cadera no se mueve ni gira','Pausa de 5 segundos y cambiá'],err:'Arquear la espalda o subir la pierna de más'},
+  curlup:{k:'x_curlup',cues:['Boca arriba, una pierna doblada y la otra estirada','Manos debajo de la zona lumbar','Despegá apenas la cabeza y los hombros, sin mover la espalda baja','Pausa de 8 a 10 segundos y bajá'],err:'Flexionar el cuello o la espalda baja para subir más'},
+  biering:{k:'x_biering',cues:['Cadera en el borde del banco, tobillos trabados','Brazos cruzados sobre el pecho','Cuerpo recto en línea con las piernas','Sostené sin arquear ni dejar caer el torso'],err:'Arquear la espalda baja para subir de más'},
+  extrot:{k:'x_extrot',cues:['Banda atada del otro lado, a la altura del codo','Codo pegado al cuerpo y doblado a 90°','Llevá la mano hacia afuera sin despegar el codo','Volvé lento contra la banda'],err:'Despegar el codo del cuerpo o girar el torso'},
+  wallslide:{k:'x_wallslide',cues:['Espalda, cabeza y brazos contra la pared','Arrancá con los brazos en W, codos a la altura de los hombros','Deslizá los brazos arriba hasta una Y sin despegarlos','Bajá lento a la W'],err:'Arquear la espalda baja o despegar los brazos de la pared'},
+  cmj:{k:'vjump',cues:['Bajada rápida a un cuarto de sentadilla','Tirá los brazos hacia arriba','Extendé tobillos, rodillas y cadera juntos','Caé suave, con las rodillas dobladas'],err:'Bajar demasiado lento (se pierde el rebote)'},
+  broadjump:{k:'broad',cues:['Balanceá los brazos atrás y adelante','Empujá con todo hacia adelante y arriba','Caé con los dos pies y aguantá la posición','Descansá bien entre saltos'],err:'Caer con las rodillas hacia adentro'},
+  pogo:{k:'x_pogo',cues:['Saltos cortos y rápidos en puntas de pie','Rodillas casi estiradas: el resorte es el tobillo','Tocá el piso lo menos posible','Brazos relajados al costado'],err:'Doblar las rodillas y caer con el talón'},
+  skater:{k:'x_skater',cues:['Saltá de costado de una pierna a la otra','La pierna libre cruza por detrás','Caé suave sobre una pierna y frená firme','La rodilla de apoyo en línea con el pie'],err:'Caer con la rodilla hacia adentro'},
+  sprint:{k:'sprint',cues:['Primeros pasos cortos y potentes, inclinado','Brazos fuertes, de la cadera a la cara','Pisá debajo del cuerpo, no adelante','Descanso completo entre sprints'],err:'Hacerlos cansado: pierde el sentido'},
+  burpee:{k:'x_burpee',cues:['Agachate y apoyá las manos en el piso','Saltá atrás a plancha con el cuerpo recto','Volvé los pies a las manos','Saltá arriba con los brazos sobre la cabeza'],err:'Hundir la cadera en la plancha'},
+  jumprope:{k:'x_jumprope',cues:['Manos a los costados de la cadera','El giro sale de las muñecas, no de los brazos','Saltitos bajos en puntas de pie','Mirá adelante y respirá parejo'],err:'Saltar demasiado alto o girar la soga con los hombros'},
+  bearcrawl:{k:'x_bearcrawl',cues:['Manos debajo de los hombros y rodillas debajo de la cadera','Rodillas a un par de centímetros del piso','Avanzá mano y pie contrarios a la vez','Espalda plana y cadera baja'],err:'Subir la cadera o apoyar las rodillas'},
+  highknees:{k:'x_highknees',cues:['Corré en el lugar en puntas de pie','Subí las rodillas a la altura de la cadera','Brazos contrarios a las piernas','Torso derecho, ritmo rápido'],err:'Echarte atrás o subir poco las rodillas'}});
+TECH.wallhs.wallX=64;TECH.hspu.wallX=64;
+/* arreglos lote 9: figura propia, con la técnica que ya tenían */
+[['muscleup','muscleup'],['diamond','diamond'],['russiandip','russiandip'],['lpullup','lpullup'],['oapull','oapull'],['archerpull','archerpull']].forEach(([id,o])=>{XT[id]=Object.assign({cues:TECH[o].cues,err:TECH[o].err},XT[id]||{},{k:'x_'+o});});
+/* la figura propia también lleva las claves de su ejercicio (para quien lea TECH directo) */
+Object.keys(XT).forEach(id=>{const x=XT[id],T=TECH[x.k];if(T&&x.cues&&!T.cues){T.cues=x.cues;T.err=x.err;}});
 /* claves propias de cada variante de habilidad (antes no tenían y su detalle no abría) */
 const VAR_CUES={
   invrow:[['Cuerpo recto de los talones a la cabeza','Tirá del pecho hacia la barra','Juntá las escápulas arriba','Más horizontal = más difícil'],'Dejar caer la cadera'],
@@ -599,9 +986,10 @@ Object.keys(VAR_CUES).forEach(k=>{if(TECH[k]&&!TECH[k].cues){TECH[k].cues=VAR_CU
 function techCard(ex){
   const k=techOf(ex),T=k&&TECH[k];if(!T)return '';
   /* respaldo: si una figura no trae claves, se usa la descripción del ejercicio */
-  const cues=T.cues||(ex.d?[ex.d]:[]);
+  /* SW-7: primero la técnica propia del ejercicio (XT); si no, la del tipo de movimiento */
+  const X=XT[ex.id]||{},cues=X.cues||T.cues||(ex.d?[ex.d]:[]),err=X.err||T.err;
   return '<div class="tech"><div class="tech-fig">'+techSVG(k)+'</div><div class="tech-txt"><h4>Cómo se hace</h4><ul>'+cues.map(c=>'<li>'+esc(c)+'</li>').join('')+'</ul>'+
-   (T.err?'<p class="tech-err">'+ic('x',14)+'<span><b>Error común:</b> '+esc(T.err)+'</span></p>':'')+'</div></div>'+vidSlot(ex);
+   (err?'<p class="tech-err">'+ic('x',14)+'<span><b>Error común:</b> '+esc(err)+'</span></p>':'')+'</div></div>'+vidSlot(ex);
 }
 
 /* ============ Recordatorios en el celular (notificaciones push) ============ */

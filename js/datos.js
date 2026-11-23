@@ -2,9 +2,9 @@
 /* ============ Datos fijos ============ */
 const TIERS=['Bronce','Plata','Oro','Platino','Diamante','Campeón','Élite'];
 const TCOL=['#C27A3F','#8794AC','#CC8A12','#1F9E95','#2F73E0','#8F43EA','#DA2A52'];
-const MUSC={pecho:'Pecho',hombros:'Hombros',biceps:'Bíceps',triceps:'Tríceps',antebrazos:'Antebrazos',abs:'Abdominales',oblicuos:'Oblicuos',trapecio:'Trapecio',dorsales:'Dorsales',lumbar:'Espalda baja',gluteos:'Glúteos',cuadriceps:'Cuádriceps',isquios:'Isquiotibiales',gemelos:'Gemelos',aductores:'Aductores'};
-const LOWER=['cuadriceps','gluteos','isquios','gemelos','lumbar','aductores'];
-const GROUPS={Pecho:['pecho'],Espalda:['dorsales','trapecio','lumbar'],Hombros:['hombros'],Brazos:['biceps','triceps','antebrazos'],Piernas:['cuadriceps','gluteos','isquios','gemelos','aductores'],Core:['abs','oblicuos']};
+const MUSC={pecho:'Pecho',hombros:'Hombros',biceps:'Bíceps',triceps:'Tríceps',antebrazos:'Antebrazos',abs:'Abdominales',oblicuos:'Oblicuos',trapecio:'Trapecio',dorsales:'Dorsales',lumbar:'Espalda baja',gluteos:'Glúteos',cuadriceps:'Cuádriceps',isquios:'Isquiotibiales',gemelos:'Gemelos',tibial:'Tibial anterior',aductores:'Aductores'};
+const LOWER=['cuadriceps','gluteos','isquios','gemelos','tibial','lumbar','aductores'];
+const GROUPS={Pecho:['pecho'],Espalda:['dorsales','trapecio','lumbar'],Hombros:['hombros'],Brazos:['biceps','triceps','antebrazos'],Piernas:['cuadriceps','gluteos','isquios','gemelos','tibial','aductores'],Core:['abs','oblicuos']};
 const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const DIAS=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 const DIAS3={1:'Lun',2:'Mar',3:'Mié',4:'Jue',5:'Vie',6:'Sáb',0:'Dom'};
@@ -15,45 +15,82 @@ function E(id,n,eq,p,s,d,st,o){return Object.assign({id,n,eq,p,s,d,st:st||null,r
 /* st = [razón 1RM/peso corporal en Bronce 1, razón en Élite] para un hombre adulto.
    Las filas con ph usan peso por mancuerna. bw = fracción del peso corporal que se mueve. */
 const EX=[
-E('bench','Press banca','Barra',['pecho'],['triceps','hombros'],'Bajá la barra hasta el pecho y empujá sin despegar la espalda del banco.',[.30,2.10]),
-E('incbench','Press inclinado','Barra',['pecho'],['hombros','triceps'],'Banco a 30°. Bajá la barra a la parte alta del pecho y empujá.',[.25,1.75]),
-E('dbpress','Press con mancuernas','Mancuernas',['pecho'],['triceps','hombros'],'Empujá las mancuernas hacia arriba juntándolas sin chocarlas.',[.12,.85],{ph:1}),
+E('bench','Press plano con barra','Barra',['pecho'],['triceps','hombros'],'Acostado en el banco plano: bajá la barra al pecho y empujá sin despegar la cola del banco.',[.30,2.10]),
+E('incbench','Press inclinado con barra','Barra',['pecho'],['hombros','triceps'],'Banco a 30–45°: bajá la barra a la parte alta del pecho y empujá.',[.25,1.75]),
+E('dbpress','Press plano con mancuernas','Mancuernas',['pecho'],['triceps','hombros'],'Banco plano: empujá las mancuernas hacia arriba juntándolas sin chocarlas.',[.12,.85],{ph:1}),
 E('dbfly','Aperturas con mancuernas','Mancuernas',['pecho'],['hombros'],'Abrí los brazos con codos semiflexionados y volvé apretando el pecho.',[.04,.38],{ph:1}),
-E('cablefly','Cruces en polea','Polea',['pecho'],['hombros'],'Juntá las manos al frente con los codos levemente flexionados.',[.08,.55],{ph:1}),
+E('cablefly','Cruce de poleas','Polea',['pecho'],['hombros'],'Juntá las manos al frente con los codos levemente flexionados.',[.08,.55],{ph:1}),
 E('pushup','Flexiones','Peso corporal',['pecho'],['triceps','hombros','abs'],'Cuerpo en línea recta. Bajá el pecho al piso y empujá.',null,{sk:{f:'push',b:2.2,u:11.1,t:30}}),
+/* SW-7, nuevos de pecho */
+E('declbench','Press declinado con barra','Barra',['pecho'],['triceps','hombros'],'Banco declinado con las piernas trabadas: bajá la barra a la parte baja del pecho y empujá.',[.32,2.15]),
+E('incdbpress','Press inclinado con mancuernas','Mancuernas',['pecho'],['hombros','triceps'],'Banco a 30°: empujá las mancuernas hacia arriba y adentro desde la altura de los hombros.',[.10,.75],{ph:1}),
+E('chestpress','Press de pecho en máquina','Máquina',['pecho'],['triceps','hombros'],'Sentado con la espalda apoyada, empujá los agarres al frente sin trabar los codos.',[.25,1.70]),
+E('pecdeck','Pec deck (contractora)','Máquina',['pecho'],['hombros'],'Codos a la altura de los hombros: cerrá los brazos adelante apretando el pecho.',[.30,2.10]),
+E('declpushup','Flexiones con pies elevados','Peso corporal',['pecho'],['hombros','triceps','abs'],'Pies en un banco o cajón: bajá el pecho al piso con el cuerpo recto.',null,{bw:.75}),
 E('dips','Fondos en paralelas','Peso corporal',['triceps','pecho'],['hombros'],'Bajá hasta que el codo llegue a 90° y subí sin balancearte.',[1.03,2.20],{bw:1}),
 E('pullup','Dominadas','Barra fija',['dorsales'],['biceps','trapecio','antebrazos'],'Colgate y llevá el mentón sobre la barra tirando con la espalda.',[1.03,2.0],{bw:1}),
 E('latpull','Jalón al pecho','Polea',['dorsales'],['biceps','trapecio'],'Tirá la barra hacia la parte alta del pecho con el torso firme.',[.35,1.50]),
 E('row','Remo con barra','Barra',['dorsales','trapecio'],['biceps','lumbar','hombros'],'Torso inclinado y espalda neutra. Llevá la barra hacia el abdomen.',[.30,1.70]),
-E('dbrow','Remo con mancuerna','Mancuerna',['dorsales'],['biceps','trapecio'],'Apoyá una mano en el banco y tirá la mancuerna hacia la cadera.',[.12,.85],{ph:1}),
-E('cablerow','Remo en polea baja','Polea',['dorsales','trapecio'],['biceps'],'Sentado, tirá del agarre hacia el abdomen juntando los omóplatos.',[.35,1.50]),
-E('deadlift','Peso muerto','Barra',['lumbar','gluteos','isquios'],['trapecio','antebrazos','cuadriceps'],'Barra pegada al cuerpo. Empujá el piso con las piernas y extendé la cadera.',[.50,3.0]),
-E('facepull','Face pull','Polea',['hombros','trapecio'],['dorsales'],'Tirá la cuerda hacia la cara abriendo los codos.',[.10,.60]),
-E('shrug','Encogimientos','Barra',['trapecio'],['antebrazos'],'Subí los hombros hacia las orejas y bajá controlado.',[.40,2.20]),
+E('dbrow','Remo con mancuerna a una mano','Mancuerna',['dorsales'],['biceps','trapecio'],'Apoyá una mano en el banco y tirá la mancuerna hacia la cadera.',[.12,.85],{ph:1}),
+E('cablerow','Remo sentado en polea baja','Polea',['dorsales','trapecio'],['biceps'],'Sentado, tirá del agarre hacia el abdomen juntando los omóplatos.',[.35,1.50]),
+E('deadlift','Peso muerto','Barra',['lumbar','gluteos','isquios'],['trapecio','antebrazos','cuadriceps'],'Arrancá con la barra en el piso sobre el medio del pie: empujá con las piernas y extendé la cadera con la barra pegada al cuerpo.',[.50,3.0]),
+E('facepull','Face pull','Polea',['hombros','trapecio'],['dorsales'],'Polea alta con cuerda: tirá hacia la cara con los codos altos, separando las manos.',[.10,.60]),
+E('shrug','Encogimientos de hombros','Barra',['trapecio'],['antebrazos'],'Subí los hombros hacia las orejas y bajá controlado.',[.40,2.20]),
+/* SW-7, nuevos de espalda */
+E('chinup','Dominadas supinas','Barra fija',['dorsales','biceps'],['trapecio','antebrazos'],'Palmas hacia vos: subí hasta pasar el mentón y bajá controlado.',[1.03,2.05],{bw:1}),
+E('assistpull','Dominadas asistidas en máquina','Máquina',['dorsales'],['biceps','trapecio'],'De rodillas en la plataforma: subí hasta pasar el mentón. Más peso = más ayuda.'),
+E('machrow','Remo sentado en máquina','Máquina',['dorsales','trapecio'],['biceps','hombros'],'Pecho contra el apoyo: tirá de las manijas hacia atrás juntando los omóplatos.',[.30,1.60]),
+E('pullover','Pullover en polea alta','Polea',['dorsales'],['pecho','triceps'],'Brazos casi rectos: bajá la barra en arco desde arriba de la cabeza hasta los muslos.',[.12,.80]),
 E('ohp','Press militar','Barra',['hombros'],['triceps','trapecio','abs'],'De pie, empujá la barra sobre la cabeza con el abdomen firme.',[.20,1.35]),
-E('dbohp','Press de hombros con mancuernas','Mancuernas',['hombros'],['triceps'],'Empujá las mancuernas hacia arriba hasta extender los brazos.',[.10,.65],{ph:1}),
+E('dbohp','Press de hombros con mancuernas','Mancuernas',['hombros'],['triceps'],'Sentado con respaldo: empujá las mancuernas desde los hombros hasta estirar los brazos.',[.10,.65],{ph:1}),
 E('lateral','Elevaciones laterales','Mancuernas',['hombros'],['trapecio'],'Subí los brazos a los costados hasta la altura de los hombros.',[.03,.28],{ph:1}),
+/* SW-7, nuevos de hombros */
+E('machpress','Press de hombros en máquina','Máquina',['hombros'],['triceps'],'Sentado con la espalda apoyada: empujá los agarres hacia arriba sin trabar los codos.',[.15,1.10]),
+E('frontraise','Elevaciones frontales','Mancuernas',['hombros'],['pecho'],'Brazos casi estirados: subí las mancuernas hacia adelante hasta la altura de los hombros.',[.03,.30],{ph:1}),
+E('reardelt','Vuelos posteriores con mancuernas','Mancuernas',['hombros'],['trapecio','dorsales'],'Inclinado con la espalda recta: abrí los brazos hacia los costados.',[.02,.25],{ph:1}),
+E('uprightrow','Remo al mentón','Barra',['hombros','trapecio'],['biceps'],'Subí la barra pegada al cuerpo hasta el pecho con los codos altos y abiertos.',[.20,1.10]),
 E('curl','Curl con barra','Barra',['biceps'],['antebrazos'],'Flexioná los codos sin balancear el cuerpo.',[.15,.95]),
 E('dbcurl','Curl con mancuernas','Mancuernas',['biceps'],['antebrazos'],'Subí cada mancuerna girando la muñeca y bajá lento.',[.07,.50],{ph:1}),
 E('hammer','Curl martillo','Mancuernas',['biceps','antebrazos'],[],'Agarre neutro: palmas enfrentadas durante todo el movimiento.',[.07,.50],{ph:1}),
-E('pushdown','Extensión de tríceps en polea','Polea',['triceps'],[],'Codos pegados al cuerpo. Extendé los brazos hacia abajo.',[.15,1.0]),
+E('pushdown','Extensión de tríceps en polea alta','Polea',['triceps'],[],'Codos pegados al cuerpo. Extendé los brazos hacia abajo.',[.15,1.0]),
 E('skull','Press francés','Barra Z',['triceps'],[],'Acostado, bajá la barra hacia la frente y extendé los codos.',[.15,.95]),
-E('wrist','Curl de muñeca','Barra',['antebrazos'],[],'Antebrazos apoyados, flexioná solo las muñecas.',[.08,.60]),
-E('squat','Sentadilla','Barra',['cuadriceps','gluteos'],['isquios','lumbar','abs'],'Barra en la espalda alta. Bajá con la espalda firme y subí empujando el piso.',[.40,2.60]),
+E('wrist','Curl de muñeca','Barra',['antebrazos'],[],'Sentado con los antebrazos en los muslos: subí la barra flexionando solo las muñecas.',[.08,.60]),
+/* SW-7, nuevos de brazos */
+E('preacher','Curl en banco Scott','Barra Z',['biceps'],['antebrazos'],'Brazos apoyados en la almohadilla inclinada: subí la barra doblando solo los codos.',[.12,.80]),
+E('cablecurl','Curl en polea baja','Polea',['biceps'],['antebrazos'],'De pie frente a la polea baja: subí el agarre con los codos pegados al cuerpo.',[.12,.80]),
+E('ohtri','Extensión de tríceps sobre la cabeza','Mancuerna',['triceps'],[],'Una mancuerna con las dos manos: bajala detrás de la cabeza y estirá los brazos.',[.08,.60]),
+E('kickback','Patada de tríceps','Mancuernas',['triceps'],[],'Inclinado, brazo pegado al cuerpo: estirá el codo llevando la mancuerna hacia atrás.',[.03,.30],{ph:1}),
+E('squat','Sentadilla con barra','Barra',['cuadriceps','gluteos'],['isquios','lumbar','abs'],'Barra en la espalda alta. Bajá con la espalda firme y subí empujando el piso.',[.40,2.60]),
 E('frontsquat','Sentadilla frontal','Barra',['cuadriceps'],['gluteos','abs'],'Barra sobre los hombros al frente, codos altos y torso erguido.',[.30,2.0]),
-E('legpress','Prensa de piernas','Máquina',['cuadriceps','gluteos'],['isquios'],'Bajá la plataforma controlado y empujá sin bloquear las rodillas.',[.80,5.0]),
-E('legext','Extensión de cuádriceps','Máquina',['cuadriceps'],[],'Extendé las rodillas y pausá arriba un segundo.',[.30,1.40]),
-E('legcurl','Curl femoral','Máquina',['isquios'],['gemelos'],'Llevá los talones hacia los glúteos de forma controlada.',[.25,1.20]),
+E('legpress','Prensa de piernas a 45°','Máquina',['cuadriceps','gluteos'],['isquios'],'Bajá la plataforma controlado y empujá sin bloquear las rodillas.',[.80,5.0]),
+E('legext','Extensión de cuádriceps','Máquina',['cuadriceps'],[],'Sentado en la máquina con el rodillo en el tobillo: estirá las rodillas y pausá arriba.',[.35,2.45]),
+E('legcurl','Curl femoral acostado','Máquina',['isquios'],['gemelos'],'Boca abajo en la máquina: llevá los talones hacia los glúteos sin levantar la cadera.',[.25,1.20]),
 E('rdl','Peso muerto rumano','Barra',['isquios','gluteos'],['lumbar'],'Llevá la cadera hacia atrás con las rodillas casi rectas y la espalda neutra.',[.40,2.40]),
 E('hipthrust','Hip thrust','Barra',['gluteos'],['isquios'],'Espalda alta en el banco. Subí la cadera y apretá los glúteos.',[.50,3.0]),
+/* SW-7, nuevos de femoral y glúteo */
+E('seatlegcurl','Curl femoral sentado','Máquina',['isquios'],['gemelos'],'Sentado con los muslos trabados: llevá los talones hacia abajo y atrás.',[.25,1.20]),
+E('hipabd','Abductores en máquina','Máquina',['gluteos'],[],'Sentado, almohadillas por fuera de las rodillas: abrí las piernas y volvé lento.',[.30,2.45]),
+E('hipadd','Aductores en máquina','Máquina',['aductores'],[],'Sentado, almohadillas por dentro de las rodillas: cerrá las piernas y volvé lento.',[.30,2.60]),
+E('glutekick','Patada de glúteo en polea','Polea',['gluteos'],['isquios'],'Con tobillera en la polea baja: llevá la pierna estirada hacia atrás apretando el glúteo.',[.05,.50]),
 E('lunge','Zancadas','Mancuernas',['cuadriceps','gluteos'],['isquios'],'Da un paso largo y bajá la rodilla de atrás hacia el piso.',[.10,.80],{ph:1}),
 E('bulgarian','Sentadilla búlgara','Mancuernas',['cuadriceps','gluteos'],['isquios'],'Pie de atrás elevado en un banco. Bajá con el torso firme.',[.10,.90],{ph:1}),
+/* SW-7, nuevos de cuádriceps */
+E('hacksquat','Sentadilla hack en máquina','Máquina',['cuadriceps'],['gluteos'],'Espalda contra el respaldo: bajá profundo y subí empujando la plataforma.',[.50,3.0]),
+E('goblet','Sentadilla goblet','Mancuerna',['cuadriceps','gluteos'],['abs'],'Una mancuerna parada contra el pecho: bajá profundo con el torso derecho.',[.10,.80]),
+E('stepup','Subida al cajón','Mancuernas',['cuadriceps','gluteos'],['isquios'],'Subí al cajón empujando con la pierna de arriba, sin impulso de la de abajo.',[.06,.60],{ph:1}),
+E('smithsquat','Sentadilla en Smith','Máquina',['cuadriceps','gluteos'],['isquios'],'La barra del Smith en la espalda alta, pies un poco adelante: bajá y subí controlado.',[.35,2.30]),
 E('calf','Elevación de gemelos de pie','Máquina',['gemelos'],[],'Subí en puntas de pie con pausa arriba y bajá estirando.',[.50,2.80]),
-E('seatedcalf','Gemelos sentado','Máquina',['gemelos'],[],'Subí los talones con las rodillas a 90° y pausá arriba.',[.30,1.80]),
+E('seatedcalf','Elevación de gemelos sentado','Máquina',['gemelos'],[],'Subí los talones con las rodillas a 90° y pausá arriba.',[.30,1.80]),
+/* SW-7, nuevo de pantorrilla */
+E('presscalf','Gemelos en prensa','Máquina',['gemelos'],[],'En la prensa con las piernas estiradas: empujá la plataforma solo con los tobillos.',[.80,4.0]),
 E('crunch','Abdominales (crunch)','Peso corporal',['abs'],['oblicuos'],'Subí los hombros del piso contrayendo el abdomen, sin tirar del cuello.',null,{bw:.3}),
-E('legraise','Elevación de piernas','Barra fija',['abs'],['antebrazos'],'Colgado, subí las piernas rectas sin balancearte.',null,{bw:.35}),
+E('legraise','Elevación de piernas colgado','Barra fija',['abs'],['antebrazos'],'Colgado, subí las piernas rectas sin balancearte.',null,{bw:.35}),
 E('plank','Plancha (segundos)','Peso corporal',['abs','oblicuos'],['lumbar','hombros'],'Cuerpo en línea recta apoyado en antebrazos. Anotá los segundos como repeticiones.',null,{time:1}),
-E('russian','Giro ruso','Peso corporal',['oblicuos'],['abs'],'Sentado con el torso inclinado, girá de lado a lado.',null,{bw:.3}),
+E('cablecrunch','Crunch en polea alta','Polea',['abs'],['oblicuos'],'De rodillas frente a la polea alta, soga junto a la cara: enrollá el torso llevando los codos a los muslos.',[.25,1.20]),
+E('abwheel','Rueda abdominal','Rueda abdominal',['abs'],['dorsales','hombros'],'De rodillas, rodá la rueda hacia adelante con el cuerpo firme y volvé con el abdomen.',null,{bw:.4}),
+E('mtclimb','Escaladores','Peso corporal',['abs'],['hombros','cuadriceps'],'En plancha alta, llevá las rodillas al pecho alternando rápido, con la cadera baja.',null,{bw:.2}),
+E('deadbug','Dead bug (bicho muerto)','Peso corporal',['abs'],['lumbar'],'Boca arriba, brazos arriba y rodillas a 90°: estirá brazo y pierna contrarios sin despegar la zona lumbar.',null,{bw:.15}),
+E('russian','Giro ruso','Peso corporal',['oblicuos'],['abs'],'Sentado con el torso inclinado atrás, girá el torso y llevá las manos de un costado de la cadera al otro.',null,{bw:.3}),
 E('hyper','Hiperextensiones','Banco romano',['lumbar','gluteos'],['isquios'],'Bajá el torso con la espalda recta y subí hasta alinear el cuerpo.'),
 /* ---- Calistenia: progresiones. sk = {f: familia, b: nivel donde empieza la variante, t: reps o segundos para llegar a la siguiente} ---- */
 E('kneepush','Flexiones de rodillas','Peso corporal',['pecho'],['triceps','hombros'],'Rodillas apoyadas, cuerpo recto de rodillas a cabeza. La base para llegar a la flexión completa.',null,{sk:{f:'push',b:0.2,u:3.7,t:20}}),
@@ -67,11 +104,11 @@ E('lpullup','Dominadas en L','Barra fija',['dorsales','abs'],['biceps'],'Dominad
 E('archerpull','Dominada arquero','Barra fija',['dorsales'],['biceps','hombros'],'Agarre muy abierto: subís hacia una mano con el otro brazo casi recto.',null,{sk:{f:'pull',b:15.2,u:16.7,t:10}}),
 E('muscleup','Muscle-up','Barra fija',['dorsales','triceps'],['pecho','biceps','hombros'],'Dominada explosiva que termina pasando el pecho por encima de la barra en un fondo.',null,{sk:{f:'pull',b:15.7,u:17.3,t:10}}),
 E('oapull','Dominada a un brazo','Barra fija',['dorsales','biceps'],['antebrazos','abs'],'Colgado de una mano, subí hasta pasar el mentón.',null,{sk:{f:'pull',b:17.8,u:18,t:5}}),
-E('benchdip','Fondos en banco','Peso corporal',['triceps'],['pecho','hombros'],'Manos en un banco detrás tuyo, bajá doblando los codos a 90°.',null,{sk:{f:'dip',b:0.6,u:5.7,t:25}}),
+E('benchdip','Fondos en banco','Banco',['triceps'],['pecho','hombros'],'Manos en un banco detrás tuyo, bajá doblando los codos a 90°.',null,{sk:{f:'dip',b:0.6,u:5.7,t:25}}),
 E('ringdip','Fondos en anillas','Anillas',['triceps','pecho'],['hombros','abs'],'Como el fondo en paralelas pero en anillas: hay que estabilizar todo el recorrido.',null,{sk:{f:'dip',b:13.2,u:16.9,t:40}}),
 E('airsquat','Sentadilla sin peso','Peso corporal',['cuadriceps','gluteos'],['isquios'],'Bajá hasta romper el paralelo con el pecho arriba.',null,{sk:{f:'legs',b:0.1,u:4.4,t:40}}),
 E('shrimp','Sentadilla shrimp','Peso corporal',['cuadriceps','gluteos'],['isquios','abs'],'Sobre una pierna, agarrás el pie de atrás y bajás hasta tocar la rodilla al piso.',null,{sk:{f:'legs',b:8.9,u:14.2,t:10}}),
-E('pistol','Pistol squat','Peso corporal',['cuadriceps','gluteos'],['abs','gemelos'],'Sentadilla completa a una pierna con la otra estirada adelante.',null,{sk:{f:'legs',b:13.2,u:15.9,t:15}}),
+E('pistol','Sentadilla pistol (a una pierna)','Peso corporal',['cuadriceps','gluteos'],['abs','gemelos'],'Sentadilla completa a una pierna con la otra estirada adelante.',null,{sk:{f:'legs',b:13.2,u:15.9,t:15}}),
 E('dragon','Dragon pistol','Peso corporal',['cuadriceps','gluteos'],['abs','aductores'],'Pistol con la pierna libre cruzada por detrás de la de apoyo.',null,{sk:{f:'legs',b:16.9,u:17.8,t:8}}),
 E('tucklsit','L-sit encogido (segundos)','Paralelas',['abs'],['triceps','hombros'],'Sostenete con los brazos rectos y las rodillas al pecho.',null,{time:1,sk:{f:'lsit',b:5.7,u:8.9,t:20}}),
 E('lsit','L-sit (segundos)','Paralelas',['abs','oblicuos'],['triceps','hombros','cuadriceps'],'Brazos rectos y piernas estiradas a 90° del torso.',null,{time:1,sk:{f:'lsit',b:13.2,u:15.9,t:30}}),
@@ -87,10 +124,10 @@ E('fullfl','Front lever completo (segundos)','Barra fija',['dorsales','abs'],['b
 E('tuckbl','Back lever encogido (segundos)','Barra fija',['dorsales','pecho'],['biceps','hombros'],'Horizontal boca abajo con las rodillas al pecho.',null,{time:1,sk:{f:'bl',b:11.1,u:13.6,t:20}}),
 E('straddlebl','Back lever abierto (segundos)','Barra fija',['dorsales','pecho'],['biceps','hombros','lumbar'],'Piernas abiertas y estiradas, cuerpo horizontal boca abajo.',null,{time:1,sk:{f:'bl',b:15.9,u:16.9,t:15}}),
 E('fullbl','Back lever completo (segundos)','Barra fija',['dorsales','pecho'],['biceps','hombros','gluteos'],'Cuerpo recto y horizontal boca abajo.',null,{time:1,sk:{f:'bl',b:16.9,u:17.8,t:30}}),
-E('tuckpl','Planche encogida (segundos)','Paralelas',['hombros'],['pecho','triceps','abs'],'Brazos rectos, cuerpo en el aire con las rodillas al pecho.',null,{time:1,sk:{f:'pl',b:15.2,u:16.4,t:20}}),
-E('advpl','Planche avanzada (segundos)','Paralelas',['hombros'],['pecho','triceps','abs'],'Como la encogida pero con la espalda plana.',null,{time:1,sk:{f:'pl',b:16.7,u:17.6,t:15}}),
-E('straddlepl','Planche abierta (segundos)','Paralelas',['hombros','pecho'],['triceps','abs','gluteos'],'Piernas abiertas y estiradas, cuerpo horizontal sobre las manos.',null,{time:1,sk:{f:'pl',b:17.9,u:18,t:10}}),
-E('fullpl','Planche completa (segundos)','Paralelas',['hombros','pecho'],['triceps','abs','gluteos'],'Cuerpo totalmente recto y horizontal sobre las manos. Nivel élite.',null,{time:1,sk:{f:'pl',b:18,u:18,t:5}}),
+E('tuckpl','Planche encogida (segundos)','Peso corporal',['hombros'],['pecho','triceps','abs'],'Brazos rectos, cuerpo en el aire con las rodillas al pecho.',null,{time:1,sk:{f:'pl',b:15.2,u:16.4,t:20}}),
+E('advpl','Planche avanzada (segundos)','Peso corporal',['hombros'],['pecho','triceps','abs'],'Como la encogida pero con la espalda plana.',null,{time:1,sk:{f:'pl',b:16.7,u:17.6,t:15}}),
+E('straddlepl','Planche abierta (segundos)','Peso corporal',['hombros','pecho'],['triceps','abs','gluteos'],'Piernas abiertas y estiradas, cuerpo horizontal sobre las manos.',null,{time:1,sk:{f:'pl',b:17.9,u:18,t:10}}),
+E('fullpl','Planche completa (segundos)','Peso corporal',['hombros','pecho'],['triceps','abs','gluteos'],'Cuerpo totalmente recto y horizontal sobre las manos. Nivel élite.',null,{time:1,sk:{f:'pl',b:18,u:18,t:5}}),
 E('pikepush','Flexiones en pica','Peso corporal',['hombros'],['triceps','trapecio'],'Cadera bien arriba, cuerpo en V invertida: bajás la cabeza hacia el piso entre las manos. La base para la vertical.',null,{sk:{f:'hs',b:3.7,u:8.9,t:15}}),
 E('crow','Cuervo (segundos)','Peso corporal',['hombros','abs'],['triceps','antebrazos'],'Manos en el piso, rodillas apoyadas arriba de los codos y los pies en el aire.',null,{time:1,sk:{f:'pl',b:7.3,u:11.1,t:30}}),
 E('pllean','Planche lean (segundos)','Peso corporal',['hombros'],['pecho','abs','antebrazos'],'En plancha de flexión con los brazos rectos, llevá los hombros bien adelante de las manos.',null,{time:1,sk:{f:'pl',b:8.2,u:11.1,t:30}}),
@@ -106,17 +143,21 @@ E('tuckflag','Bandera encogida (segundos)','Barra vertical',['oblicuos','dorsale
 E('straddleflag','Bandera abierta (segundos)','Barra vertical',['oblicuos','dorsales'],['hombros','abs'],'Horizontal de costado con las piernas estiradas y abiertas.',null,{time:1,sk:{f:'flag',b:17.1,u:17.7,t:10}}),
 E('flag','Bandera humana (segundos)','Barra vertical',['oblicuos','dorsales'],['hombros','abs'],'Agarrado de un poste, cuerpo horizontal de costado.',null,{time:1,sk:{f:'flag',b:17.8,u:18,t:10}}),
 /* ---- Deporte: potencia, prevención y estabilidad ---- */
+E('negpull','Dominadas negativas','Barra fija',['dorsales','biceps'],['antebrazos'],'Subí saltando o desde un cajón y bajá lo más lento que puedas, de 3 a 5 segundos.',null,{bw:1}),
+E('hollow','Hollow body (segundos)','Peso corporal',['abs'],['cuadriceps'],'Boca arriba: despegá hombros y piernas estiradas con la zona lumbar pegada al piso. Anotá los segundos.',null,{time:1}),
+E('clappush','Flexiones con palmada','Peso corporal',['pecho'],['triceps','hombros'],'Empujá tan fuerte que las manos despeguen, aplaudí y caé con los codos blandos.',null,{bw:.65}),
+E('sissy','Sentadilla sissy','Peso corporal',['cuadriceps'],[],'En puntas de pie, llevá las rodillas adelante y el cuerpo atrás en línea recta; brazos adelante (o agarrate de algo) para equilibrar.',null,{bw:.6}),
 E('boxjump','Saltos al cajón','Cajón',['cuadriceps','gluteos'],['gemelos','isquios'],'Saltá con los dos pies y caé suave arriba del cajón. Bajá caminando.',null,{sport:1}),
 E('jumpsquat','Sentadilla con salto','Peso corporal',['cuadriceps','gluteos'],['gemelos'],'Sentadilla y salto explosivo. Caé amortiguando con las rodillas.',null,{sport:1}),
 E('kbswing','Swing con pesa rusa','Pesa rusa',['gluteos','isquios'],['lumbar','hombros','abs'],'Bisagra de cadera: la pesa sube por la fuerza de la cadera, no de los brazos.',null,{sport:1}),
 E('nordic','Curl nórdico','Peso corporal',['isquios'],['gluteos'],'De rodillas con los tobillos sujetos, bajá el torso lo más lento posible. Previene desgarros.',null,{sport:1}),
 E('copenhagen','Plancha Copenhague (segundos)','Banco',['aductores'],['oblicuos','abs'],'Plancha lateral con la pierna de arriba apoyada en un banco. Previene pubalgia.',null,{time:1,sport:1}),
 E('pallof','Press Pallof','Polea',['oblicuos','abs'],['hombros'],'De costado a la polea, empujá el agarre al frente sin dejar que te gire.',null,{sport:1}),
-E('medslam','Lanzamiento de balón medicinal','Balón medicinal',['abs','dorsales'],['hombros','triceps'],'Subí el balón sobre la cabeza y estrellalo contra el piso con todo.',null,{sport:1}),
+E('medslam','Balón medicinal contra el piso','Balón medicinal',['abs','dorsales'],['hombros','triceps'],'Subí el balón sobre la cabeza y estrellalo contra el piso con todo.',null,{sport:1}),
 E('farmer','Paseo del granjero (segundos)','Mancuernas',['antebrazos','trapecio'],['abs','gluteos'],'Caminá con una mancuerna pesada en cada mano, torso firme.',null,{time:1,sport:1}),
 E('neckiso','Isométrico de cuello (segundos)','Peso corporal',['trapecio'],['hombros'],'Empujá la cabeza contra tu mano en las 4 direcciones sin moverla. Clave en rugby.',null,{time:1,sport:1}),
 E('spansq','Sentadilla española (segundos)','Banda',['cuadriceps'],['gluteos'],'Una banda atrás de las rodillas sujeta a algo firme. Bajá a media sentadilla con el torso derecho y sostené. Cuida el tendón de la rodilla.',null,{time:1,joint:1}),
-E('tibraise','Elevación de tibial','Peso corporal',['gemelos'],['cuadriceps'],'Espalda contra la pared y talones adelante: subí las puntas de los pies lo más que puedas y bajá lento.',null,{joint:1}),
+E('tibraise','Elevación de tibial','Peso corporal',['tibial'],[],'Espalda contra la pared y talones adelante: subí las puntas de los pies lo más que puedas y bajá lento.',null,{joint:1}),
 E('slcalf','Gemelo a una pierna','Peso corporal',['gemelos'],[],'Parado en un escalón sobre una pierna: subí bien alto y bajá lento hasta estirar.',null,{joint:1}),
 E('slbal','Equilibrio a una pierna (segundos)','Peso corporal',['gemelos'],['abs','gluteos'],'Parado en una pierna, rodilla apenas flexionada. Cuando sea fácil, cerrá los ojos.',null,{time:1,joint:1}),
 E('kneewall','Rodilla a la pared','Peso corporal',['gemelos'],[],'Pie a unos centímetros de la pared: llevá la rodilla a tocarla sin levantar el talón. Movilidad de tobillo.',null,{joint:1}),
@@ -132,8 +173,27 @@ E('cmj','Salto vertical','Peso corporal',['cuadriceps','gluteos'],['gemelos'],'B
 E('broadjump','Salto en largo','Peso corporal',['gluteos','cuadriceps'],['isquios','gemelos'],'Desde parado, balanceá los brazos y saltá lo más lejos posible con los dos pies. Aguantá la caída.',null,{power:1}),
 E('pogo','Saltitos de tobillo','Peso corporal',['gemelos'],['cuadriceps'],'Saltos cortos y rápidos casi sin doblar las rodillas, rebotando como un resorte.',null,{power:1}),
 E('skater','Saltos de patinador','Peso corporal',['gluteos','aductores'],['cuadriceps','gemelos'],'Saltá de costado de una pierna a la otra y frená firme cada caída.',null,{power:1}),
+E('burpee','Burpees','Peso corporal',['cuadriceps','pecho'],['hombros','abs','triceps'],'Agachate, saltá atrás a plancha, volvé los pies y saltá arriba con los brazos sobre la cabeza.',null,{bw:.6,sport:1}),
+E('jumprope','Saltar la soga (segundos)','Soga',['gemelos'],['hombros','antebrazos'],'Saltitos bajos en puntas de pie girando la soga con las muñecas. Anotá los segundos.',null,{time:1,sport:1}),
+E('bearcrawl','Caminata de oso (segundos)','Peso corporal',['abs','hombros'],['cuadriceps','triceps'],'En cuatro patas con las rodillas suspendidas: avanzá mano y pie contrarios con la espalda plana.',null,{time:1,sport:1}),
+E('highknees','Skipping (segundos)','Peso corporal',['cuadriceps'],['abs','gemelos'],'Corré en el lugar subiendo las rodillas a la altura de la cadera, rápido.',null,{time:1,sport:1}),
 E('sprint','Sprint 20 m','Peso corporal',['isquios','cuadriceps'],['gluteos','gemelos'],'Sprint corto al máximo con descanso completo entre cada uno (1-2 min). Cada repetición es un sprint.',null,{power:1})
 ];
+/* SW-7: otras formas de decirle a cada ejercicio (el buscador y la paleta también miran acá) */
+const KW={
+  chinup:'chin up chinup supinas agarre supino',pullup:'pull up pullup barra',sprint:'correr carrera velocidad cardio',
+  spansq:'sentadilla española banda rodilla tendon',tibraise:'tibial tibiales puntas pie pared',slcalf:'gemelo una pierna escalon pantorrilla',slbal:'equilibrio una pierna propiocepcion',kneewall:'movilidad tobillo rodilla pared',slbridge:'puente gluteo una pierna',sidepl:'plancha lateral oblicuos',birddog:'bird dog cuatro patas lumbar',curlup:'mcgill curl up abdominales',biering:'biering sorensen lumbar isometrico',extrot:'rotacion externa manguito rotador banda',wallslide:'wall slide hombro movilidad pared',cmj:'salto vertical cmj contramovimiento',broadjump:'salto largo horizontal',pogo:'pogo saltitos tobillo',skater:'patinador saltos laterales skater cardio',burpee:'burpees burpi cardio',jumprope:'saltar soga cuerda comba cardio',bearcrawl:'oso caminata bear crawl cuadrupedia',highknees:'skipping rodillas arriba high knees cardio',
+  kneepush:'flexiones rodillas lagartijas',diamond:'diamante triceps flexiones lagartijas',archerpush:'arquero flexiones',pppush:'pseudo planche flexiones',oapush:'una mano un brazo flexion',austrow:'remo invertido australiano',muscleup:'muscle up',pistol:'pistol una pierna sentadilla',freehs:'parada de manos vertical handstand',wallhs:'parada de manos vertical pared handstand',hspu:'flexion vertical handstand push up',freehspu:'flexion vertical libre handstand push up',tuckfl:'front lever',advfl:'front lever',straddlefl:'front lever',fullfl:'front lever',onelegfl:'front lever',tuckbl:'back lever',advbl:'back lever',straddlebl:'back lever',fullbl:'back lever',tuckpl:'planche',advpl:'planche',straddlepl:'planche',fullpl:'planche',tuckflag:'bandera flag',straddleflag:'bandera flag',vflag:'bandera flag',flag:'bandera flag poste',negpull:'negativas dominadas excentricas',deadhang:'colgado barra dead hang',hollow:'hollow body banana',clappush:'flexiones palmada aplauso pliometricas',sissy:'sissy sentadilla cuadriceps',
+  crunch:'abdominales crunch abs encogimientos',legraise:'elevacion piernas colgado barra abs',plank:'plancha isometrico core',russian:'giro ruso oblicuos russian twist',pallof:'pallof antirrotacion polea core',medslam:'balon medicinal slam golpe piso',cablecrunch:'crunch polea soga abdominales rodillas',abwheel:'rueda abdominal ab wheel rollout',mtclimb:'escaladores mountain climbers cardio',deadbug:'dead bug bicho muerto core',
+  calf:'gemelos pantorrillas talones de pie',seatedcalf:'gemelos pantorrillas soleo sentado',presscalf:'gemelos pantorrillas prensa',
+  legcurl:'femoral acostado curl isquios maquina',seatlegcurl:'femoral sentado curl isquios maquina',rdl:'rumano peso muerto piernas rigidas',kbswing:'kettlebell pesa rusa swing',hipthrust:'puente gluteo empuje cadera hip thrust',hipabd:'abductores abductor gluteo medio maquina',hipadd:'aductores aductor maquina',glutekick:'patada gluteo polea kickback',nordic:'nordico femoral isquios',copenhagen:'copenhague aductores plancha',
+  squat:'sentadilla trasera back squat',frontsquat:'sentadilla adelante front squat',legpress:'prensa 45 maquina piernas',legext:'extension cuadriceps sillon maquina',lunge:'estocadas zancadas desplantes',bulgarian:'bulgara split squat',hacksquat:'hack maquina sentadilla',goblet:'copa goblet sentadilla mancuerna',stepup:'step up subida cajon banco',smithsquat:'smith maquina guiada sentadilla',boxjump:'salto cajon box jump pliometria',jumpsquat:'sentadilla salto pliometria',
+  dips:'fondos paralelas dips',curl:'biceps barra recta',dbcurl:'biceps alternado mancuernas',hammer:'martillo hammer neutro',cablecurl:'biceps polea',preacher:'scott predicador biceps banco',pushdown:'triceps polea jalon soga cuerda',ohtri:'triceps nuca copa frances mancuerna',kickback:'triceps patada kickback',skull:'frances rompecraneos triceps barra z',wrist:'antebrazo muñeca',farmer:'granjero caminata farmer carry',
+  ohp:'press militar parado barra hombros overhead',dbohp:'press arnold hombros sentado',machpress:'press hombros maquina',lateral:'vuelos laterales',frontraise:'vuelos frontales',reardelt:'pajaros vuelos posteriores deltoides posterior',uprightrow:'remo al menton remo vertical',facepull:'face pull cuerda',
+  bench:'banca press de banca plano bench',incbench:'banca inclinado bench',declbench:'banca declinado',dbpress:'banca mancuernas',incdbpress:'banca inclinado mancuernas',
+  dbfly:'aperturas abiertas fly',cablefly:'cruce de poleas cruces crossover',pecdeck:'contractora peck deck aperturas maquina',chestpress:'press pecho maquina',declpushup:'flexiones declinadas lagartijas',pushup:'lagartijas push up'
+};
+EX.forEach(e=>{if(KW[e.id])e.kw=KW[e.id];});
 /* largo de cada variante de calistenia: hasta dónde empieza la siguiente de su familia */
 (()=>{const fam={};EX.forEach(e=>{if(e.sk)(fam[e.sk.f]=fam[e.sk.f]||[]).push(e);});
   Object.values(fam).forEach(l=>{l.sort((a,b)=>a.sk.b-b.sk.b);l.forEach((e,i)=>{e.sk.g=e.sk.u!=null?Math.max(.5,e.sk.u-e.sk.b):Math.min(4,i<l.length-1?l[i+1].sk.b-e.sk.b:Math.max(1,18-e.sk.b));});});})();
@@ -273,7 +333,9 @@ const allo=w=>75*Math.pow(w/75,2/3);
 const ANCH={bench:[.70,.93,1.22,1.53,1.87],squat:[.94,1.26,1.64,2.09,2.56],deadlift:[1.11,1.48,1.92,2.42,2.96],ohp:[.41,.57,.77,1.0,1.25],
   curl:[.27,.41,.57,.78,1.0],row:[.60,.82,1.09,1.41,1.74],
   /* dominadas 1/7/13/22/34 reps y fondos 2/9/20/33/48 reps (StrengthLevel), pasadas a carga total con Epley */
-  pullup:[1.03,1.23,1.43,1.73,2.13],dips:[1.07,1.30,1.67,2.10,2.60]};
+  pullup:[1.03,1.23,1.43,1.73,2.13],dips:[1.07,1.30,1.67,2.10,2.60],
+  /* máquinas de aislamiento (StrengthLevel: contractora, abductores, aductores, extensión de cuádriceps): antes daban Campeón con cargas de intermedio */
+  pecdeck:[.46,.73,1.07,1.49,1.94],hipabd:[.43,.74,1.16,1.67,2.24],hipadd:[.47,.81,1.25,1.79,2.39],legext:[.54,.85,1.25,1.73,2.26]};
 /* Repeticiones con tu peso (hombre de 75 kg, 18 a 39 años) en los percentiles 5/20/50/80/95 de gente que entrena.
    Fuente: tablas de StrengthLevel (flexiones 5/19/39/62, sentadilla sin peso 5/23/55/93/137); el resto, proporcional. */
 const REPS={pushup:[5,19,39,62,90],kneepush:[10,28,50,75,105],diamond:[2,10,24,42,64],benchdip:[8,20,38,58,85],

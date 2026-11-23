@@ -6,7 +6,7 @@ const assert = require('node:assert/strict');
 const { appConPerfil } = require('./cargar.js');
 
 const { g } = appConPerfil();
-const EX = g('EX'), TECH = g('TECH'), techOf = g('techOf'), techSVG = g('techSVG'), exDetail = g('exDetail'), MUSC = g('MUSC');
+const EX = g('EX'), TECH = g('TECH'), XT = g('XT'), techOf = g('techOf'), techSVG = g('techSVG'), exDetail = g('exDetail'), MUSC = g('MUSC');
 
 test('ids únicos y datos básicos completos', () => {
   assert.equal(new Set(EX.map(e => e.id)).size, EX.length, 'hay ids repetidos');
@@ -23,7 +23,8 @@ for (const ex of EX) {
   test(`${ex.id} (${ex.n}): técnica y detalle`, () => {
     const k = techOf(ex);
     assert.ok(TECH[k], `figura "${k}" no existe en TECH`);
-    assert.ok(Array.isArray(TECH[k].cues) && TECH[k].cues.length > 0, `figura "${k}" sin claves de técnica`);
+    const cues = (XT[ex.id] && XT[ex.id].cues) || TECH[k].cues;
+    assert.ok(Array.isArray(cues) && cues.length > 0, `figura "${k}" sin claves de técnica`);
     assert.match(techSVG(k), /<svg/, 'la figura no dibuja');
     const h = exDetail(ex.id);
     assert.match(h, /Cómo se hace/, 'el detalle no muestra la técnica');

@@ -169,7 +169,7 @@ const ACH=[
  {id:'oro',i:'medal',t:2,n:'Primer Oro',ok:s=>s.maxL>=6},
  {id:'platino',i:'medal',t:3,n:'Primer Platino',ok:s=>s.maxL>=9},
  {id:'diamante',i:'gem',t:4,n:'Primer Diamante',ok:s=>s.maxL>=12},
- {id:'campeon',i:'shield',t:5,n:'Primer Campeón',ok:s=>s.maxL>=15},
+ {id:'campeon',i:'trophy',t:5,n:'Primer Campeón',ok:s=>s.maxL>=15},
  {id:'elite',i:'crown',t:6,n:'Élite',ok:s=>s.maxL>=18},
  {id:'all6',i:'body',t:3,n:'Rango en los 6 grupos',ok:s=>s.groups>=6},
  {id:'cali',i:'acro',t:1,n:'Primera habilidad de calistenia',ok:s=>s.sk>=1},
