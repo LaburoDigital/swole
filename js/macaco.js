@@ -31,7 +31,9 @@ const MK=(()=>{
   const lerp=(a,b,u)=>a+(b-a)*u,lp=(a,b,u)=>[lerp(a[0],b[0],u),lerp(a[1],b[1],u)],ease=u=>u*u*(3-2*u);
   const SIDE=['s','e','w','ab','abf','lt','el','h','k','a'],FSIDE=['a','e','h','k'],FTOP=['t','nk','tw','sw','tk'];
   /* ángulos de una pose a un instante u (0 = A, 1 = B) */
-  function angAt(D,u){if(D.M){const h=u<.5;return angAt(Object.assign({},D,{A:h?D.A:D.M,B:h?D.M:D.B,M:null}),h?u*2:(u-.5)*2);} /* M: pose intermedia (A → M → B) */
+  function angAt(D,u){if(D.fases&&D.fases.length){const K=[{u:0,p:D.A}].concat(D.fases.map(p=>({u:p.u,p})),[{u:1,p:D.B}]);let i=0;while(i<K.length-2&&u>K[i+1].u)i++;const a=K[i],b=K[i+1];
+      return angAt(Object.assign({},D,{A:a.p,B:b.p,fases:null,M:null}),Math.max(0,Math.min(1,(u-a.u)/(b.u-a.u))));} /* fases: poses intermedias en orden, cada una en su instante u (A → fase 1 → fase 2 → … → B): el movimiento va por etapas, no todo junto */
+    if(D.M){const h=u<.5;return angAt(Object.assign({},D,{A:h?D.A:D.M,B:h?D.M:D.B,M:null}),h?u*2:(u-.5)*2);} /* M: pose intermedia (A → M → B) */
     const A=D.A,B=D.B;
     if(D.v==='front'){const o={};FTOP.forEach(k=>{const dv=k==='sw'||k==='tk'?1:k==='t'?180:0;o[k]=lerp(A[k]!=null?A[k]:dv,B[k]!=null?B[k]:(A[k]!=null?A[k]:dv),u);});
       for(const sd of ['L','R']){const a=Object.assign({},A.x,A[sd]),b=Object.assign({},a,B.x,B[sd]);o[sd]={};FSIDE.forEach(k=>o[sd][k]=lerp(a[k]||0,b[k]||0,u));}
@@ -39,7 +41,7 @@ const MK=(()=>{
     const o={t:lerp(A.t,B.t,u),nk:lerp(A.nk||0,B.nk!=null?B.nk:(A.nk||0),u)};
     for(const sd of ['n','f']){const a=Object.assign({},A.n,A[sd]),b=Object.assign({},a,B.n,B[sd]);o[sd]={};SIDE.forEach(k=>o[sd][k]=lerp(a[k]||0,b[k]||0,u));}return o;}
   /* punto de contacto: fijo, que va de A a B, o pegado al cuerpo (bo = [adelante, arriba] medidos sobre el torso) */
-  function target(T,u,P,R){if(!T)return null;if(Array.isArray(T))return T;if(T.A&&T.M)return u<.5?lp(T.A,T.M,u*2):lp(T.M,T.B,(u-.5)*2); /* M: punto intermedio (la barra rodea la cara) */
+  function target(T,u,P,R){if(!T)return null;if(Array.isArray(T))return T;if(T.seq){const K=T.seq;let i=0;while(i<K.length-2&&u>K[i+1][0])i++;return lp(K[i][1],K[i+1][1],Math.max(0,Math.min(1,(u-K[i][0])/(K[i+1][0]-K[i][0]))));} /* seq: [[u, punto], …] por etapas, a la par de las fases */if(T.A&&T.M)return u<.5?lp(T.A,T.M,u*2):lp(T.M,T.B,(u-.5)*2); /* M: punto intermedio (la barra rodea la cara) */
     if(T.A)return lp(T.A,T.B,u);
     if(T.rel){const q=P[T.rel];if(!q)return null;if(T.bo&&R){const t=R.phi.t,a=V(t-90,R.d),b=V(t,R.d);return[q[0]+a[0]*T.bo[0]+b[0]*T.bo[1],q[1]+a[1]*T.bo[0]+b[1]*T.bo[1]];}const o=T.off||[0,0];return[q[0]+o[0],q[1]+o[1]];}return null;}
   /* ---------- de costado: cinemática directa desde la cadera ---------- */
@@ -139,7 +141,7 @@ const MK=(()=>{
   /* mount:'v': soporte vertical corto (se ve de punta, como en las dominadas, y queda detrás del cuerpo cuando pasa por encima) */
   /* soporte en diagonal de la barra fija (mount:'d'): sube a 45° hacia adelante, lejos del cuerpo que pasa por encima de la barra */
   function strut(p){const k=Math.min(p[1]-2,116-p[0]);return [p[0]+k,p[1]-k];}
-  function eqSVG(F,D,one,layer){let h='';(D.eq||[]).forEach((e,i)=>{const at=R=>R.eq[i].at,L=e.layer||(['bar','db','kb','ball','handle','ring','pad'].includes(e.t)?(e.behind?'back2':'mid'):'back');if(L!==layer)return;
+  function eqSVG(F,D,one,layer){let h='';(D.eq||[]).forEach((e,i)=>{if(e.t==='pullbar'&&!e.front&&D.v!=='front'&&layer==='top'){h+='<circle class="mk-hl" fill="none" stroke-width="1.6" cx="'+e.p[0]+'" cy="'+e.p[1]+'" r="3.5"/><circle class="tq-eq" cx="'+e.p[0]+'" cy="'+e.p[1]+'" r="2.6"/>';return;} /* de costado la barra fija (de punta) se ve en todos los cuadros: se repite arriba de todo, con un borde del color del fondo */const at=R=>R.eq[i].at,L=e.layer||(['bar','db','kb','ball','handle','ring','pad'].includes(e.t)?(e.t==='bar'&&D.v!=='front'?'top':e.behind?'back2':'mid'):'back'); /* de costado el disco cercano queda más cerca de quien mira que la pierna y el brazo cercanos: va arriba de todo (el lejano lo tapa el cuerpo) */if(L!==layer)return;
       switch(e.t){
         case 'floor':h+='<line class="tq-floor" x1="4" y1="'+FLOOR+'" x2="116" y2="'+FLOOR+'"/>';break;
         case 'block':h+='<rect class="tq-eq" x="'+e.r[0]+'" y="'+e.r[1]+'" width="'+e.r[2]+'" height="'+e.r[3]+'" rx="2.5"/>';break;
@@ -184,16 +186,17 @@ const MK=(()=>{
     if(o.c){const cx=Math.max(x0,Math.min(o.c[0],x1)),cy=Math.max(y0,Math.min(o.c[1],y1));return Math.hypot(o.c[0]-cx,o.c[1]-cy)<o.r;}
     return segBox(o.s[0],o.s[1],x0-o.r,y0-o.r,x1+o.r,y1+o.r);});}
   /* busca esquina (arriba izq., arriba der., abajo izq., abajo der.) y tamaño (100 %, 80 %, 65 %) donde el recuadro no tape nada */
-  const GB={};function gripBox(D){if(!D.grip)return null;const key=JSON.stringify([D.A,D.M,D.B,D.ik,D.eq,D.root]);if(GB[key]!==undefined)return GB[key];
+  const GB={};function gripBox(D){if(!D.grip)return null;const key=JSON.stringify([D.A,D.M,D.fases,D.B,D.ik,D.eq,D.root]);if(GB[key]!==undefined)return GB[key];
     const SS=[];for(let i=0;i<=20;i++)SS.push(...shapes(D,frame(D,i/20)));let res=null;
     for(const s of [1,.8,.65]){const w=38*s,h=26*s;for(const [x,y] of [[2,2],[118-w,2],[2,108-h],[118-w,108-h],[60-w/2,2]])if(!hits(SS,[x,y,w,h],.5)){res={x,y,s};break;}if(res)break;}
     return GB[key]=res;}
   function svg(D,opt){opt=opt||{};const one=opt.u!=null||opt.stat,F=one?[frame(D,ease(opt.u||0))]:frames(D),fr=D.v==='front';FWD=!one&&!!D.fwd;try{
-    const body=fr?'<g class="mk-far">'+limbsF(F,'L',one)+'</g>'+'<g class="mk-near">'+limbsF(F,'R',one)+'</g>'+eqSVG(F,D,one,'back2')+'<g class="mk-near">'+seg(F,'P','N','mk-tr',11,one)+'</g>'+dot(F,'H',HEAD,'tq-h',one)+
+    const nearF=fr?'<g class="mk-near">'+limbsF(F,'R',one)+'</g>':''; /* yaw (vista 3/4): la pierna cercana viene hacia quien mira y pasa por delante del torso */
+    const body=fr?'<g class="mk-far">'+limbsF(F,'L',one)+'</g>'+(D.yaw&&!D.back?'':nearF)+eqSVG(F,D,one,'back2')+'<g class="mk-near">'+seg(F,'P','N','mk-tr',11,one)+(D.back?line(F,R=>lp(R.P.P,R.P.N,.08),R=>lp(R.P.P,R.P.N,.92),'mk-hl',1.3,one):'')+'</g>'+(D.yaw&&!D.back?nearF:'')+dot(F,'H',HEAD,'tq-h',one)+(D.back?dot(F,'H',HEAD-1.4,'tq-dbh',one):'')+
         '<g class="mk-far">'+armF(F,'L',one)+'</g><g class="mk-near">'+armF(F,'R',one)+dot(F,'ER',2,'tq-j',one)+dot(F,'EL',2,'tq-j',one)+'</g>'
       :eqSVG(F,D,one,'back2')+'<g class="mk-far">'+limbs(F,'f',one)+arm(F,'f',one)+'</g>'+eqSVG(F,D,one,'mid')+
         '<g class="mk-near">'+seg(F,'P','N','mk-tr',10,one)+limbs(F,'n',one)+dot(F,'Kn',2.2,'tq-j',one)+'</g>'+(D.headFront?'':dot(F,'H',HEAD,'tq-h',one))+'<g class="mk-near">'+arm(F,'n',one)+dot(F,'En',2,'tq-j',one)+'</g>'+(D.headFront?dot(F,'H',HEAD,'tq-h',one):''); /* headFront: las manos pasan detrás de la cabeza */
-    return '<svg class="tq mk'+(one?' st':'')+'" viewBox="0 0 120 120" role="img" aria-label="Cómo se hace">'+eqSVG(F,D,one,'back')+(FWD?'<g><animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;.8;.86;.9;1" dur="2.8s" repeatCount="indefinite"/>':'')+shadow(F,D,one)+body+(FWD?'</g>':'')+(fr?eqSVG(F,D,one,'mid'):eqSVG(F,D,one,'top'))+
+    return '<svg class="tq mk'+(one?' st':'')+'" viewBox="0 0 120 120" role="img" aria-label="Cómo se hace'+(D.back?' (vista de atrás)':'')+'">'+eqSVG(F,D,one,'back')+(FWD?'<g><animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;.8;.86;.9;1" dur="2.8s" repeatCount="indefinite"/>':'')+shadow(F,D,one)+body+(FWD?'</g>':'')+(fr?eqSVG(F,D,one,'mid'):eqSVG(F,D,one,'top'))+
       (opt.noGrip?'':gripGlyph(D.grip,gripBox(D)))+'</svg>';}finally{FWD=false;}}
   /* ---------- validador ---------- */
   function check(D,steps){steps=steps||40; /* cada 2,5 % del movimiento */const acc=new Map(),add1=m=>{const i=m.lastIndexOf(' en '),k=m.slice(0,i).replace(/ \(-?\d+°\)/,''),p=m.slice(i+4);if(!acc.has(k))acc.set(k,[]);acc.get(k).push(p);};
@@ -205,11 +208,12 @@ const MK=(()=>{
     for(let i=0;i<=steps;i++){const u=i/steps,R=frame(D,u),P=R.P,g=angles(R),pc=Math.round(u*100)+'%';
       /* 1. articulaciones dentro del rango humano */
       /* de frente, un tramo muy en escorzo (menos del 60 % de su largo: viene hacia quien mira) no muestra su ángulo real: ahí se controlan largo y contacto */
-      if(fr){for(const sd of SDS){const q=g[sd],esc=s=>lsOf(R.g,s,sd)<.6;[['a','fa','hombro',0,'ua'],['e','fe','codo',0,'ua'],['h','fh','cadera',1,'th'],['k','fk','rodilla',1,'th']].forEach(([k,l,n,fem,sg])=>{if(esc(sg))return;const v=q[k],L=(D.lim&&D.lim[l])||LIM[l];if(v<L[0]-.5||v>L[1]+.5)add1(n+lado(sd,fem)+' fuera de rango ('+Math.round(v)+'°) en '+pc);});}}
+      /* yaw: vista 3/4 armada en 3D (.equipo/SW-10/tres-cuartos.js): los ángulos de pantalla son proyecciones, no los del plano frontal; se controlan largos, apoyos y piso */
+      if(fr){for(const sd of (D.yaw?[]:SDS)){const q=g[sd],esc=s=>lsOf(R.g,s,sd)<.6;[['a','fa','hombro',0,'ua'],['e','fe','codo',0,'ua'],['h','fh','cadera',1,'th'],['k','fk','rodilla',1,'th']].forEach(([k,l,n,fem,sg])=>{if(esc(sg))return;const v=q[k],L=(D.lim&&D.lim[l])||LIM[l];if(v<L[0]-.5||v>L[1]+.5)add1(n+lado(sd,fem)+' fuera de rango ('+Math.round(v)+'°) en '+pc);});}}
       else{if(g.nk<LIM.nk[0]-.5||g.nk>LIM.nk[1]+.5)add1('cuello fuera de rango ('+Math.round(g.nk)+'°) en '+pc);
         for(const sd of SDS)for(const k of ['s','e','w','h','k','a','ab','abf','lt','el']){if('sew'.includes(k)&&g[sd].ab>=45)continue;if('ew'.includes(k)&&g[sd].abf>=45)continue; /* con el antebrazo hacia quien mira (abf ≥ 45) el codo y la muñeca proyectados no muestran su ángulo real */const v=g[sd][k],L=(D.lim&&D.lim[k])||LIM[k]; /* lim: rango propio de un ejercicio, con su motivo en la definición */if(v<L[0]-.5||v>L[1]+.5)add1({s:'hombro',e:'codo',w:'muñeca',h:'cadera',k:'rodilla',a:'tobillo',ab:'apertura del brazo',abf:'apertura del antebrazo',lt:'apertura del muslo',el:'elevación del hombro'}[k]+lado(sd,['w','h','k','ab','abf','lt'].includes(k))+' fuera de rango ('+Math.round(v)+'°) en '+pc);}}
       /* 1b. bilateral: los dos lados con los mismos ángulos (salvo ejercicios a una mano o pierna, o alternados: uni) */
-      if(!D.uni){const ks=fr?['a','e','h','k']:['s','e','h','k','a'],[x,y]=fr?['L','R']:['n','f'];ks.forEach(k=>{const dv=Math.abs(nrm(g[x][k]-g[y][k]));if(dv>6)add1({s:'brazo',a:'brazo',e:'codo',h:'muslo',k:'rodilla'}[k]+(fr?' derecho distinto del izquierdo':' lejano distinto del cercano')+' ('+Math.round(dv)+'°) en '+pc);});}
+      if(!D.uni&&!(fr&&D.yaw)){const ks=fr?['a','e','h','k']:['s','e','h','k','a'],[x,y]=fr?['L','R']:['n','f'];ks.forEach(k=>{const dv=Math.abs(nrm(g[x][k]-g[y][k]));if(dv>6)add1({s:'brazo',a:'brazo',e:'codo',h:'muslo',k:'rodilla'}[k]+(fr?' derecho distinto del izquierdo':' lejano distinto del cercano')+' ('+Math.round(dv)+'°) en '+pc);});}
       /* 1d. de frente y de pie: la rodilla en la línea cadera–pie (sin piernas en O), salvo rodillas dobladas declaradas (bentKnees) */
       if(fr&&!D.bentKnees)for(const sd of SDS){const H=P['H'+sd],A=P['A'+sd],K=P['K'+sd],v=[A[0]-H[0],A[1]-H[1]],l=Math.hypot(v[0],v[1])||1,dk=Math.abs((K[0]-H[0])*v[1]-(K[1]-H[1])*v[0])/l;if(dk>1.5)add1('la rodilla'+lado(sd,1)+' se sale de la línea cadera–pie ('+dk.toFixed(1)+') en '+pc);}
       /* 1c. al final de un empuje o una extensión el codo o la rodilla llegan casi estirados (≥165°): lock = [{u:0|1, j:'e'|'k'}].
@@ -254,8 +258,8 @@ const MKD={
   bench:{d:1,lock:[{u:0,j:'e'}],grip:{t:'prono',w:'medio'},feet:{n:'floor',f:'floor'},
     eq:[{t:'floor'},{t:'block',r:[12,90,47,6]},{t:'post',p:[18,96,18,110]},{t:'post',p:[53,96,53,110]},{t:'bar',at:'Gn'}],
     root:{j:'P',p:[62,85]},
-    A:{t:-90,nk:16,n:{s:95,e:5,ab:0,h:30,k:80,a:0}},B:{t:-90,nk:16,n:{s:20,e:100,ab:45,h:30,k:80,a:0}},
-    ik:{Gn:{A:[36.1,53.3],B:[43,73.5]},An:{to:[82,107.45],flat:1},Af:{to:[78,107.45],flat:1}}},
+    A:{t:-90,nk:16,n:{s:95,e:5,ab:0,h:30,k:80,a:0}},B:{t:-90,nk:16,n:{s:20,e:100,ab:55,w:-90,h:30,k:80,a:0}},
+    ik:{Gn:{A:[36.1,53.3],B:[42.5,78]},An:{to:[82,107.45],flat:1},Af:{to:[78,107.45],flat:1}}},
   /* flexiones con pies elevados: boca abajo (cabeza a la izquierda), puntas en el cajón, manos apoyadas al ancho de hombros, codos a ~45° */
   declpushup:{d:-1,lock:[{u:0,j:'e'}],grip:{t:'apoyo',w:'medio'},handPhi:90,tiptoe:1,
     eq:[{t:'floor'},{t:'block',r:[84,72,30,39]}],
@@ -279,12 +283,8 @@ const MKD={
     root:{j:'Tn',p:[68,109.25]},
     A:{t:180,nk:0,n:{s:0,e:0,w:-60,ab:50,abf:50,h:0,k:2,a:2}},B:{t:140,nk:-10,n:{s:0,e:0,w:-60,ab:50,abf:50,h:122,k:118,a:30}},
     ik:{Gn:{rel:'N',bo:[-5,-3],elbow:'down'},Gf:{rel:'N',bo:[-5,-3],elbow:'down'}}},
-  /* dominadas: colgado de la barra, sube hasta pasar el mentón; el cuerpo se mueve, las manos quedan en la barra */
-  pullup:{d:1,lock:[{u:0,j:'e'}],grip:{t:'prono',w:'medio'},
-    eq:[{t:'pullbar',p:[60,16]}],
-    root:{j:'Gn',p:[60,16]},
-    A:{t:182,nk:0,n:{s:172,e:4,w:0,h:0,k:60,a:-20}},B:{t:188,nk:-15,n:{s:0,e:148,w:0,h:12,k:55,a:-20}},
-    ik:{Gf:{rel:'Gn',off:[-3,-2.2]}}}
+  /* dominadas (SW-10, Juan: vista de atrás, para que se lean el ancho del agarre y los codos): abajo colgado con los brazos estirados; arriba el mentón pasa la barra y los codos bajan a los costados del torso; piernas cruzadas */
+  pullup:{v:'front',back:1,bentKnees:1,grip:{t:'prono',w:'medio'},eq:[{t:'pullbar',front:1,p:[26,26,94]}],root:{j:'N',p:{A:[60,53],B:[60,25]}},A:{t:180,tk:1,L:{a:170,e:0,h:4,k:-22},R:{a:170,e:0,h:4,k:-22},ls:{shL:0.55,shR:0.55}},B:{t:180,tk:1,L:{a:30,e:140,h:4,k:-22},R:{a:30,e:140,h:4,k:-22},ls:{shL:0.55,shR:0.55,uaL:0.86,uaR:0.86,faL:0.83,faR:0.83}},ik:{GL:{to:[43,26],elbow:'down'},GR:{to:[77,26],elbow:'down'}},lock:[{u:0,j:'e',sd:['L','R']}]}
 };
 /* texto del agarre para la ficha */
 const GRIP_T={prono:'Agarre prono',supino:'Agarre supino',neutro:'Agarre neutro (martillo)',mixto:'Agarre mixto',apoyo:'Manos apoyadas'},GRIP_W={cerrado:'cerrado',medio:'al ancho de los hombros',abierto:'abierto'};
