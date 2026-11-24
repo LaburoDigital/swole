@@ -1769,3 +1769,26 @@ html.touring .nav,html.touring .top{z-index:auto}
 .tq-kb{fill:var(--acc);stroke:color-mix(in srgb,var(--acc) 60%,#000);stroke-width:1.5}
 .tq-ball{fill:var(--acc);stroke:color-mix(in srgb,var(--acc) 60%,#000);stroke-width:1.5}
 .tq-wall{fill:var(--text);opacity:.09}
+/* SW-9 macaco nuevo: cada tramo con su tono (brazo/antebrazo/mano, muslo/pierna/pie); el lado lejano más apagado y detrás */
+.mk .mk-tr,.mk .mk-ua,.mk .mk-th{stroke:var(--text)}
+.mk .mk-fa,.mk .mk-sh{stroke:color-mix(in srgb,var(--text) 68%,var(--acc))}
+.mk .mk-hd{stroke:var(--acc2)}
+.mk .mk-ft{stroke:color-mix(in srgb,var(--text) 50%,var(--acc2))}
+.mk .mk-far{opacity:.6}
+.mk .mk-hl{stroke:var(--bg);opacity:.9}
+.mk-gl{fill:var(--text);font:700 5.6px system-ui,sans-serif}
+.mk-gbg{fill:color-mix(in srgb,var(--bg) 75%,transparent);stroke:var(--line);stroke-width:.6}
+.mk-gb{stroke:var(--mut);stroke-width:1.6;stroke-linecap:round}
+.mk-gd{fill:color-mix(in srgb,var(--acc2) 55%,#000)}
+.mk-gp{fill:color-mix(in srgb,var(--acc2) 35%,#fff)}
+.mk-gk{stroke:color-mix(in srgb,var(--acc2) 25%,#fff);stroke-width:.7;stroke-linecap:round}
+.mk-gt{stroke:var(--acc2);stroke-width:1.7;stroke-linecap:round}
+.td-fig .mk-grip,.gt-fig .mk-grip,.rt-fig .mk-grip{display:none}
+.tech-grip{font-size:13px;color:var(--mut);margin:-2px 0 8px}
+/* SW-9: en claro el cuerpo va en gris medio (no negro) y cada tramo con su tono, como en oscuro */
+.mk-gw{fill:var(--mut)}
+:root[data-theme="light"] .mk .mk-tr,:root[data-theme="light"] .mk .mk-ua,:root[data-theme="light"] .mk .mk-th{stroke:#8A8FA6}
+:root[data-theme="light"] .mk .tq-h{fill:#8A8FA6}
+:root[data-theme="light"] .mk .mk-fa,:root[data-theme="light"] .mk .mk-sh{stroke:color-mix(in srgb,#8A8FA6 50%,var(--acc))}
+:root[data-theme="light"] .mk .mk-far{opacity:.5}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .mk .mk-tr,:root:not([data-theme="dark"]) .mk .mk-ua,:root:not([data-theme="dark"]) .mk .mk-th{stroke:#8A8FA6}:root:not([data-theme="dark"]) .mk .tq-h{fill:#8A8FA6}:root:not([data-theme="dark"]) .mk .mk-fa,:root:not([data-theme="dark"]) .mk .mk-sh{stroke:color-mix(in srgb,#8A8FA6 50%,var(--acc))}:root:not([data-theme="dark"]) .mk .mk-far{opacity:.5}}
