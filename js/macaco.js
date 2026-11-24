@@ -56,7 +56,7 @@ const MK=(()=>{
   const VF=f=>V(f,1),phF=v=>phi(v,1);
   function lsOf(g,seg,sd){const l=g.ls||{};return l[seg+sd]!=null?l[seg+sd]:l[seg]!=null?l[seg]:1;}
   function fkFront(D,g){const P={},R={d:1,ang:g,v:'front',phi:{}};P.P=[0,0];P.N=add(P.P,VF(g.t),LEN.t*g.tk);const up=VF(g.t+180);
-    P.H=[P.N[0]+g.tw+up[0]*0,P.N[1]-LEN.nk];P.H=add([P.N[0]+g.tw,P.N[1]],VF(g.t-g.nk),LEN.nk);
+    P.H=[P.N[0]+g.tw+up[0]*0,P.N[1]-LEN.nk];P.H=add([P.N[0]+g.tw,P.N[1]],VF(g.t-g.nk),LEN.nk*(g.ls&&g.ls.nk!=null?g.ls.nk:1)); /* ls.nk: el cuello en escorzo (inclinado hacia quien mira, la cabeza queda delante del pecho) */
     /* el cuerpo de frente puede estar inclinado (plancha lateral): hombros, caderas y miembros giran con el torso (rt) */
     const rt=g.t-180,ro=(v)=>{const c=Math.cos(rad(-rt)),s=Math.sin(rad(-rt));return[v[0]*c-v[1]*s,v[0]*s+v[1]*c];},ad=(p,v)=>{const w=ro(v);return[p[0]+w[0],p[1]+w[1]];};R.rot=rt;
     P.SL=ad(P.N,[-9*g.sw+g.tw,3]);P.SR=ad(P.N,[9*g.sw+g.tw,3]);P.HL=ad(P.P,[-5,0]);P.HR=ad(P.P,[5,0]);
@@ -136,6 +136,7 @@ const MK=(()=>{
     const body=rot!=null?'<g transform="rotate('+rot+')"><rect class="tq-dbh" x="-5.5" y="-1.1" width="11" height="2.2" rx="1.1"/><rect class="tq-plate" x="-8.5" y="-4.6" width="3.6" height="9.2" rx="1.3"/><rect class="tq-plate" x="4.9" y="-4.6" width="3.6" height="9.2" rx="1.3"/></g>'
       :'<polygon class="tq-plate" points="4.6,0 2.3,4 -2.3,4 -4.6,0 -2.3,-4 2.3,-4"/><circle class="tq-hub" r="1.4"/>';
     return '<g transform="translate('+x+' '+y+')">'+anT+body+'</g>';}
+  /* mount:'v': soporte vertical corto (se ve de punta, como en las dominadas, y queda detrás del cuerpo cuando pasa por encima) */
   /* soporte en diagonal de la barra fija (mount:'d'): sube a 45° hacia adelante, lejos del cuerpo que pasa por encima de la barra */
   function strut(p){const k=Math.min(p[1]-2,116-p[0]);return [p[0]+k,p[1]-k];}
   function eqSVG(F,D,one,layer){let h='';(D.eq||[]).forEach((e,i)=>{const at=R=>R.eq[i].at,L=e.layer||(['bar','db','kb','ball','handle','ring','pad'].includes(e.t)?(e.behind?'back2':'mid'):'back');if(L!==layer)return;
@@ -144,7 +145,7 @@ const MK=(()=>{
         case 'block':h+='<rect class="tq-eq" x="'+e.r[0]+'" y="'+e.r[1]+'" width="'+e.r[2]+'" height="'+e.r[3]+'" rx="2.5"/>';break;
         case 'wall':h+='<rect class="tq-wall" x="'+e.r[0]+'" y="'+e.r[1]+'" width="'+e.r[2]+'" height="'+e.r[3]+'" rx="2"/>';break;
         case 'post':h+='<line class="tq-'+(e.pad?'pad':'eq')+'" x1="'+e.p[0]+'" y1="'+e.p[1]+'" x2="'+e.p[2]+'" y2="'+e.p[3]+'"/>';break;
-        case 'pullbar':h+=(e.mount==='d'?(()=>{const q=strut(e.p);return '<line class="tq-eq" x1="'+(e.p[0]+1.85)+'" y1="'+(e.p[1]-1.85)+'" x2="'+q[0]+'" y2="'+q[1]+'"/><circle class="tq-eq" cx="'+e.p[0]+'" cy="'+e.p[1]+'" r="2.6"/>';})():e.mount==='h'?'<line class="tq-eq" x1="4" y1="'+e.p[1]+'" x2="'+(e.p[0]-2.6)+'" y2="'+e.p[1]+'"/><circle class="tq-eq" cx="'+e.p[0]+'" cy="'+e.p[1]+'" r="2.6"/>':e.front?'<line class="tq-eq" x1="'+e.p[0]+'" y1="'+e.p[1]+'" x2="'+e.p[2]+'" y2="'+e.p[1]+'"/>':'<line class="tq-eq" x1="'+e.p[0]+'" y1="2" x2="'+e.p[0]+'" y2="'+(e.p[1]-2.5)+'"/><circle class="tq-eq" cx="'+e.p[0]+'" cy="'+e.p[1]+'" r="2.6"/>');break;
+        case 'pullbar':h+=(e.mount==='v'?'<line class="tq-eq" x1="'+e.p[0]+'" y1="'+(e.p[1]-12)+'" x2="'+e.p[0]+'" y2="'+(e.p[1]-2.5)+'"/><circle class="tq-eq" cx="'+e.p[0]+'" cy="'+e.p[1]+'" r="2.6"/>':e.mount==='d'?(()=>{const q=strut(e.p);return '<line class="tq-eq" x1="'+(e.p[0]+1.85)+'" y1="'+(e.p[1]-1.85)+'" x2="'+q[0]+'" y2="'+q[1]+'"/><circle class="tq-eq" cx="'+e.p[0]+'" cy="'+e.p[1]+'" r="2.6"/>';})():e.mount==='h'?'<line class="tq-eq" x1="4" y1="'+e.p[1]+'" x2="'+(e.p[0]-2.6)+'" y2="'+e.p[1]+'"/><circle class="tq-eq" cx="'+e.p[0]+'" cy="'+e.p[1]+'" r="2.6"/>':e.front?'<line class="tq-eq" x1="'+e.p[0]+'" y1="'+e.p[1]+'" x2="'+e.p[2]+'" y2="'+e.p[1]+'"/>':'<line class="tq-eq" x1="'+e.p[0]+'" y1="2" x2="'+e.p[0]+'" y2="'+(e.p[1]-2.5)+'"/><circle class="tq-eq" cx="'+e.p[0]+'" cy="'+e.p[1]+'" r="2.6"/>');break;
         case 'roll':h+='<circle class="tq-roll" cx="'+e.p[0]+'" cy="'+e.p[1]+'" r="4.6"/>';break;
         /* cable: sale de la polea y termina exactamente en la mano (o en la articulación que lleva la tobillera) */
         case 'pulley':h+=line(F,e.p,R=>R.P[e.to],'tq-cab',1.6,one)+'<circle class="tq-eq" cx="'+e.p[0]+'" cy="'+e.p[1]+'" r="3.2"/>';break;
@@ -157,7 +158,7 @@ const MK=(()=>{
           const ends=R=>{const P=R.P,v=[P.P[0]-P.N[0],P.P[1]-P.N[1]],l=Math.hypot(v[0],v[1]),n=[-v[1]/l,v[0]/l],s=n[1]<0?-1:1;return[[P.N[0]-v[0]/l*9+n[0]*s*6.5,P.N[1]-v[1]/l*9+n[1]*s*6.5],[P.P[0]+v[0]/l*3+n[0]*s*6.5,P.P[1]+v[1]/l*3+n[1]*s*6.5]];};
           h+=line(F,R=>ends(R)[0],R=>ends(R)[1],'tq-pad',null,one);const e0=ends(F[0]);[.2,.85].forEach(k=>{const p=[f1(lerp(e0[0][0],e0[1][0],k)),f1(lerp(e0[0][1],e0[1][1],k)+3)];h+='<line class="tq-eq" x1="'+p[0]+'" y1="'+p[1]+'" x2="'+p[0]+'" y2="110"/>';});break;}
         case 'rope':{const d=R=>{const a=R.P.GL,b=R.P.GR,y=lerp(e.y[0],e.y[1],R.u);return 'M'+f1(a[0])+' '+f1(a[1])+' Q60 '+f1(y)+' '+f1(b[0])+' '+f1(b[1]);};h+='<path class="tq-cab" fill="none" d="'+d(F[0])+'">'+(one?'':anim(F,'d',d))+'</path>';break;}
-        case 'bar':h+=dot(F,at,6.5,'tq-plate',one)+dot(F,at,2,'tq-hub',one);break;
+        case 'bar':h+=dot(F,at,e.r||6.5,'tq-plate',one)+dot(F,at,2,'tq-hub',one);break;
         case 'db':h+=hexDb(F,at,one,e.rot);break;
         case 'kb':h+=dot(F,at,6,'tq-kb',one);break;
         case 'ball':h+=dot(F,at,7,'tq-ball',one);break;
@@ -172,10 +173,10 @@ const MK=(()=>{
     const SD=fr?['L','R']:['n','f'];SD.forEach(sd=>{sg(P[(fr?'H':'Hp')+sd],P['K'+sd],6.5);sg(P['K'+sd],P['A'+sd],5.5);sg(P['L'+sd],P['T'+sd],3.5);sg(P['S'+sd],P['E'+sd],5.5);sg(P['E'+sd],P['W'+sd],4.8);sg(P['W'+sd],P['G'+sd],4.2);});
     sg(P.P,P.N,11);ci(P.H,HEAD);
     (D.eq||[]).forEach((e,i)=>{const at=R.eq[i].at;switch(e.t){case 'floor':sg([4,FLOOR],[116,FLOOR],2);break;case 'block':case 'wall':S.push({q:e.r});break;case 'post':sg([e.p[0],e.p[1]],[e.p[2],e.p[3]],3);break;
-      case 'pullbar':if(e.mount==='d'){sg(e.p,strut(e.p),3);ci(e.p,2.6);}else if(e.mount==='h'){sg([4,e.p[1]],e.p,3);ci(e.p,2.6);}else if(e.front)sg([e.p[0],e.p[1]],[e.p[2],e.p[1]],3);else{sg([e.p[0],2],[e.p[0],e.p[1]],3);ci(e.p,2.6);}break;case 'roll':ci(e.p,4.6);break;
+      case 'pullbar':if(e.mount==='v'){ci(e.p,2.6);}else if(e.mount==='d'){sg(e.p,strut(e.p),3);ci(e.p,2.6);}else if(e.mount==='h'){sg([4,e.p[1]],e.p,3);ci(e.p,2.6);}else if(e.front)sg([e.p[0],e.p[1]],[e.p[2],e.p[1]],3);else{sg([e.p[0],2],[e.p[0],e.p[1]],3);ci(e.p,2.6);}break;case 'roll':ci(e.p,4.6);break;
       case 'pulley':ci(e.p,3.2);sg(e.p,P[e.to],1.6);break;case 'lever':sg(e.pv,P[e.to],4);ci(e.pv,3.5);if(e.stand)sg(e.pv,[e.stand,110],3);break;
       case 'plat':ci(P[e.to],e.len||9);break;case 'tbench':sg(P.N,P.P,24);break;case 'rope':sg(P.GL,[60,(e.y[0]+e.y[1])/2],2);sg(P.GR,[60,(e.y[0]+e.y[1])/2],2);sg([60,e.y[0]],[60,e.y[1]],2);break;
-      case 'bar':ci(at,6.5);break;case 'db':ci(at,e.rot!=null?8.5:4.6);break;case 'kb':ci(at,6);break;case 'ball':ci(at,7);break;case 'handle':ci(at,2.4);break;case 'pad':ci(at,e.r||4.6);break;
+      case 'bar':ci(at,e.r||6.5);break;case 'db':ci(at,e.rot!=null?8.5:4.6);break;case 'kb':ci(at,6);break;case 'ball':ci(at,7);break;case 'handle':ci(at,2.4);break;case 'pad':ci(at,e.r||4.6);break;
       case 'ring':if(at){ci([at[0],at[1]-3.5],3.5);sg([at[0]-2,0],[at[0],at[1]-7],1.6);}break;}});return S;}
   const segBox=(a,b,x0,y0,x1,y1)=>{for(let i=0;i<=20;i++){const t=i/20,x=a[0]+(b[0]-a[0])*t,y=a[1]+(b[1]-a[1])*t;if(x>=x0&&x<=x1&&y>=y0&&y<=y1)return true;}return false;};
   function hits(S,b,pad){const [x0,y0,x1,y1]=[b[0]-pad,b[1]-pad,b[0]+b[2]+pad,b[1]+b[3]+pad];return S.some(o=>{
@@ -206,7 +207,7 @@ const MK=(()=>{
       /* de frente, un tramo muy en escorzo (menos del 60 % de su largo: viene hacia quien mira) no muestra su ángulo real: ahí se controlan largo y contacto */
       if(fr){for(const sd of SDS){const q=g[sd],esc=s=>lsOf(R.g,s,sd)<.6;[['a','fa','hombro',0,'ua'],['e','fe','codo',0,'ua'],['h','fh','cadera',1,'th'],['k','fk','rodilla',1,'th']].forEach(([k,l,n,fem,sg])=>{if(esc(sg))return;const v=q[k],L=(D.lim&&D.lim[l])||LIM[l];if(v<L[0]-.5||v>L[1]+.5)add1(n+lado(sd,fem)+' fuera de rango ('+Math.round(v)+'°) en '+pc);});}}
       else{if(g.nk<LIM.nk[0]-.5||g.nk>LIM.nk[1]+.5)add1('cuello fuera de rango ('+Math.round(g.nk)+'°) en '+pc);
-        for(const sd of SDS)for(const k of ['s','e','w','h','k','a','ab','abf','lt','el']){if('sew'.includes(k)&&g[sd].ab>=45)continue;const v=g[sd][k],L=(D.lim&&D.lim[k])||LIM[k]; /* lim: rango propio de un ejercicio, con su motivo en la definición */if(v<L[0]-.5||v>L[1]+.5)add1({s:'hombro',e:'codo',w:'muñeca',h:'cadera',k:'rodilla',a:'tobillo',ab:'apertura del brazo',abf:'apertura del antebrazo',lt:'apertura del muslo',el:'elevación del hombro'}[k]+lado(sd,['w','h','k','ab','abf','lt'].includes(k))+' fuera de rango ('+Math.round(v)+'°) en '+pc);}}
+        for(const sd of SDS)for(const k of ['s','e','w','h','k','a','ab','abf','lt','el']){if('sew'.includes(k)&&g[sd].ab>=45)continue;if('ew'.includes(k)&&g[sd].abf>=45)continue; /* con el antebrazo hacia quien mira (abf ≥ 45) el codo y la muñeca proyectados no muestran su ángulo real */const v=g[sd][k],L=(D.lim&&D.lim[k])||LIM[k]; /* lim: rango propio de un ejercicio, con su motivo en la definición */if(v<L[0]-.5||v>L[1]+.5)add1({s:'hombro',e:'codo',w:'muñeca',h:'cadera',k:'rodilla',a:'tobillo',ab:'apertura del brazo',abf:'apertura del antebrazo',lt:'apertura del muslo',el:'elevación del hombro'}[k]+lado(sd,['w','h','k','ab','abf','lt'].includes(k))+' fuera de rango ('+Math.round(v)+'°) en '+pc);}}
       /* 1b. bilateral: los dos lados con los mismos ángulos (salvo ejercicios a una mano o pierna, o alternados: uni) */
       if(!D.uni){const ks=fr?['a','e','h','k']:['s','e','h','k','a'],[x,y]=fr?['L','R']:['n','f'];ks.forEach(k=>{const dv=Math.abs(nrm(g[x][k]-g[y][k]));if(dv>6)add1({s:'brazo',a:'brazo',e:'codo',h:'muslo',k:'rodilla'}[k]+(fr?' derecho distinto del izquierdo':' lejano distinto del cercano')+' ('+Math.round(dv)+'°) en '+pc);});}
       /* 1d. de frente y de pie: la rodilla en la línea cadera–pie (sin piernas en O), salvo rodillas dobladas declaradas (bentKnees) */
@@ -218,7 +219,7 @@ const MK=(()=>{
       /* 2. huesos con largo fijo (el escorzo achica lo que se ve, no el hueso) */
       for(const sd of SDS){let L;if(fr){const ls=(s)=>lsOf(R.g,s,sd);L=[['S','E',LEN.ua*ls('ua'),'brazo'],['E','W',LEN.fa*ls('fa'),'antebrazo'],['H','K',LEN.th*ls('th'),'muslo'],['K','A',LEN.sh*ls('sh'),'pierna']];}
         else{const q=R.g[sd],cf=Math.cos(rad(q.abf));L=[['S','E',LEN.ua*Math.cos(rad(q.ab)),'brazo'],['E','W',LEN.fa*cf,'antebrazo'],['W','G',LEN.hd*cf,'mano'],['Hp','K',LEN.th*Math.cos(rad(q.lt)),'muslo'],['K','A',LEN.sh,'pierna'],['A','T',Math.hypot(LEN.ft,LEN.sole),'pie']];}
-        L.forEach(([a,b,l,n])=>{if(Math.abs(dist(P[a+sd],P[b+sd])-l)>.15)add1(n+' cambia de largo en '+pc);});}
+        L.forEach(([a,b,l,n])=>{if(Math.abs(dist(P[a+sd],P[b+sd])-Math.abs(l))>.15)add1(n+' cambia de largo en '+pc);});} /* ls negativo: el tramo apunta al revés (gira pasando por quien mira, como el antebrazo en la rotación externa) */
       if(!fr&&Math.abs(dist(P.P,P.N)-LEN.t)>.15)add1('torso cambia de largo en '+pc);
       /* 3. manos y pies en su contacto; el cable termina en la mano */
       for(const k in (R.tg||{})){const sd=k.slice(-1),j=k[0],got=P[j+sd],dd=dist(got,R.tg[k]);if(dd>.8)add1((j==='A'||j==='T'?'el pie':'la mano')+lado(sd,!(j==='A'||j==='T'))+' no llega a su apoyo ('+dd.toFixed(1)+') en '+pc);}
@@ -238,7 +239,7 @@ const MK=(()=>{
       for(const sd of SDS){const q=R.g[sd]||{},lat=fr?0:14*Math.sin(rad(q.ab||0))+18*Math.sin(rad(q.abf||0));if(lat<HEAD+2&&!D.handHead&&dist(P['G'+sd],P.H)<HEAD+1.5)add1('la mano'+lado(sd,1)+' se mete en la cabeza en '+pc);}
       /* 7. ningún equipo (barra, mancuerna, manija, cable, palanca) a menos de 2 de la cabeza, salvo contacto declarado: headOK (con su motivo), detrás o al costado */
       R.eq.forEach(e=>{if(e.headOK||e.behind||e.lateral)return;const at=e.at,H=P.H,lim=HEAD+2,NMq={bar:'la barra',db:'la mancuerna',kb:'la pesa rusa',ball:'el balón',handle:'la manija',pad:'el rodillo',ring:'la anilla',pulley:'el cable',lever:'la palanca'};let dd=1e9;
-        if(['bar','db','kb','ball','handle','pad'].includes(e.t)&&at)dd=dist(at,H)-({bar:7.25,db:e.rot!=null?9.25:5.35,kb:6.75,ball:7.75,handle:3.9,pad:(e.r||4.6)+.75})[e.t]; /* hasta el contorno dibujado (con su aro) */
+        if(['bar','db','kb','ball','handle','pad'].includes(e.t)&&at)dd=dist(at,H)-({bar:(e.r||6.5)+.75,db:e.rot!=null?9.25:5.35,kb:6.75,ball:7.75,handle:3.9,pad:(e.r||4.6)+.75})[e.t]; /* hasta el contorno dibujado (con su aro) */
         else if(e.t==='ring'&&at)dd=dist([at[0],at[1]-3.5],H)-5;
         else if((e.t==='pulley'||e.t==='lever')&&P[e.to]){const a=e.t==='pulley'?e.p:e.pv,b=P[e.to],v=[b[0]-a[0],b[1]-a[1]],L2=v[0]*v[0]+v[1]*v[1]||1,t=Math.max(0,Math.min(1,((H[0]-a[0])*v[0]+(H[1]-a[1])*v[1])/L2));dd=dist(H,[a[0]+v[0]*t,a[1]+v[1]*t])-(e.t==='lever'?1.75:.8);}
         if(dd<lim)add1((NMq[e.t]||'el equipo')+' pasa a menos de 2 de la cabeza en '+pc);});}
