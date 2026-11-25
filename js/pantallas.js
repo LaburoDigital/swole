@@ -865,18 +865,25 @@ document.addEventListener('pointerdown',e=>{
 /* ¿había un campo con el teclado abierto cuando empezó este toque? */
 document.addEventListener('pointerdown',e=>{const a=document.activeElement;S.kbT=e.pointerType==='touch'&&a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&!/^(checkbox|radio|range|file|button|submit|date|time|color)$/.test(a.type||'')?performance.now():0;},{capture:true,passive:true});
 /* el teclado no tapa el botón de guardar: las hojas suben lo que ocupa el teclado */
-if(window.visualViewport){const vv=visualViewport,rt=document.documentElement;const kbUpd=()=>{const kb=Math.max(0,Math.round(innerHeight-vv.height-vv.offsetTop)),on=kb>90;rt.style.setProperty('--kb',(on?kb:0)+'px');
+if(window.visualViewport){const vv=visualViewport,rt=document.documentElement;const kbUpd=ev=>{const kb=Math.max(0,Math.round(innerHeight-vv.height-vv.offsetTop)),on=kb>90;rt.style.setProperty('--kb',(on?kb:0)+'px');
   if(on!==rt.classList.contains('kb')){rt.classList.toggle('kb',on);if(on)setTimeout(()=>{const a=document.activeElement;if(a&&a.closest&&a.closest('.msheet,.pick'))try{a.scrollIntoView({block:'nearest'});}catch(x){}},80);
     /* se cerró el teclado: que iOS vuelva a alinear la pantalla (ver vpFix) */
     else vpFixSoon();}
-  /* sin teclado, la parte visible no puede quedar corrida respecto de donde se pegan la barra y el encabezado */
-  if(!on&&vv.offsetTop>1)vpFixSoon();};
+  /* sin teclado, la parte visible no puede quedar corrida respecto de donde se pegan la barra y el encabezado.
+     Solo al cambiar de tamaño, nunca desde el scroll de visualViewport: en iOS offsetTop cambia un momento con la inercia
+     y el rebote, y cada scrollTo cortaba la inercia y hacía saltar lo pegado arriba (el "temblor" de SW-10, juan-4.md) */
+  if(ev&&ev.type==='resize'&&!on&&vv.offsetTop>1)vpFixSoon();};
   vv.addEventListener('resize',kbUpd);vv.addEventListener('scroll',kbUpd);}
 /* iPhone (app instalada): al cerrar el teclado o volver de segundo plano, iOS a veces deja la zona donde se pegan los
    elementos fijos corrida respecto de lo que se ve. Resultado: la barra de abajo a mitad de pantalla, el fondo cortado a esa
    altura, el encabezado fuera de pantalla y el contenido pasando por debajo de la hora. Volver a pedir el mismo scroll
    obliga a iOS a realinearlas; no mueve nada de lo que ves. */
+/* mientras el usuario scrollea (o la inercia sigue) no se toca el scroll: vpFix espera a que termine */
+let scrollT=-1e9;const marcaScroll=()=>{scrollT=performance.now();};
+window.addEventListener('scroll',marcaScroll,{passive:true});document.addEventListener('touchmove',marcaScroll,{passive:true});
+function scrolleando(){return performance.now()-scrollT<400;}
 function vpFix(){const rt=document.documentElement;if(rt.classList.contains('kb')||rt.classList.contains('locked'))return;
+  if(scrolleando()){vpFixSoon();return;}
   const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return;
   try{window.scrollTo(window.scrollX,window.scrollY);}catch(e){}}
 let vpT=0;function vpFixSoon(){clearTimeout(vpT);vpT=setTimeout(()=>{vpFix();setTimeout(vpFix,250);},60);}
@@ -886,7 +893,9 @@ window.addEventListener('orientationchange',()=>setTimeout(vpFixSoon,300));
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')vpFixSoon();});
 /* lo que se pega debajo del encabezado (Rutinas/Calendario, pestañas de Nivel) usa su alto real, medido (antes 66 px fijos:
    el encabezado mide 67, quedaban encimados y la costura temblaba al scrollear) */
-(()=>{const top=document.querySelector('.top');if(!top)return;const set=()=>{const h=top.getBoundingClientRect().height;if(h)document.documentElement.style.setProperty('--toph',h+'px');};
+(()=>{const top=document.querySelector('.top');if(!top)return;let tT=0;
+  /* el alto se mide quieto: si cambia mientras se scrollea, se aplica cuando termina (que lo pegado no salte durante el scroll) */
+  const set=()=>{if(scrolleando()){clearTimeout(tT);tT=setTimeout(set,450);return;}const h=top.getBoundingClientRect().height;if(h)document.documentElement.style.setProperty('--toph',h+'px');};
   set();if('ResizeObserver' in window)new ResizeObserver(set).observe(top);else addEventListener('resize',set);})();
 /* al tocar un número se selecciona entero: escribís encima sin tener que borrar */
 document.addEventListener('focusin',e=>{const t=e.target;if(t&&t.tagName==='INPUT'&&t.type==='number'&&t.value!=='')setTimeout(()=>{try{if(document.activeElement===t)t.select();}catch(x){}},0);});

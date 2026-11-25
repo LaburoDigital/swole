@@ -44,11 +44,14 @@ function navTo(v,dir){
     if(Math.abs(dx)>(fast?80:140)){const j=i+(dx<0?1:-1);if(j>=0&&j<TAB_ORDER.length){setTimeout(()=>{v.style.transition='';navTo(TAB_ORDER[j],dx<0?1:-1);},10);}}
   },{passive:true});
 })();
-/* al bajar: el título grande pasa al encabezado. La barra de abajo queda siempre fija (esconderla hacía saltar la pantalla) */
+/* al bajar: el título grande pasa al encabezado. La barra de abajo queda siempre fija (esconderla hacía saltar la pantalla).
+   Con margen (histéresis): entra cuando el título queda por arriba de 56 px y sale recién por debajo de 72. Con un solo umbral,
+   si en el borde algo cambiaba de alto, "scrolled" iba y venía y lo pegado arriba temblaba (SW-10, juan-4.md) */
+function topScrolled(prev,bottom){return prev?bottom<=72:bottom<56;}
 (()=>{let lastY=0,tick=false;
   const upd=()=>{tick=false;
     const maxY=Math.max(0,document.documentElement.scrollHeight-window.innerHeight),y=Math.min(Math.max(0,window.scrollY),maxY),b=document.body,t=$('#view .pg'),tt=$('#topT');
-    if(t&&tt){const gone=t.getBoundingClientRect().bottom<64;b.classList.toggle('scrolled',gone);if(gone&&tt.textContent!==t.textContent)tt.textContent=t.textContent;}
+    if(t&&tt){const gone=topScrolled(b.classList.contains('scrolled'),t.getBoundingClientRect().bottom);b.classList.toggle('scrolled',gone);if(gone&&tt.textContent!==t.textContent)tt.textContent=t.textContent;}
     else b.classList.remove('scrolled');
     b.classList.remove('navhide');
     lastY=y;
