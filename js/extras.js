@@ -2,11 +2,16 @@
 /* ============ Navegación moderna ============ */
 const reducedMotion=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 const TAB_ORDER=['inicio','entrenar','niveles','nutri'];
+/* SW-10 (temblor-raiz.md): la página scrollea en #scroller, nunca la ventana */
+function SC(){return document.getElementById('scroller')||document.scrollingElement;}
+/* al cambiar de pestaña el contenido vuelve arriba. En algunos iOS, poner scrollTop=0 no frena el deslizamiento con inercia que
+   seguía: se corta el scroll un instante (overflow hidden) y se devuelve (qa.md) */
+function scArriba(){const s=SC();if(!s)return;const st=s.style;if(st)st.overflowY='hidden';s.scrollTop=0;if(st)setTimeout(()=>{st.overflowY='';},0);}
 /* cambio de pestaña con transición nativa del navegador (View Transitions); si no hay soporte, la animación de siempre */
 function navTo(v,dir){
-  const go=()=>{goTab(v);window.scrollTo(0,0);render();};
+  const go=()=>{goTab(v);scArriba();render();};
   const cur=TAB_ORDER.indexOf(S.tab),nx=TAB_ORDER.indexOf(v==='hoy'?'inicio':['rutinas','cal'].includes(v)?'entrenar':v);
-  if(cur===nx&&!['rutinas','cal'].includes(v)){if(window.scrollY>40)window.scrollTo({top:0,behavior:'smooth'});else go();return;}
+  if(cur===nx&&!['rutinas','cal'].includes(v)){if(SC().scrollTop>40)SC().scrollTo({top:0,behavior:'smooth'});else go();return;}
   buzz(8);
   if(!document.startViewTransition||reducedMotion()||document.visibilityState!=='visible'){go();return;}
   const back=dir?dir<0:nx>=0&&cur>=0&&nx<cur;
@@ -47,16 +52,18 @@ function navTo(v,dir){
 /* al bajar: el título grande pasa al encabezado. La barra de abajo queda siempre fija (esconderla hacía saltar la pantalla).
    Con margen (histéresis): entra cuando el título queda por arriba de 56 px y sale recién por debajo de 72. Con un solo umbral,
    si en el borde algo cambiaba de alto, "scrolled" iba y venía y lo pegado arriba temblaba (SW-10, juan-4.md) */
-function topScrolled(prev,bottom){return prev?bottom<=72:bottom<56;}
-(()=>{let lastY=0,tick=false;
+function topScrolled(prev,bottom,edge){const e=edge==null?64:edge;return prev?bottom<=e+8:bottom<e-8;}
+(()=>{let tick=false;
   const upd=()=>{tick=false;
-    const maxY=Math.max(0,document.documentElement.scrollHeight-window.innerHeight),y=Math.min(Math.max(0,window.scrollY),maxY),b=document.body,t=$('#view .pg'),tt=$('#topT');
-    if(t&&tt){const gone=topScrolled(b.classList.contains('scrolled'),t.getBoundingClientRect().bottom);b.classList.toggle('scrolled',gone);if(gone&&tt.textContent!==t.textContent)tt.textContent=t.textContent;}
+    const b=document.body,t=$('#view .pg'),tt=$('#topT'),cab=$('#cab');
+    /* con segmento el título ya está fijo en la cabecera: "scrolled" (la línea de abajo) es solo si el contenido se movió */
+    if(document.documentElement.classList.contains('conseg')){const y=SC().scrollTop;b.classList.toggle('scrolled',b.classList.contains('scrolled')?y>1:y>4);}
+    /* el borde es el de abajo de la cabecera */
+    else if(t&&tt){const gone=topScrolled(b.classList.contains('scrolled'),t.getBoundingClientRect().bottom,cab?cab.getBoundingClientRect().bottom:64);b.classList.toggle('scrolled',gone);if(gone&&tt.textContent!==t.textContent)tt.textContent=t.textContent;}
     else b.classList.remove('scrolled');
     b.classList.remove('navhide');
-    lastY=y;
   };
-  window.addEventListener('scroll',()=>{if(!tick){tick=true;requestAnimationFrame(upd);}},{passive:true});
+  const sc=SC();if(sc)sc.addEventListener('scroll',()=>{if(!tick){tick=true;requestAnimationFrame(upd);}},{passive:true});
 })();
 /* (se sacó "tirar para actualizar": se disparaba solo al llegar arriba scrolleando; la sincronización ya es automática) */
 

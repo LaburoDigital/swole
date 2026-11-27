@@ -866,37 +866,11 @@ document.addEventListener('pointerdown',e=>{
 document.addEventListener('pointerdown',e=>{const a=document.activeElement;S.kbT=e.pointerType==='touch'&&a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)&&!/^(checkbox|radio|range|file|button|submit|date|time|color)$/.test(a.type||'')?performance.now():0;},{capture:true,passive:true});
 /* el teclado no tapa el botón de guardar: las hojas suben lo que ocupa el teclado */
 if(window.visualViewport){const vv=visualViewport,rt=document.documentElement;const kbUpd=ev=>{const kb=Math.max(0,Math.round(innerHeight-vv.height-vv.offsetTop)),on=kb>90;rt.style.setProperty('--kb',(on?kb:0)+'px');
-  if(on!==rt.classList.contains('kb')){rt.classList.toggle('kb',on);if(on)setTimeout(()=>{const a=document.activeElement;if(a&&a.closest&&a.closest('.msheet,.pick'))try{a.scrollIntoView({block:'nearest'});}catch(x){}},80);
-    /* se cerró el teclado: que iOS vuelva a alinear la pantalla (ver vpFix) */
-    else vpFixSoon();}
-  /* sin teclado, la parte visible no puede quedar corrida respecto de donde se pegan la barra y el encabezado.
-     Solo al cambiar de tamaño, nunca desde el scroll de visualViewport: en iOS offsetTop cambia un momento con la inercia
-     y el rebote, y cada scrollTo cortaba la inercia y hacía saltar lo pegado arriba (el "temblor" de SW-10, juan-4.md) */
-  if(ev&&ev.type==='resize'&&!on&&vv.offsetTop>1)vpFixSoon();};
+  if(on!==rt.classList.contains('kb')){rt.classList.toggle('kb',on);if(on)setTimeout(()=>{const a=document.activeElement;if(a&&a.closest&&a.closest('.msheet,.pick'))try{a.scrollIntoView({block:'nearest'});}catch(x){}},80);}};
   vv.addEventListener('resize',kbUpd);vv.addEventListener('scroll',kbUpd);}
-/* iPhone (app instalada): al cerrar el teclado o volver de segundo plano, iOS a veces deja la zona donde se pegan los
-   elementos fijos corrida respecto de lo que se ve. Resultado: la barra de abajo a mitad de pantalla, el fondo cortado a esa
-   altura, el encabezado fuera de pantalla y el contenido pasando por debajo de la hora. Volver a pedir el mismo scroll
-   obliga a iOS a realinearlas; no mueve nada de lo que ves. */
-/* mientras el usuario scrollea (o la inercia sigue) no se toca el scroll: vpFix espera a que termine */
-let scrollT=-1e9;const marcaScroll=()=>{scrollT=performance.now();};
-window.addEventListener('scroll',marcaScroll,{passive:true});document.addEventListener('touchmove',marcaScroll,{passive:true});
-function scrolleando(){return performance.now()-scrollT<400;}
-function vpFix(){const rt=document.documentElement;if(rt.classList.contains('kb')||rt.classList.contains('locked'))return;
-  if(scrolleando()){vpFixSoon();return;}
-  const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return;
-  try{window.scrollTo(window.scrollX,window.scrollY);}catch(e){}}
-let vpT=0;function vpFixSoon(){clearTimeout(vpT);vpT=setTimeout(()=>{vpFix();setTimeout(vpFix,250);},60);}
-document.addEventListener('focusout',()=>vpFixSoon());
-window.addEventListener('pageshow',()=>vpFixSoon());
-window.addEventListener('orientationchange',()=>setTimeout(vpFixSoon,300));
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')vpFixSoon();});
-/* lo que se pega debajo del encabezado (Rutinas/Calendario, pestañas de Nivel) usa su alto real, medido (antes 66 px fijos:
-   el encabezado mide 67, quedaban encimados y la costura temblaba al scrollear) */
-(()=>{const top=document.querySelector('.top');if(!top)return;let tT=0;
-  /* el alto se mide quieto: si cambia mientras se scrollea, se aplica cuando termina (que lo pegado no salte durante el scroll) */
-  const set=()=>{if(scrolleando()){clearTimeout(tT);tT=setTimeout(set,450);return;}const h=top.getBoundingClientRect().height;if(h)document.documentElement.style.setProperty('--toph',h+'px');};
-  set();if('ResizeObserver' in window)new ResizeObserver(set).observe(top);else addEventListener('resize',set);})();
+/* SW-10 (temblor-raiz.md): se borró vpFix (scrollTo de realineo al cerrar el teclado, volver de segundo plano o girar) y el
+   alto medido --toph. Con la cáscara fija la ventana nunca scrollea, así que iOS no tiene nada que desalinear, y el segmento
+   vive dentro de la cabecera (ver syncTopSeg), sin un segundo sticky. */
 /* al tocar un número se selecciona entero: escribís encima sin tener que borrar */
 document.addEventListener('focusin',e=>{const t=e.target;if(t&&t.tagName==='INPUT'&&t.type==='number'&&t.value!=='')setTimeout(()=>{try{if(document.activeElement===t)t.select();}catch(x){}},0);});
 /* si la ventana ya estaba abierta y solo cambió su contenido, no repite la animación de entrada (evita el parpadeo) */
@@ -1010,6 +984,16 @@ function viewPerfil(){
 }
 const VIEWS={inicio:viewInicio,entrenar:viewEntrenar,niveles:viewNiveles,nutri:viewNutri,perfil:viewPerfil};
 function render(){RC={};try{render0();}finally{RC=null;}}
+/* el segmento de la pantalla (Rutinas/Calendario en Entrenar, las pestañas de Nivel) va adentro del bloque de cabecera: queda
+   pegado al encabezado por construcción, sin un segundo sticky ni un alto medido (temblor-raiz.md, causa A) */
+function syncTopSeg(v){const slot=document.getElementById('topSeg');if(!slot)return;const seg=v&&v.querySelector('.zone-seg,.nv-seg');
+  const want=S.tab==='entrenar'?'zone-seg':S.tab==='niveles'?'nv-seg':null,had=slot.firstElementChild;
+  /* se puede llamar más de una vez: si la vista ya no lo trae pero la cabecera tiene el de esta pantalla, queda */
+  if(!seg&&had&&want&&had.classList.contains(want))return;
+  slot.textContent='';if(seg){seg.removeAttribute('style');slot.appendChild(seg);
+    /* el título de la pantalla pasa a la cabecera (fijo, arriba del segmento); el h1 queda oculto a la vista pero sigue para lectores de pantalla */
+    const pg=v.querySelector('.pg'),tt=document.getElementById('topT');if(pg){pg.classList.add('pg-cab');if(tt)tt.textContent=pg.textContent;}}
+  document.documentElement.classList.toggle('conseg',!!slot.firstElementChild);}
 function render0(){
   const tb=t=>'<button class="'+(S.tab===t.id?'on':'')+'" data-a="tab" data-v="'+t.id+'" '+(S.tab===t.id?'aria-current="page"':'')+'>'+ic(t.i,22)+'<span>'+t.l+'</span></button>';
   const ti=TABS.findIndex(t=>t.id===S.tab),slot=ti<0?-1:ti<2?ti:ti+1;
@@ -1023,7 +1007,7 @@ function render0(){
      queda marcada y se rearma cuando el entreno se cierra o termina */
   if(db.active&&S.sessOpen&&!changed&&S.viewOk){S.viewDirty=true;}
   else{S.viewDirty=false;S.viewOk=true;
-  try{keepX(v,()=>{v.innerHTML=VIEWS[S.tab]();},changed);}
+  try{keepX(v,()=>{v.innerHTML=VIEWS[S.tab]();},changed);syncTopSeg(v);}
   catch(err){console.error(err);v.innerHTML='<div class="card"><h3>Algo falló en esta pantalla</h3><p class="mut sm-t" style="margin-top:6px">Tus datos siguen guardados. Probá recargar; si vuelve a pasar, bajá una copia y avisanos.</p><div class="g2" style="margin-top:12px"><button class="btn" data-a="export">Bajar una copia</button><button class="btn pri" data-a="reload">Recargar</button></div></div>';}
   revealSoon(v);
   if(changed&&!S.vt){v.classList.remove('enter','fwd','back');void v.offsetWidth;v.classList.add('enter',dir);countUp(v);clearTimeout(S.enterT);S.enterT=setTimeout(()=>v.classList.remove('enter'),1400);}
@@ -1046,7 +1030,7 @@ const DLISTS={
 };
 (()=>{
   let L=null,W=null,lp=null,lpFired=false;
-  const scroller=el=>el.closest('.msheet,.sess')||document.scrollingElement;
+  const scroller=el=>el.closest('.msheet,.sess')||SC();
   document.addEventListener('pointerdown',e=>{
     if(e.button>0)return;
     const h=e.target.closest('.dh'),it=h&&h.closest('[data-di]'),list=it&&it.closest('[data-dl]');
@@ -1061,8 +1045,7 @@ const DLISTS={
   },true);
   document.addEventListener('pointermove',e=>{
     if(lp&&Math.hypot(e.clientX-lp.x0,e.clientY-lp.y0)>10){clearTimeout(lp.t);lp=null;}
-    if(L){e.preventDefault();const r=L.rects,f=L.from,H=r[f].height+L.gap,v=e.clientY,doc=L.sc===document.scrollingElement;
-      const sr=doc?{top:0,bottom:innerHeight}:L.sc.getBoundingClientRect();
+    if(L){e.preventDefault();const r=L.rects,f=L.from,H=r[f].height+L.gap,v=e.clientY,sr=L.sc.getBoundingClientRect();
       if(v<sr.top+60)L.sc.scrollTop-=8;else if(v>sr.bottom-60)L.sc.scrollTop+=8;
       const dy=v-L.y0+(L.sc.scrollTop-L.s0),mid=r[f].top+r[f].height/2+dy;let to=0;r.forEach((x,i)=>{if(i!==f&&x.top+x.height/2<mid)to++;});L.to=to;
       L.el.style.transform='translateY('+dy+'px)';
@@ -1119,16 +1102,12 @@ window.addEventListener('popstate',()=>{
   else if(S.m2){if(!askDiscard('m2'))S.m2=null;}
   else if(S.modal){if((S.modal.t==='profile'&&!db.profile)||S.modal.t==='welcome'||S.modal.t==='onb'){try{history.pushState({sw:hDepth+1},'');hDepth++;}catch(e){}return;}if(!askDiscard('modal')){if(S.modal.t==='tools'&&S.iv){S.modal=null;ACTIONS.ivStop();}S.modal=null;}}
   else if(S.sessOpen)S.sessOpen=false;
-  else if(S.tab!=='inicio'){goTab('inicio');window.scrollTo(0,0);}
+  else if(S.tab!=='inicio'){goTab('inicio');scArriba();}
   render();
 });
-function lockScroll(on){
-  const r=document.documentElement,b=document.body,isOn=r.classList.contains('locked');
-  /* en compu alcanza con ocultar el desborde (la barra reserva su lugar); el truco de fijar el body es solo para celulares */
-  const fine=matchMedia('(hover:hover) and (pointer:fine)').matches;
-  if(on&&!isOn){S.lockY=window.scrollY;if(!fine)Object.assign(b.style,{position:'fixed',top:(-S.lockY)+'px',left:'0',right:'0',width:'100%'});r.classList.add('locked');}
-  else if(!on&&isOn){r.classList.remove('locked');if(b.style.position==='fixed'){Object.assign(b.style,{position:'',top:'',left:'',right:'',width:''});window.scrollTo(0,S.lockY||0);}}
-}
+/* con una capa abierta (hoja, entreno, selector) el contenido de atrás no scrollea: #scroller queda con overflow:hidden
+   (html.locked en app.css). Ya no se fija el body ni se mueve la ventana (temblor-raiz.md, causa B) */
+function lockScroll(on){const r=document.documentElement;r.classList.toggle('locked',!!on);const sc=SC();if(sc&&sc.toggleAttribute)sc.toggleAttribute('inert',!!on);}
 /* la pantalla no se apaga mientras hay un entreno en curso */
 async function keepAwake(on){
   try{

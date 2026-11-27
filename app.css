@@ -32,7 +32,7 @@ button{cursor:pointer;border:0;background:none;padding:0}
 
 /* layout */
 .main{min-height:100vh;padding-bottom:150px}
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:25;background:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:12px 16px;max-width:860px;margin:0 auto}
+.top{z-index:25;background:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:12px 16px;max-width:860px;margin:0 auto}
 .mark{font:800 26px/1 var(--f-d);letter-spacing:-.04em;display:flex;align-items:center;gap:8px}
 .mark svg{width:30px;height:30px;flex:none;overflow:visible}
 /* wordmark: la "o" es un disco de pesa que gira una vez al abrir */
@@ -51,12 +51,12 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .ib.flat{background:none;border-color:transparent}
 .wrap{max-width:860px;margin:0 auto;padding:4px 16px 0}
 .pg{font:800 32px/1.05 var(--f-d);letter-spacing:-.035em;margin:6px 0 16px}
-.nav{position:fixed;z-index:20;left:0;right:0;bottom:0;display:flex;justify-content:space-around;background:var(--surf);border-top:1px solid var(--line);padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px))}
+.nav{z-index:20;display:flex;justify-content:space-around;background:var(--surf);border-top:1px solid var(--line);padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px))}
 .nav button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 10px;border-radius:14px;font-size:11.5px;font-weight:700;color:var(--mut);min-width:60px}
 .nav button.on{color:var(--acc)}
 .nav button.on svg{stroke-width:2.4}
 @media (min-width:900px){
-  .nav{top:0;right:auto;width:210px;flex-direction:column;justify-content:flex-start;gap:6px;border-top:0;border-right:1px solid var(--line);padding:84px 14px 14px}
+  .nav{width:210px;flex-direction:column;justify-content:flex-start;gap:6px;border-top:0;border-right:1px solid var(--line);padding:84px 14px 14px}
   .nav button{flex-direction:row;gap:12px;font-size:15px;padding:12px 14px;width:100%;justify-content:flex-start}
   .nav button.on{background:var(--raise)}
   .main{margin-left:210px}
@@ -491,7 +491,7 @@ details.why p{margin-top:8px}
 .avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--surf);box-shadow:0 0 0 2.5px var(--ac),0 0 14px color-mix(in srgb,var(--ac) 45%,transparent);font:800 17px var(--f-d)}
 /* menú flotante */
 @media (max-width:899px){
-  .nav{left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));border:1px solid var(--line);border-radius:26px;padding:7px;display:grid;grid-template-columns:repeat(5,1fr);align-items:center;box-shadow:0 14px 40px rgba(0,0,0,.35)}
+  .nav{border:1px solid var(--line);border-radius:26px;padding:7px;display:grid;grid-template-columns:repeat(5,1fr);align-items:center;box-shadow:0 14px 40px rgba(0,0,0,.35)}
   .nav button{min-width:0;padding:6px 2px;position:relative;z-index:1}
   .nav button::after,.nav button.on::after{display:none!important}
   .nav-ind{position:absolute;top:7px;bottom:7px;left:7px;width:calc((100% - 14px)/5);border-radius:19px;background:color-mix(in srgb,var(--acc) 18%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 35%,transparent);transform:translateX(calc(var(--s)*100%));transition:transform .45s cubic-bezier(.22,1,.36,1),opacity .2s}
@@ -508,7 +508,7 @@ details.why p{margin-top:8px}
 @keyframes fabPulse{50%{box-shadow:0 0 0 10px color-mix(in srgb,var(--ok) 0%,transparent),0 0 0 0 transparent;transform:scale(1.05)}}
 .fab-l{display:none}
 @media (min-width:900px){.fab{margin:6px 0 10px;width:100%;height:50px;border-radius:16px;display:flex!important;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:15px}.fab-l{display:inline}.nav-ind{display:none}#avatarSlot{display:inline-block}}
-.zone-seg{top:calc(66px + env(safe-area-inset-top,0px))}
+
 /* bienvenida paso a paso */
 .mback.onb{background:radial-gradient(circle at 20% 10%,color-mix(in srgb,var(--acc) 35%,transparent),transparent 55%),radial-gradient(circle at 90% 90%,color-mix(in srgb,var(--hot) 30%,transparent),transparent 55%),var(--bg);align-items:stretch;z-index:80}
 .onb-in-wrap{width:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column;padding:calc(18px + env(safe-area-inset-top,0px)) 20px calc(20px + env(safe-area-inset-bottom,0px));min-height:100%}
@@ -606,7 +606,7 @@ body::before{background:color-mix(in srgb,var(--bg) 70%,transparent)}
 .nav button.on::after{width:18px}
 @media (min-width:900px){.nav button::after{display:none}}
 .btn.pri{background:linear-gradient(135deg,var(--acc),color-mix(in srgb,var(--acc) 55%,var(--hot)));box-shadow:0 6px 18px color-mix(in srgb,var(--acc) 35%,transparent)}
-.zone-seg{position:sticky;top:calc(66px + env(safe-area-inset-top,0px));z-index:5;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);background:color-mix(in srgb,var(--raise) 85%,transparent)}
+.zone-seg{z-index:5;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);background:color-mix(in srgb,var(--raise) 85%,transparent)}
 .subview>*{animation:rise .45s cubic-bezier(.2,.8,.2,1) both}
 /* pantalla de carga */
 #splash{position:fixed;inset:0;z-index:200;background:var(--bg);display:grid;place-content:center;justify-items:center;gap:14px;transition:opacity .5s,transform .5s}
@@ -937,7 +937,7 @@ html.vt-back::view-transition-new(page){animation-name:vtInB}
 body.scrolled .top{border-bottom-color:var(--line);box-shadow:0 8px 24px rgba(5,6,15,.18)}
 .top-t{position:absolute;left:50%;transform:translate(-50%,6px);font:700 16px var(--f-d);letter-spacing:-.01em;opacity:0;pointer-events:none;transition:opacity .2s,transform .25s cubic-bezier(.22,1,.36,1);white-space:nowrap;max-width:45%;overflow:hidden;text-overflow:ellipsis}
 body.scrolled .top-t{opacity:1;transform:translate(-50%,0)}
-.top{position:sticky}
+
 /* barra de abajo que se esconde al bajar */
 @media (max-width:899px){
   .nav{transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .25s}
@@ -1679,7 +1679,7 @@ svg.chart{touch-action:pan-y;cursor:crosshair}
 .bgfx::before{animation:none!important}
 /* las pestañas fijas de arriba: sin desenfoque (temblaban al scrollear) */
 .zone-seg,.nv-seg{-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--raise);transform:translateZ(0)}
-.nv-seg{position:sticky;top:calc(66px + env(safe-area-inset-top,0px));z-index:5;margin-bottom:14px}
+.nv-seg{z-index:5;margin-bottom:14px}
 /* ≤340 px: las 4 pestañas de Nivel (Resumen, Ejercicios, Progreso, Carta) entran enteras (antes "Carta" quedaba cortada) */
 @media (max-width:340px){.nv-seg{gap:2px}.nv-seg button{padding:9px 4px;font-size:13px}}
 .nav button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
@@ -1728,7 +1728,7 @@ html.touring .nav,html.touring .top{z-index:auto}
 .top{background:var(--bg)}
 .mh-bar,.msheet.full .mh-bar{background:var(--surf)}
 .carta-sheet .mh-bar{background:transparent}
-.zone-seg,.nv-seg{top:calc(var(--toph,66px) + env(safe-area-inset-top,0px))}
+
 /* SW-4: gráfico con tendencia: la tendencia va punteada y hay una leyenda chica */
 .chart .tr{stroke-dasharray:6 5}
 .ch-leg{display:flex;gap:16px;justify-content:center;margin:4px 0 2px;font-size:12px;color:var(--mut)}
@@ -1792,3 +1792,57 @@ html.touring .nav,html.touring .top{z-index:auto}
 :root[data-theme="light"] .mk .mk-fa,:root[data-theme="light"] .mk .mk-sh{stroke:color-mix(in srgb,#8A8FA6 50%,var(--acc))}
 :root[data-theme="light"] .mk .mk-far{opacity:.5}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .mk .mk-tr,:root:not([data-theme="dark"]) .mk .mk-ua,:root:not([data-theme="dark"]) .mk .mk-th{stroke:#8A8FA6}:root:not([data-theme="dark"]) .mk .tq-h{fill:#8A8FA6}:root:not([data-theme="dark"]) .mk .mk-fa,:root:not([data-theme="dark"]) .mk .mk-sh{stroke:color-mix(in srgb,#8A8FA6 50%,var(--acc))}:root:not([data-theme="dark"]) .mk .mk-far{opacity:.5}}
+
+/* ===== SW-10 (temblor-raiz.md): cáscara fija con un solo contenedor que scrollea =====
+   La ventana nunca scrollea (html y body quietos): no hay nada que iOS pueda desalinear, y no hace falta vpFix.
+   Arriba, un único bloque de cabecera (no sticky, no fixed) con el encabezado y, en Entrenar y en Nivel, el segmento adentro:
+   quedan pegados por construcción, sin dos stickies ni un alto medido con decimales (el hueco de 1 px que "temblaba").
+   En el medio #scroller, el único que scrollea. Abajo la barra, como un hijo más (no fixed: no puede quedar en el medio). */
+html,body{height:100%;overflow:hidden}
+body::before{display:none}
+/* el relleno de la zona del reloj y del indicador de inicio lo ponen .cab y .nav: :root ya no lo suma (si no, se duplicaba y la barra quedaba sobre el indicador) */
+:root{padding-top:0;padding-bottom:0}
+#app{position:relative;height:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.cab{flex:none;position:relative;z-index:25;padding-top:env(safe-area-inset-top,0px);background:var(--bg);border-bottom:1px solid transparent;transition:box-shadow .25s,border-color .25s}
+.top{position:relative;top:auto;background:transparent;border-bottom:0;box-shadow:none}
+body.scrolled .top{border-bottom-color:transparent;box-shadow:none}
+body.scrolled .cab{border-bottom-color:var(--line);box-shadow:0 8px 24px rgba(5,6,15,.18)}
+.top-seg{max-width:860px;margin:0 auto;padding:0 16px 10px}
+.top-seg:empty{display:none}
+.top-seg .seg{position:static;top:auto;margin:0!important}
+.main{min-height:0;margin-left:0}
+#scroller{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-gutter:stable;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:72px}
+html.locked #scroller{overflow:hidden}
+/* con la píldora o la barra de descanso a la vista (flotan sobre el final del contenido), la última tarjeta no queda tapada */
+html:has(#pill:not(:empty)) #scroller,html:has(#restbar:not(:empty)) #scroller{padding-bottom:104px}
+.nav{position:relative;flex:none;left:auto;right:auto;top:auto;bottom:auto}
+@media (max-width:899px){
+  .nav{margin:0 12px calc(10px + env(safe-area-inset-bottom,0px))}
+}
+@media (min-width:900px){
+  #app{display:grid;grid-template-columns:240px 1fr;grid-template-rows:auto 1fr}
+  .nav{grid-column:1;grid-row:1/3;width:auto;height:auto;overflow-y:auto;margin:0}
+  .cab{grid-column:2;grid-row:1}
+  #scroller{grid-column:2;grid-row:2;padding-bottom:24px}
+  .top-seg{max-width:1180px;padding:0 32px 10px}
+}
+
+/* ===== SW-10 v99 (pedido del jefe sobre diseno-cascara.md) =====
+   M2: en Entrenar y Nivel la cabecera muestra siempre el título corto (sin el logo en el celu) y el h1 grande no se ve:
+   título → segmento → contenido desde el primer momento. El segundo segmento de Entrenar (Mis rutinas / Ejercicios) se ve como
+   subpestañas de texto con subrayado, un nivel más abajo que el de la cabecera. */
+.pg-cab{position:absolute!important;width:1px;height:1px;margin:0!important;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+html.conseg .top-t{opacity:1;transform:translate(-50%,0)}
+@media (max-width:440px){html.conseg .top-t{transform:none}html.conseg .top .mark{opacity:0!important;visibility:hidden;pointer-events:none}}
+html.conseg .subview>.seg{background:none;border-radius:0;padding:0;gap:22px;justify-content:flex-start;border-bottom:1px solid var(--line)}
+html.conseg .subview>.seg button{flex:0 0 auto;min-height:44px;padding:0 2px;border-radius:0;background:none!important;border:0;box-shadow:none;color:var(--mut)}
+html.conseg .subview>.seg button.on{color:var(--text);box-shadow:inset 0 -2px 0 var(--acc)}
+/* B1: el contenido ya no pasa por debajo de la cabecera, así que va transparente sobre el fondo (sin corte de golpe);
+   al bajar, solo una línea y una sombra suave */
+.cab{background:transparent}
+body.scrolled .cab{border-bottom-color:var(--line);box-shadow:0 6px 18px rgba(5,6,15,.14)}
+/* B2: los botones del segmento de la cabecera a 44 de alto (criterio de Juan) */
+.top-seg .seg button{min-height:44px;padding:0 8px}
+@media (max-width:340px){.top-seg .seg button{font-size:13px}}
+/* B3: los títulos de los caminos (Nivel) no se cortan en el medio de la palabra ("Articulacione / s de acero") */
+.cam-t b{overflow-wrap:normal;word-break:normal;-webkit-hyphens:auto;hyphens:auto}

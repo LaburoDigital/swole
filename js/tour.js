@@ -6,7 +6,7 @@
 const Tour=(()=>{
   const card=txt=>()=>[...document.querySelectorAll('#view .card,#view .lvl-hero,#view .gen-cta,#view .qgrid')].find(e=>e.textContent.includes(txt));
   const nav=v=>'#nav button[data-v="'+v+'"]';
-  const go=(tab,extra)=>()=>{if(extra)extra();goTab(tab);render();window.scrollTo(0,0);};
+  const go=(tab,extra)=>()=>{if(extra)extra();goTab(tab);render();scArriba();};
   const TOPICS=[
     ['inicio','Inicio','home','Tu rango, misiones, el entreno de hoy y tu coach'],
     ['entrenar','Entrenar','dumb','Rutinas, el generador, el entreno en vivo y el calendario'],
@@ -75,7 +75,7 @@ const Tour=(()=>{
     S.modal=null;S.m2=null;S.picker=null;S.sessOpen=false;render();
     st={name,i:0};document.documentElement.classList.add('touring');requestAnimationFrame(()=>cont.classList.add('on'));show();
   }
-  function end(){const c=el();db.settings.tourSeen=1;save();st=null;document.documentElement.classList.remove('touring');if(c){c.classList.remove('on');setTimeout(()=>{if(!st)c.remove();},300);}goTab('inicio');render();window.scrollTo(0,0);}
+  function end(){const c=el();db.settings.tourSeen=1;save();st=null;document.documentElement.classList.remove('touring');if(c){c.classList.remove('on');setTimeout(()=>{if(!st)c.remove();},300);}goTab('inicio');render();scArriba();}
   function show(){
     const steps=T[st.name],s=steps[st.i];if(!s){if(st.name==='main')return end();st={name:'main',i:T.main.length-1};return show();}
     if(s.t)s.t();
