@@ -40,7 +40,8 @@ test('la animación interpola ángulos: los huesos no cambian de largo en ningú
   /* de costado: torso, muslo (con su escorzo) y pierna; de frente el validador mide cada tramo con su escorzo */
   for (const id of Object.keys(MKD)) { if (MKD[id].v === 'front') continue; for (let i = 0; i <= 20; i++) {
     const R = MK.frame(MKD[id], i / 20), P = R.P, d = (a, b) => Math.hypot(P[a][0] - P[b][0], P[a][1] - P[b][1]), th = 20 * Math.cos(R.g.n.lt * Math.PI / 180);
-    assert.ok(Math.abs(d('P', 'N') - 30) < .01, id + ' torso');
+    const cv = R.g.cv || 0; /* con la columna redondeada (cv) la cadera y el cuello quedan a la cuerda del arco de 30 */
+    assert.ok(Math.abs(d('P', 'N') - (30 - 8 * cv * cv / 90)) < .01, id + ' torso');
     assert.ok(Math.abs(d('Hpn', 'Kn') - th) < .01 && Math.abs(d('Kn', 'An') - 19) < .01, id + ' pierna');
   } }
 });
@@ -73,10 +74,10 @@ test('isométricos de brazos estirados (planches, banderas, levers, vertical, so
   assert.ok(MK.check(D).some(p => p.includes('no está estirado')));
 });
 
-test('todo ejercicio que no es de segundos se mueve: A y B no son la misma pose', () => {
+test('todo ejercicio que no es de segundos se mueve (entre A y B o, si va por fases y vuelve al inicio, en el recorrido)', () => {
   for (const e of EX) { if (e.time || !MKD[e.id]) continue;
-    const a = MK.frame(MKD[e.id], 0).P, b = MK.frame(MKD[e.id], 1).P;
-    const mov = Math.max(...Object.keys(a).filter(k => Array.isArray(a[k]) && b[k]).map(k => Math.hypot(a[k][0] - b[k][0], a[k][1] - b[k][1])));
+    const D = MKD[e.id], a = MK.frame(D, 0).P, us = D.fases && D.fases.length ? [1, ...D.fases.map(f => f.u)] : [1];
+    const mov = Math.max(...us.map(u => { const b = MK.frame(D, u).P; return Math.max(...Object.keys(a).filter(k => Array.isArray(a[k]) && b[k]).map(k => Math.hypot(a[k][0] - b[k][0], a[k][1] - b[k][1]))); }));
     assert.ok(mov >= 3, e.id + ': no se mueve (lo que más se desplaza recorre ' + mov.toFixed(1) + ')'); }
 });
 

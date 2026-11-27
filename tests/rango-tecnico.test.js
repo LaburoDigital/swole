@@ -45,9 +45,12 @@ const ROM = [
   { patron: 'fondo imposible', ids: ['impdip'],
     fuente: 'técnica estándar de calistenia: arranca con los antebrazos apoyados en las barras y empuja hasta los brazos bloqueados, con las manos quietas',
     inicio: { ante: [70, 110] }, fin: { e: [0, 15] }, mano: true },
-  { patron: 'dominadas (prona, supina, en L, asistida), vistas de atrás', ids: ['pullup', 'chinup', 'lpullup', 'assistpull'],
+  { patron: 'dominadas (prona, supina, asistida), vistas de atrás', ids: ['pullup', 'chinup', 'assistpull'],
     fuente: 'NSCA (4.ª ed.), cap. 15, y juan-2.md: arranca colgado con los brazos estirados (codo ≥165°) y sube hasta que el mentón pasa la barra; las manos no se mueven',
     inicio: { eMax: [0, 15] }, fin: { menton: [1, 15] }, mano: true },
+  { patron: 'dominadas en L (de costado: la L es lo que define el ejercicio)', ids: ['lpullup'],
+    fuente: 'Overcoming Gravity (S. Low) y jefe-154.md / juan-4.md: colgado con los brazos estirados y las piernas rectas, juntas y horizontales; sube hasta que el mentón pasa la barra sin bajar las piernas',
+    inicio: { e: [0, 15], cadera: [-3, 3] }, fin: { menton: [1, 15], cadera: [-3, 3] }, mano: true },
   { patron: 'dominadas negativas', ids: ['negpull'],
     fuente: 'técnica estándar: arranca con el mentón sobre la barra y baja lento hasta colgar con los brazos estirados',
     inicio: { menton: [1, 15] }, fin: { eMax: [0, 15] }, mano: true },
@@ -157,7 +160,9 @@ test('muscle-up: fases separadas y en orden (primero tira hasta el pecho, despu�
 });
 
 test('dominadas: todas vistas de atrás (pedido de Juan)', () => {
-  for (const id of ['pullup', 'chinup', 'lpullup', 'assistpull', 'negpull', 'archerpull', 'oapull']) {
+  /* la dominada en L va de costado, como excepción (decisión del jefe en jefe-154.md: la L es lo que define el ejercicio) */
+  assert.ok(!MKD.lpullup.back && MKD.lpullup.v !== 'front', 'la dominada en L va de costado');
+  for (const id of ['pullup', 'chinup', 'assistpull', 'negpull', 'archerpull', 'oapull']) {
     assert.ok(MKD[id].v === 'front' && MKD[id].back, id + ' tiene que verse de atrás');
     assert.match(MK.svg(MKD[id], { stat: 1 }), /vista de atrás/);
   }

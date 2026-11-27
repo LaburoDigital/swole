@@ -597,10 +597,11 @@ function restNoteClear(){try{navigator.serviceWorker&&navigator.serviceWorker.re
 document.addEventListener('visibilitychange',()=>{if(!S.rest)return;if(document.hidden){const hm=new Date(S.rest.end).toTimeString().slice(0,5);restNote('Descansando','Termina a las '+hm,true);clearTimeout(S.restN);S.restN=setTimeout(()=>{if(S.rest&&document.hidden)restNote('Descanso terminado','Volvé a la siguiente serie',false);},Math.max(0,S.rest.end-Date.now()));}else{clearTimeout(S.restN);restNoteClear();}});
 function endRest(alarm){clearInterval(restT);clearTimeout(S.restN);const hid=document.hidden;S.rest=null;$('#restbar').innerHTML='';if(alarm){beep();toast('Descanso terminado');if(hid)restNote('Descanso terminado','Volvé a la siguiente serie',false);}else restNoteClear();}
 function renderRest(){
-  if(!S.rest){$('#restbar').innerHTML='';return;}
+  if(!S.rest){$('#restbar').innerHTML='';ajustaDock();return;}
   const left=Math.max(0,Math.ceil((S.rest.end-Date.now())/1000));
   $('#restbar').innerHTML='<div class="restb"><div class="row"><div class="ring"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="26" class="rbg"/><circle id="restF" cx="30" cy="30" r="26" class="rfg" style="stroke-dashoffset:'+(163.4*(1-left/S.rest.total)).toFixed(1)+'"/></svg><b id="restT">'+fmtT(left)+'</b></div>'+
    '<span class="grow"><span style="font-size:12px;font-weight:700;opacity:.7">Descanso</span><br><span style="font-weight:700">'+fmtT(S.rest.total)+'</span></span><button class="btn" data-a="restAdd" data-v="-15">-15</button><button class="btn" data-a="restAdd" data-v="15">+15</button><button class="btn" data-a="restSkip">Saltar</button></div></div>';
+  ajustaDock();
 }
 
 /* ============ Capas: modales ============ */
@@ -929,6 +930,7 @@ function renderPill(){
   const el=$('#pill');
   if(db.active&&!S.sessOpen)el.innerHTML='<button class="pillb" data-a="sessOpen">'+ic('timer')+'<span class="grow">'+esc(db.active.name)+'</span><span id="pillT">'+fmtT((Date.now()-db.active.t0)/1000)+'</span></button>';
   else el.innerHTML=todayGoHTML();
+  ajustaDock();
 }
 /* Selector de ejercicios */
 /* las tarjetas que están más abajo aparecen suaves cuando llegan a la pantalla */

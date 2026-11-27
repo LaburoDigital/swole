@@ -37,16 +37,19 @@ const MK=(()=>{
     const A=D.A,B=D.B;
     if(D.v==='front'){const o={};FTOP.forEach(k=>{const dv=k==='sw'||k==='tk'?1:k==='t'?180:0;o[k]=lerp(A[k]!=null?A[k]:dv,B[k]!=null?B[k]:(A[k]!=null?A[k]:dv),u);});
       for(const sd of ['L','R']){const a=Object.assign({},A.x,A[sd]),b=Object.assign({},a,B.x,B[sd]);o[sd]={};FSIDE.forEach(k=>o[sd][k]=lerp(a[k]||0,b[k]||0,u));}
+      if(A.rr!=null||B.rr!=null){const ra=A.rr!=null?A.rr:B.rr;o.rr=lerp(ra,B.rr!=null?B.rr:ra,u);}
       const la=A.ls||{},lb=B.ls||la;o.ls={};new Set(Object.keys(la).concat(Object.keys(lb))).forEach(k=>o.ls[k]=lerp(la[k]!=null?la[k]:1,lb[k]!=null?lb[k]:1,u));return o;}
-    const o={t:lerp(A.t,B.t,u),nk:lerp(A.nk||0,B.nk!=null?B.nk:(A.nk||0),u)};
+    const o={t:lerp(A.t,B.t,u),nk:lerp(A.nk||0,B.nk!=null?B.nk:(A.nk||0),u),cv:lerp(A.cv||0,B.cv!=null?B.cv:(A.cv||0),u)}; /* cv: la columna redondeada (cuánto se curva la espalda hacia atrás, en unidades del dibujo) */
     for(const sd of ['n','f']){const a=Object.assign({},A.n,A[sd]),b=Object.assign({},a,B.n,B[sd]);o[sd]={};SIDE.forEach(k=>o[sd][k]=lerp(a[k]||0,b[k]||0,u));}return o;}
   /* punto de contacto: fijo, que va de A a B, o pegado al cuerpo (bo = [adelante, arriba] medidos sobre el torso) */
   function target(T,u,P,R){if(!T)return null;if(Array.isArray(T))return T;if(T.seq){const K=T.seq;let i=0;while(i<K.length-2&&u>K[i+1][0])i++;return lp(K[i][1],K[i+1][1],Math.max(0,Math.min(1,(u-K[i][0])/(K[i+1][0]-K[i][0]))));} /* seq: [[u, punto], …] por etapas, a la par de las fases */if(T.A&&T.M)return u<.5?lp(T.A,T.M,u*2):lp(T.M,T.B,(u-.5)*2); /* M: punto intermedio (la barra rodea la cara) */
     if(T.A)return lp(T.A,T.B,u);
     if(T.rel){const q=P[T.rel];if(!q)return null;if(T.bo&&R){const t=R.phi.t,a=V(t-90,R.d),b=V(t,R.d);return[q[0]+a[0]*T.bo[0]+b[0]*T.bo[1],q[1]+a[1]*T.bo[0]+b[1]*T.bo[1]];}const o=T.off||[0,0];return[q[0]+o[0],q[1]+o[1]];}return null;}
+  /* largo de cadera a cuello: el torso mide 30 por la columna; si se redondea (cv = flecha del arco), la cuerda se acorta */
+  const tLen=cv=>LEN.t-8*(cv||0)*(cv||0)/(3*LEN.t);
   /* ---------- de costado: cinemática directa desde la cadera ---------- */
   function fkSide(D,g){
-    const d=D.d,P={},R={d,ang:g,v:'side'};P.P=[0,0];const ft=g.t;P.N=add(P.P,V(ft,d),LEN.t);P.H=add(P.N,V(ft-g.nk,d),LEN.nk);R.phi={t:ft,hd:ft-g.nk};
+    const d=D.d,P={},R={d,ang:g,v:'side'};P.P=[0,0];const ft=g.t;P.N=add(P.P,V(ft,d),tLen(g.cv)); /* con la columna redondeada, la cadera y el cuello quedan más cerca (la cuerda del arco) */P.H=add(P.N,V(ft-g.nk,d),LEN.nk);R.phi={t:ft,hd:ft-g.nk};
     /* el lado lejano, apenas corrido hacia atrás y arriba para que se vea */
     const off=[-3*d,-2.2],offH=[-3*d,0],foot=(A,fo)=>[add(add(A,V(fo,d),LEN.ft),V(fo-90,d),LEN.sole),add(add(A,V(fo+180,d),LEN.heel),V(fo-90,d),LEN.sole)];R.foot=foot;
     for(const sd of ['n','f']){const q=g[sd],S=sd==='f'?add(P.N,off,1):P.N,Hp=sd==='f'?add(P.P,offH,1):P.P,cf=Math.cos(rad(q.abf)),ct=Math.cos(rad(q.lt)),u=ft-180+q.s,f=u+q.e,h=f+q.w,th=ft-180+q.h,sh=th-q.k,fo=sh+90+q.a;
@@ -60,8 +63,8 @@ const MK=(()=>{
   function fkFront(D,g){const P={},R={d:1,ang:g,v:'front',phi:{}};P.P=[0,0];P.N=add(P.P,VF(g.t),LEN.t*g.tk);const up=VF(g.t+180);
     P.H=[P.N[0]+g.tw+up[0]*0,P.N[1]-LEN.nk];P.H=add([P.N[0]+g.tw,P.N[1]],VF(g.t-g.nk),LEN.nk*(g.ls&&g.ls.nk!=null?g.ls.nk:1)); /* ls.nk: el cuello en escorzo (inclinado hacia quien mira, la cabeza queda delante del pecho) */
     /* el cuerpo de frente puede estar inclinado (plancha lateral): hombros, caderas y miembros giran con el torso (rt) */
-    const rt=g.t-180,ro=(v)=>{const c=Math.cos(rad(-rt)),s=Math.sin(rad(-rt));return[v[0]*c-v[1]*s,v[0]*s+v[1]*c];},ad=(p,v)=>{const w=ro(v);return[p[0]+w[0],p[1]+w[1]];};R.rot=rt;
-    P.SL=ad(P.N,[-9*g.sw+g.tw,3]);P.SR=ad(P.N,[9*g.sw+g.tw,3]);P.HL=ad(P.P,[-5,0]);P.HR=ad(P.P,[5,0]);
+    const rt=g.t-180,rr=g.rr!=null?g.rr:rt,hw=g.rr!=null?5*g.sw:5,ro=(v)=>{const c=Math.cos(rad(-rr)),s=Math.sin(rad(-rr));return[v[0]*c-v[1]*s,v[0]*s+v[1]*c];},ad=(p,v)=>{const w=ro(v);return[p[0]+w[0],p[1]+w[1]];};R.rot=rt;
+    P.SL=ad(P.N,[-9*g.sw+g.tw,3]);P.SR=ad(P.N,[9*g.sw+g.tw,3]);P.HL=ad(P.P,[-hw,0]);P.HR=ad(P.P,[hw,0]); /* rr: en 3/4 o mirando desde arriba la línea de hombros y caderas va como la proyecta la cámara, no perpendicular al torso dibujado */
     for(const sd of ['L','R']){const m=sd==='L'?-1:1,q=g[sd],fu=m*q.a+rt,ff=m*(q.a+q.e)+rt,fth=m*q.h+rt,fsh=m*(q.h+q.k)+rt;
       P['E'+sd]=add(P['S'+sd],VF(fu),LEN.ua*lsOf(g,'ua',sd));P['W'+sd]=add(P['E'+sd],VF(ff),LEN.fa*lsOf(g,'fa',sd));P['G'+sd]=add(P['W'+sd],VF(ff),4*lsOf(g,'fa',sd));
       P['K'+sd]=add(P['H'+sd],VF(fth),LEN.th*lsOf(g,'th',sd));P['A'+sd]=add(P['K'+sd],VF(fsh),LEN.sh*lsOf(g,'sh',sd));
@@ -118,6 +121,11 @@ const MK=(()=>{
   function dot(F,j,r,cls,one){const g=k=>R=>f1(pt(R,j)[k]);return '<circle class="'+cls+'" cx="'+g(0)(F[0])+'" cy="'+g(1)(F[0])+'" r="'+r+'">'+(one?'':anim(F,'cx',g(0))+anim(F,'cy',g(1)))+'</circle>';}
   /* cada tramo con un borde del color del fondo: así el brazo se ve aunque pase por delante del torso */
   const seg=(F,a,b,cls,w,one)=>line(F,a,b,'mk-hl',w+2.2,one)+line(F,a,b,cls,w,one);
+  /* torso de costado: recto, o curvo si alguna pose redondea la columna (cv): una curva que se arquea hacia la espalda, más arriba que en el medio */
+  function torsoS(F,one){if(!F.some(R=>R.g&&Math.abs(R.g.cv||0)>.05))return seg(F,'P','N','mk-tr',10,one);
+    const d=R=>{const P=R.P.P,N=R.P.N,bk=V(R.phi.t+90,R.d),c=R.g.cv||0,m=[P[0]+(N[0]-P[0])*.62+bk[0]*2*c,P[1]+(N[1]-P[1])*.62+bk[1]*2*c]; /* el punto más curvo queda en la parte alta de la espalda, no en la cintura */return 'M'+f1(P[0])+' '+f1(P[1])+' Q'+f1(m[0])+' '+f1(m[1])+' '+f1(N[0])+' '+f1(N[1]);};
+    const v=seq(F,d),an=one||v.every(x=>x===v[0])?'':'<animate attributeName="d" values="'+v.join(';')+'" keyTimes="'+kt()+'" dur="2.8s" repeatCount="indefinite"/>';
+    const p=(cls,w)=>'<path class="'+cls+'" fill="none" stroke-linecap="round" stroke-width="'+w+'" d="'+d(F[0])+'">'+an+'</path>';return p('mk-hl',12.2)+p('mk-tr',10);}
   function limbs(F,sd,one){return seg(F,'Hp'+sd,'K'+sd,'mk-th',6.5,one)+seg(F,'K'+sd,'A'+sd,'mk-sh',5.5,one)+seg(F,'L'+sd,'T'+sd,'mk-ft',3.5,one);}
   function arm(F,sd,one){return seg(F,'S'+sd,'E'+sd,'mk-ua',5.5,one)+seg(F,'E'+sd,'W'+sd,'mk-fa',4.8,one)+seg(F,'W'+sd,'G'+sd,'mk-hd',4.2,one);}
   function limbsF(F,sd,one){return seg(F,'H'+sd,'K'+sd,'mk-th',6.5,one)+seg(F,'K'+sd,'A'+sd,'mk-sh',5.5,one)+seg(F,'L'+sd,'T'+sd,'mk-ft',3.5,one);}
@@ -129,9 +137,9 @@ const MK=(()=>{
       if(neu)return '<line class="mk-gb" x1="'+x+'" y1="3" x2="'+x+'" y2="16"/><rect class="mk-gd" x="'+(x-3)+'" y="5.8" width="6" height="8" rx="1.8"/><line class="mk-gt" x1="'+x+'" y1="6" x2="'+x+'" y2="3.4"/>';
       return '<rect class="'+(pal?'mk-gp':'mk-gd')+'" x="'+(x-3.2)+'" y="5" width="6.4" height="9" rx="2"/>'+(pal?'':'<line class="mk-gk" x1="'+(x-2.3)+'" y1="7" x2="'+(x+2.3)+'" y2="7"/>')+
         '<line class="mk-gt" x1="'+(x+sgn*(pal?3.2:-3.2))+'" y1="10.6" x2="'+(x+sgn*(pal?5.8:-5.4))+'" y2="'+(pal?8.4:9)+'"/>';};
-    const tl=gr.t==='mixto'?['prono','supino']:[gr.t,gr.t],dbs=gr.db&&gr.t!=='neutro'?[cx-w,cx+w].map(x=>'<line class="mk-gb" x1="'+(x-6.5)+'" y1="9.5" x2="'+(x+6.5)+'" y2="9.5"/><rect class="mk-gw" x="'+(x-8)+'" y="6.5" width="2.4" height="6" rx=".8"/><rect class="mk-gw" x="'+(x+5.6)+'" y="6.5" width="2.4" height="6" rx=".8"/>').join(''):'';
+    const tl=gr.t2?[gr.t,gr.t2]:gr.t==='mixto'?['prono','supino']:[gr.t,gr.t], /* t2: el agarre cambia en el recorrido (curl con giro): la mano izquierda muestra el inicio y la derecha el final */dbs=gr.db&&gr.t!=='neutro'?[cx-w,cx+w].map(x=>'<line class="mk-gb" x1="'+(x-6.5)+'" y1="9.5" x2="'+(x+6.5)+'" y2="9.5"/><rect class="mk-gw" x="'+(x-8)+'" y="6.5" width="2.4" height="6" rx=".8"/><rect class="mk-gw" x="'+(x+5.6)+'" y="6.5" width="2.4" height="6" rx=".8"/>').join(''):'';
     return '<g class="mk-grip" transform="translate('+f1(box.x)+' '+f1(box.y)+') scale('+box.s+')"><rect class="mk-gbg" x="0" y="0" width="38" height="26" rx="4"/>'+(gr.t==='neutro'||gr.t==='apoyo'||gr.db?dbs:'<line class="mk-gb" x1="3" y1="9.5" x2="35" y2="9.5"/>')+(gr.t==='apoyo'?'<line class="mk-gb" x1="3" y1="16" x2="35" y2="16"/>':'')+
-      hand(cx-w,tl[0])+hand(cx+w,tl[1])+'<text class="mk-gl" x="19" y="23.2" text-anchor="middle">'+(GN[gr.t]||'')+'</text></g>';}
+      hand(cx-w,tl[0])+hand(cx+w,tl[1])+(gr.t2?'<line class="mk-gb" x1="'+(cx-3)+'" y1="9.5" x2="'+(cx+3)+'" y2="9.5"/><polyline class="mk-gb" fill="none" points="'+(cx+1)+',7.5 '+(cx+3.2)+',9.5 '+(cx+1)+',11.5"/>':'')+'<text class="mk-gl" x="19" y="23.2" text-anchor="middle"'+(gr.t2?' font-size="4.6"':'')+'>'+(gr.t2?(GN[gr.t]||'')+' → '+(GN[gr.t2]||'').toLowerCase():(GN[gr.t]||''))+'</text></g>';}
   /* ---------- equipo ---------- */
   function hexDb(F,at,one,rot){const g=k=>R=>f1(pt(R,at)[k]),x=g(0)(F[0]),y=g(1)(F[0]);
     const anT=one?'':(()=>{const v=seq(F,R=>g(0)(R)+' '+g(1)(R));return v.every(s=>s===v[0])?'':'<animateTransform attributeName="transform" type="translate" values="'+v.join(';')+'" keyTimes="'+kt()+'" dur="2.8s" repeatCount="indefinite"/>';})();
@@ -144,6 +152,9 @@ const MK=(()=>{
   function eqSVG(F,D,one,layer){let h='';(D.eq||[]).forEach((e,i)=>{if(e.t==='pullbar'&&!e.front&&D.v!=='front'&&layer==='top'){h+='<circle class="mk-hl" fill="none" stroke-width="1.6" cx="'+e.p[0]+'" cy="'+e.p[1]+'" r="3.5"/><circle class="tq-eq" cx="'+e.p[0]+'" cy="'+e.p[1]+'" r="2.6"/>';return;} /* de costado la barra fija (de punta) se ve en todos los cuadros: se repite arriba de todo, con un borde del color del fondo */const at=R=>R.eq[i].at,L=e.layer||(['bar','db','kb','ball','handle','ring','pad'].includes(e.t)?(e.t==='bar'&&D.v!=='front'?'top':e.behind?'back2':'mid'):'back'); /* de costado el disco cercano queda más cerca de quien mira que la pierna y el brazo cercanos: va arriba de todo (el lejano lo tapa el cuerpo) */if(L!==layer)return;
       switch(e.t){
         case 'floor':h+='<line class="tq-floor" x1="4" y1="'+FLOOR+'" x2="116" y2="'+FLOOR+'"/>';break;
+        /* piso en perspectiva (vistas 3/4 o desde arriba): el paralelogramo del piso proyectado; sombra: la de contacto de una mano, un pie o la cola, achatada por la altura de la cámara */
+        case 'piso':h+='<polygon class="tq-piso" points="'+e.p.map(q=>f1(q[0])+','+f1(q[1])).join(' ')+'"/>';break;
+        case 'sombra':{const g=k=>R=>f1(R.eq[i].at[k]),R0=F[0];if(!R0.eq[i].at)break;h+='<ellipse class="tq-sombra" cx="'+g(0)(R0)+'" cy="'+g(1)(R0)+'" rx="'+(e.r||5)+'" ry="'+f1((e.r||5)*(e.k||.4))+'">'+(one?'':anim(F,'cx',g(0))+anim(F,'cy',g(1)))+'</ellipse>';break;}
         case 'block':h+='<rect class="tq-eq" x="'+e.r[0]+'" y="'+e.r[1]+'" width="'+e.r[2]+'" height="'+e.r[3]+'" rx="2.5"/>';break;
         case 'wall':h+='<rect class="tq-wall" x="'+e.r[0]+'" y="'+e.r[1]+'" width="'+e.r[2]+'" height="'+e.r[3]+'" rx="2"/>';break;
         case 'post':h+='<line class="tq-'+(e.pad?'pad':'eq')+'" x1="'+e.p[0]+'" y1="'+e.p[1]+'" x2="'+e.p[2]+'" y2="'+e.p[3]+'"/>';break;
@@ -195,7 +206,7 @@ const MK=(()=>{
     const body=fr?'<g class="mk-far">'+limbsF(F,'L',one)+'</g>'+(D.yaw&&!D.back?'':nearF)+eqSVG(F,D,one,'back2')+'<g class="mk-near">'+seg(F,'P','N','mk-tr',11,one)+(D.back?line(F,R=>lp(R.P.P,R.P.N,.08),R=>lp(R.P.P,R.P.N,.92),'mk-hl',1.3,one):'')+'</g>'+(D.yaw&&!D.back?nearF:'')+dot(F,'H',HEAD,'tq-h',one)+(D.back?dot(F,'H',HEAD-1.4,'tq-dbh',one):'')+
         '<g class="mk-far">'+armF(F,'L',one)+'</g><g class="mk-near">'+armF(F,'R',one)+dot(F,'ER',2,'tq-j',one)+dot(F,'EL',2,'tq-j',one)+'</g>'
       :eqSVG(F,D,one,'back2')+'<g class="mk-far">'+limbs(F,'f',one)+arm(F,'f',one)+'</g>'+eqSVG(F,D,one,'mid')+
-        '<g class="mk-near">'+seg(F,'P','N','mk-tr',10,one)+limbs(F,'n',one)+dot(F,'Kn',2.2,'tq-j',one)+'</g>'+(D.headFront?'':dot(F,'H',HEAD,'tq-h',one))+'<g class="mk-near">'+arm(F,'n',one)+dot(F,'En',2,'tq-j',one)+'</g>'+(D.headFront?dot(F,'H',HEAD,'tq-h',one):''); /* headFront: las manos pasan detrás de la cabeza */
+        '<g class="mk-near">'+torsoS(F,one)+limbs(F,'n',one)+dot(F,'Kn',2.2,'tq-j',one)+'</g>'+(D.headFront?'':dot(F,'H',HEAD,'tq-h',one))+'<g class="mk-near">'+arm(F,'n',one)+dot(F,'En',2,'tq-j',one)+'</g>'+(D.headFront?dot(F,'H',HEAD,'tq-h',one):''); /* headFront: las manos pasan detrás de la cabeza */
     return '<svg class="tq mk'+(one?' st':'')+'" viewBox="0 0 120 120" role="img" aria-label="Cómo se hace'+(D.back?' (vista de atrás)':'')+'">'+eqSVG(F,D,one,'back')+(FWD?'<g><animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;.8;.86;.9;1" dur="2.8s" repeatCount="indefinite"/>':'')+shadow(F,D,one)+body+(FWD?'</g>':'')+(fr?eqSVG(F,D,one,'mid'):eqSVG(F,D,one,'top'))+
       (opt.noGrip?'':gripGlyph(D.grip,gripBox(D)))+'</svg>';}finally{FWD=false;}}
   /* ---------- validador ---------- */
@@ -224,7 +235,7 @@ const MK=(()=>{
       for(const sd of SDS){let L;if(fr){const ls=(s)=>lsOf(R.g,s,sd);L=[['S','E',LEN.ua*ls('ua'),'brazo'],['E','W',LEN.fa*ls('fa'),'antebrazo'],['H','K',LEN.th*ls('th'),'muslo'],['K','A',LEN.sh*ls('sh'),'pierna']];}
         else{const q=R.g[sd],cf=Math.cos(rad(q.abf));L=[['S','E',LEN.ua*Math.cos(rad(q.ab)),'brazo'],['E','W',LEN.fa*cf,'antebrazo'],['W','G',LEN.hd*cf,'mano'],['Hp','K',LEN.th*Math.cos(rad(q.lt)),'muslo'],['K','A',LEN.sh,'pierna'],['A','T',Math.hypot(LEN.ft,LEN.sole),'pie']];}
         L.forEach(([a,b,l,n])=>{if(Math.abs(dist(P[a+sd],P[b+sd])-Math.abs(l))>.15)add1(n+' cambia de largo en '+pc);});} /* ls negativo: el tramo apunta al revés (gira pasando por quien mira, como el antebrazo en la rotación externa) */
-      if(!fr&&Math.abs(dist(P.P,P.N)-LEN.t)>.15)add1('torso cambia de largo en '+pc);
+      if(!fr&&Math.abs(dist(P.P,P.N)-tLen(R.g.cv))>.15)add1('torso cambia de largo en '+pc);
       /* 3. manos y pies en su contacto; el cable termina en la mano */
       for(const k in (R.tg||{})){const sd=k.slice(-1),j=k[0],got=P[j+sd],dd=dist(got,R.tg[k]);if(dd>.8)add1((j==='A'||j==='T'?'el pie':'la mano')+lado(sd,!(j==='A'||j==='T'))+' no llega a su apoyo ('+dd.toFixed(1)+') en '+pc);}
       (D.eq||[]).forEach((e,ix)=>{if((e.t==='pulley'||e.t==='lever'||e.t==='plat')&&!P[e.to])add1('el '+(e.t==='pulley'?'cable':'equipo')+' no tiene a dónde llegar');if(['bar','db','kb','ball','handle','ring','pad'].includes(e.t)&&R.eq[ix].at==null)add1('equipo sin lugar ('+e.t+')');});

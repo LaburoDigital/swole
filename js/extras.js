@@ -6,6 +6,16 @@ const TAB_ORDER=['inicio','entrenar','niveles','nutri'];
 function SC(){return document.getElementById('scroller')||document.scrollingElement;}
 /* al cambiar de pestaña el contenido vuelve arriba. En algunos iOS, poner scrollTop=0 no frena el deslizamiento con inercia que
    seguía: se corta el scroll un instante (overflow hidden) y se devuelve (qa.md) */
+/* la píldora ("Entreno de hoy") y la barra de descanso flotan sobre el final del contenido: se mide cuánto lo tapan y #scroller
+   deja ese espacio abajo (+16). Se llama al dibujar la píldora o el descanso y al cambiar el tamaño de la ventana. Antes era un
+   :has(:empty) que Chrome no recalcula al vaciarse, y un número fijo que no alcanzaba con las dos a la vez (qa-cascara.md) */
+function ajustaDock(){const sc=SC(),d=document.getElementById('dock'),rt=document.documentElement;if(!sc||!d||!sc.getBoundingClientRect)return;
+  const it=[...d.children].filter(c=>c.childElementCount&&c.getBoundingClientRect().height>0);
+  if(!it.length){rt.classList.remove('dock-on');rt.style.removeProperty('--dockpad');return;}
+  const top=Math.min(...it.map(c=>c.getBoundingClientRect().top)),pad=Math.ceil(sc.getBoundingClientRect().bottom-top+16);
+  rt.classList.add('dock-on');rt.style.setProperty('--dockpad',Math.max(0,pad)+'px');}
+addEventListener('resize',()=>ajustaDock());
+{const d=document.getElementById('dock');if(d&&d.addEventListener)d.addEventListener('transitionend',()=>ajustaDock());} /* el dock se mueve con una transición (entreno abierto, rotar): se vuelve a medir cuando llega */
 function scArriba(){const s=SC();if(!s)return;const st=s.style;if(st)st.overflowY='hidden';s.scrollTop=0;if(st)setTimeout(()=>{st.overflowY='';},0);}
 /* cambio de pestaña con transición nativa del navegador (View Transitions); si no hay soporte, la animación de siempre */
 function navTo(v,dir){

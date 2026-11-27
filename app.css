@@ -1813,8 +1813,9 @@ body.scrolled .cab{border-bottom-color:var(--line);box-shadow:0 8px 24px rgba(5,
 .main{min-height:0;margin-left:0}
 #scroller{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-gutter:stable;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:72px}
 html.locked #scroller{overflow:hidden}
-/* con la píldora o la barra de descanso a la vista (flotan sobre el final del contenido), la última tarjeta no queda tapada */
-html:has(#pill:not(:empty)) #scroller,html:has(#restbar:not(:empty)) #scroller{padding-bottom:104px}
+/* con la píldora o la barra de descanso a la vista (flotan sobre el final del contenido), la última tarjeta no queda tapada:
+   ajustaDock() mide cuánto tapan y lo deja en --dockpad */
+html.dock-on #scroller{padding-bottom:max(72px,var(--dockpad,104px))}
 .nav{position:relative;flex:none;left:auto;right:auto;top:auto;bottom:auto}
 @media (max-width:899px){
   .nav{margin:0 12px calc(10px + env(safe-area-inset-bottom,0px))}
@@ -1824,6 +1825,7 @@ html:has(#pill:not(:empty)) #scroller,html:has(#restbar:not(:empty)) #scroller{p
   .nav{grid-column:1;grid-row:1/3;width:auto;height:auto;overflow-y:auto;margin:0}
   .cab{grid-column:2;grid-row:1}
   #scroller{grid-column:2;grid-row:2;padding-bottom:24px}
+  html.dock-on #scroller{padding-bottom:max(24px,var(--dockpad,104px))}
   .top-seg{max-width:1180px;padding:0 32px 10px}
 }
 
@@ -1846,3 +1848,7 @@ body.scrolled .cab{border-bottom-color:var(--line);box-shadow:0 6px 18px rgba(5,
 @media (max-width:340px){.top-seg .seg button{font-size:13px}}
 /* B3: los títulos de los caminos (Nivel) no se cortan en el medio de la palabra ("Articulacione / s de acero") */
 .cam-t b{overflow-wrap:normal;word-break:normal;-webkit-hyphens:auto;hyphens:auto}
+
+/* SW-10 v100: piso en perspectiva y sombras de contacto en las vistas 3/4 */
+.tq-piso{fill:color-mix(in srgb,var(--text) 6%,transparent);stroke:color-mix(in srgb,var(--text) 16%,transparent);stroke-width:1;stroke-linejoin:round}
+.tq-sombra{fill:rgba(0,0,0,.32)}

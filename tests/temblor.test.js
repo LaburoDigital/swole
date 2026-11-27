@@ -49,6 +49,10 @@ test('temblor (estático): .top y .nav no son fixed ni sticky; html y body no sc
   const ult = k => { let v = null; for (const [sel, d] of reglas(CSS)) if (sel === ':root') { const m = d.match(new RegExp(k + '\\s*:\\s*([^;]+)')); if (m) v = m[1].trim(); } return v; };
   assert.equal(ult('padding-top'), '0', ':root sin relleno arriba');
   assert.equal(ult('padding-bottom'), '0', ':root sin relleno abajo');
+  /* el espacio para la píldora y el descanso se mide al dibujarlos (Chrome no recalcula :has(:empty) al vaciarse; qa-cascara.md) */
+  assert.doesNotMatch(CSS.replace(/\/\*[\s\S]*?\*\//g, ''), /:has\([^)]*:empty/, 'sin :has(:empty) para el espacio del dock');
+  const pant = JS.find(([f]) => f === 'js/pantallas.js')[1];
+  for (const fn of ['renderPill', 'renderRest']) { const i = pant.indexOf('function ' + fn + '('), j = pant.indexOf('\n}', i); assert.match(pant.slice(i, j), /ajustaDock\(\)/, fn + ' ajusta el espacio del dock'); }
 });
 
 test('temblor (estructura): la cabecera es un bloque arriba con el segmento adentro, el contenido en #scroller y la barra abajo', () => {
