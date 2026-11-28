@@ -250,12 +250,25 @@ const agNombre=(gr,id)=>gr.t==='apoyo'&&AGDIR[id]==='diamante'?'Diamante':gr.t2?
 /* el cuadradito mide AGW × AGH unidades del dibujo (120): ~50 px de ancho en la ficha (diseno, M2) */
 const AGW=46,AGH=40;
 /* el recuadro del dibujo de la ficha para los ejercicios con ag:1: las manos con los dedos (recorte del dibujo grande) y el nombre */
-function agCaja(gr,id){const w=AGX[gr.w]||48;
-  if(gr.t==='apoyo'){if(unaMano(gr)||AGDIR[id]==='diamante')return [72,30,96,66];const x0=120-w-26;return [x0,36,240-2*x0,(240-2*x0)*.69];}
-  const x0=unaMano(gr)?82:120-w-24,ww=240-2*x0;return [x0,AGY-26-Math.max(0,ww*.69-62)/2,ww,Math.max(62,ww*.69)];}
+/* el recorte del cuadradito: la caja de las manos tal como las dibuja manosSVG (las apoyadas, giradas), con margen y con la proporción
+   del lugar donde va (44 × 31). Antes era un recorte fijo y en arquero, pseudo planche y planche lean las manos se salían (jefe-musculos-2.md, C) */
+function agManos(gr,id){const w=AGX[gr.w]||48,uno=unaMano(gr),P=[],pon=(x,y)=>P.push([x,y]);
+  if(gr.t==='apoyo'){
+    if(antebrazo(gr)){const xs=uno||/antebrazo\)/.test(gr.txt)?[120-w]:[120-w,120+w];xs.forEach(x=>{pon(x-12,50);pon(x+12,100);});return P;}
+    const dir=AGDIR[id]||(/atrás/.test(gr.txt||'')?'atras':/afuera/.test(gr.txt||'')?'afuera':'adelante');
+    const M=dir==='diamante'?[[95.8,74,25,1],[144.2,74,25,-1]]:(r=>uno?[[120,74,r,1]]:[[120-w,74,r,1],[120+w,74,r,-1]])({adelante:-6,atras:205,afuera:-95}[dir]);
+    /* esquinas de la mano en su sistema (dedos hacia arriba, pulgar hacia +x); transform: translate · scale(s·1,3, 1,3) · rotate */
+    for(const [cx,cy,rot,sg] of M)for(const [lx,ly] of [[-13,-32],[25,-32],[25,17],[-13,17]]){const c=Math.cos(rot*Math.PI/180),sn=Math.sin(rot*Math.PI/180),x=lx*c-ly*sn,y=lx*sn+ly*c;pon(cx+x*sg*1.3,cy+y*1.3);}
+    return P;}
+  const xs=uno?[120]:[120-w,120+w],neu=gr.t==='neutro'&&!gr.t2;
+  for(const x of xs){if(gr.db&&neu){pon(x-15,AGY-44);pon(x+15,AGY+44);}else if(gr.db){pon(x-34,AGY-17);pon(x+34,AGY+36);}else{pon(x-18,AGY-20);pon(x+18,AGY+36);}}
+  return P;}
+function agCaja(gr,id){const P=agManos(gr,id),m=5;let x0=Math.min(...P.map(q=>q[0]))-m,x1=Math.max(...P.map(q=>q[0]))+m,y0=Math.min(...P.map(q=>q[1]))-m,y1=Math.max(...P.map(q=>q[1]))+m;
+  const A=(AGW-2)/(AGH-9);if((x1-x0)/(y1-y0)<A){const e=((y1-y0)*A-(x1-x0))/2;x0-=e;x1+=e;}else{const e=((x1-x0)/A-(y1-y0))/2;y0-=e;y1+=e;}
+  return [x0,y0,x1-x0,y1-y0];}
 function agMini(D,box,id){box=box||{x:2,y:2,s:1};const gr=D.grip,c=agCaja(gr,id).map(v=>+v.toFixed(1));AGM=true;let man;try{man=manosSVG(gr,id);}finally{AGM=false;}
   return '<g class="mk-grip mk-ag" transform="translate('+(+box.x).toFixed(1)+' '+(+box.y).toFixed(1)+') scale('+box.s+')"><rect class="mk-gbg" x="0" y="0" width="'+AGW+'" height="'+AGH+'" rx="4"/>'+
-    '<svg x="1" y="1" width="'+(AGW-2)+'" height="'+(AGH-9)+'" viewBox="'+c.join(' ')+'" class="ag-mini">'+man+'</svg><text class="mk-gl" x="'+AGW/2+'" y="'+(AGH-2.4)+'" text-anchor="middle">'+esc(agNombre(gr,id))+'</text></g>';}
+    '<svg x="1" y="1" width="'+(AGW-2)+'" height="'+(AGH-9)+'" viewBox="'+c.join(' ')+'" class="ag-mini" overflow="hidden">'+man+'</svg><text class="mk-gl" x="'+AGW/2+'" y="'+(AGH-2.4)+'" text-anchor="middle">'+esc(agNombre(gr,id))+'</text></g>';}
 /* el ancho, en palabras (tiene que coincidir con el dibujo: tests/visor.test.js mide las manos contra los hombros) */
 const AGW_TXT={cerrado:'más juntas que los hombros',medio:'al ancho de los hombros',pocoabierto:'un poco más abiertas que los hombros',abierto:'bien más abiertas que los hombros',variable:'que se abren y se cierran en el recorrido'};
 const AGW_T={cerrado:'Cerrado',medio:'Al ancho de los hombros',pocoabierto:'Un poco más abierto que los hombros',abierto:'Abierto',variable:'El ancho cambia en el recorrido'};
@@ -294,7 +307,10 @@ function visU(tl,t){const s=tl.segs.find(x=>t<x.t0+x.dur)||tl.segs[tl.segs.lengt
 const visG=(tl,t)=>{const g=tl.G.findIndex(x=>t<x.t0+x.dur);return g<0?tl.G.length-1:g;};
 const visX=(tl,t)=>{const g=visG(tl,t),G=tl.G[g];return (g+Math.min(1,(t-G.t0)/G.dur))/tl.G.length;};
 const visTfromX=(tl,x)=>{x=Math.min(.9999,Math.max(0,x));const n=tl.G.length,g=Math.floor(x*n),G=tl.G[g];return G.t0+(x*n-g)*G.dur;};
-function visFig(id,u){const q=Math.round(u*200)/200,k=id+':'+q;let s=VIS.cache.get(k);
+/* cuadros del visor: 150 por recorrido. Cada uno se arma una vez (string) y se parsea una vez (nodo SVG): al reproducir solo se cambia el nodo,
+   sin volver a parsear (jefe: con los músculos, armar y parsear un cuadro costaba 3–5 ms en compu; ahora el cambio es de nodo) */
+const VQ=150,vq=u=>Math.round(u*VQ)/VQ;
+function visFig(id,u){const q=vq(u),k=id+':'+q;let s=VIS.cache.get(k);
   if(!s){const D=MKD[id],b=MK.caja(D);s=MK.svg(D,{u:q,raw:1,noGrip:1,vb:b.x+' '+b.y+' '+b.w+' '+b.h});if(VIS.cache.size>600)VIS.cache.clear();VIS.cache.set(k,s);}return s;}
 function visorHTML(m){const id=m.d.id,D=MKD[id],tl=VIS.id===id&&VIS.tl?VIS.tl:visTL(id);if(!D||!tl)return '<p class="mut">Este ejercicio no tiene dibujo.</p>';
   const F=VFASES[id],X=XT[id]||{},cues=X.cues||[],gi=visG(tl,VIS.t),gn=tl.G[gi].n,x=visX(tl,VIS.t);
@@ -312,8 +328,13 @@ function visorHTML(m){const id=m.d.id,D=MKD[id],tl=VIS.id===id&&VIS.tl?VIS.tl:vi
     (m.d.grip?'<div class="vis-gp" role="dialog" aria-label="Agarre">'+agarreHTML(id)+'<button class="btn wide" data-a="visGripX">Volver al visor</button></div>':'')+
   '</div>';}
 /* pinta el cuadro actual sin redibujar la hoja (busca los elementos cada vez: sobrevive a un render() de la app) */
+VIS.nodos=new Map();
+function visNodo(id,u){const k=id+':'+vq(u);let n=VIS.nodos.get(k);if(n)return n;if(typeof document==='undefined'||!document.createElement)return null;
+  const t=document.createElement('template');t.innerHTML=visFig(id,u);n=t.content.firstElementChild;if(!n)return null;if(VIS.nodos.size>VQ*3)VIS.nodos.clear();VIS.nodos.set(k,n);return n;}
+/* al abrir, los cuadros se preparan de a poco en segundo plano (así el primer recorrido ya no arma ni parsea) */
+function visCalentar(id){let i=0;const paso=()=>{if(!S.m2||S.m2.t!=='visor'||VIS.id!==id||i>VQ)return;for(let k=0;k<6&&i<=VQ;k++,i++)visNodo(id,i/VQ);setTimeout(paso,16);};setTimeout(paso,120);}
 function visPaint(){const tl=VIS.tl,id=VIS.id;if(!tl||typeof document==='undefined')return;const fig=document.getElementById('visFig');if(!fig)return;
-  const u=visU(tl,VIS.t),q=String(Math.round(u*200)/200);if(fig.dataset.q!==q){fig.innerHTML=visFig(id,u);fig.dataset.q=q;}
+  const u=visU(tl,VIS.t),q=String(vq(u));if(fig.dataset.q!==q){const n=visNodo(id,u);if(n)fig.replaceChildren(n);else fig.innerHTML=visFig(id,u);fig.dataset.q=q;}
   const x=visX(tl,VIS.t),hd=document.getElementById('visHead');if(hd){hd.style.left=(x*100).toFixed(2)+'%';hd.parentElement.setAttribute('aria-valuenow',Math.round(x*100));}
   const w=document.getElementById('vis'),gi=visG(tl,VIS.t);if(w&&w.dataset.g!==String(gi)){w.dataset.g=gi;const gn=tl.G[gi].n;
     w.querySelectorAll('.vis-seg').forEach((b,i)=>{b.classList.toggle('on',i===gi);b.setAttribute('aria-pressed',i===gi);});
@@ -343,7 +364,7 @@ function visSetPlay(on){VIS.play=on;const b=typeof document!=='undefined'&&docum
 function visIrFase(g){const G=VIS.tl&&VIS.tl.G[g];if(!G)return;VIS.t=G.t0+G.dur*.5;visSetPlay(false);if(typeof document!=='undefined')visCueVer();}
 Object.assign(ACTIONS,{
   visor(v){if(!MKD[v]||!VFASES[v])return;if(VIS.id!==v){VIS.id=v;VIS.tl=visTL(v);VIS.t=0;VIS.vel=1;}
-    VIS.play=!calmMotion();S.m2={t:'visor',d:{id:v}};renderModal(); /* solo las hojas: render() redibujaba el selector y lo llevaba arriba (qa, B1) */if(typeof document!=='undefined'&&document.querySelector('.vis-segs')){visFitSegs();visCueVer();}visRun();},
+    VIS.play=!calmMotion();S.m2={t:'visor',d:{id:v}};renderModal();visCalentar(v); /* solo las hojas: render() redibujaba el selector y lo llevaba arriba (qa, B1) */if(typeof document!=='undefined'&&document.querySelector('.vis-segs')){visFitSegs();visCueVer();}visRun();},
   visPlay(){visSetPlay(!VIS.play);},
   visVel(v){VIS.vel=+v||1;document.querySelectorAll('.vis-vel button').forEach(b=>{const on=+b.dataset.v===VIS.vel;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);});},
   visFase(v){if(performance.now()-VIS.noClick<400)return;visIrFase(+v);},

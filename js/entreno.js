@@ -30,6 +30,8 @@ function weekStats(){
   });
   return{m,sessions,sets};
 }
+/* SW-11 fase 2 (jefe): el mapa de la ficha usa los colores del macaco: rojo el principal, azul el secundario */
+function mapColOf(ex){const c={};ex.s.forEach(k=>c[k]='var(--mk-ms)');ex.p.forEach(k=>c[k]='var(--mk-mp)');return c;}
 function mapOf(ex){const I={};ex.p.forEach(k=>I[k]=1);ex.s.forEach(k=>{if(!I[k])I[k]=.45;});return I;}
 function mapOfRoutine(r){
   const I={};

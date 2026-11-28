@@ -607,10 +607,10 @@ function renderRest(){
 /* ============ Capas: modales ============ */
 function exDetail(id){
   const ex=exById(id);if(!ex)return '';
-  let h=techCard(ex)+'<div class="big-map" style="max-width:300px;width:100%">'+bodyMap(mapOf(ex),{labels:1,cls:'live'})+'</div><div class="chips">'+chipsMus(ex)+'</div>';
+  let h=techCard(ex)+'<div class="big-map" style="max-width:300px;width:100%">'+bodyMap(null,{fills:mapColOf(ex),labels:1,cls:'live'})+'</div><div class="chips">'+chipsMus(ex)+'</div>';
   if(ex.d)h+='<p>'+esc(ex.d)+'</p>';
   if(ex.ph)h+='<div class="warn"><b>Peso por mano:</b> anotá lo que pesa UNA mancuerna, no la suma de las dos.</div>';
-  h+='<p class="mut sm-t">Equipo: '+esc(ex.eq)+'. Los músculos resaltados son los principales y los claros, los secundarios.</p>';
+  h+='<p class="mut sm-t">Equipo: '+esc(ex.eq)+'. En rojo, los músculos principales; en azul, los secundarios.</p>';
   h+='<div class="row" style="gap:8px;flex-wrap:wrap">'+(hasRank(ex)?'<button class="btn sm pri" data-a="markOpen" data-v="'+ex.id+'">'+ic('bolt',16)+' Cargar marca</button>':'')+(isBarbell(ex)?'<button class="btn sm line" data-a="platesOpen">'+ic('disc',16)+' Calculadora de discos</button>':'')+'</div>';
   const b=bestE1(id);
   {const sx=stallOf(id),fx=fixOf(id);
@@ -940,10 +940,10 @@ function renderPicker(){
   const el=$('#picker');syncLayers();
   if(!S.picker){leaveLayer(el,'.pick',()=>!S.picker);return;}
   /* un ejercicio abierto: su figura, su nivel y todo lo que sabemos de él, con "Elegir este" a mano */
-  if(S.picker.view){const ex=exById(S.picker.view);if(ex){const had0=el.querySelector('.pick:not(.leaving)');clearTimeout(el._lv);const lbl=pickCtx()?'Elegir este':'Agregar';
+  if(S.picker.view){const ex=exById(S.picker.view);if(ex){const had0=el.querySelector('.pick:not(.leaving)');/* qa SW-11 B1: si se vuelve a dibujar la misma vista (al cerrar el visor, el agarre o una marca), el scroll queda donde estaba */const pv0=el.querySelector('.pick.pk-view:not(.leaving)');el._pst=pv0?pv0.scrollTop:0;clearTimeout(el._lv);const lbl=pickCtx()?'Elegir este':'Agregar';
     el.innerHTML='<div class="pick pk-view'+(S.picker.target==='gen'?' ptop':'')+(had0?' stay':'')+'"><div class="pick-in"><div class="pick-top"><div class="row"><button class="ib" data-a="pickBack" aria-label="Volver a la lista">'+ic('left',20)+'</button><h2 class="grow" style="font:800 22px var(--f-d)">'+esc(ex.n)+'</h2><button class="btn pri sm" data-a="pickAdd" data-v="'+ex.id+'">'+lbl+'</button></div></div><div class="pk-body">'+exDetail(ex.id)+'</div></div></div>';
-    const pk=el.querySelector('.pick');if(pk)pk.scrollTop=0;return;}S.picker.view=null;}
-  const had=el.querySelector('.pick:not(.leaving)');clearTimeout(el._lv);
+    const pk=el.querySelector('.pick');if(pk)pk.scrollTop=pv0&&el._pv===S.picker.view?el._pst||0:0;el._pv=S.picker.view;return;}S.picker.view=null;}
+  const had=el.querySelector('.pick:not(.leaving)');clearTimeout(el._lv);el._pv=null;
   keepScroll(el,()=>{el.innerHTML='<div class="pick'+(S.picker.target==='gen'?' ptop':'')+'"><div class="pick-in"><div class="pick-top"><div class="row"><h2 class="grow" style="font:800 24px var(--f-d)">'+(pickCtx()?'Cambiar ejercicio':'Elegir ejercicios')+'</h2><button class="btn pri sm" data-a="pickDone">Listo</button></div>'+
    '<div class="field"><input id="pq" type="search" placeholder="Buscar ejercicio" value="'+esc(S.picker.q)+'" data-i="pq" aria-label="Buscar ejercicio"></div><div class="scroll-x" id="pg">'+pickChips()+'</div></div>'+pickSimilar()+'<div class="gap" id="pres">'+pickResults()+'</div>'+(S.picker.target==='gen'||S.picker.target==='rswap'?'':'<button class="btn wide" style="margin-top:14px" data-a="newEx">'+ic('plus',18)+' Crear ejercicio propio</button>')+'</div></div>';});
   if(had){const x=el.querySelector('.pick');if(x)x.classList.add('stay');}

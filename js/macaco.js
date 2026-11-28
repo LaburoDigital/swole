@@ -19,94 +19,8 @@
      h  = abducción de la cadera (0 = pierna abajo, + = hacia afuera), k = rodilla vista de frente
      ls = escorzo por tramo (ej. muslos hacia quien mira al estar sentado); tw/sw/tk = torso que gira, ancho de hombros, torso acostado. */
 const MK=(()=>{
-  const LEN={t:30,nk:9,ua:14,fa:13,hd:5,th:20,sh:19,ft:8,heel:2.5,sole:1.8},HEAD=7.5,FLOOR=111;
-  /* Rangos de movimiento normales (AAOS, "Joint Motion: Method of Measuring and Recording"; Norkin y White, "Measurement of Joint Motion").
-     Rodilla y tobillo en sentadilla profunda: Hemmerich y otros 2006 (rodilla hasta ~155°, dorsiflexión con carga hasta ~40°).
-     Muñeca: la mano apoyada en el piso pide ~90° de extensión, con los dedos hacia adelante o hacia atrás (por eso ±95). De frente: abducción de hombro 180 y aducción 40,
-     abducción de cadera 45 (60 con la pelvis) y aducción 30. */
-  const LIM={s:[-60,180],e:[0,150],w:[-95,95],h:[-30,135],k:[0,155],a:[-50,40],nk:[-45,50],ab:[0,80],abf:[0,80],lt:[0,80],el:[0,5],
-    fa:[-40,180],fe:[-150,150],fh:[-30,60],fk:[-155,155]};
-  const rad=x=>x*Math.PI/180,deg=x=>x*180/Math.PI,nrm=a=>{a=((a+180)%360+360)%360-180;return a===-180?180:a;};
-  const V=(f,d)=>[d*Math.sin(rad(f)),Math.cos(rad(f))],add=(p,v,l)=>[p[0]+v[0]*l,p[1]+v[1]*l],phi=(v,d)=>deg(Math.atan2(d*v[0],v[1])),dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
-  const lerp=(a,b,u)=>a+(b-a)*u,lp=(a,b,u)=>[lerp(a[0],b[0],u),lerp(a[1],b[1],u)],ease=u=>u*u*(3-2*u);
-  const SIDE=['s','e','w','ab','abf','lt','el','h','k','a'],FSIDE=['a','e','h','k'],FTOP=['t','nk','tw','sw','tk'];
-  /* ángulos de una pose a un instante u (0 = A, 1 = B) */
-  function angAt(D,u){if(D.fases&&D.fases.length){const K=[{u:0,p:D.A}].concat(D.fases.map(p=>({u:p.u,p})),[{u:1,p:D.B}]);let i=0;while(i<K.length-2&&u>K[i+1].u)i++;const a=K[i],b=K[i+1];
-      return angAt(Object.assign({},D,{A:a.p,B:b.p,fases:null,M:null}),Math.max(0,Math.min(1,(u-a.u)/(b.u-a.u))));} /* fases: poses intermedias en orden, cada una en su instante u (A → fase 1 → fase 2 → … → B): el movimiento va por etapas, no todo junto */
-    if(D.M){const h=u<.5;return angAt(Object.assign({},D,{A:h?D.A:D.M,B:h?D.M:D.B,M:null}),h?u*2:(u-.5)*2);} /* M: pose intermedia (A → M → B) */
-    const A=D.A,B=D.B;
-    if(D.v==='front'){const o={};FTOP.forEach(k=>{const dv=k==='sw'||k==='tk'?1:k==='t'?180:0;o[k]=lerp(A[k]!=null?A[k]:dv,B[k]!=null?B[k]:(A[k]!=null?A[k]:dv),u);});
-      for(const sd of ['L','R']){const a=Object.assign({},A.x,A[sd]),b=Object.assign({},a,B.x,B[sd]);o[sd]={};FSIDE.forEach(k=>o[sd][k]=lerp(a[k]||0,b[k]||0,u));}
-      if(A.rr!=null||B.rr!=null){const ra=A.rr!=null?A.rr:B.rr;o.rr=lerp(ra,B.rr!=null?B.rr:ra,u);}
-      const la=A.ls||{},lb=B.ls||la;o.ls={};new Set(Object.keys(la).concat(Object.keys(lb))).forEach(k=>o.ls[k]=lerp(la[k]!=null?la[k]:1,lb[k]!=null?lb[k]:1,u));return o;}
-    const o={t:lerp(A.t,B.t,u),nk:lerp(A.nk||0,B.nk!=null?B.nk:(A.nk||0),u),cv:lerp(A.cv||0,B.cv!=null?B.cv:(A.cv||0),u)}; /* cv: la columna redondeada (cuánto se curva la espalda hacia atrás, en unidades del dibujo) */
-    for(const sd of ['n','f']){const a=Object.assign({},A.n,A[sd]),b=Object.assign({},a,B.n,B[sd]);o[sd]={};SIDE.forEach(k=>o[sd][k]=lerp(a[k]||0,b[k]||0,u));}return o;}
-  /* punto de contacto: fijo, que va de A a B, o pegado al cuerpo (bo = [adelante, arriba] medidos sobre el torso) */
-  function target(T,u,P,R){if(!T)return null;if(Array.isArray(T))return T;if(T.seq){const K=T.seq;let i=0;while(i<K.length-2&&u>K[i+1][0])i++;return lp(K[i][1],K[i+1][1],Math.max(0,Math.min(1,(u-K[i][0])/(K[i+1][0]-K[i][0]))));} /* seq: [[u, punto], …] por etapas, a la par de las fases */if(T.A&&T.M)return u<.5?lp(T.A,T.M,u*2):lp(T.M,T.B,(u-.5)*2); /* M: punto intermedio (la barra rodea la cara) */
-    if(T.A)return lp(T.A,T.B,u);
-    if(T.rel){const q=P[T.rel];if(!q)return null;if(T.bo&&R){const t=R.phi.t,a=V(t-90,R.d),b=V(t,R.d);return[q[0]+a[0]*T.bo[0]+b[0]*T.bo[1],q[1]+a[1]*T.bo[0]+b[1]*T.bo[1]];}const o=T.off||[0,0];return[q[0]+o[0],q[1]+o[1]];}return null;}
-  /* largo de cadera a cuello: el torso mide 30 por la columna; si se redondea (cv = flecha del arco), la cuerda se acorta */
-  const tLen=cv=>LEN.t-8*(cv||0)*(cv||0)/(3*LEN.t);
-  /* ---------- de costado: cinemática directa desde la cadera ---------- */
-  function fkSide(D,g){
-    const d=D.d,P={},R={d,ang:g,v:'side'};P.P=[0,0];const ft=g.t;P.N=add(P.P,V(ft,d),tLen(g.cv)); /* con la columna redondeada, la cadera y el cuello quedan más cerca (la cuerda del arco) */P.H=add(P.N,V(ft-g.nk,d),LEN.nk);R.phi={t:ft,hd:ft-g.nk};
-    /* el lado lejano, apenas corrido hacia atrás y arriba para que se vea */
-    const off=[-3*d,-2.2],offH=[-3*d,0],foot=(A,fo)=>[add(add(A,V(fo,d),LEN.ft),V(fo-90,d),LEN.sole),add(add(A,V(fo+180,d),LEN.heel),V(fo-90,d),LEN.sole)];R.foot=foot;
-    for(const sd of ['n','f']){const q=g[sd],S=sd==='f'?add(P.N,off,1):P.N,Hp=sd==='f'?add(P.P,offH,1):P.P,cf=Math.cos(rad(q.abf)),ct=Math.cos(rad(q.lt)),u=ft-180+q.s,f=u+q.e,h=f+q.w,th=ft-180+q.h,sh=th-q.k,fo=sh+90+q.a;
-      const S2=add(S,V(ft,d),q.el);P['S'+sd]=S2;P['Hp'+sd]=Hp;P['E'+sd]=add(S2,V(u,d),LEN.ua*Math.cos(rad(q.ab)));P['W'+sd]=add(P['E'+sd],V(f,d),LEN.fa*cf);P['G'+sd]=add(P['W'+sd],V(h,d),LEN.hd*cf);
-      P['K'+sd]=add(Hp,V(th,d),LEN.th*ct);P['A'+sd]=add(P['K'+sd],V(sh,d),LEN.sh);[P['T'+sd],P['L'+sd]]=foot(P['A'+sd],fo);
-      R.phi[sd]={u,f,h,th,sh,fo};}
-    R.P=P;return R;}
-  /* ---------- de frente ---------- */
-  const VF=f=>V(f,1),phF=v=>phi(v,1);
-  function lsOf(g,seg,sd){const l=g.ls||{};return l[seg+sd]!=null?l[seg+sd]:l[seg]!=null?l[seg]:1;}
-  function fkFront(D,g){const P={},R={d:1,ang:g,v:'front',phi:{}};P.P=[0,0];P.N=add(P.P,VF(g.t),LEN.t*g.tk);const up=VF(g.t+180);
-    P.H=[P.N[0]+g.tw+up[0]*0,P.N[1]-LEN.nk];P.H=add([P.N[0]+g.tw,P.N[1]],VF(g.t-g.nk),LEN.nk*(g.ls&&g.ls.nk!=null?g.ls.nk:1)); /* ls.nk: el cuello en escorzo (inclinado hacia quien mira, la cabeza queda delante del pecho) */
-    /* el cuerpo de frente puede estar inclinado (plancha lateral): hombros, caderas y miembros giran con el torso (rt) */
-    const rt=g.t-180,rr=g.rr!=null?g.rr:rt,hw=g.rr!=null?5*g.sw:5,ro=(v)=>{const c=Math.cos(rad(-rr)),s=Math.sin(rad(-rr));return[v[0]*c-v[1]*s,v[0]*s+v[1]*c];},ad=(p,v)=>{const w=ro(v);return[p[0]+w[0],p[1]+w[1]];};R.rot=rt;
-    P.SL=ad(P.N,[-9*g.sw+g.tw,3]);P.SR=ad(P.N,[9*g.sw+g.tw,3]);P.HL=ad(P.P,[-hw,0]);P.HR=ad(P.P,[hw,0]); /* rr: en 3/4 o mirando desde arriba la línea de hombros y caderas va como la proyecta la cámara, no perpendicular al torso dibujado */
-    for(const sd of ['L','R']){const m=sd==='L'?-1:1,q=g[sd],fu=m*q.a+rt,ff=m*(q.a+q.e)+rt,fth=m*q.h+rt,fsh=m*(q.h+q.k)+rt;
-      P['E'+sd]=add(P['S'+sd],VF(fu),LEN.ua*lsOf(g,'ua',sd));P['W'+sd]=add(P['E'+sd],VF(ff),LEN.fa*lsOf(g,'fa',sd));P['G'+sd]=add(P['W'+sd],VF(ff),4*lsOf(g,'fa',sd));
-      P['K'+sd]=add(P['H'+sd],VF(fth),LEN.th*lsOf(g,'th',sd));P['A'+sd]=add(P['K'+sd],VF(fsh),LEN.sh*lsOf(g,'sh',sd));
-      P['T'+sd]=ad(P['A'+sd],[m*3.2,LEN.sole]);P['L'+sd]=ad(P['A'+sd],[-m*1.2,LEN.sole]);
-      R.phi[sd]={u:fu,f:ff,th:fth,sh:fsh};}
-    R.P=P;return R;}
-  /* cinemática inversa de 2 huesos: el codo o la rodilla doblan solo para su lado */
-  function solve2(S,Q,L1,L2,d,pref,isKnee,lim){const D=[Q[0]-S[0],Q[1]-S[1]],L=Math.max(1e-6,Math.hypot(D[0],D[1])),c=Math.max(-1,Math.min(1,(L1*L1+L*L-L2*L2)/(2*L1*Math.min(L,L1+L2)))),al=deg(Math.acos(c)),fD=phi(D,d);
-    const opts=[fD+al,fD-al].map(f1=>{const E=add(S,V(f1,d),L1),f2=phi([Q[0]-E[0],Q[1]-E[1]],d),j=isKnee?nrm(f1-f2):nrm(f2-f1);return{f1,f2,E,j};});
-    lim=lim||(isKnee?LIM.k:LIM.e);const bad=o=>o.j<lim[0]?lim[0]-o.j:o.j>lim[1]?o.j-lim[1]:0;
-    if(pref==='down')opts.sort((a,b)=>b.E[1]-a.E[1]);else if(pref==='up')opts.sort((a,b)=>a.E[1]-b.E[1]);else if(pref==='out'||pref==='in'){const cx=(S[0]+Q[0])/2,dir=pref==='out'?1:-1;opts.sort((a,b)=>dir*(Math.abs(b.E[0]-cx+(b.E[0]-cx>0?0:0))-Math.abs(a.E[0]-cx)));opts.sort((a,b)=>dir*((b.E[0]-S[0])*Math.sign(S[0]-60||1)-(a.E[0]-S[0])*Math.sign(S[0]-60||1)));}
-    else if(pref==='back'||pref==='fwd'){const s=pref==='fwd'?1:-1;opts.sort((a,b)=>s*(b.E[0]-a.E[0])*d);}else opts.sort((a,b)=>bad(a)-bad(b));return opts[0];}
-  function ikArm(R,sd,Q,mode,D,g,spec){const pref=spec&&spec.elbow,P=R.P,d=R.d;
-    if(R.v==='front'){const L1=LEN.ua*lsOf(g,'ua',sd),L2=(LEN.fa+4)*lsOf(g,'fa',sd),o=solve2(P['S'+sd],Q,L1,L2,1,pref||'out',false,[-180,180]);
-      P['E'+sd]=o.E;P['W'+sd]=add(o.E,VF(o.f2),LEN.fa*lsOf(g,'fa',sd));P['G'+sd]=add(P['W'+sd],VF(o.f2),4*lsOf(g,'fa',sd));R.phi[sd].u=o.f1;R.phi[sd].f=o.f2;return;}
-    const q=g[sd],S=P['S'+sd],L1=LEN.ua*Math.cos(rad(q.ab)),cf=Math.cos(rad(q.abf)),FA=LEN.fa*cf,HD=LEN.hd*cf;
-    if(mode==='W'){/* la muñeca en el punto (manos apoyadas): la mano queda en el ángulo que pida la pose */
-      const o=solve2(S,Q,L1,FA,d,pref);P['E'+sd]=o.E;P['W'+sd]=add(o.E,V(o.f2,d),FA);const hf=(spec&&spec.hand!=null)?spec.hand:D.handPhi!=null?D.handPhi:o.f2+q.w;P['G'+sd]=add(P['W'+sd],V(hf,d),HD);R.phi[sd].u=o.f1;R.phi[sd].f=o.f2;R.phi[sd].h=hf;return;}
-    const z=[FA+HD*Math.cos(rad(q.w)),HD*Math.sin(rad(q.w))],L2=Math.hypot(z[0],z[1]),dl=deg(Math.atan2(z[1],z[0]));
-    const o=solve2(S,Q,L1,L2,d,pref),ff=o.f2-dl;P['E'+sd]=o.E;P['W'+sd]=add(o.E,V(ff,d),FA);P['G'+sd]=add(P['W'+sd],V(ff+q.w,d),HD);R.phi[sd].u=o.f1;R.phi[sd].f=ff;R.phi[sd].h=ff+q.w;}
-  function ikLeg(R,sd,Q,spec,g){const P=R.P,d=R.d,flat=spec&&spec.flat,pref=spec&&spec.knee;
-    if(R.v==='front'){const L1=LEN.th*lsOf(g,'th',sd),L2=LEN.sh*lsOf(g,'sh',sd),o=solve2(P['H'+sd],Q,L1,L2,1,pref||'out',false,[-180,180]),m=sd==='L'?-1:1;
-      P['K'+sd]=o.E;P['A'+sd]=add(o.E,VF(o.f2),L2);P['T'+sd]=add(add(P['A'+sd],[m,0],3.2),[0,1],LEN.sole);P['L'+sd]=add(add(P['A'+sd],[-m,0],1.2),[0,1],LEN.sole);R.phi[sd].th=o.f1;R.phi[sd].sh=o.f2;return;}
-    const ct=Math.cos(rad(g[sd].lt)),Hp=P['Hp'+sd],o=solve2(Hp,Q,LEN.th*ct,LEN.sh,d,pref,true);P['K'+sd]=o.E;P['A'+sd]=add(o.E,V(o.f2,d),LEN.sh);
-    let fo=o.f2+90+g[sd].a;if(flat){const c=[90,-90].map(x=>({x,a:nrm(x-o.f2-90)})).sort((p,r)=>Math.abs(p.a)-Math.abs(r.a));fo=c[0].x;}
-    [P['T'+sd],P['L'+sd]]=R.foot(P['A'+sd],fo);R.phi[sd].th=o.f1;R.phi[sd].sh=o.f2;R.phi[sd].fo=fo;}
-  /* un cuadro completo en el instante u (0..1, ya con la curva suave) */
-  function frame(D,u){const g=angAt(D,u),R=D.v==='front'?fkFront(D,g):fkSide(D,g),P=R.P,pin=D.root,pp=target(pin.p,u,P,R),q=P[pin.j],dx=pp[0]-q[0],dy=pp[1]-q[1];
-    for(const k in P)P[k]=[P[k][0]+dx,P[k][1]+dy];
-    /* pies planos sin cinemática inversa (de costado): el tobillo acomoda el pie paralelo al piso */
-    const ik=Object.assign({},D.ik||{});
-    if(D.v!=='front'&&!D.uni)for(const k of Object.keys(ik))if(k.slice(-1)==='n'){const kf=k.slice(0,-1)+'f',sf=ik[kf]&&ik[kf].own;if(!sf){const sp=ik[k].to?ik[k]:{to:ik[k]},o=(k[0]==='A'||k[0]==='T')?[-3*R.d,0]:[-3*R.d,-2.2];ik[kf]=Object.assign({},sp,{to:{rel:'__',fn:(Q)=>[Q[0]+o[0],Q[1]+o[1]],src:sp.to}});}}
-    for(const k in ik){if(ik[k]==null)continue;const sp=ik[k].to?ik[k]:{to:ik[k]},Q=sp.to&&sp.to.rel==='__'?(q=>q&&sp.to.fn(q))(target(sp.to.src,u,P,R)):target(sp.to,u,P,R);if(!Q)continue;const sd=k.slice(-1),j=k[0];
-      if(j==='G'||j==='W')ikArm(R,sd,Q,j,D,g,sp);else if(j==='A')ikLeg(R,sd,Q,sp,g);
-      else if(j==='T'){/* punta del pie en el punto (en puntas de pie): se ajusta el tobillo en tres pasadas */let A=[Q[0]-3*R.d,Q[1]-6];for(let it=0;it<4;it++){ikLeg(R,sd,A,{},g);const T=R.P['T'+sd];A=[A[0]+Q[0]-T[0],A[1]+Q[1]-T[1]];}ikLeg(R,sd,A,{},g);}
-      R.tg=R.tg||{};R.tg[k]=Q;}
-    R.eq=(D.eq||[]).map(e=>Object.assign({},e,{at:e.at!=null?(typeof e.at==='string'?P[e.at]:target(e.at,u,P,R)):null}));
-    R.u=u;R.g=g;return R;}
-  /* ángulos reales de un cuadro (después de la cinemática inversa), para el validador */
-  function angles(R){if(R.v==='front'){const o={};for(const sd of ['L','R']){const m=sd==='L'?-1:1,q=R.phi[sd];const rt=R.rot||0,w=x=>{x=nrm(x);return x<-90?x+360:x;},ua=w(m*(q.u-rt)),fa=w(m*(q.f-rt)),th=nrm(m*(q.th-rt)),sh=nrm(m*(q.sh-rt));o[sd]={a:ua,e:nrm(fa-ua),h:th,k:nrm(sh-th)};}return o;}
-    const p=R.phi,t=p.t,o={nk:nrm(t-p.hd)};for(const sd of ['n','f']){const q=p[sd];o[sd]={s:nrm(q.u-(t-180)),e:nrm(q.f-q.u),w:nrm(q.h-q.f),h:nrm(q.th-(t-180)),k:nrm(q.th-q.sh),a:nrm(q.fo-q.sh-90),ab:R.g[sd].ab,abf:R.g[sd].abf,lt:R.g[sd].lt,el:R.g[sd].el};}return o;}
-  const N=12,frames=D=>{const out=[];for(let i=0;i<=N;i++)out.push(frame(D,ease(i/N)));return out;};
+  /* el esqueleto (largos, límites, cinemática, IK, fases) vive en js/esqueleto.js (SW-11 fase 2) */
+  const {LEN,HEAD,FLOOR,LIM,rad,deg,nrm,V,add,phi,dist,lerp,lp,ease,SIDE,FSIDE,FTOP,angAt,target,tLen,fkSide,VF,phF,lsOf,fkFront,solve2,ikArm,ikLeg,frame,angles,N,frames}=ESQ;
   /* ---------- dibujo ---------- */
   const f1=x=>Math.round(x*10)/10;
   const KT=(()=>{const a=[];for(let i=0;i<=N;i++)a.push(+(.45*i/N).toFixed(4));for(let i=0;i<=N;i++)a.push(+(.55+.45*i/N).toFixed(4));return a.join(';');})();
@@ -216,13 +130,160 @@ const MK=(()=>{
   /* las formas del equipo k (en el orden de shapes): cuántas pone cada equipo, para saltear los soportes */
   function skipEq(D,R,idx,sop){let n=0;for(let j=0;j<(D.eq||[]).length;j++){const one=Object.assign({},D,{eq:[D.eq[j]]}),c=shapes(one,Object.assign({},R,{eq:[R.eq[j]]})).length-shapes(Object.assign({},D,{eq:[]}),Object.assign({},R,{eq:[]})).length;if(idx<n+c)return sop[j];n+=c;}return false;}
   const idDe=D=>{for(const k in MKD)if(MKD[k]===D)return k;return '';};
-  function svg(D,opt){opt=opt||{};const one=opt.u!=null||opt.stat,F=one?[frame(D,opt.raw?(opt.u||0):ease(opt.u||0))]:frames(D),fr=D.v==='front';FWD=!one&&!!D.fwd;try{
-    const nearF=fr?'<g class="mk-near">'+limbsF(F,'R',one)+'</g>':''; /* yaw (vista 3/4): la pierna cercana viene hacia quien mira y pasa por delante del torso */
-    const body=fr?'<g class="mk-far">'+limbsF(F,'L',one)+'</g>'+(D.yaw&&!D.back?'':nearF)+eqSVG(F,D,one,'back2')+'<g class="mk-near">'+seg(F,'P','N','mk-tr',11,one)+(D.back?line(F,R=>lp(R.P.P,R.P.N,.08),R=>lp(R.P.P,R.P.N,.92),'mk-hl',1.3,one):'')+'</g>'+(D.yaw&&!D.back?nearF:'')+dot(F,'H',HEAD,'tq-h',one)+(D.back?dot(F,'H',HEAD-1.4,'tq-dbh',one):'')+
-        '<g class="mk-far">'+armF(F,'L',one)+'</g><g class="mk-near">'+armF(F,'R',one)+dot(F,'ER',2,'tq-j',one)+dot(F,'EL',2,'tq-j',one)+'</g>'
-      :eqSVG(F,D,one,'back2')+'<g class="mk-far">'+limbs(F,'f',one)+arm(F,'f',one)+'</g>'+eqSVG(F,D,one,'mid')+
-        '<g class="mk-near">'+torsoS(F,one)+limbs(F,'n',one)+dot(F,'Kn',2.2,'tq-j',one)+'</g>'+(D.headFront?'':dot(F,'H',HEAD,'tq-h',one))+'<g class="mk-near">'+arm(F,'n',one)+dot(F,'En',2,'tq-j',one)+'</g>'+(D.headFront?dot(F,'H',HEAD,'tq-h',one):''); /* headFront: las manos pasan detrás de la cabeza */
-    return '<svg class="tq mk'+(one?' st':'')+'" viewBox="'+(opt.vb||'0 0 120 120')+'" role="img" aria-label="Cómo se hace'+(D.back?' (vista de atrás)':'')+'">'+eqSVG(F,D,one,'back')+(FWD?'<g><animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;.8;.86;.9;1" dur="2.8s" repeatCount="indefinite"/>':'')+shadow(F,D,one)+body+(FWD?'</g>':'')+(fr?eqSVG(F,D,one,'mid'):eqSVG(F,D,one,'top'))+
+  /* ---------- capas del cuerpo (SW-11 fase 2): músculos, ropa y pelo ----------
+     Orden de las capas en cada grupo: piel (los tramos del esqueleto) → ropa (remera, short) → músculos. Los colores son variables
+     de app.css (--mk-piel, --mk-pelo, --mk-remera, --mk-short, --mk-mp, --mk-ms, --mk-m0), para poder cambiarlas después.
+     Los músculos son formas pegadas a cada hueso (un tramo grueso de puntas redondas, corrido hacia la cara del hueso donde está el
+     músculo). Cambian según la vista: de costado se ve casi todo; de frente, pecho y abdomen; de atrás, dorsal, trapecio y glúteo.
+     En la app se pintan solo los del ejercicio (principales en color fuerte, secundarios en suave); con opt.detalle, todos. */
+  const MUS=['pecho','hombros','biceps','triceps','antebrazos','abs','oblicuos','trapecio','dorsales','lumbar','gluteos','cuadriceps','isquios','gemelos','tibial','aductores'];
+  /* qué músculos se ven en cada vista (de costado, los aductores se ven en la cara interna de la pierna lejana) */
+  const MVIS={costado:MUS.slice(),
+    frente:['pecho','hombros','biceps','antebrazos','abs','oblicuos','trapecio','dorsales','cuadriceps','aductores','tibial','triceps','gemelos','gluteos'], /* de frente asoman el tríceps (borde de afuera del brazo), el gemelo (borde de adentro de la pierna) y el glúteo medio (costado de la cadera) */
+    atras:['dorsales','trapecio','lumbar','gluteos','triceps','hombros','isquios','gemelos','antebrazos','oblicuos','aductores']};
+  const vistaDe=D=>D.v==='front'?(D.back?'atras':'frente'):'costado';
+  const un=(a,b)=>{const x=b[0]-a[0],y=b[1]-a[1],l=Math.hypot(x,y)||1;return [x/l,y/l];};
+  /* punto a una fracción t del hueso A→B, corrido o unidades hacia su normal n(R, dirección) */
+  const sobre=(A,B,t,o,nf)=>R=>{const a=R.P[A],b=R.P[B],q=lp(a,b,t);if(!o)return q;const n=nf(R,un(a,b));return [q[0]+n[0]*o,q[1]+n[1]*o];};
+  /* de costado: la cara de adelante de un miembro (bíceps, cuádriceps, tibial) es el hueso girado hacia donde mira la figura */
+  const adel=(R,b)=>[R.d*b[1],-R.d*b[0]];
+  /* el torso: su cara de adelante (pecho, abdomen) es la opuesta */
+  const adelT=R=>{const b=un(R.P.P,R.P.N);return [-R.d*b[1],R.d*b[0]];};
+  const lado=(R,b)=>[-b[1],b[0]];
+  /* ---------- formas de los músculos: paths que se deforman con el hueso (SW-11 fase 2, jefe-musculos-1.md) ----------
+     Cada músculo es una lista de puntos de control y cada punto está anclado a un hueso:
+       [A, B, t, o, normal]  → el punto a la fracción t del hueso A→B (A y B, puntos del cuadro), corrido o unidades hacia la normal.
+     La forma es una curva cerrada suave (Catmull-Rom) que pasa por esos puntos. Como cada punto sigue a su hueso, el músculo se estira,
+     se acorta y gira con el cuerpo, y una forma puede cruzar dos huesos (el pectoral va del esternón al hombro: puntos en el torso y
+     en el brazo). Atajo para los de un solo hueso: perfil [[t, ancho hacia la normal, ancho hacia el otro lado, desvío], …].
+     Normales: 'adel' (de costado: la cara de adelante del miembro), 'torso' (de costado: adelante del torso), 'afuera' (de frente:
+     hacia afuera de ese lado), 'lat' (de frente: a lo ancho del torso, con el signo s de cada mitad).
+     En los nombres de los puntos, '#' es el lado (n/f de costado, L/R de frente). Las formas viven en FORMAS (datos): para cambiar
+     un músculo se cambia su entrada, no el motor. */
+  const NORM={adel:(R,b)=>[R.d*b[1],-R.d*b[0]],torso:R=>adelT(R),afuera:(R,b,sd)=>{const l=lado(R,b),k=sd==='L'?1:-1;return [l[0]*k,l[1]*k];},lat:(R,b,sd,s)=>{const l=lado(R,b);return [l[0]*s,l[1]*s];}};
+  /* perfil → puntos: ida por un lado del hueso y vuelta por el otro */
+  const perfilApuntos=(A,B,perfil,n)=>perfil.map(([t,wa,,o])=>[A,B,t,(o||0)+wa,n]).concat(perfil.slice().reverse().map(([t,,wb,o])=>[A,B,t,(o||0)-wb,n]));
+  /* el diseño de sw-diseno (.equipo/SW-11/diseno-musculos: formas.json, aprobado por el jefe). Fuente editable: musref.js (corrimientos en
+     medios anchos del tramo) y boceto.js la pasa a este formato. De costado, el pectoral y el glúteo son los de diseno-v102.md (M1: el pecho más alto, para que no parezca panza; M2: glúteo
+     redondo con el muslo). De frente, el glúteo medio sale hasta 1,8 medios anchos (B2). De frente, el glúteo medio sale del costado
+     de la pelvis (puntos en el torso, N→P con la normal 'afuera') para que asome afuera del short (jefe-musculos-2.md, B). De costado, el glúteo va entero con el muslo cercano
+     (antes la mitad de arriba iba con la pelvis y, con la cadera muy flexionada, quedaba del lado de adelante: jefe-musculos-2.md, A). */
+  const FORMAS={
+    costado:[
+      {"m":"lumbar","g":"torso","puntos":[["P","N",0.04,-1.5,"torso"],["P","N",0.06,-5.5,"torso"],["P","N",0.24,-5.8,"torso"],["P","N",0.4,-5,"torso"],["P","N",0.42,-1.5,"torso"],["P","N",0.22,-1,"torso"]]},
+      {"m":"oblicuos","g":"torso","puntos":[["P","N",0.1,-1.5,"torso"],["P","N",0.12,2,"torso"],["P","N",0.3,2.25,"torso"],["P","N",0.46,2,"torso"],["P","N",0.52,0,"torso"],["P","N",0.44,-1.5,"torso"],["P","N",0.24,-1.75,"torso"]]},
+      {"m":"abs","g":"torso","puntos":[["P","N",0.1,1.5,"torso"],["P","N",0.11,5.2,"torso"],["P","N",0.3,5.7,"torso"],["P","N",0.46,5.6,"torso"],["P","N",0.5,4.5,"torso"],["P","N",0.48,2,"torso"],["P","N",0.3,1.4,"torso"]],"lineas":[[["P","N",0.26,3,"torso"],["P","N",0.26,5.5,"torso"]],[["P","N",0.42,2.9,"torso"],["P","N",0.42,5.5,"torso"]]]},
+      {"m":"dorsales","g":"torso","puntos":[["P","N",0.32,-2.5,"torso"],["P","N",0.5,-5.4,"torso"],["P","N",0.7,-6.7,"torso"],["P","N",0.86,-6.1,"torso"],["P","N",0.9,-3,"torso"],["P","N",0.72,-1.5,"torso"],["P","N",0.5,-1.5,"torso"]]},
+      {"m":"pecho","g":"torso","puntos":[["P","N",0.56,2.5,"torso"],["P","N",0.6,6.4,"torso"],["P","N",0.7,7.4,"torso"],["P","N",0.82,7.2,"torso"],["P","N",0.92,5.8,"torso"],["P","N",0.98,3,"torso"],["P","N",0.84,1.5,"torso"],["P","N",0.66,1.6,"torso"]]},
+      {"m":"trapecio","g":"torso","puntos":[["P","N",0.82,-2.25,"torso"],["P","N",0.88,-5.6,"torso"],["P","N",1,-5.4,"torso"],["P","N",1.1,-2.5,"torso"],["P","N",1.06,-0.5,"torso"],["P","N",0.94,-0.9,"torso"]]},
+      {"m":"gluteos","g":"torso","puntos":[["Hpn","Kn",-0.16,-0.97,"adel"],["Hpn","Kn",-0.2,-4.23,"adel"],["Hpn","Kn",-0.12,-6.83,"adel"],["Hpn","Kn",0.06,-7.8,"adel"],["Hpn","Kn",0.24,-6.66,"adel"],["Hpn","Kn",0.36,-4.06,"adel"],["Hpn","Kn",0.34,-0.97,"adel"],["Hpn","Kn",0.1,0.33,"adel"]]},
+      {"m":"triceps","g":"brazo","puntos":[["S#","E#",0.22,-0.28,"adel"],["S#","E#",0.34,-3.16,"adel"],["S#","E#",0.5,-3.85,"adel"],["S#","E#",0.68,-3.16,"adel"],["S#","E#",0.88,-1.04,"adel"],["S#","E#",0.9,-0.14,"adel"],["S#","E#",0.5,-0.28,"adel"]]},
+      {"m":"biceps","g":"brazo","puntos":[["S#","E#",0.3,0.28,"adel"],["S#","E#",0.42,3.03,"adel"],["S#","E#",0.58,3.91,"adel"],["S#","E#",0.74,3.08,"adel"],["S#","E#",0.9,0.88,"adel"],["S#","E#",0.88,-0.11,"adel"],["S#","E#",0.5,0,"adel"]]},
+      {"m":"antebrazos","g":"brazo","puntos":[["E#","W#",0.02,-2.28,"adel"],["E#","W#",0.04,2.28,"adel"],["E#","W#",0.2,3.07,"adel"],["E#","W#",0.46,2.4,"adel"],["E#","W#",0.76,1.2,"adel"],["E#","W#",0.76,-1.2,"adel"],["E#","W#",0.46,-2.4,"adel"],["E#","W#",0.2,-2.93,"adel"]]},
+      {"m":"hombros","g":"brazo","puntos":[["S#","E#",-0.14,0,"adel"],["S#","E#",-0.08,2.53,"adel"],["S#","E#",0.1,3.3,"adel"],["S#","E#",0.3,2.34,"adel"],["S#","E#",0.42,0.22,"adel"],["S#","E#",0.3,-2.34,"adel"],["S#","E#",0.1,-3.3,"adel"],["S#","E#",-0.08,-2.53,"adel"]]},
+      {"m":"isquios","g":"pierna","puntos":[["Hp#","K#",0.16,-0.32,"adel"],["Hp#","K#",0.34,-3.9,"adel"],["Hp#","K#",0.55,-4.29,"adel"],["Hp#","K#",0.8,-3.31,"adel"],["Hp#","K#",0.94,-1.17,"adel"],["Hp#","K#",0.9,0,"adel"],["Hp#","K#",0.5,0,"adel"]]},
+      {"m":"aductores","g":"pierna","puntos":[["Hp#","K#",0.04,-0.97,"adel"],["Hp#","K#",0.08,1.63,"adel"],["Hp#","K#",0.3,1.79,"adel"],["Hp#","K#",0.52,0.98,"adel"],["Hp#","K#",0.5,-0.32,"adel"],["Hp#","K#",0.3,-1.24,"adel"]],"solo":"f"},
+      {"m":"cuadriceps","g":"pierna","puntos":[["Hp#","K#",0.1,0.49,"adel"],["Hp#","K#",0.3,3.74,"adel"],["Hp#","K#",0.58,4.48,"adel"],["Hp#","K#",0.82,3.64,"adel"],["Hp#","K#",0.97,1.46,"adel"],["Hp#","K#",0.95,-0.16,"adel"],["Hp#","K#",0.6,-0.32,"adel"],["Hp#","K#",0.14,-0.26,"adel"]]},
+      {"m":"gemelos","g":"pierna","puntos":[["K#","A#",0.04,-0.55,"adel"],["K#","A#",0.12,-3.3,"adel"],["K#","A#",0.28,-4.35,"adel"],["K#","A#",0.46,-3.24,"adel"],["K#","A#",0.64,-1.27,"adel"],["K#","A#",0.64,0,"adel"],["K#","A#",0.1,0,"adel"]]},
+      {"m":"tibial","g":"pierna","puntos":[["K#","A#",0.1,0.14,"adel"],["K#","A#",0.16,2.61,"adel"],["K#","A#",0.42,2.53,"adel"],["K#","A#",0.74,1.43,"adel"],["K#","A#",0.74,0.14,"adel"]]}],
+    frente:[
+      {"m":"oblicuos","g":"torso","puntos":[["P","N",0.1,3.63,"lat"],["P","N",0.12,5.61,"lat"],["P","N",0.32,6.05,"lat"],["P","N",0.5,5.61,"lat"],["P","N",0.5,3.85,"lat"],["P","N",0.3,3.41,"lat"]],"bil":1},
+      {"m":"abs","g":"torso","puntos":[["P","N",0.1,-3.3,"lat"],["P","N",0.1,3.3,"lat"],["P","N",0.34,3.63,"lat"],["P","N",0.58,3.41,"lat"],["P","N",0.6,0,"lat"],["P","N",0.58,-3.41,"lat"],["P","N",0.34,-3.63,"lat"]],"s":1,"lineas":[[["P","N",0.1,0,"lat"],["P","N",0.58,0,"lat"]],[["P","N",0.26,-3.41,"lat"],["P","N",0.26,3.41,"lat"]],[["P","N",0.42,-3.41,"lat"],["P","N",0.42,3.41,"lat"]]]},
+      {"m":"dorsales","g":"torso","puntos":[["P","N",0.5,5.83,"lat"],["P","N",0.56,7.15,"lat"],["P","N",0.72,8.69,"lat"],["P","N",0.8,7.92,"lat"],["P","N",0.74,6.16,"lat"],["P","N",0.6,5.5,"lat"]],"bil":1},
+      {"m":"pecho","g":"torso","puntos":[["P","N",0.58,0.22,"lat"],["P","N",0.6,4.51,"lat"],["P","N",0.66,7.81,"lat"],["P","N",0.76,9.13,"lat"],["P","N",0.88,8.25,"lat"],["P","N",0.92,4.95,"lat"],["P","N",0.9,0.22,"lat"]],"bil":1,"lineas":[[["P","N",0.6,0,"lat"],["P","N",0.9,0,"lat"]]]},
+      {"m":"trapecio","g":"torso","puntos":[["P","N",0.9,1.65,"lat"],["P","N",0.94,6.6,"lat"],["P","N",0.98,8.25,"lat"],["P","N",1.06,4.95,"lat"],["P","N",1.08,1.76,"lat"]],"bil":1},
+      {"m":"gluteos","g":"pierna","puntos":[["N","P",0.8,5.6,"afuera"],["N","P",0.84,8.8,"afuera"],["N","P",0.97,9.9,"afuera"],["H#","K#",0.12,5.85,"afuera"],["H#","K#",0.16,3.4,"afuera"],["N","P",0.96,4.4,"afuera"],["N","P",0.86,4.4,"afuera"]]},
+      {"m":"hombros","g":"brazo","puntos":[["S#","E#",-0.16,-1.65,"afuera"],["S#","E#",-0.12,1.65,"afuera"],["S#","E#",0.04,4.13,"afuera"],["S#","E#",0.28,3.24,"afuera"],["S#","E#",0.44,0.55,"afuera"],["S#","E#",0.3,-2.47,"afuera"],["S#","E#",0.06,-3.16,"afuera"]]},
+      {"m":"biceps","g":"brazo","puntos":[["S#","E#",0.3,-0.28,"afuera"],["S#","E#",0.4,-2.89,"afuera"],["S#","E#",0.58,-3.3,"afuera"],["S#","E#",0.76,-2.61,"afuera"],["S#","E#",0.9,-0.82,"afuera"],["S#","E#",0.9,0.83,"afuera"],["S#","E#",0.7,2.34,"afuera"],["S#","E#",0.5,2.48,"afuera"],["S#","E#",0.36,1.65,"afuera"]]},
+      {"m":"triceps","g":"brazo","puntos":[["S#","E#",0.32,2.34,"afuera"],["S#","E#",0.46,3.52,"afuera"],["S#","E#",0.64,3.24,"afuera"],["S#","E#",0.76,2.48,"afuera"],["S#","E#",0.56,2.26,"afuera"]]},
+      {"m":"antebrazos","g":"brazo","puntos":[["E#","W#",0.02,-2.28,"afuera"],["E#","W#",0.04,2.28,"afuera"],["E#","W#",0.2,3.07,"afuera"],["E#","W#",0.46,2.4,"afuera"],["E#","W#",0.76,1.2,"afuera"],["E#","W#",0.76,-1.2,"afuera"],["E#","W#",0.46,-2.4,"afuera"],["E#","W#",0.2,-2.93,"afuera"]]},
+      {"m":"aductores","g":"pierna","puntos":[["H#","K#",0.02,-1.14,"afuera"],["H#","K#",0.04,-3.9,"afuera"],["H#","K#",0.2,-4.29,"afuera"],["H#","K#",0.46,-3.41,"afuera"],["H#","K#",0.52,-1.95,"afuera"],["H#","K#",0.3,-1.3,"afuera"]]},
+      {"m":"cuadriceps","g":"pierna","puntos":[["H#","K#",0.06,0.98,"afuera"],["H#","K#",0.1,3.64,"afuera"],["H#","K#",0.38,4.29,"afuera"],["H#","K#",0.66,3.64,"afuera"],["H#","K#",0.88,2.02,"afuera"],["H#","K#",0.94,0,"afuera"],["H#","K#",0.86,-2.92,"afuera"],["H#","K#",0.74,-3.9,"afuera"],["H#","K#",0.56,-2.66,"afuera"],["H#","K#",0.34,-1.79,"afuera"],["H#","K#",0.14,-0.65,"afuera"]]},
+      {"m":"tibial","g":"pierna","puntos":[["K#","A#",0.1,0.28,"afuera"],["K#","A#",0.14,2.26,"afuera"],["K#","A#",0.42,2.42,"afuera"],["K#","A#",0.74,1.51,"afuera"],["K#","A#",0.74,0.22,"afuera"],["K#","A#",0.4,0.14,"afuera"]]},
+      {"m":"gemelos","g":"pierna","puntos":[["K#","A#",0.1,-2.34,"afuera"],["K#","A#",0.16,-3.71,"afuera"],["K#","A#",0.3,-3.9,"afuera"],["K#","A#",0.46,-2.89,"afuera"],["K#","A#",0.44,-2.25,"afuera"]]}],
+    atras:[
+      {"m":"lumbar","g":"torso","puntos":[["P","N",0.04,0.66,"lat"],["P","N",0.04,3.19,"lat"],["P","N",0.2,3.41,"lat"],["P","N",0.36,2.75,"lat"],["P","N",0.36,0.66,"lat"]],"bil":1,"lineas":[[["P","N",0.04,0,"lat"],["P","N",0.4,0,"lat"]]]},
+      {"m":"oblicuos","g":"torso","puntos":[["P","N",0.08,4.13,"lat"],["P","N",0.12,6.16,"lat"],["P","N",0.34,6.05,"lat"],["P","N",0.42,5.06,"lat"],["P","N",0.3,4.13,"lat"]],"bil":1},
+      {"m":"dorsales","g":"torso","puntos":[["P","N",0.26,1.65,"lat"],["P","N",0.3,4.4,"lat"],["P","N",0.44,7.15,"lat"],["P","N",0.62,8.8,"lat"],["P","N",0.8,9.13,"lat"],["P","N",0.86,7.15,"lat"],["P","N",0.74,3.03,"lat"],["P","N",0.55,1.76,"lat"]],"bil":1},
+      {"m":"trapecio","g":"torso","puntos":[["P","N",1.06,0,"lat"],["P","N",1.02,3.03,"lat"],["P","N",0.96,7.04,"lat"],["P","N",0.9,8.91,"lat"],["P","N",0.84,6.6,"lat"],["P","N",0.68,2.75,"lat"],["P","N",0.5,0,"lat"],["P","N",0.68,-2.75,"lat"],["P","N",0.84,-6.6,"lat"],["P","N",0.9,-8.91,"lat"],["P","N",0.96,-7.04,"lat"],["P","N",1.02,-3.03,"lat"]],"s":1},
+      {"m":"gluteos","g":"torso","puntos":[["P","N",0.02,0.22,"lat"],["P","N",0.04,3.96,"lat"],["P","N",-0.04,5.5,"lat"],["P","N",-0.17,5.61,"lat"],["P","N",-0.26,4.4,"lat"],["P","N",-0.28,1.65,"lat"],["P","N",-0.22,0.22,"lat"]],"bil":1},
+      {"m":"hombros","g":"brazo","puntos":[["S#","E#",-0.16,-1.65,"afuera"],["S#","E#",-0.12,1.65,"afuera"],["S#","E#",0.04,4.13,"afuera"],["S#","E#",0.28,3.24,"afuera"],["S#","E#",0.44,0.55,"afuera"],["S#","E#",0.3,-2.47,"afuera"],["S#","E#",0.06,-3.16,"afuera"]]},
+      {"m":"triceps","g":"brazo","puntos":[["S#","E#",0.22,-0.55,"afuera"],["S#","E#",0.3,-2.89,"afuera"],["S#","E#",0.5,-3.44,"afuera"],["S#","E#",0.72,-2.61,"afuera"],["S#","E#",0.88,-0.69,"afuera"],["S#","E#",0.88,0.69,"afuera"],["S#","E#",0.72,2.61,"afuera"],["S#","E#",0.5,3.44,"afuera"],["S#","E#",0.3,2.89,"afuera"],["S#","E#",0.22,0.55,"afuera"]]},
+      {"m":"antebrazos","g":"brazo","puntos":[["E#","W#",0.02,-2.28,"afuera"],["E#","W#",0.04,2.28,"afuera"],["E#","W#",0.2,3.07,"afuera"],["E#","W#",0.46,2.4,"afuera"],["E#","W#",0.76,1.2,"afuera"],["E#","W#",0.76,-1.2,"afuera"],["E#","W#",0.46,-2.4,"afuera"],["E#","W#",0.2,-2.93,"afuera"]]},
+      {"m":"aductores","g":"pierna","puntos":[["H#","K#",0.04,-1.46,"afuera"],["H#","K#",0.06,-3.74,"afuera"],["H#","K#",0.26,-3.9,"afuera"],["H#","K#",0.4,-2.76,"afuera"],["H#","K#",0.3,-1.62,"afuera"]]},
+      {"m":"isquios","g":"pierna","puntos":[["H#","K#",0.14,-2.76,"afuera"],["H#","K#",0.12,2.76,"afuera"],["H#","K#",0.36,3.74,"afuera"],["H#","K#",0.66,3.32,"afuera"],["H#","K#",0.9,1.63,"afuera"],["H#","K#",0.92,-1.62,"afuera"],["H#","K#",0.66,-3.41,"afuera"],["H#","K#",0.36,-3.64,"afuera"]],"lineas":[[["H#","K#",0.18,0,"afuera"],["H#","K#",0.86,0,"afuera"]]]},
+      {"m":"gemelos","g":"pierna","puntos":[["K#","A#",0.04,-2.2,"afuera"],["K#","A#",0.04,2.2,"afuera"],["K#","A#",0.18,3.91,"afuera"],["K#","A#",0.34,3.85,"afuera"],["K#","A#",0.56,1.65,"afuera"],["K#","A#",0.62,0,"afuera"],["K#","A#",0.56,-1.65,"afuera"],["K#","A#",0.34,-3.9,"afuera"],["K#","A#",0.18,-3.99,"afuera"]]}]};
+  /* tope de volumen (jefe, músculos v2): el músculo es parte del brazo, no algo puesto encima. Deltoides hasta 1,2× el grosor del brazo y
+     bíceps y tríceps hasta 1,15× (medido de cada lado del hueso: medio grosor = 2,75); el deltoides no se pasa del hombro más de 0,06 del
+     brazo, y ninguno llega al codo. El margen (0,9) es para la curva, que se pasa un poco de sus puntos. Lo controla tests/musculos.test.js. */
+  const TOPE={hombros:1.2,biceps:1.15,triceps:1.15},MEDIO_BRAZO=2.75;
+  function topeVolumen(e,pts){const k=TOPE[e.m];if(!k||e.g!=='brazo')return pts;const o=k*MEDIO_BRAZO*.9;
+    return pts.map(p=>/^[SE]#$/.test(p[0])&&/^[EW]#$/.test(p[1])?[p[0],p[1],Math.min(.94,Math.max(-.06,p[2])),Math.max(-o,Math.min(o,p[3])),p[4]]:p);}
+  /* las formas de una definición, ya con el lado y el grupo de dibujo (lejos / lejosP / torso / piernaN / brazoN) */
+  const FCACHE=new WeakMap();
+  function formas(D){if(FCACHE.has(D))return FCACHE.get(D);const v=vistaDe(D),fr=v!=='costado',out=[];
+    for(const e of FORMAS[v]){const base=topeVolumen(e,e.puntos||perfilApuntos(e.A,e.B,e.perfil,e.n));
+      if(e.g==='torso'){for(const s of e.bil?[-1,1]:[e.s||1])out.push({m:e.m,g:'torso',sd:null,s,pts:base,lineas:e.lineas});continue;}
+      for(const sd of fr?['L','R']:['n','f']){if(e.solo&&e.solo!==sd)continue;const cerca=fr?sd==='R':sd==='n';
+        const g=cerca?(e.g==='brazo'?'brazoN':'piernaN'):(fr&&e.g==='pierna'?'lejosP':'lejos');
+        const rp=p=>[p[0].replace('#',sd),p[1].replace('#',sd),p[2],p[3],p[4]];out.push({m:e.m,g,sd,s:1,pts:base.map(rp),lineas:e.lineas&&e.lineas.map(l=>l.map(rp))});}}
+    FCACHE.set(D,out);return out;}
+  /* el contorno de una forma en un cuadro */
+  const contorno=(R,f)=>{const P=f.pts.map(p=>ptoCtl(R,p,f.sd,f.s));return P.some(q=>!q)?'':curvaCerrada(P);};
+  const ptoCtl=(R,[A,B,t,o,n],sd,s)=>{const a=R.P[A],b=R.P[B];if(!a||!b)return null;const q=lp(a,b,t);if(!o)return q;const v=NORM[n](R,un(a,b),sd,s);return [q[0]+v[0]*o,q[1]+v[1]*o];};
+  /* curva cerrada suave por los puntos (Catmull-Rom pasada a Bézier cúbica) */
+  function curvaCerrada(P){const n=P.length;if(n<3)return '';let d='M'+f1(P[0][0])+' '+f1(P[0][1]);
+    for(let i=0;i<n;i++){const p0=P[(i-1+n)%n],p1=P[i],p2=P[(i+1)%n],p3=P[(i+2)%n];
+      d+='C'+f1(p1[0]+(p2[0]-p0[0])/6)+' '+f1(p1[1]+(p2[1]-p0[1])/6)+' '+f1(p2[0]-(p3[0]-p1[0])/6)+' '+f1(p2[1]-(p3[1]-p1[1])/6)+' '+f1(p2[0])+' '+f1(p2[1]);}
+    return d+'Z';}
+  /* músculos tapados por la ropa: si no trabajan, no se dibujan (la ropa no se pinta de anatomía); si trabajan, van encima */
+  /* musculosa (solo en el modo detalle o el juego; en la app, solo short): forma de diseno (boceto.js, TANK), sisa amplia y escote */
+  const MUSCULOSA={costado:[['P','N',.06,-5.4,'torso'],['P','N',.06,5.4,'torso'],['P','N',.56,5.6,'torso'],['P','N',.8,4.2,'torso'],['P','N',.9,2,'torso'],['P','N',.98,-1,'torso'],['P','N',.9,-4.4,'torso'],['P','N',.6,-5.4,'torso']],
+    frente:[['P','N',.06,0,'lat'],['P','N',.06,6,'lat'],['P','N',.5,6.2,'lat'],['P','N',.72,6.6,'lat'],['P','N',.86,5.6,'lat'],['P','N',1,4.4,'lat'],['P','N',1,2.4,'lat'],['P','N',.84,0,'lat']]};MUSCULOSA.atras=MUSCULOSA.frente;
+  /* los músculos del ejercicio: principales (p) y secundarios (s) de EX */
+  const MUSC_EX=new WeakMap();
+  function muscDe(D,id){if(MUSC_EX.has(D))return MUSC_EX.get(D);id=id||idDe(D);const e=typeof EX!=='undefined'&&EX.find(x=>x.id===id),r={p:(e&&e.p)||[],s:((e&&e.s)||[]).filter(m=>!(e.p||[]).includes(m))};MUSC_EX.set(D,r);return r;}
+  const pathAnim=(F,fn,cls,one)=>{const v=seq(F,fn),an=one||v.every(x=>x===v[0])?'':'<animate attributeName="d" values="'+v.join(';')+'" keyTimes="'+kt()+'" dur="2.8s" repeatCount="indefinite"/>';return '<path class="'+cls+'" d="'+fn(F[0])+'">'+an+'</path>';};
+  /* dibuja los músculos de un grupo (lejos, lejosP, torso, piernaN, brazoN): los que trabajan en color (principal fuerte, secundario
+     suave) y el resto en un tono apenas más oscuro que la piel, para que el cuerpo se lea musculoso (jefe-musculos-1.md, punto 2).
+     Los tapados por la ropa solo se dibujan si trabajan (o con opt.detalle). Cada uno es un path animado: el mismo número de
+     puntos en todos los cuadros, así el navegador interpola la forma. */
+  function musSVG(F,D,grupo,one,opt){const M=muscDe(D,opt.id),vis=MVIS[vistaDe(D)],fr=D.v==='front';let h='';
+    /* de frente, los de las piernas que trabajan se pintan al final del torso: si no, el short de la cadera los tapa (abductores, aductores; jefe-musculos-2.md, B) */
+    if(fr&&opt.solo==='w'&&(grupo==='lejosP'||grupo==='piernaN')&&!opt.tarde)return '';if(opt.tarde&&!fr)return '';
+    /* entre los que trabajan, primero los secundarios y arriba los principales (diseno-v102.md, M2: el isquio tapaba el glúteo del hip thrust) */
+    const orden=opt.solo==='w'?formas(D).slice().sort((a,b)=>(M.p.includes(a.m)?1:0)-(M.p.includes(b.m)?1:0)):formas(D);
+    for(const f of orden){if(f.g!==grupo||!vis.includes(f.m))continue;const st=M.p.includes(f.m)?'mp':M.s.includes(f.m)?'ms':'m0';
+      if(opt.solo==='m0'&&st!=='m0')continue;if(opt.lite)continue;if(opt.solo==='w'&&st==='m0')continue; /* capas: los que no trabajan van debajo de la ropa y los que trabajan, encima */
+      const v=seq(F,R=>contorno(R,f)),an=one||v.every(x=>x===v[0])?'':'<animate attributeName="d" values="'+v.join(';')+'" keyTimes="'+kt()+'" dur="2.8s" repeatCount="indefinite"/>';
+      h+='<path class="mk-m mk-'+st+' m-'+f.m+'" d="'+contorno(F[0],f)+'">'+an+'</path>';
+      /* líneas de definición (abdomen, esternón, isquios, lumbar): segmentos con los mismos puntos anclados */
+      if(f.lineas)for(const [p,q] of f.lineas){const ln=R=>{const a=ptoCtl(R,p,f.sd,f.s),b=ptoCtl(R,q,f.sd,f.s);return a&&b?'M'+f1(a[0])+' '+f1(a[1])+'L'+f1(b[0])+' '+f1(b[1]):'';},v2=seq(F,ln);
+        h+='<path class="mk-ml mk-l'+st+'" d="'+ln(F[0])+'">'+(one||v2.every(x=>x===v2[0])?'':'<animate attributeName="d" values="'+v2.join(';')+'" keyTimes="'+kt()+'" dur="2.8s" repeatCount="indefinite"/>')+'</path>';}}
+    return h;}
+  /* ropa (jefe-musculos-1.md, punto 3): musculosa (el torso, sin mangas) y short (cadera y muslos). Pelo: un casquete detrás de la cabeza */
+  function ropaSVG(F,D,grupo,one,opt){opt=opt||{};const fr=D.v==='front',sds=grupo==='lejos'&&!fr?['f']:grupo==='lejosP'?['L']:grupo==='piernaN'?[fr?'R':'n']:[];let h='';
+    for(const sd of sds)h+=line(F,(fr?'H':'Hp')+sd,R=>lp(R.P[(fr?'H':'Hp')+sd],R.P['K'+sd],.3),'mk-short',fr?7.2:7,one);
+    if(grupo==='torso'){h+=line(F,R=>lp(R.P.P,R.P.N,-.06),R=>lp(R.P.P,R.P.N,.14),'mk-short',fr?11.6:10.6,one);
+      for(const f of formas(D))if(f.m==='gluteos'&&f.g==='torso')h+=pathAnim(F,R=>contorno(R,f),'mk-shortf',one);
+      if(opt.detalle)for(const s2 of fr?[-1,1]:[1]){const ff={pts:MUSCULOSA[vistaDe(D)],sd:null,s:s2};h+=pathAnim(F,R=>contorno(R,ff),'mk-tank',one);}}
+    return h;}
+  /* nariz de costado: un bulto chico adelante de la cara, para que se lea hacia dónde mira el cuerpo (sin cara, en los fondos o los
+     levers el pecho parecía la espalda: jefe-musculos-2.md, A) */
+  function narizSVG(F,D,one){if(D.v==='front')return '';return dot(F,R=>{const H=R.P.H,b=un(R.P.N,H),n=[-R.d*b[1],R.d*b[0]];return [H[0]+n[0]*(HEAD-.4)+b[0]*.6,H[1]+n[1]*(HEAD-.4)+b[1]*.6];},1.9,'mk-nariz',one);}
+  function peloSVG(F,D,one){const fr=D.v==='front';
+    if(fr&&D.back)return dot(F,R=>{const u=un(R.P.N,R.P.H);return [R.P.H[0]+u[0]*.5,R.P.H[1]+u[1]*.5];},HEAD-1.1,'mk-pelo',one);
+    return dot(F,R=>{const u=un(R.P.N,R.P.H),bk=fr?[0,0]:(()=>{const b=un(R.P.P,R.P.N);return [R.d*b[1],-R.d*b[0]];})();return [R.P.H[0]+u[0]*1.7+bk[0]*1.4,R.P.H[1]+u[1]*1.7+bk[1]*1.4];},HEAD-.5,'mk-pelo',one);}
+  function svg(D,opt){opt=opt||{};
+    /* figura quieta chica (árbol, logros, listas: stat sin u): sin músculos, sin pelo ni nariz (qa fase 2, B1: el árbol pasó de 201 a 561 KB; el jefe:
+       a 44 px van quietas y sin músculos, como antes) */
+    if(opt.stat&&opt.u==null&&!opt.detalle&&opt.lite==null)opt=Object.assign({},opt,{lite:1});const lite=!!opt.lite;const one=opt.u!=null||opt.stat,F=one?[frame(D,opt.raw?(opt.u||0):ease(opt.u||0))]:frames(D),fr=D.v==='front';FWD=!one&&!!D.fwd;try{
+    const nearF=fr?'<g class="mk-near">'+limbsF(F,'R',one)+musSVG(F,D,'piernaN',one,Object.assign({},opt,{solo:'m0'}))+ropaSVG(F,D,'piernaN',one,opt)+musSVG(F,D,'piernaN',one,Object.assign({},opt,{solo:'w'}))+'</g>':''; /* yaw (vista 3/4): la pierna cercana viene hacia quien mira y pasa por delante del torso */
+    const body=fr?'<g class="mk-far">'+limbsF(F,'L',one)+musSVG(F,D,'lejosP',one,Object.assign({},opt,{solo:'m0'}))+ropaSVG(F,D,'lejosP',one,opt)+musSVG(F,D,'lejosP',one,Object.assign({},opt,{solo:'w'}))+'</g>'+(D.yaw&&!D.back?'':nearF)+eqSVG(F,D,one,'back2')+'<g class="mk-near">'+seg(F,'P','N','mk-tr',11,one)+(D.back?line(F,R=>lp(R.P.P,R.P.N,.08),R=>lp(R.P.P,R.P.N,.92),'mk-hl',1.3,one):'')+musSVG(F,D,'torso',one,Object.assign({},opt,{solo:'m0'}))+ropaSVG(F,D,'torso',one,opt)+musSVG(F,D,'torso',one,Object.assign({},opt,{solo:'w'}))+musSVG(F,D,'lejosP',one,Object.assign({},opt,{solo:'w',tarde:1}))+musSVG(F,D,'piernaN',one,Object.assign({},opt,{solo:'w',tarde:1}))+'</g>'+(D.yaw&&!D.back?nearF:'')+(D.back?'':(lite?'':peloSVG(F,D,one)))+dot(F,'H',HEAD,'tq-h',one)+(D.back?(lite?'':peloSVG(F,D,one)):'')+
+        '<g class="mk-far">'+armF(F,'L',one)+musSVG(F,D,'lejos',one,Object.assign({},opt,{solo:'m0'}))+ropaSVG(F,D,'lejos',one,opt)+musSVG(F,D,'lejos',one,Object.assign({},opt,{solo:'w'}))+'</g><g class="mk-near">'+armF(F,'R',one)+musSVG(F,D,'brazoN',one,Object.assign({},opt,{solo:'m0'}))+ropaSVG(F,D,'brazoN',one,opt)+musSVG(F,D,'brazoN',one,Object.assign({},opt,{solo:'w'}))+dot(F,'ER',2,'tq-j',one)+dot(F,'EL',2,'tq-j',one)+'</g>'
+      :eqSVG(F,D,one,'back2')+'<g class="mk-far">'+limbs(F,'f',one)+arm(F,'f',one)+musSVG(F,D,'lejos',one,Object.assign({},opt,{solo:'m0'}))+ropaSVG(F,D,'lejos',one,opt)+musSVG(F,D,'lejos',one,Object.assign({},opt,{solo:'w'}))+'</g>'+eqSVG(F,D,one,'mid')+
+        '<g class="mk-near">'+torsoS(F,one)+musSVG(F,D,'torso',one,Object.assign({},opt,{solo:'m0'}))+limbs(F,'n',one)+musSVG(F,D,'piernaN',one,Object.assign({},opt,{solo:'m0'}))+ropaSVG(F,D,'torso',one,opt)+ropaSVG(F,D,'piernaN',one,opt)+musSVG(F,D,'torso',one,Object.assign({},opt,{solo:'w'}))+musSVG(F,D,'lejosP',one,Object.assign({},opt,{solo:'w',tarde:1}))+musSVG(F,D,'piernaN',one,Object.assign({},opt,{solo:'w',tarde:1}))+musSVG(F,D,'piernaN',one,Object.assign({},opt,{solo:'w'}))+dot(F,'Kn',2.2,'tq-j',one)+'</g>'+(D.headFront?'':(lite?'':peloSVG(F,D,one))+(lite?'':narizSVG(F,D,one))+dot(F,'H',HEAD,'tq-h',one))+'<g class="mk-near">'+arm(F,'n',one)+musSVG(F,D,'brazoN',one,Object.assign({},opt,{solo:'m0'}))+ropaSVG(F,D,'brazoN',one,opt)+musSVG(F,D,'brazoN',one,Object.assign({},opt,{solo:'w'}))+dot(F,'En',2,'tq-j',one)+'</g>'+(D.headFront?(lite?'':peloSVG(F,D,one))+(lite?'':narizSVG(F,D,one))+dot(F,'H',HEAD,'tq-h',one):''); /* headFront: las manos pasan detrás de la cabeza */
+    return '<svg class="tq mk'+(fr?' mk-fr':'')+(one?' st':'')+'" viewBox="'+(opt.vb||'0 0 120 120')+'" role="img" aria-label="Cómo se hace'+(D.back?' (vista de atrás)':'')+'">'+eqSVG(F,D,one,'back')+(FWD?'<g><animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;.8;.86;.9;1" dur="2.8s" repeatCount="indefinite"/>':'')+shadow(F,D,one)+body+(FWD?'</g>':'')+(fr?eqSVG(F,D,one,'mid'):eqSVG(F,D,one,'top'))+
       (opt.noGrip?'':D.ag&&typeof agMini==='function'?agMini(D,gripBox(D),opt.id||idDe(D)):gripGlyph(D.grip,gripBox(D)))+'</svg>';}finally{FWD=false;}}
   /* ---------- validador ---------- */
   function check(D,steps){steps=steps||40; /* cada 2,5 % del movimiento */const acc=new Map(),add1=m=>{const i=m.lastIndexOf(' en '),k=m.slice(0,i).replace(/ \(-?\d+°\)/,''),p=m.slice(i+4);if(!acc.has(k))acc.set(k,[]);acc.get(k).push(p);};
@@ -275,7 +336,7 @@ const MK=(()=>{
         if(dd<lim)add1((NMq[e.t]||'el equipo')+' pasa a menos de 2 de la cabeza en '+pc);});}
     if(D.grip&&!gripBox(D))add1('el recuadro del agarre no tiene una esquina libre: tapa la figura o el equipo en 0%');
     return [...acc].map(([k,ps])=>k+' en '+(ps.length>1?ps[0]+'–'+ps[ps.length-1]:ps[0]));}
-  return{LEN,LIM,frame,angles,svg,check,gripGlyph,gripBox,caja,shapes,phi,V,nrm};
+  return{LEN,LIM,frame,angles,svg,check,gripGlyph,gripBox,caja,shapes,phi,V,nrm,MUS,MVIS,vistaDe,formas,muscDe,FORMAS,contorno,MUSCULOSA};
 })();
 
 /* ---------- los ejercicios con el macaco nuevo ---------- */
@@ -312,6 +373,7 @@ const MKD={
   /* dominadas (SW-10, Juan: vista de atrás, para que se lean el ancho del agarre y los codos): abajo colgado con los brazos estirados; arriba el mentón pasa la barra y los codos bajan a los costados del torso; piernas cruzadas */
   pullup:{v:'front',back:1,bentKnees:1,grip:{t:'prono',w:'pocoabierto'},eq:[{t:'pullbar',front:1,p:[26,26,94]}],root:{j:'N',p:{A:[60,53],B:[60,25]}},A:{t:180,tk:1,L:{a:170,e:0,h:4,k:-22},R:{a:170,e:0,h:4,k:-22},ls:{shL:0.55,shR:0.55}},B:{t:180,tk:1,L:{a:30,e:140,h:4,k:-22},R:{a:30,e:140,h:4,k:-22},ls:{shL:0.55,shR:0.55,uaL:0.86,uaR:0.86,faL:0.83,faR:0.83}},ik:{GL:{to:[43,26],elbow:'down'},GR:{to:[77,26],elbow:'down'}},lock:[{u:0,j:'e',sd:['L','R']}]}
 };
+ESQ.usar(MKD); /* exportPose(id, u) busca acá los ejercicios */
 /* texto del agarre para la ficha */
 const GRIP_T={prono:'Agarre prono',supino:'Agarre supino',neutro:'Agarre neutro (martillo)',mixto:'Agarre mixto',apoyo:'Manos apoyadas'},GRIP_W={cerrado:'cerrado',medio:'al ancho de los hombros',pocoabierto:'un poco más abierto que los hombros',variable:'las manos se abren y se cierran en el recorrido',abierto:'abierto'};
 const gripTxt=g=>g?(GRIP_T[g.t]||'')+(g.w?', '+(GRIP_W[g.w]||g.w):'')+(g.txt?' '+g.txt:''):'';
@@ -322,3 +384,7 @@ function mkHook(){Object.keys(MKD).forEach(id=>{const D=MKD[id],k='mk_'+id;if(TE
 mkHook();
 {const techSVG0=techSVG;techSVG=function(k,stat){const T=TECH[k];if(T&&T.mk)return MK.svg(MKD[T.mk],{stat});return techSVG0(k,stat);};}
 {const techCard0=techCard;techCard=function(ex){const h=techCard0(ex),D=ex&&MKD[ex.id];return D&&D.grip?h.replace('<h4>Cómo se hace</h4>','<h4>Cómo se hace</h4><p class="tech-grip">'+esc(gripTxt(D.grip))+'</p>'):h;};}
+/* SW-11 fase 2: leyenda chica de los músculos pintados (principales en color fuerte, secundarios en suave) */
+{const techCard1=techCard;techCard=function(ex){const h=techCard1(ex),D=ex&&MKD[ex.id];if(!D||!h)return h;const M=MK.muscDe(D,ex.id),vis=MK.MVIS[MK.vistaDe(D)],nm=l=>l.filter(m=>vis.includes(m)).map(m=>MUSC[m]||m).join(', ');
+  const p=nm(M.p),q=nm(M.s);if(!p&&!q)return h;const leg='<p class="tech-leg">'+(p?'<span><i class="lp"></i>'+esc(p)+'</span>':'')+(q?'<span><i class="ls"></i>'+esc(q)+'</span>':'')+'</p>';
+  return h.replace('<h4>Cómo se hace</h4>','<h4>Cómo se hace</h4>'+leg);};}

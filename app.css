@@ -1860,7 +1860,9 @@ button.tech-grip{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;text
 .tech-grip-v{color:var(--acc);font-weight:700;white-space:nowrap}
 .msheet.vis-sh{display:flex;flex-direction:column;overflow:hidden}
 .msheet.vis-sh .mbody{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;width:100%;max-width:640px;margin:0 auto;padding-bottom:6px}
-.vis{position:relative;flex:1 0 auto;min-height:0;display:flex;flex-direction:column;gap:10px}
+.vis{position:relative;flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:10px}
+/* diseno-v102 M3: en pantallas normales el visor entra en la hoja y las claves scrollean adentro; en las muy bajas (qa B3) scrollea la hoja */
+@media (max-height:600px){.vis{flex:1 0 auto}}
 .vis-stage{position:relative;flex:1 1 42vh;min-height:180px;border-radius:20px;background:var(--raise);border:1px solid var(--line);overflow:hidden}
 .vis-fig{position:absolute;inset:10px}
 .vis-fig .tq{width:100%;height:100%;overflow:hidden}
@@ -1922,3 +1924,35 @@ button.tech-grip{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;text
 /* en el cuadradito (ag:1) no van las marcas de los hombros ni los textos */
 .ag-mini .ag-sh,.ag-mini .ag-tx,.ag-mini .ag-floor,.ag-mini .ag-fw{display:none}
 .ag-mini .ag-o{stroke-width:2.4}
+
+/* SW-11 fase 2: el macaco con piel, pelo, short y músculos, en capas. Colores de sw-diseno (diseno-musculos/colores.css, aprobados por el jefe):
+   principal rojo profundo (más oscuro que la piel), secundario azul (color opuesto a la piel), los que no trabajan apenas más oscuros
+   que la piel. Medido con simulación de daltonismo en diseno-musculos.md. Variables para personalizarlo después. */
+:root{--mk-piel:#D49A74;--mk-pelo:#3B2A20;--mk-short:#3A3F4B;--mk-tank:#4A5068;--mk-mp:#A30D25;--mk-ms:#2F7BEA;--mk-m0:#BC8462;--mk-borde:#7E4E33}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--mk-piel:#E2AC86;--mk-pelo:#7A5238;--mk-short:#3E4458;--mk-tank:#4A5068;--mk-mp:#C8102E;--mk-ms:#4F9BFF;--mk-m0:#C79370;--mk-borde:#8A5A3E}}
+:root[data-theme="dark"]{--mk-piel:#E2AC86;--mk-pelo:#7A5238;--mk-short:#3E4458;--mk-tank:#4A5068;--mk-mp:#C8102E;--mk-ms:#4F9BFF;--mk-m0:#C79370;--mk-borde:#8A5A3E}
+/* :not(#_) gana a las reglas viejas de cada tema: la piel reemplaza el blanco/gris del macaco; sin remera, el torso también es piel */
+:root:not(#_) .mk .mk-ua,:root:not(#_) .mk .mk-th,:root:not(#_) .mk .mk-fa,:root:not(#_) .mk .mk-sh,:root:not(#_) .mk .mk-hd,:root:not(#_) .mk .mk-tr{stroke:var(--mk-piel)}
+:root:not(#_) .mk .tq-h{fill:var(--mk-piel)}
+.mk .mk-short{stroke:var(--mk-short);stroke-linecap:round}.mk .mk-shortf{fill:var(--mk-short)}.mk .mk-tank{fill:var(--mk-tank)}
+.mk .mk-pelo{fill:var(--mk-pelo)}
+.mk .mk-nariz{fill:var(--mk-piel);stroke:var(--mk-borde);stroke-width:.5}
+/* músculos: paths con forma y un borde fino que los separa */
+.mk .mk-m{stroke:var(--mk-borde);stroke-width:.45;stroke-linejoin:round}
+.mk .mk-m0{fill:var(--mk-m0)}
+.mk .mk-mp{fill:var(--mk-mp);stroke:color-mix(in srgb,var(--mk-mp) 55%,#000)}
+.mk .mk-ms{fill:var(--mk-ms);stroke:color-mix(in srgb,var(--mk-ms) 50%,#000)}
+.mk .mk-ml{fill:none;stroke-width:.45;stroke-linecap:round}
+.mk .mk-lm0{stroke:var(--mk-borde)}.mk .mk-lmp{stroke:color-mix(in srgb,var(--mk-mp) 50%,#000)}.mk .mk-lms{stroke:color-mix(in srgb,var(--mk-ms) 45%,#000)}
+/* leyenda de la ficha */
+.tech-leg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:var(--mut);margin:-2px 0 8px}
+.tech-leg span{display:inline-flex;align-items:center;gap:5px}
+.tech-leg i{width:12px;height:6px;border-radius:3px;display:inline-block}
+.tech-leg .lp{background:var(--mk-mp)}.tech-leg .ls{background:var(--mk-ms)}
+
+/* diseno-v102 (B): de frente y de atrás el lado lejano casi opaco (en claro el rojo se volvía rosa); los puntos de codos y rodillas en el color del
+   borde de los músculos (parecían agujeros); en el mapa oscuro, borde claro en el rojo principal */
+:root:not(#_) .mk.mk-fr .mk-far{opacity:.8}
+.mk .tq-j{fill:var(--mk-borde)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .bm g[style*="--mk-mp"] polygon{stroke:color-mix(in srgb,#fff 55%,transparent);stroke-width:1}}
+:root[data-theme="dark"] .bm g[style*="--mk-mp"] polygon{stroke:color-mix(in srgb,#fff 55%,transparent);stroke-width:1}
