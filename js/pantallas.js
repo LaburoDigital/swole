@@ -1098,6 +1098,8 @@ window.addEventListener('popstate',()=>{
   if(S.modal&&S.modal.t==='recap')clearTimeout(S.recapT);
   /* en la marca, atrás vuelve del formulario a la lista en vez de cerrar todo */
   if(S.m2&&S.m2.t==='mark'&&S.m2.d.step==='form'&&!S.m2.d.direct&&!S.picker&&!isDirty('m2')){S.m2.d.step='pick';try{history.pushState({sw:hDepth+1},'');hDepth++;}catch(e){}renderModal();return;}
+  /* en el visor con el agarre abierto, atrás vuelve al visor */
+  if(S.m2&&S.m2.t==='visor'&&S.m2.d.grip){try{history.pushState({sw:hDepth+1},'');hDepth++;}catch(e){}ACTIONS.visGripX();return;}
   /* el selector abierto desde el asistente está arriba de todo: se cierra primero */
   if(S.picker&&(S.picker.target==='gen'||!S.m2))S.picker=null;
   /* atrás sobre una ventana con cambios sin guardar pregunta antes de tirarlos (el render de abajo repone el paso del historial) */

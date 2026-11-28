@@ -131,7 +131,7 @@ const MK=(()=>{
   function limbsF(F,sd,one){return seg(F,'H'+sd,'K'+sd,'mk-th',6.5,one)+seg(F,'K'+sd,'A'+sd,'mk-sh',5.5,one)+seg(F,'L'+sd,'T'+sd,'mk-ft',3.5,one);}
   function armF(F,sd,one){return seg(F,'S'+sd,'E'+sd,'mk-ua',5.5,one)+seg(F,'E'+sd,'W'+sd,'mk-fa',4.8,one)+seg(F,'W'+sd,'G'+sd,'mk-hd',4.2,one);}
   /* agarre visto de frente, con su nombre: dorso oscuro (prono), palma clara (supino), manijas paradas (neutro) o manos apoyadas */
-  const GW={cerrado:7,medio:10,abierto:13},GN={prono:'Prono',supino:'Supino',neutro:'Neutro',mixto:'Mixto',apoyo:'Apoyadas'};
+  const GW={cerrado:7,medio:10,pocoabierto:11.5,abierto:13},GN={prono:'Prono',supino:'Supino',neutro:'Neutro',mixto:'Mixto',apoyo:'Apoyadas'};
   function gripGlyph(gr,box){if(!gr)return '';box=box||{x:2,y:2,s:1};const w=GW[gr.w]||10,cx=19,hand=(x,t)=>{const pal=t==='supino',neu=t==='neutro',sgn=x<cx?-1:1;
       if(t==='apoyo')return '<rect class="mk-gp" x="'+(x-3.4)+'" y="10" width="6.8" height="5.4" rx="1.8"/><line class="mk-gt" x1="'+(x+3.4*-sgn)+'" y1="13" x2="'+(x+5.8*-sgn)+'" y2="11"/>';
       if(neu)return '<line class="mk-gb" x1="'+x+'" y1="3" x2="'+x+'" y2="16"/><rect class="mk-gd" x="'+(x-3)+'" y="5.8" width="6" height="8" rx="1.8"/><line class="mk-gt" x1="'+x+'" y1="6" x2="'+x+'" y2="3.4"/>';
@@ -197,18 +197,33 @@ const MK=(()=>{
     if(o.c){const cx=Math.max(x0,Math.min(o.c[0],x1)),cy=Math.max(y0,Math.min(o.c[1],y1));return Math.hypot(o.c[0]-cx,o.c[1]-cy)<o.r;}
     return segBox(o.s[0],o.s[1],x0-o.r,y0-o.r,x1+o.r,y1+o.r);});}
   /* busca esquina (arriba izq., arriba der., abajo izq., abajo der.) y tamaño (100 %, 80 %, 65 %) donde el recuadro no tape nada */
-  const GB={};function gripBox(D){if(!D.grip)return null;const key=JSON.stringify([D.A,D.M,D.fases,D.B,D.ik,D.eq,D.root]);if(GB[key]!==undefined)return GB[key];
+  const GB={};function gripBox(D){if(!D.grip)return null;const key=JSON.stringify([D.A,D.M,D.fases,D.B,D.ik,D.eq,D.root,D.ag]);if(GB[key]!==undefined)return GB[key];
     const SS=[];for(let i=0;i<=20;i++)SS.push(...shapes(D,frame(D,i/20)));let res=null;
-    for(const s of [1,.8,.65]){const w=38*s,h=26*s;for(const [x,y] of [[2,2],[118-w,2],[2,108-h],[118-w,108-h],[60-w/2,2]])if(!hits(SS,[x,y,w,h],.5)){res={x,y,s};break;}if(res)break;}
+    for(const s of [1,.8,.65]){const w=(D.ag?46:38)*s,h=(D.ag?40:26)*s; /* ag:1 (SW-11): el cuadradito con las manos y los dedos es más alto */for(const [x,y] of [[2,2],[118-w,2],[2,108-h],[118-w,108-h],[60-w/2,2]])if(!hits(SS,[x,y,w,h],.5)){res={x,y,s};break;}if(res)break;}
     return GB[key]=res;}
-  function svg(D,opt){opt=opt||{};const one=opt.u!=null||opt.stat,F=one?[frame(D,ease(opt.u||0))]:frames(D),fr=D.v==='front';FWD=!one&&!!D.fwd;try{
+  /* SW-11 visor: la caja que ocupa la figura y su equipo en TODOS los cuadros (u crudo de 0 a 1), con margen, para el zoom.
+     No cuentan el piso, la pared ni los soportes y cables largos (la barra sí): si hay piso, la caja baja hasta el piso. */
+  const CJ={};function caja(D,m){m=m==null?6:m;const key=JSON.stringify([D.A,D.M,D.fases,D.B,D.ik,D.eq,D.root,m]);if(CJ[key])return CJ[key];
+    let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;const pon=(x,y,r)=>{x0=Math.min(x0,x-r);x1=Math.max(x1,x+r);y0=Math.min(y0,y-r);y1=Math.max(y1,y+r);};
+    const sop=(D.eq||[]).map(e=>e.t==='floor'||e.t==='wall'||e.t==='rope'||(e.t==='pullbar'&&!e.front)||e.t==='ring'||e.t==='pulley');
+    for(let i=0;i<=40;i++){const R=frame(D,i/40);const S=shapes(D,R),nEq=S.length;
+      /* shapes pone el cuerpo primero y después el equipo en orden: para saber de qué equipo es cada forma, se recalcula sin el equipo */
+      const nB=shapes(Object.assign({},D,{eq:[]}),Object.assign({},R,{eq:[]})).length;S.forEach((o,k)=>{if(k>=nB&&skipEq(D,R,k-nB,sop))return;
+        if(o.q){pon(o.q[0],o.q[1],0);pon(o.q[0]+o.q[2],o.q[1]+o.q[3],0);}else if(o.c)pon(o.c[0],o.c[1],o.r);else{pon(o.s[0][0],o.s[0][1],o.r);pon(o.s[1][0],o.s[1][1],o.r);}});
+      (D.eq||[]).forEach((e,j)=>{if(e.t==='pullbar'&&!e.front)pon(e.p[0],e.p[1],3.6);if(e.t==='ring'&&R.eq[j].at)pon(R.eq[j].at[0],R.eq[j].at[1]-3.5,4.5);if(e.t==='pulley')pon(e.p[0],e.p[1],4.2);if(e.t==='piso')e.p.forEach(q=>pon(q[0],q[1],1));});}
+    if((D.eq||[]).some(e=>e.t==='floor'))y1=Math.max(y1,FLOOR+1);
+    x0-=m;y0-=m;x1+=m;y1+=m;return CJ[key]={x:+x0.toFixed(1),y:+y0.toFixed(1),w:+(x1-x0).toFixed(1),h:+(y1-y0).toFixed(1)};}
+  /* las formas del equipo k (en el orden de shapes): cuántas pone cada equipo, para saltear los soportes */
+  function skipEq(D,R,idx,sop){let n=0;for(let j=0;j<(D.eq||[]).length;j++){const one=Object.assign({},D,{eq:[D.eq[j]]}),c=shapes(one,Object.assign({},R,{eq:[R.eq[j]]})).length-shapes(Object.assign({},D,{eq:[]}),Object.assign({},R,{eq:[]})).length;if(idx<n+c)return sop[j];n+=c;}return false;}
+  const idDe=D=>{for(const k in MKD)if(MKD[k]===D)return k;return '';};
+  function svg(D,opt){opt=opt||{};const one=opt.u!=null||opt.stat,F=one?[frame(D,opt.raw?(opt.u||0):ease(opt.u||0))]:frames(D),fr=D.v==='front';FWD=!one&&!!D.fwd;try{
     const nearF=fr?'<g class="mk-near">'+limbsF(F,'R',one)+'</g>':''; /* yaw (vista 3/4): la pierna cercana viene hacia quien mira y pasa por delante del torso */
     const body=fr?'<g class="mk-far">'+limbsF(F,'L',one)+'</g>'+(D.yaw&&!D.back?'':nearF)+eqSVG(F,D,one,'back2')+'<g class="mk-near">'+seg(F,'P','N','mk-tr',11,one)+(D.back?line(F,R=>lp(R.P.P,R.P.N,.08),R=>lp(R.P.P,R.P.N,.92),'mk-hl',1.3,one):'')+'</g>'+(D.yaw&&!D.back?nearF:'')+dot(F,'H',HEAD,'tq-h',one)+(D.back?dot(F,'H',HEAD-1.4,'tq-dbh',one):'')+
         '<g class="mk-far">'+armF(F,'L',one)+'</g><g class="mk-near">'+armF(F,'R',one)+dot(F,'ER',2,'tq-j',one)+dot(F,'EL',2,'tq-j',one)+'</g>'
       :eqSVG(F,D,one,'back2')+'<g class="mk-far">'+limbs(F,'f',one)+arm(F,'f',one)+'</g>'+eqSVG(F,D,one,'mid')+
         '<g class="mk-near">'+torsoS(F,one)+limbs(F,'n',one)+dot(F,'Kn',2.2,'tq-j',one)+'</g>'+(D.headFront?'':dot(F,'H',HEAD,'tq-h',one))+'<g class="mk-near">'+arm(F,'n',one)+dot(F,'En',2,'tq-j',one)+'</g>'+(D.headFront?dot(F,'H',HEAD,'tq-h',one):''); /* headFront: las manos pasan detrás de la cabeza */
-    return '<svg class="tq mk'+(one?' st':'')+'" viewBox="0 0 120 120" role="img" aria-label="Cómo se hace'+(D.back?' (vista de atrás)':'')+'">'+eqSVG(F,D,one,'back')+(FWD?'<g><animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;.8;.86;.9;1" dur="2.8s" repeatCount="indefinite"/>':'')+shadow(F,D,one)+body+(FWD?'</g>':'')+(fr?eqSVG(F,D,one,'mid'):eqSVG(F,D,one,'top'))+
-      (opt.noGrip?'':gripGlyph(D.grip,gripBox(D)))+'</svg>';}finally{FWD=false;}}
+    return '<svg class="tq mk'+(one?' st':'')+'" viewBox="'+(opt.vb||'0 0 120 120')+'" role="img" aria-label="Cómo se hace'+(D.back?' (vista de atrás)':'')+'">'+eqSVG(F,D,one,'back')+(FWD?'<g><animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;.8;.86;.9;1" dur="2.8s" repeatCount="indefinite"/>':'')+shadow(F,D,one)+body+(FWD?'</g>':'')+(fr?eqSVG(F,D,one,'mid'):eqSVG(F,D,one,'top'))+
+      (opt.noGrip?'':D.ag&&typeof agMini==='function'?agMini(D,gripBox(D),opt.id||idDe(D)):gripGlyph(D.grip,gripBox(D)))+'</svg>';}finally{FWD=false;}}
   /* ---------- validador ---------- */
   function check(D,steps){steps=steps||40; /* cada 2,5 % del movimiento */const acc=new Map(),add1=m=>{const i=m.lastIndexOf(' en '),k=m.slice(0,i).replace(/ \(-?\d+°\)/,''),p=m.slice(i+4);if(!acc.has(k))acc.set(k,[]);acc.get(k).push(p);};
     const fr=D.v==='front',SDS=fr?['L','R']:['n','f'],lado=(sd,fem)=>fr?(sd==='L'?' izquierd':' derech')+(fem?'a':'o'):(sd==='n'?(fem?' cercana':' cercano'):(fem?' lejana':' lejano'));
@@ -260,7 +275,7 @@ const MK=(()=>{
         if(dd<lim)add1((NMq[e.t]||'el equipo')+' pasa a menos de 2 de la cabeza en '+pc);});}
     if(D.grip&&!gripBox(D))add1('el recuadro del agarre no tiene una esquina libre: tapa la figura o el equipo en 0%');
     return [...acc].map(([k,ps])=>k+' en '+(ps.length>1?ps[0]+'–'+ps[ps.length-1]:ps[0]));}
-  return{LEN,LIM,frame,angles,svg,check,gripGlyph,gripBox,phi,V,nrm};
+  return{LEN,LIM,frame,angles,svg,check,gripGlyph,gripBox,caja,shapes,phi,V,nrm};
 })();
 
 /* ---------- los ejercicios con el macaco nuevo ---------- */
@@ -283,7 +298,7 @@ const MKD={
     root:{j:'Tn',p:[66,109.25]},
     A:{t:180,nk:0,n:{s:8,e:8,w:0,h:0,k:3,a:0}},B:{t:180,nk:0,n:{s:12,e:126,w:-10,h:0,k:3,a:0}}},
   /* jalón al pecho: sentado con los muslos bajo el rodillo; el cable baja de la polea y termina en la barra que agarran las manos */
-  latpull:{d:1,lock:[{u:0,j:'e'}],grip:{t:'prono',w:'abierto'},feet:{n:'floor',f:'floor'},
+  latpull:{d:1,lock:[{u:0,j:'e'}],grip:{t:'prono',w:'pocoabierto'},feet:{n:'floor',f:'floor'},
     eq:[{t:'floor'},{t:'block',r:[38,95,28,6]},{t:'post',p:[52,101,52,110]},{t:'post',p:[30,3,100,3]},{t:'post',p:[100,3,100,110]},{t:'roll',p:[71,81.2]},{t:'pulley',p:[57,7],to:'Gn'},{t:'handle',at:'Gn'}],
     root:{j:'P',p:[52,90]},
     A:{t:188,nk:0,n:{s:170,e:10,h:82,k:90,a:0}},B:{t:192,nk:-5,n:{s:20,e:130,ab:30,h:78,k:90,a:0}},
@@ -295,10 +310,10 @@ const MKD={
     A:{t:180,nk:0,n:{s:0,e:0,w:-60,ab:50,abf:50,h:0,k:2,a:2}},B:{t:140,nk:-10,n:{s:0,e:0,w:-60,ab:50,abf:50,h:122,k:118,a:30}},
     ik:{Gn:{rel:'N',bo:[-5,-3],elbow:'down'},Gf:{rel:'N',bo:[-5,-3],elbow:'down'}}},
   /* dominadas (SW-10, Juan: vista de atrás, para que se lean el ancho del agarre y los codos): abajo colgado con los brazos estirados; arriba el mentón pasa la barra y los codos bajan a los costados del torso; piernas cruzadas */
-  pullup:{v:'front',back:1,bentKnees:1,grip:{t:'prono',w:'medio'},eq:[{t:'pullbar',front:1,p:[26,26,94]}],root:{j:'N',p:{A:[60,53],B:[60,25]}},A:{t:180,tk:1,L:{a:170,e:0,h:4,k:-22},R:{a:170,e:0,h:4,k:-22},ls:{shL:0.55,shR:0.55}},B:{t:180,tk:1,L:{a:30,e:140,h:4,k:-22},R:{a:30,e:140,h:4,k:-22},ls:{shL:0.55,shR:0.55,uaL:0.86,uaR:0.86,faL:0.83,faR:0.83}},ik:{GL:{to:[43,26],elbow:'down'},GR:{to:[77,26],elbow:'down'}},lock:[{u:0,j:'e',sd:['L','R']}]}
+  pullup:{v:'front',back:1,bentKnees:1,grip:{t:'prono',w:'pocoabierto'},eq:[{t:'pullbar',front:1,p:[26,26,94]}],root:{j:'N',p:{A:[60,53],B:[60,25]}},A:{t:180,tk:1,L:{a:170,e:0,h:4,k:-22},R:{a:170,e:0,h:4,k:-22},ls:{shL:0.55,shR:0.55}},B:{t:180,tk:1,L:{a:30,e:140,h:4,k:-22},R:{a:30,e:140,h:4,k:-22},ls:{shL:0.55,shR:0.55,uaL:0.86,uaR:0.86,faL:0.83,faR:0.83}},ik:{GL:{to:[43,26],elbow:'down'},GR:{to:[77,26],elbow:'down'}},lock:[{u:0,j:'e',sd:['L','R']}]}
 };
 /* texto del agarre para la ficha */
-const GRIP_T={prono:'Agarre prono',supino:'Agarre supino',neutro:'Agarre neutro (martillo)',mixto:'Agarre mixto',apoyo:'Manos apoyadas'},GRIP_W={cerrado:'cerrado',medio:'al ancho de los hombros',abierto:'abierto'};
+const GRIP_T={prono:'Agarre prono',supino:'Agarre supino',neutro:'Agarre neutro (martillo)',mixto:'Agarre mixto',apoyo:'Manos apoyadas'},GRIP_W={cerrado:'cerrado',medio:'al ancho de los hombros',pocoabierto:'un poco más abierto que los hombros',variable:'las manos se abren y se cierran en el recorrido',abierto:'abierto'};
 const gripTxt=g=>g?(GRIP_T[g.t]||'')+(g.w?', '+(GRIP_W[g.w]||g.w):'')+(g.txt?' '+g.txt:''):'';
 /* engancha el macaco nuevo a la app: cada ejercicio con definición usa su figura "mk_id" (lo corre de nuevo cada lote que se suma) */
 function mkHook(){Object.keys(MKD).forEach(id=>{const D=MKD[id],k='mk_'+id;if(TECH[k])return;const pick=P=>{const o={};for(const j in P)o[j]=P[j].map(v=>Math.round(v*10)/10);return o;};

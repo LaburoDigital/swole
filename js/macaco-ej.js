@@ -3,7 +3,7 @@
 Object.assign(MKD,{
   /* ===== Lote 1: Pecho ===== */
   /* press inclinado con barra: respaldo a ~35°, la barra baja vertical a la parte alta del pecho */
-  incbench:{lock:[{u:0,j:'e'}],d:1,grip:{t:'prono',w:'medio'},feet:{n:'floor',f:'floor'},
+  incbench:{lock:[{u:0,j:'e'}],d:1,grip:{t:'prono',w:'pocoabierto'},feet:{n:'floor',f:'floor'},
     eq:[{t:'floor'},{t:'tbench'},{t:'block',r:[42,87,18,6]},{t:'post',p:[51,93,51,110]},{t:'bar',at:'Gn',headOK:'los discos van a los costados de la cabeza'}],
     root:{j:'P',p:[58,82]},
     A:{t:-125,nk:16,n:{s:95,e:5,ab:0,h:30,k:80,a:0}},B:{t:-125,nk:16,n:{s:20,e:100,ab:55,w:-90,h:30,k:80,a:0}},
@@ -15,14 +15,14 @@ Object.assign(MKD,{
     A:{t:-90,nk:16,n:{s:90,e:4,h:-30,k:64.8,a:4.8}},B:{t:-90,nk:16,n:{s:-40,e:140,ab:50,w:-60,h:-30,k:64.8,a:4.8}},
     ik:{An:{to:[77.7,107.45],flat:1},Af:{to:[74.7,107.45],flat:1}}},
   /* aperturas con mancuernas (SW-10, decisión de SW-8 recuperada): vistas desde los pies del banco y desde arriba (pitch 65), para que se vea cómo los brazos se abren hacia los costados; codos apenas doblados */
-  dbfly:{A:{t:180,tk:0.91,sw:1,L:{h:15.42,k:-15.42,a:154.67,e:44.87},R:{h:15.42,k:-15.42,a:154.67,e:44.87},ls:{thL:0.91,shL:0.51,uaL:0.46,faL:0.44,thR:0.91,shR:0.51,uaR:0.46,faR:0.44,nk:0.91},nk:0},B:{t:180,tk:0.91,sw:1,L:{h:15.42,k:-15.42,a:86.37,e:8.46},R:{h:15.42,k:-15.42,a:86.37,e:8.46},ls:{thL:0.91,shL:0.51,uaL:0.99,faL:0.98,thR:0.91,shR:0.51,uaR:0.99,faR:0.98,nk:0.91},nk:0},v:'front',pies:1,bentKnees:1,grip:{t:'neutro',w:'medio',db:1},eq:[{t:'block',soft:1,r:[49,22.4,22,52.6]},{t:'db',at:'GL',lateral:1},{t:'db',at:'GR',lateral:1}],root:{j:'P',p:[60,62]},vista:'pies'},
+  dbfly:{A:{t:180,tk:0.91,sw:1,L:{h:15.42,k:-15.42,a:154.67,e:44.87},R:{h:15.42,k:-15.42,a:154.67,e:44.87},ls:{thL:0.91,shL:0.51,uaL:0.46,faL:0.44,thR:0.91,shR:0.51,uaR:0.46,faR:0.44,nk:0.91},nk:0},B:{t:180,tk:0.91,sw:1,L:{h:15.42,k:-15.42,a:86.37,e:8.46},R:{h:15.42,k:-15.42,a:86.37,e:8.46},ls:{thL:0.91,shL:0.51,uaL:0.99,faL:0.98,thR:0.91,shR:0.51,uaR:0.99,faR:0.98,nk:0.91},nk:0},v:'front',pies:1,bentKnees:1,grip:{t:'neutro',w:'variable',db:1},eq:[{t:'block',soft:1,r:[49,22.4,22,52.6]},{t:'db',at:'GL',lateral:1},{t:'db',at:'GR',lateral:1}],root:{j:'P',p:[60,62]},vista:'pies'},
   /* cruce de poleas: de frente, los cables bajan de las poleas altas y terminan en las manos */
-  cablefly:{v:'front',grip:{t:'neutro',w:'medio'},feet:{L:'floor',R:'floor'},
+  cablefly:{v:'front',grip:{t:'neutro',w:'variable'},feet:{L:'floor',R:'floor'},
     eq:[{t:'floor'},{t:'post',p:[8,4,8,110]},{t:'post',p:[112,4,112,110]},{t:'pulley',p:[8,14],to:'GL'},{t:'pulley',p:[112,14],to:'GR'},{t:'handle',at:'GL'},{t:'handle',at:'GR'}],
     root:{j:'P',p:[60,68.6]},
     A:{L:{a:114.9,e:-20,h:5,k:0},R:{a:114.9,e:-20,h:5,k:0},ls:{faL:.765,faR:.765}},B:{L:{a:-30,e:-20,h:5,k:0},R:{a:-30,e:-20,h:5,k:0},ls:{faL:.765,faR:.765}}},
   /* flexiones: boca abajo (cabeza a la izquierda), en puntas de pie, manos apoyadas al ancho de hombros, codos a ~45° */
-  pushup:{lock:[{u:0,j:'e'}],d:-1,grip:{t:'apoyo',w:'medio'},handPhi:90,tiptoe:1,feet:{n:'floor',f:'floor'},
+  pushup:{lock:[{u:0,j:'e'}],d:-1,grip:{t:'apoyo',w:'pocoabierto'},handPhi:90,tiptoe:1,feet:{n:'floor',f:'floor'},
     eq:[{t:'floor'}],
     root:{j:'Tn',p:[94,109.25]},
     A:{t:108,nk:-5,n:{s:80,e:0,h:0,k:0,a:-40}},B:{t:96,nk:-5,n:{s:30,e:90,ab:40,h:0,k:0,a:-40}},
@@ -46,7 +46,7 @@ Object.assign(MKD,{
     A:{t:184,nk:0,n:{s:20,e:110,ab:40,h:88,k:90,a:0}},B:{t:184,nk:0,n:{s:85,e:8,h:88,k:90,a:0}},
     ik:{Gn:{A:[55,62.2],B:[71.5,61]},An:{to:[72,107.45],flat:1},Af:{to:[69,107.45],flat:1}}},
   /* pec deck en 3/4 desde arriba (yaw 20, pitch 55): los brazos, con el codo a 90° y el antebrazo vertical en las almohadillas, se cierran adelante en el plano horizontal */
-  pecdeck:{v:'front',bentKnees:1,grip:{t:'neutro',w:'medio'},eq:[{t:'block',soft:1,r:[50,71,22,7]},{t:'block',soft:1,r:[63,40,8,32]},{t:'pad',at:'EL'},{t:'pad',at:'ER'}],root:{j:'P',p:[60,70]},A:{t:180,tk:0.57,sw:0.94,L:{h:39.51,k:-39.51,a:118.95,e:61.05},R:{h:-7.27,k:7.27,a:85.11,e:94.89},ls:{thL:0.88,shL:0.57,uaL:0.95,faL:0.57,thR:0.82,shR:0.57,uaR:1,faR:0.57,nk:0.57},nk:0},B:{t:180,tk:0.57,sw:0.94,L:{h:39.51,k:-39.51,a:39.51,e:140.49},R:{h:-7.27,k:7.27,a:-7.27,e:187.27},ls:{thL:0.88,shL:0.57,uaL:0.88,faL:0.57,thR:0.82,shR:0.57,uaR:0.82,faR:0.57,nk:0.57},nk:0},yaw:20,handHead:1}
+  pecdeck:{v:'front',bentKnees:1,grip:{t:'neutro',w:'variable'},eq:[{t:'block',soft:1,r:[50,71,22,7]},{t:'block',soft:1,r:[63,40,8,32]},{t:'pad',at:'EL'},{t:'pad',at:'ER'}],root:{j:'P',p:[60,70]},A:{t:180,tk:0.57,sw:0.94,L:{h:39.51,k:-39.51,a:118.95,e:61.05},R:{h:-7.27,k:7.27,a:85.11,e:94.89},ls:{thL:0.88,shL:0.57,uaL:0.95,faL:0.57,thR:0.82,shR:0.57,uaR:1,faR:0.57,nk:0.57},nk:0},B:{t:180,tk:0.57,sw:0.94,L:{h:39.51,k:-39.51,a:39.51,e:140.49},R:{h:-7.27,k:7.27,a:-7.27,e:187.27},ls:{thL:0.88,shL:0.57,uaL:0.88,faL:0.57,thR:0.82,shR:0.57,uaR:0.82,faR:0.57,nk:0.57},nk:0},yaw:20,handHead:1}
 });
 Object.assign(MKD,{
   /* ===== Lote 2: Espalda ===== */
@@ -91,7 +91,7 @@ Object.assign(MKD,{
   /* dominadas supinas (vista de atrás): agarre al ancho de los hombros, más angosto que la prona; arriba los codos van adelante (escorzo 0,55) */
   chinup:{v:'front',back:1,bentKnees:1,grip:{t:'supino',w:'medio'},eq:[{t:'pullbar',front:1,p:[26,26,94]}],root:{j:'N',p:{A:[60,54],B:[60,25]}},A:{t:180,tk:1,L:{a:170,e:0,h:4,k:-22},R:{a:170,e:0,h:4,k:-22},ls:{shL:0.55,shR:0.55}},B:{t:180,tk:1,L:{a:30,e:140,h:4,k:-22},R:{a:30,e:140,h:4,k:-22},ls:{shL:0.55,shR:0.55,uaL:0.55,uaR:0.55,faL:0.55,faR:0.55}},ik:{GL:{to:[50,26],elbow:'down'},GR:{to:[70,26],elbow:'down'}},lock:[{u:0,j:'e',sd:['L','R']}]},
   /* dominadas asistidas en máquina (vista de atrás): de rodillas en la almohadilla, que empuja hacia arriba; las canillas van hacia atrás (en escorzo) */
-  assistpull:{v:'front',back:1,bentKnees:1,grip:{t:'prono',w:'medio'},eq:[{t:'pullbar',front:1,p:[26,26,94]},{t:'lever',pv:[96,110],to:'KR'},{t:'pad',at:'KL'},{t:'pad',at:'KR'}],root:{j:'N',p:{A:[60,53],B:[60,25]}},A:{t:180,tk:1,L:{a:170,e:0,h:2,k:0},R:{a:170,e:0,h:2,k:0},ls:{shL:0.3,shR:0.3}},B:{t:180,tk:1,L:{a:30,e:140,h:2,k:0},R:{a:30,e:140,h:2,k:0},ls:{shL:0.3,shR:0.3,uaL:0.86,uaR:0.86,faL:0.83,faR:0.83}},ik:{GL:{to:[43,26],elbow:'down'},GR:{to:[77,26],elbow:'down'}},lock:[{u:0,j:'e',sd:['L','R']}]},
+  assistpull:{v:'front',back:1,bentKnees:1,grip:{t:'prono',w:'pocoabierto'},eq:[{t:'pullbar',front:1,p:[26,26,94]},{t:'lever',pv:[96,110],to:'KR'},{t:'pad',at:'KL'},{t:'pad',at:'KR'}],root:{j:'N',p:{A:[60,53],B:[60,25]}},A:{t:180,tk:1,L:{a:170,e:0,h:2,k:0},R:{a:170,e:0,h:2,k:0},ls:{shL:0.3,shR:0.3}},B:{t:180,tk:1,L:{a:30,e:140,h:2,k:0},R:{a:30,e:140,h:2,k:0},ls:{shL:0.3,shR:0.3,uaL:0.86,uaR:0.86,faL:0.83,faR:0.83}},ik:{GL:{to:[43,26],elbow:'down'},GR:{to:[77,26],elbow:'down'}},lock:[{u:0,j:'e',sd:['L','R']}]},
   /* remo sentado en máquina: el pecho apoyado contra la almohadilla (se dibuja arriba de todo, delante del brazo); las manijas vienen hacia las costillas */
   machrow:{lock:[{u:0,j:'e'}],d:1,grip:{t:'neutro',w:'medio'},feet:{n:'floor',f:'floor'},eq:[{t:'floor'},{t:'block',r:[28,86,19,5]},{t:'post',p:[38,91,38,110]},{t:'block',soft:1,layer:'top',r:[48.5,55,5.5,22]},{t:'post',p:[51.5,77,51.5,110]},{t:'lever',pv:[100,58],to:'Gn',stand:100},{t:'handle',at:'Gn'}],root:{j:'P',p:[44,81]},A:{t:185,n:{s:80,e:4,h:85,k:92,a:2}},B:{t:185,n:{s:-40,e:105,h:85,k:92,a:2}},ik:{An:{to:[70,107.45],flat:1},Af:{to:[67,107.45],flat:1}}},
   /* pullover en polea alta: brazos estirados de arriba hasta los muslos; el cable baja de la polea a las manos */
@@ -118,7 +118,7 @@ Object.assign(MKD,{
     A:{t:182,nk:-10,n:{s:63,e:110,w:90,ab:55,h:88,k:88,a:0}},B:{t:182,nk:0,n:{s:170,e:5,w:0,ab:0,h:88,k:88,a:0}}, /* SW-10 (Juan): abajo las mancuernas al costado de la cabeza, a la altura del centro de la cabeza (orejas), antebrazo vertical y codo a 110° */
     ik:{An:{to:[66,107.45],flat:1}}},
   /* elevaciones laterales: de frente, los brazos suben hasta la altura de los hombros con los codos apenas doblados */
-  lateral:{v:'front',grip:{t:'prono',w:'medio',db:1},feet:{L:'floor',R:'floor'},
+  lateral:{v:'front',grip:{t:'prono',w:'variable',db:1},feet:{L:'floor',R:'floor'},
     eq:[{t:'floor'},{t:'db',at:'GL'},{t:'db',at:'GR'}],root:{j:'P',p:[60,68.6]},
     A:{L:{a:11,e:-3,h:5,k:0},R:{a:11,e:-3,h:5,k:0},ls:{faL:.765,faR:.765}},B:{L:{a:92,e:-4,h:5,k:0},R:{a:92,e:-4,h:5,k:0},ls:{faL:.765,faR:.765}}},
   /* press de hombros en máquina: sentado, las manijas de la palanca van de los hombros a arriba */
@@ -133,9 +133,9 @@ Object.assign(MKD,{
     ik:{An:{to:[60,107.45],flat:1}}},
   /* vuelos posteriores: inclinado, los brazos se abren hacia los costados (de costado se ven en escorzo) */
   /* vuelos posteriores en 3/4 (yaw 40): inclinado a 70°, los brazos van de colgando a abiertos a los costados */
-  reardelt:{v:'front',bentKnees:1,grip:{t:'neutro',w:'medio',db:1},feet:{L:'floor',R:'floor'},eq:[{t:'floor'},{t:'db',at:'GL',lateral:1},{t:'db',at:'GR',lateral:1}],root:{j:'P',p:[66,69.65]},A:{t:240.48,tk:0.69,sw:0.77,L:{h:75.56,k:-22.41,a:64.86,e:-0.35},R:{h:-67.11,k:13.96,a:-56.1,e:-4.03},ls:{thL:0.99,shL:0.99,uaL:1,faL:1,thR:0.96,shR:0.99,uaR:1,faR:1,nk:0.69},rr:0,nk:0},B:{t:240.48,tk:0.69,sw:0.77,L:{h:75.56,k:-22.41,a:146.75,e:-16.13},R:{h:-67.11,k:13.96,a:25.79,e:-19.41},ls:{thL:0.99,shL:0.99,uaL:0.77,faL:0.84,thR:0.96,shR:0.99,uaR:0.77,faR:0.73,nk:0.69},rr:0,nk:0},yaw:40},
+  reardelt:{v:'front',bentKnees:1,grip:{t:'neutro',w:'variable',db:1},feet:{L:'floor',R:'floor'},eq:[{t:'floor'},{t:'db',at:'GL',lateral:1},{t:'db',at:'GR',lateral:1}],root:{j:'P',p:[66,69.65]},A:{t:240.48,tk:0.69,sw:0.77,L:{h:75.56,k:-22.41,a:64.86,e:-0.35},R:{h:-67.11,k:13.96,a:-56.1,e:-4.03},ls:{thL:0.99,shL:0.99,uaL:1,faL:1,thR:0.96,shR:0.99,uaR:1,faR:1,nk:0.69},rr:0,nk:0},B:{t:240.48,tk:0.69,sw:0.77,L:{h:75.56,k:-22.41,a:146.75,e:-16.13},R:{h:-67.11,k:13.96,a:25.79,e:-19.41},ls:{thL:0.99,shL:0.99,uaL:0.77,faL:0.84,thR:0.96,shR:0.99,uaR:0.77,faR:0.73,nk:0.69},rr:0,nk:0},yaw:40},
   /* remo al mentón: la barra sube pegada al cuerpo hasta el pecho alto, con los codos altos y abiertos */
-  uprightrow:{d:1,lock:[{u:0,j:'e'}],grip:{t:'prono',w:'cerrado'},feet:{n:'floor',f:'floor'},
+  uprightrow:{d:1,lock:[{u:0,j:'e'}],grip:{t:'prono',w:'medio'},feet:{n:'floor',f:'floor'},
     eq:[{t:'floor'},{t:'bar',at:'Gn'}],root:{j:'P',p:[60,68.6]},
     A:{t:180,n:{s:8,e:0,ab:0,h:0,k:2,a:0}},B:{t:180,n:{s:60,e:120,ab:80,h:0,k:2,a:0}},
     ik:{Gn:{A:[64.5,70],B:[65,54.5],elbow:'up'},An:{to:[60,107.45],flat:1}}}
@@ -205,7 +205,7 @@ Object.assign(MKD,{
     eq:[{t:'floor'},{t:'tbench'},{t:'post',p:[44,100,86,58]},{t:'plat',to:'An',ang:135,len:10}],root:{j:'P',p:[40,90]},
     A:{t:-130,n:{s:-40,e:20,h:85,k:0,a:-50}},B:{t:-130,n:{s:-40,e:20,h:133,k:100,a:-50}}},
   /* extensión de cuádriceps: sentado, la palanca gira en la rodilla y el rodillo empuja desde el tobillo */
-  legext:{d:1,lock:[{u:1,j:'k'}],grip:{t:'neutro',w:'abierto',txt:'(manijas del asiento)'},
+  legext:{d:1,lock:[{u:1,j:'k'}],grip:{t:'neutro',w:'medio',txt:'(manijas del asiento)'},
     eq:[{t:'floor'},{t:'block',r:[30,85,28,6]},{t:'block',soft:1,r:[30,44,6,44]},{t:'post',p:[44,91,44,110]},{t:'lever',pv:[62,79.5],to:'An'},{t:'pad',at:{rel:'An',off:[2,-3.5]}}],root:{j:'P',p:[42,79.5]},
     A:{t:178,n:{s:12,e:10,h:92,k:90,a:0}},B:{t:178,n:{s:12,e:10,h:92,k:2,a:-30}}},
   /* zancadas: una pierna adelante, baja hasta que la rodilla de atrás casi toca el piso */
@@ -279,13 +279,13 @@ Object.assign(MKD,{
     eq:[{t:'floor'},{t:'block',only:'R',r:[84,75,26,6]},{t:'post',p:[89,81,89,110]},{t:'post',p:[105,81,105,110]}],root:{j:'EL',p:[34,105]},ik:{AR:[89,72.4]},
     A:{t:-86,L:{a:60,e:-90,h:-10,k:0},R:{a:10,e:-5,h:0,k:0},ls:{faL:.3}},B:{t:-82,L:{a:60,e:-90,h:-8,k:0},R:{a:10,e:-5,h:0,k:0},ls:{faL:.3}}},
   /* curl femoral sentado: el rodillo traba los muslos arriba, cerca de la rodilla; la canilla baja hasta atrás */
-  seatlegcurl:{d:1,lock:[{u:0,j:'k'}],grip:{t:'neutro',w:'abierto',txt:'(manijas del asiento)'},eq:[{t:'floor'},{t:'block',r:[30,85,24,6]},{t:'block',soft:1,r:[30,44,6,44]},{t:'post',p:[42,91,42,110]},{t:'block',soft:1,r:[48,71.5,14,4]},{t:'lever',pv:[62,79.5],to:'An'},{t:'pad',at:{rel:'An',off:[0,4.6]}},{t:'pad',r:4.2,at:{rel:'Kn',off:[-6,-6.4]}}],root:{j:'P',p:[42,79.5]},A:{t:178,n:{s:12,e:10,h:92,k:2,a:-30}},B:{t:178,n:{s:12,e:10,h:92,k:100,a:10}}},
+  seatlegcurl:{d:1,lock:[{u:0,j:'k'}],grip:{t:'neutro',w:'medio',txt:'(manijas del asiento)'},eq:[{t:'floor'},{t:'block',r:[30,85,24,6]},{t:'block',soft:1,r:[30,44,6,44]},{t:'post',p:[42,91,42,110]},{t:'block',soft:1,r:[48,71.5,14,4]},{t:'lever',pv:[62,79.5],to:'An'},{t:'pad',at:{rel:'An',off:[0,4.6]}},{t:'pad',r:4.2,at:{rel:'Kn',off:[-6,-6.4]}}],root:{j:'P',p:[42,79.5]},A:{t:178,n:{s:12,e:10,h:92,k:2,a:-30}},B:{t:178,n:{s:12,e:10,h:92,k:100,a:10}}},
   /* abductores en máquina: de frente, sentado, las rodillas abren contra las almohadillas de afuera */
-  hipabd:{v:'front',bentKnees:1,grip:{t:'neutro',w:'abierto',txt:'(manijas del asiento)'},
+  hipabd:{v:'front',bentKnees:1,grip:{t:'neutro',w:'medio',txt:'(manijas del asiento)'},
     eq:[{t:'floor'},{t:'wall',r:[47,26,26,54]},{t:'post',p:[60,80,60,110]},{t:'pad',r:4,at:{rel:'KL',off:[-4,0]}},{t:'pad',r:4,at:{rel:'KR',off:[4,0]}}],root:{j:'P',p:[60,78]},
     A:{L:{a:10,e:-10,h:5,k:-3},R:{a:10,e:-10,h:5,k:-3},ls:{faL:.765,faR:.765,th:.55}},B:{L:{a:10,e:-10,h:40,k:-30},R:{a:10,e:-10,h:40,k:-30},ls:{faL:.765,faR:.765,th:.55}}},
   /* aductores en máquina: de frente, sentado, las rodillas cierran contra las almohadillas de adentro */
-  hipadd:{v:'front',bentKnees:1,grip:{t:'neutro',w:'abierto',txt:'(manijas del asiento)'},
+  hipadd:{v:'front',bentKnees:1,grip:{t:'neutro',w:'medio',txt:'(manijas del asiento)'},
     eq:[{t:'floor'},{t:'wall',r:[47,26,26,54]},{t:'post',p:[60,80,60,110]},{t:'pad',r:4,at:{rel:'KL',off:[4,0]}},{t:'pad',r:4,at:{rel:'KR',off:[-4,0]}}],root:{j:'P',p:[60,78]},
     A:{L:{a:10,e:-10,h:40,k:-30},R:{a:10,e:-10,h:40,k:-30},ls:{faL:.765,faR:.765,th:.55}},B:{L:{a:10,e:-10,h:5,k:-3},R:{a:10,e:-10,h:5,k:-3},ls:{faL:.765,faR:.765,th:.55}}},
   /* patada de glúteo en polea: con tobillera, una pierna va estirada hacia atrás */
@@ -349,7 +349,7 @@ Object.assign(MKD,{
 });
 Object.assign(MKD,{
   /* ===== Lote 9: Calistenia y habilidades (convertidos de la figura vieja y ajustados) ===== */
-  kneepush:{eq:[{t:'floor'}],d:-1,A:{t:119,nk:0,n:{s:60,e:0,h:0,k:55,a:35}},B:{t:102,nk:-0.1,n:{s:0,e:110,h:0,k:55,a:35}},ik:{Wn:{to:[28,108.6],hand:90},Wf:{to:[28,108.6],hand:90}},root:{j:'Kn',p:[71.5,105.6]},grip:{t:'apoyo',w:'medio'},lock:[{u:0,j:'e'}]},
+  kneepush:{eq:[{t:'floor'}],d:-1,A:{t:119,nk:0,n:{s:60,e:0,h:0,k:55,a:35}},B:{t:102,nk:-0.1,n:{s:0,e:110,h:0,k:55,a:35}},ik:{Wn:{to:[28,108.6],hand:90},Wf:{to:[28,108.6],hand:90}},root:{j:'Kn',p:[71.5,105.6]},grip:{t:'apoyo',w:'pocoabierto'},lock:[{u:0,j:'e'}]},
   /* flexiones diamante en 3/4 (yaw 35, desde arriba), sobre el piso en perspectiva con sombras de apoyo: manos juntas debajo del pecho y codos pegados, que van hacia atrás */
   diamond:{A:{t:280.95,tk:0.57,sw:0.84,L:{h:-5.11,k:2.42,a:85.82,e:0.02},R:{h:0.61,k:2.08,a:-110.54,e:-0.02},ls:{thL:0.54,shL:0.58,uaL:0.96,faL:0.96,thR:0.63,shR:0.58,uaR:0.85,faR:0.85,nk:0.57},rr:-13.47,nk:0},B:{t:292.92,tk:0.62,sw:0.84,L:{h:-2.11,k:2.91,a:7.94,e:101.49},R:{h:-3.35,k:2.55,a:-3.41,e:-146.07},ls:{thL:0.58,shL:0.62,uaL:0.64,faL:0.95,thR:0.66,shR:0.62,uaR:0.56,faR:0.99,nk:0.62},rr:-13.47,nk:0},fases:[{u:0.25,t:284.08,tk:0.59,sw:0.84,L:{h:-4.32,k:2.57,a:62.76,e:38.08},R:{h:-0.46,k:2.21,a:-85.93,e:-40.76},ls:{thL:0.55,shL:0.59,uaL:0.79,faL:1,thR:0.63,shR:0.59,uaR:0.54,faR:0.97,nk:0.59},rr:-13.47,nk:0},{u:0.5,t:287.13,tk:0.6,sw:0.84,L:{h:-3.55,k:2.7,a:45.91,e:60.82},R:{h:-1.48,k:2.34,a:-57.6,e:-77.58},ls:{thL:0.56,shL:0.6,uaL:0.7,faL:0.99,thR:0.64,shR:0.6,uaR:0.41,faR:0.99,nk:0.6},rr:-13.47,nk:0},{u:0.75,t:290.08,tk:0.61,sw:0.84,L:{h:-2.81,k:2.81,a:27.75,e:81.89},R:{h:-2.45,k:2.45,a:-24.62,e:-117.8},ls:{thL:0.57,shL:0.61,uaL:0.65,faL:0.97,thR:0.65,shR:0.61,uaR:0.42,faR:0.99,nk:0.61},rr:-13.47,nk:0}],yaw:35,v:'front',bentKnees:1,grip:{t:'apoyo',w:'cerrado'},lock:[{u:0,j:'e',sd:['L','R']}],eq:[{t:'piso',p:[[74.2,39.3],[119.4,50.1],[46.8,85.6],[1.6,74.8]]},{t:'sombra',at:'GL',k:0.34},{t:'sombra',at:'GR',k:0.34},{t:'sombra',at:'TL',k:0.34},{t:'sombra',at:'TR',k:0.34}],root:{j:'GR',p:[46.5,82.2]},ik:{GL:{to:[44,81.4]}},cam:{yaw:35,pitch:20},apoyo:['GL','GR','TL','TR']},
   /* flexiones arquero en 3/4 sobre el piso en perspectiva: manos bien abiertas; baja hacia un lado con ese brazo doblado y el otro estirado al costado todo el recorrido */
@@ -419,7 +419,7 @@ Object.assign(MKD,{
   straddleflag:{v:'front',uni:1,lock:[{u:'all',j:'e',sd:['L','R']}],grip:{t:'mixto',w:'abierto',txt:'(poste)'},eq:[{t:'floor'},{t:'post',p:[14,6,14,111]}],root:{j:'GR',p:[14,40]},A:{t:-90,L:{a:150,e:0,h:25,k:0},R:{a:150,e:0,h:25,k:0}},B:{t:-88,L:{a:150,e:0,h:25,k:0},R:{a:150,e:0,h:25,k:0}}},
   flag:{v:'front',uni:1,lock:[{u:'all',j:'e',sd:['L','R']}],grip:{t:'mixto',w:'abierto',txt:'(poste)'},eq:[{t:'floor'},{t:'post',p:[14,6,14,111]}],root:{j:'GR',p:[14,40]},A:{t:-90,L:{a:150,e:0,h:0,k:0},R:{a:150,e:0,h:0,k:0}},B:{t:-88,L:{a:150,e:0,h:0,k:0},R:{a:150,e:0,h:0,k:0}}},
   /* dominadas negativas (vista de atrás): arrancan arriba con el mentón sobre la barra y bajan lento hasta colgar con los brazos estirados */
-  negpull:{v:'front',back:1,bentKnees:1,grip:{t:'prono',w:'medio'},eq:[{t:'pullbar',front:1,p:[26,26,94]}],root:{j:'N',p:{A:[60,25],B:[60,53]}},A:{t:180,tk:1,L:{a:30,e:140,h:4,k:-22},R:{a:30,e:140,h:4,k:-22},ls:{shL:0.55,shR:0.55,uaL:0.86,uaR:0.86,faL:0.83,faR:0.83}},B:{t:180,tk:1,L:{a:170,e:0,h:4,k:-22},R:{a:170,e:0,h:4,k:-22},ls:{shL:0.55,shR:0.55}},ik:{GL:{to:[43,26],elbow:'down'},GR:{to:[77,26],elbow:'down'}},lock:[{u:1,j:'e',sd:['L','R']}]},
+  negpull:{v:'front',back:1,bentKnees:1,grip:{t:'prono',w:'pocoabierto'},eq:[{t:'pullbar',front:1,p:[26,26,94]}],root:{j:'N',p:{A:[60,25],B:[60,53]}},A:{t:180,tk:1,L:{a:30,e:140,h:4,k:-22},R:{a:30,e:140,h:4,k:-22},ls:{shL:0.55,shR:0.55,uaL:0.86,uaR:0.86,faL:0.83,faR:0.83}},B:{t:180,tk:1,L:{a:170,e:0,h:4,k:-22},R:{a:170,e:0,h:4,k:-22},ls:{shL:0.55,shR:0.55}},ik:{GL:{to:[43,26],elbow:'down'},GR:{to:[77,26],elbow:'down'}},lock:[{u:1,j:'e',sd:['L','R']}]},
   hollow:{eq:[{t:'floor'}],d:1,A:{t:-106.1,nk:-0.7,n:{s:36.2,e:0,h:31.2,k:0.2,a:-45}},B:{t:-109,nk:-0.2,n:{s:40.8,e:0.2,h:38.9,k:0,a:-45}},root:{j:'P',p:[64,104]},lock:[{u:'all',j:'e'}]},
   /* flexiones con palmada, por fases y solo de ida: abajo → empuje hasta estirar → vuelo corto (las manos despegan ~6, el cuerpo casi recto, y se juntan debajo del pecho) → manos de nuevo al piso → abajo */
   clappush:{eq:[{t:'floor'}],d:-1,A:{t:97,nk:-5,n:{s:5,e:110,ab:40,h:0,k:0,a:-40,w:58}},B:{t:97,nk:-5,n:{s:5,e:110,ab:40,h:0,k:0,a:-40,w:58}},feet:{n:'floor',f:'floor'},root:{j:'Tn',p:[94,109.25]},grip:{t:'apoyo',w:'medio'},fwd:1,tiptoe:1,fases:[{u:0.12,t:101,nk:-5,n:{s:25,e:90,w:54,h:0,k:0,a:-40}},{u:0.22,t:105.4,nk:-5,n:{s:40,e:60,w:64.6,h:0,k:0,a:-40}},{u:0.26,t:106.6,nk:-5,n:{s:56,e:30,w:77.4,h:0,k:0,a:-40}},{u:0.3,t:107.6,nk:-5,n:{s:72,e:0,w:90.4,h:0,k:0,a:-40}},{u:0.5,t:111,nk:-5,n:{s:50,e:40,w:20,h:0,k:0,a:-40}},{u:0.7,t:107.6,nk:-5,n:{s:72,e:0,w:90.4,h:0,k:0,a:-40}},{u:0.74,t:106.6,nk:-5,n:{s:56,e:30,w:77.4,h:0,k:0,a:-40}},{u:0.78,t:105.4,nk:-5,n:{s:40,e:60,w:64.6,h:0,k:0,a:-40}},{u:0.88,t:101,nk:-5,n:{s:25,e:90,w:54,h:0,k:0,a:-40}}],lock:[{u:0.3,j:'e'}],handPhi:90},
@@ -453,8 +453,8 @@ Object.assign(MKD,{
   biering:{eq:[{t:'floor'},{t:'block',r:[56,75,52,6]},{t:'block',r:[62,81,4,29]},{t:'block',r:[100,81,4,29]},{t:'pad',r:4,at:'An'}],d:-1,A:{t:90,nk:0,n:{s:60,e:120,h:0,k:0,a:-50}},B:{t:86.9,nk:-0.5,n:{s:59.7,e:120.3,h:3.1,k:0,a:-50}},root:{j:'P',p:[56,70]}},
   deadhang:{eq:[{t:'pullbar',front:1,p:[30,12,90]}],v:'front',A:{t:180,tk:1,L:{a:174,e:4,h:6,k:-4.2},R:{a:174,e:4,h:6,k:-4.2},ls:{faL:0.7659999999999999,faR:0.7659999999999999}},B:{t:180,tk:1,L:{a:174,e:4,h:6,k:-3.9},R:{a:174,e:4,h:6,k:-3.9},ls:{faL:0.763,faR:0.763}},root:{j:'GL',p:[51,12]},grip:{t:'prono',w:'medio'},lock:[{u:'all',j:'e'}],back:1},
   /* rotación externa con banda: codo fijo a 90° y la mano a la altura del codo; la banda cruza por delante del cuerpo hasta la mano */
-  extrot:{eq:[{t:'floor'},{t:'post',p:[10,20,10,110],pad:0},{t:'pulley',p:[10,58],to:'GR',layer:'mid'}],v:'front',A:{t:180,tk:1,L:{a:4.9,e:-4.9,h:5,k:0},R:{a:0,e:90,h:5,k:0},ls:{faL:0.765,faR:-1}},B:{t:180,tk:1,L:{a:4.9,e:-4.9,h:5,k:0},R:{a:0,e:90,h:5,k:0},ls:{faL:0.765,faR:1}},root:{j:'P',p:[60,68.6]},feet:{L:'floor',R:'floor'},uni:1,grip:{t:'neutro',w:'cerrado',txt:'(banda)'}},
-  wallslide:{eq:[{t:'floor'},{t:'wall',r:[36,6,48,101]}],v:'front',A:{t:180,tk:1,L:{a:70,e:98,h:5,k:0},R:{a:70,e:98,h:5,k:0},ls:{faL:0.764,faR:0.764}},B:{t:180,tk:1,L:{a:152,e:-0.1,h:5,k:0},R:{a:152,e:-0.1,h:5,k:0},ls:{faL:0.7609999999999999,faR:0.7609999999999999}},root:{j:'P',p:[60,68.6]},feet:{L:'floor',R:'floor'},grip:{t:'apoyo',w:'abierto',txt:'(contra la pared)'}},
+  extrot:{eq:[{t:'floor'},{t:'post',p:[10,20,10,110],pad:0},{t:'pulley',p:[10,58],to:'GR',layer:'mid'}],v:'front',A:{t:180,tk:1,L:{a:4.9,e:-4.9,h:5,k:0},R:{a:0,e:90,h:5,k:0},ls:{faL:0.765,faR:-1}},B:{t:180,tk:1,L:{a:4.9,e:-4.9,h:5,k:0},R:{a:0,e:90,h:5,k:0},ls:{faL:0.765,faR:1}},root:{j:'P',p:[60,68.6]},feet:{L:'floor',R:'floor'},uni:1,grip:{t:'neutro',w:'variable',txt:'(banda)'}},
+  wallslide:{eq:[{t:'floor'},{t:'wall',r:[36,6,48,101]}],v:'front',A:{t:180,tk:1,L:{a:70,e:98,h:5,k:0},R:{a:70,e:98,h:5,k:0},ls:{faL:0.764,faR:0.764}},B:{t:180,tk:1,L:{a:152,e:-0.1,h:5,k:0},R:{a:152,e:-0.1,h:5,k:0},ls:{faL:0.7609999999999999,faR:0.7609999999999999}},root:{j:'P',p:[60,68.6]},feet:{L:'floor',R:'floor'},grip:{t:'apoyo',w:'variable',txt:'(contra la pared)'}},
   cmj:{eq:[{t:'floor'}],d:1,A:{t:149.7,nk:-18.9,n:{s:-40,e:1.8,h:83.4,k:71.6,a:18.4}},B:{t:178.1,nk:3.8,n:{s:122.9,e:7.7,h:4.8,k:2.9,a:0}},root:{j:'P',p:{A:[48,78],B:[59,54]}}},
   broadjump:{eq:[{t:'floor'}],d:1,A:{t:144,nk:0.8,n:{s:-40,e:0,h:94,k:84.6,a:26.6}},B:{t:149.7,nk:6.6,n:{s:68.9,e:88.2,h:96.3,k:92.6,a:26.6}},root:{j:'Tn',p:{A:[38,109.25],M:[62,96],B:[96,109.25]}},M:{t:165,nk:0,n:{s:140,e:10,h:45,k:70,a:-10}},fwd:1},
   pogo:{eq:[{t:'floor'}],d:1,A:{t:180,nk:0,n:{s:-10.3,e:20.5,h:0,k:0,a:-50}},B:{t:180,nk:0,n:{s:-6.2,e:12.4,h:0,k:0,a:-50}},root:{j:'P',p:{A:[59.3,62.5],B:[60.9,53.1]}}},
@@ -462,7 +462,7 @@ Object.assign(MKD,{
   sprint:{eq:[{t:'floor'}],d:1,A:{t:168.7,nk:0,n:{s:-24.2,e:62.1,h:60.1,k:65.5,a:16.7},f:{s:56.3,e:104,h:-8.7,k:16.9,a:36.9}},B:{t:168.7,nk:0,n:{s:56.3,e:104,h:-8.7,k:16.9,a:36.9},f:{s:-24.2,e:62.1,h:60.1,k:65.5,a:16.7}},root:{j:'P',p:[58,66]},uni:1},
   /* burpee completo, por fases y solo de ida: parado → agachado con las manos al piso → salto atrás a plancha → pies adentro → salto arriba con los brazos sobre la cabeza */
   burpee:{eq:[{t:'floor'}],d:-1,tiptoe:1,A:{t:180,nk:0,n:{s:0,e:5,w:0,h:0,k:2,a:0}},B:{t:176,nk:0,n:{s:140,e:4,w:0,h:0,k:2,a:-40}},root:{j:'Tn',p:{seq:[[0,[66,109.25]],[0.2,[66,109.25]],[0.33,[90,104]],[0.45,[91,109.25]],[0.58,[79,104]],[0.7,[66,109.25]],[0.85,[64,109.25]],[1,[62,106]]]}},grip:{t:'apoyo',w:'medio'},fwd:1,fases:[{u:0.2,t:105,nk:-5,n:{s:65,e:0,w:-90,h:125,k:140,a:25}},{u:0.45,t:108,nk:-5,n:{s:72,e:0,w:-90,h:0,k:0,a:-40}},{u:0.7,t:105,nk:-5,n:{s:65,e:0,w:-90,h:125,k:140,a:25}},{u:0.85,t:160,nk:0,n:{s:30,e:10,w:0,h:60,k:80,a:20}}]},
-  jumprope:{eq:[{t:'floor'},{t:'rope',y:[152,-40]}],v:'front',A:{t:180,tk:1,L:{a:20,e:60.3,h:6,k:-3.9},R:{a:20,e:60.3,h:6,k:-3.9},ls:{faL:0.764,faR:0.764}},B:{t:180,tk:1,L:{a:20,e:62.1,h:6,k:-3.9},R:{a:20,e:62.1,h:6,k:-3.9},ls:{faL:0.7659999999999999,faR:0.7659999999999999}},root:{j:'P',p:{A:[60,69],B:[60,62]}},grip:{t:'neutro',w:'cerrado',txt:'(soga)'}},
+  jumprope:{eq:[{t:'floor'},{t:'rope',y:[152,-40]}],v:'front',A:{t:180,tk:1,L:{a:20,e:60.3,h:6,k:-3.9},R:{a:20,e:60.3,h:6,k:-3.9},ls:{faL:0.764,faR:0.764}},B:{t:180,tk:1,L:{a:20,e:62.1,h:6,k:-3.9},R:{a:20,e:62.1,h:6,k:-3.9},ls:{faL:0.7659999999999999,faR:0.7659999999999999}},root:{j:'P',p:{A:[60,69],B:[60,62]}},grip:{t:'neutro',w:'abierto',txt:'(soga)'}},
   bearcrawl:{eq:[{t:'floor'}],d:-1,uni:1,tiptoe:1,A:{t:92,nk:-5,n:{s:80,e:0,h:100,k:100,a:-30},f:{s:80,e:0,h:80,k:100,a:-30}},B:{t:92,nk:-5,n:{s:80,e:0,h:80,k:100,a:-30},f:{s:80,e:0,h:100,k:100,a:-30}},ik:{Wn:{to:{A:[30,108.6],M:[27,103],B:[24,108.6]},hand:90},Wf:{own:1,to:{A:[25,106.4],M:[27,101],B:[30,106.4]},hand:90},Tn:{to:{A:[78,109.25],M:[82,106],B:[86,109.25]}},Tf:{own:1,to:{A:[88,109.25],M:[84,106],B:[80,109.25]}}},root:{j:'P',p:[62,84]},grip:{t:'apoyo',w:'medio'}},
   highknees:{eq:[{t:'floor'}],d:1,A:{t:-177.9,nk:0.2,n:{s:-32.1,e:50.3,h:87.9,k:90,a:-19.8},f:{s:28,e:129.7,h:-2.1,k:0,a:-50}},B:{t:-177.9,nk:0.2,n:{s:28,e:129.7,h:-2.1,k:0,a:-50},f:{s:-32.1,e:50.3,h:87.9,k:90,a:-19.8}},root:{j:'P',p:[59.3,62.5]},uni:1}
 });
